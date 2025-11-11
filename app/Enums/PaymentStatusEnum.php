@@ -1,0 +1,35 @@
+<?php
+
+namespace App\Enums;
+
+use Filament\Support\Contracts\HasColor;
+use Filament\Support\Contracts\HasLabel;
+
+enum PaymentStatusEnum: string implements HasLabel, HasColor
+{
+    case UNPAID = 'unpaid';
+    case PARTIAL = 'partial';
+    case PAID = 'paid';
+    case OVERDUE = 'overdue';
+
+    public function getLabel(): ?string
+    {
+        return match ($this) {
+            self::UNPAID => 'Unpaid',
+            self::PARTIAL => 'Partially Paid',
+            self::PAID => 'Paid',
+            self::OVERDUE => 'Overdue',
+        };
+    }
+
+    public function getColor(): ?string
+    {
+        return match ($this) {
+            self::UNPAID => 'gray',
+            self::PARTIAL => 'warning',
+            self::PAID => 'success',
+            self::OVERDUE => 'danger',
+        };
+    }
+}
+

@@ -1,0 +1,20 @@
+{
+    "mcpServers": {
+        "laravel-boost": {
+            "command": "/Users/guidutra/Library/Application Support/Herd/bin/php84",
+            "args": [
+                "/Users/guidutra/Estudos/Impex_project_final/artisan",
+                "boost:mcp"
+            ]
+        },
+        "herd": {
+            "command": "/Users/guidutra/Library/Application Support/Herd/bin/php84",
+            "args": [
+                "/Applications/Herd.app/Contents/Resources/herd-mcp.phar"
+            ],
+            "env": {
+                "SITE_PATH": "/Users/guidutra/Estudos/Impex_project_final"
+            }
+        }
+    }
+}
