@@ -19,7 +19,6 @@ return new class extends Migration
             $table->foreignId('client_id')->constrained('clients');
             $table->date('order_date');
             $table->integer('payment_terms_days')->default(30);
-            $table->index('payment_terms_days');
             $table->bigInteger('total_amount_cents')->default(0);
             $table->foreignId('currency_id')->constrained('currencies');
             $table->decimal('exchange_rate_to_usd', 12, 5)->nullable();
@@ -28,12 +27,6 @@ return new class extends Migration
             $table->string('invoice_number')->nullable();
             $table->string('status')->default(OrderStatusEnum::NEW->value);
             $table->string('payment_status')->default(PaymentStatusEnum::UNPAID->value);
-            $table->string('shipping_company')->nullable();
-            $table->string('shipping_document')->nullable();
-            $table->bigInteger('shipping_value_cents')->nullable();
-            $table->bigInteger('shipping_value_usd_cents')->nullable();
-            $table->date('etd')->nullable();
-            $table->date('eta')->nullable();
             $table->timestamps();
         });
     }
