@@ -22,8 +22,8 @@ class OrdersTable
                 TextColumn::make('order_date')
                     ->date()
                     ->sortable(),
-                TextColumn::make('payment_terms_days')
-                    ->numeric()
+                TextColumn::make('paymentTerm.name')
+                    ->label('Payment Term')
                     ->sortable(),
                 TextColumn::make('total_amount_cents')
                     ->numeric()

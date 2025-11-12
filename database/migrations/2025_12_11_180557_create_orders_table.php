@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('order_number', 50)->unique();
             $table->foreignId('client_id')->constrained('clients');
             $table->date('order_date');
-            $table->integer('payment_terms_days')->default(30);
+            $table->foreignId('payment_terms_id')->constrained('payment_terms');
             $table->bigInteger('total_amount_cents')->default(0);
             $table->foreignId('currency_id')->constrained('currencies');
             $table->decimal('exchange_rate_to_usd', 12, 5)->nullable();

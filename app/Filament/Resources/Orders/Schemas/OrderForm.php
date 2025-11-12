@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Orders\Schemas;
 
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Select;
 use Filament\Schemas\Schema;
 
 class OrderForm
@@ -14,15 +15,18 @@ class OrderForm
             ->components([
                 TextInput::make('order_number')
                     ->required(),
+                Select::make('payment_term_id')
+                    ->relationship('paymentTerm', 'name')
+                    ->searchable()
+                    ->preload()
+                    ->required()
+                    ->default(fn () => \App\Models\PaymentTerm::where('is_default', true)->first()?->id),
                 TextInput::make('client_id')
                     ->required()
                     ->numeric(),
                 DatePicker::make('order_date')
                     ->required(),
-                TextInput::make('payment_terms_days')
-                    ->required()
-                    ->numeric()
-                    ->default(30),
+                // Removed old payment_terms_days field
                 TextInput::make('total_amount_cents')
                     ->required()
                     ->numeric()
