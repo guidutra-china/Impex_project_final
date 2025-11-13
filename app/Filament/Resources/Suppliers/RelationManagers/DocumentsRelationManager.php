@@ -76,6 +76,7 @@ class DocumentsRelationManager extends RelationManager
             ])
             ->headerActions([
                 CreateAction::make()
+                    ->label('Upload Documents')
                     ->mutateFormDataUsing(function (array $data): array {
                         $data['file_type'] = 'document';
                         if (isset($data['file_path']) && !isset($data['original_filename'])) {

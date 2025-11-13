@@ -68,6 +68,7 @@ class PhotosRelationManager extends RelationManager
             ])
             ->headerActions([
                 CreateAction::make()
+                    ->label('Upload Photo')
                     ->mutateFormDataUsing(function (array $data): array {
                         $data['file_type'] = 'photo';
                         if (isset($data['file_path']) && !isset($data['original_filename'])) {
