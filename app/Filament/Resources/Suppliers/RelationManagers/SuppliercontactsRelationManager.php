@@ -17,6 +17,8 @@ class SuppliercontactsRelationManager extends RelationManager
 {
     protected static string $relationship = 'suppliercontacts';
 
+    protected static ?string $title = 'Contacts';
+
     public function form(Schema $schema): Schema
     {
         return SupplierContactForm::configure($schema);

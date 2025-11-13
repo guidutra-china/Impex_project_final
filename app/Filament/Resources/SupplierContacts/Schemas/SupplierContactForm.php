@@ -4,11 +4,14 @@ namespace App\Filament\Resources\SupplierContacts\Schemas;
 
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Schemas\Components\Form;
 use Filament\Schemas\Schema;
 
 class SupplierContactForm
 {
-    public static function configure(Schema $schema): Schema
+    public static function configure(Form|Schema $schema): Form|Schema
+
     {
         return $schema
             ->components([
@@ -21,7 +24,8 @@ class SupplierContactForm
                     ->searchable()
                     ->preload()
                     ->relationship('supplier' , 'name' )
-                    ->required(),
+                    ->required()
+                    ->hidden(fn ($livewire) => $livewire instanceof RelationManager),
                 TextInput::make('email')
                     ->label('Email Address')
                     ->email()

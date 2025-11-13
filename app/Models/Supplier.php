@@ -20,14 +20,8 @@ class Supplier extends Model
         'phone',
         'country',
         'website',
-        'photos',
-        'documents',
     ];
 
-    protected $casts = [
-        'photos' => 'array',
-        'documents' => 'array',
-    ];
 
     public function tags(): BelongsToMany
     {
@@ -38,4 +32,19 @@ class Supplier extends Model
     {
         return $this->hasMany(SupplierContact::class);
     }
+    public function files(): HasMany
+    {
+        return $this->hasMany(SupplierFile::class)->orderBy('sort_order');
+    }
+
+    public function photos(): HasMany
+    {
+        return $this->hasMany(SupplierFile::class)->where('file_type', 'photo')->orderBy('sort_order');
+    }
+
+    public function documents(): HasMany
+    {
+        return $this->hasMany(SupplierFile::class)->where('file_type', 'document')->orderBy('date_uploaded', 'desc');
+    }
+
 }
