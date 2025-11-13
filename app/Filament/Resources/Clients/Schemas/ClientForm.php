@@ -2,7 +2,9 @@
 
 namespace App\Filament\Resources\Clients\Schemas;
 
+use App\Enums\CountryTypeEnum;
 use App\Models\Client;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Section;
@@ -47,9 +49,9 @@ class ClientForm
                             ->label('ZIP/Postal Code')
                             ->maxLength(255),
 
-                        TextInput::make('country')
-                            ->label('Country')
-                            ->maxLength(255),
+                        Select::make('country')
+                            ->options(CountryTypeEnum::toArray())
+                            ->searchable(),
 
                         TextInput::make('tax_number')
                             ->label('Tax Number')

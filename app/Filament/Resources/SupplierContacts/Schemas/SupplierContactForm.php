@@ -29,7 +29,6 @@ class SupplierContactForm
                 TextInput::make('email')
                     ->label('Email Address')
                     ->email()
-                    ->required()
                     ->maxLength(255),
                 TextInput::make('phone')
                     ->label('Phone Number')

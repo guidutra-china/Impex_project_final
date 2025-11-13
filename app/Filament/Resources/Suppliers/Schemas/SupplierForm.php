@@ -2,12 +2,14 @@
 
 namespace App\Filament\Resources\Suppliers\Schemas;
 
+use App\Enums\CountryTypeEnum;
 use App\Models\Supplier;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+
 
 class SupplierForm
 {
@@ -48,9 +50,9 @@ class SupplierForm
                             ->label('ZIP/Postal Code')
                             ->maxLength(255),
 
-                        TextInput::make('country')
-                            ->label('Country')
-                            ->maxLength(255),
+                        Select::make('country')
+                            ->options(CountryTypeEnum::toArray())
+                            ->searchable(),
                     ])
                     ->columns(2)
                     ->columnSpan(['lg' => fn (?Supplier $record) => $record === null ? 3 : 2]),
