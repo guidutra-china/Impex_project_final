@@ -1,0 +1,245 @@
+diff --git a/app/Filament/Resources/PaymentTerm/Pages/CreatePaymentTerm.php b/app/Filament/Resources/PaymentTerm/Pages/CreatePaymentTerm.php
+new file mode 100644
+index 0000000..30c7d50
+--- /dev/null
++++ b/app/Filament/Resources/PaymentTerm/Pages/CreatePaymentTerm.php
+@@ -0,0 +1,11 @@
++<?php
++
++namespace App\Filament\Resources\PaymentTerm\Pages;
++
++use App\Filament\Resources\PaymentTerm\PaymentTermResource;
++use Filament\Resources\Pages\CreateRecord;
++
++class CreatePaymentTerm extends CreateRecord
++{
++    protected static string $resource = PaymentTermResource::class;
++}
+diff --git a/app/Filament/Resources/PaymentTerm/Pages/EditPaymentTerm.php b/app/Filament/Resources/PaymentTerm/Pages/EditPaymentTerm.php
+new file mode 100644
+index 0000000..4623537
+--- /dev/null
++++ b/app/Filament/Resources/PaymentTerm/Pages/EditPaymentTerm.php
+@@ -0,0 +1,19 @@
++<?php
++
++namespace App\Filament\Resources\PaymentTerm\Pages;
++
++use App\Filament\Resources\PaymentTerm\PaymentTermResource;
++use Filament\Actions;
++use Filament\Resources\Pages\EditRecord;
++
++class EditPaymentTerm extends EditRecord
++{
++    protected static string $resource = PaymentTermResource::class;
++
++    protected function getHeaderActions(): array
++    {
++        return [
++            Actions\DeleteAction::make(),
++        ];
++    }
++}
+diff --git a/app/Filament/Resources/PaymentTerm/Pages/ListPaymentTerms.php b/app/Filament/Resources/PaymentTerm/Pages/ListPaymentTerms.php
+new file mode 100644
+index 0000000..3942c63
+--- /dev/null
++++ b/app/Filament/Resources/PaymentTerm/Pages/ListPaymentTerms.php
+@@ -0,0 +1,19 @@
++<?php
++
++namespace App\Filament\Resources\PaymentTerm\Pages;
++
++use App\Filament\Resources\PaymentTerm\PaymentTermResource;
++use Filament\Actions;
++use Filament\Resources\Pages\ListRecords;
++
++class ListPaymentTerms extends ListRecords
++{
++    protected static string $resource = PaymentTermResource::class;
++
++    protected function getHeaderActions(): array
++    {
++        return [
++            Actions\CreateAction::make(),
++        ];
++    }
++}
+diff --git a/app/Filament/Resources/PaymentTerm/PaymentTermResource.php b/app/Filament/Resources/PaymentTerm/PaymentTermResource.php
+new file mode 100644
+index 0000000..174d184
+--- /dev/null
++++ b/app/Filament/Resources/PaymentTerm/PaymentTermResource.php
+@@ -0,0 +1,89 @@
++<?php
++
++namespace App\Filament\Resources\PaymentTerm;
++
++use App\Filament\Resources\PaymentTerm\Pages;
++use App\Filament\Resources\PaymentTerm\RelationManagers\StagesRelationManager;
++use App\Models\PaymentTerm;
++use Filament\Forms\Components\TextInput;
++use Filament\Forms\Components\Textarea;
++use Filament\Forms\Components\Toggle;
++use Filament\Forms\Form;
++use Filament\Resources\Resource;
++use Filament\Tables\Columns\TextColumn;
++use Filament\Tables\Columns\ToggleColumn;
++use Filament\Tables\Table;
++use Filament\Tables\Actions\EditAction;
++use Filament\Tables\Actions\DeleteAction;
++use Filament\Tables\Actions\BulkActionGroup;
++use Filament\Tables\Actions\DeleteBulkAction;
++
++class PaymentTermResource extends Resource
++{
++    protected static ?string $model = PaymentTerm::class;
++
++    protected static ?string $navigationIcon = 'heroicon-o-currency-dollar';
++    
++    protected static string | \BackedEnum | null $navigationGroup = 'Settings';
++
++    public static function form(Form $form): Form
++    {
++        return $form
++            ->schema([
++                TextInput::make('name')
++                    ->required()
++                    ->maxLength(255)
++                    ->unique(ignoreRecord: true),
++                Textarea::make('description')
++                    ->maxLength(65535)
++                    ->columnSpanFull(),
++                Toggle::make('is_default')
++                    ->label('Set as Default')
++                    ->helperText('Only one payment term can be set as default.')
++                    ->columnSpanFull(),
++            ]);
++    }
++
++    public static function table(Table $table): Table
++    {
++        return $table
++            ->columns([
++                TextColumn::make('name')
++                    ->searchable()
++                    ->sortable(),
++                TextColumn::make('description')
++                    ->limit(50)
++                    ->tooltip(fn (PaymentTerm $record): string => $record->description ?? ''),
++                ToggleColumn::make('is_default')
++                    ->label('Default'),
++            ])
++            ->filters([
++                //
++            ])
++            ->actions([
++                EditAction::make(),
++                DeleteAction::make(),
++            ])
++            ->bulkActions([
++                BulkActionGroup::make([
++                    DeleteBulkAction::make(),
++                ]),
++            ]);
++    }
++
++    public static function getRelations(): array
++    {
++        return [
++            StagesRelationManager::class,
++        ];
++    }
++
++    public static function getPages(): array
++    {
++        return [
++            'index' => Pages\ListPaymentTerms::route('/'),
++            'create' => Pages\CreatePaymentTerm::route('/create'),
++            'edit' => Pages\EditPaymentTerm::route('/{record}/edit'),
++        ];
++    }
++}
+diff --git a/app/Filament/Resources/PaymentTerm/RelationManagers/StagesRelationManager.php b/app/Filament/Resources/PaymentTerm/RelationManagers/StagesRelationManager.php
+new file mode 100644
+index 0000000..9fee35d
+--- /dev/null
++++ b/app/Filament/Resources/PaymentTerm/RelationManagers/StagesRelationManager.php
+@@ -0,0 +1,77 @@
++<?php
++
++namespace App\Filament\Resources\PaymentTerm\RelationManagers;
++
++use Filament\Forms\Components\TextInput;
++use Filament\Forms\Form;
++use Filament\Resources\RelationManagers\RelationManager;
++use Filament\Tables\Columns\TextColumn;
++use Filament\Tables\Table;
++use Filament\Tables\Actions\CreateAction;
++use Filament\Tables\Actions\EditAction;
++use Filament\Tables\Actions\DeleteAction;
++use Filament\Tables\Actions\BulkActionGroup;
++use Filament\Tables\Actions\DeleteBulkAction;
++
++class StagesRelationManager extends RelationManager
++{
++    protected static string $relationship = 'stages';
++
++    public function form(Form $form): Form
++    {
++        return $form
++            ->schema([
++                TextInput::make('percentage')
++                    ->required()
++                    ->numeric()
++                    ->minValue(1)
++                    ->maxValue(100)
++                    ->suffix('%')
++                    ->columnSpan(1),
++                TextInput::make('days_from_invoice')
++                    ->required()
++                    ->numeric()
++                    ->minValue(0)
++                    ->suffix('days')
++                    ->columnSpan(1),
++                TextInput::make('sort_order')
++                    ->numeric()
++                    ->default(1)
++                    ->columnSpan(1),
++            ])->columns(3);
++    }
++
++    public function table(Table $table): Table
++    {
++        return $table
++            ->recordTitleAttribute('percentage')
++            ->columns([
++                TextColumn::make('sort_order')
++                    ->label('Order')
++                    ->sortable(),
++                TextColumn::make('percentage')
++                    ->label('Percentage')
++                    ->suffix('%')
++                    ->sortable(),
++                TextColumn::make('days_from_invoice')
++                    ->label('Due (Days from Invoice)')
++                    ->sortable(),
++            ])
++            ->filters([
++                //
++            ])
++            ->headerActions([
++                CreateAction::make(),
++            ])
++            ->actions([
++                EditAction::make(),
++                DeleteAction::make(),
++            ])
++            ->bulkActions([
++                BulkActionGroup::make([
++                    DeleteBulkAction::make(),
++                ]),
++            ])
++            ->defaultSort('sort_order', 'asc');
++    }
++}
