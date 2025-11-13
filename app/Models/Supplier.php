@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Supplier extends Model
 {
     use SoftDeletes;
+    
     protected $fillable = [
         'name',
         'address',
@@ -19,6 +20,13 @@ class Supplier extends Model
         'phone',
         'country',
         'website',
+        'photos',
+        'documents',
+    ];
+
+    protected $casts = [
+        'photos' => 'array',
+        'documents' => 'array',
     ];
 
     public function tags(): BelongsToMany
@@ -29,7 +37,5 @@ class Supplier extends Model
     public function suppliercontacts(): HasMany
     {
         return $this->hasMany(SupplierContact::class);
-
     }
-
 }
