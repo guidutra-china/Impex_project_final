@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Resources\SupplierQuotes\Products\RelationManagers;
+namespace App\Filament\Resources\Products\RelationManagers;
 
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Support\Icons\Heroicon;

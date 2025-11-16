@@ -1,9 +1,10 @@
 <?php
 
-namespace App\Filament\Resources\SupplierQuotes\SupplierQuotes\Pages;
+namespace App\Filament\Resources\SupplierQuotes\Pages;
 
 use App\Filament\Resources\SupplierQuotes\SupplierQuoteResource;
-use Filament\Actions;
+use Filament\Actions\Action;
+use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
 
 class EditSupplierQuote extends EditRecord
@@ -13,8 +14,8 @@ class EditSupplierQuote extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\DeleteAction::make(),
-            Actions\Action::make('recalculate')
+            DeleteAction::make(),
+            Action::make('recalculate')
                 ->label('Recalculate All')
                 ->icon('heroicon-o-calculator')
                 ->action(function () {

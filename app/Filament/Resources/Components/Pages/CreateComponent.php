@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Filament\Resources\SupplierQuotes\Components\Pages;
+namespace App\Filament\Resources\Components\Pages;
 
-use App\Filament\Resources\SupplierQuotes\Components\ComponentResource;
+use App\Filament\Resources\Components\ComponentResource;
 use Filament\Resources\Pages\CreateRecord;
 
 class CreateComponent extends CreateRecord

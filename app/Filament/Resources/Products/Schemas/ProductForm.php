@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Resources\SupplierQuotes\Products\Schemas;
+namespace App\Filament\Resources\Products\Schemas;
 
 use App\Enums\CountryTypeEnum;
 use App\Models\Category;

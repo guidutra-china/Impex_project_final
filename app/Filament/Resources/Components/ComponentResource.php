@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Filament\Resources\SupplierQuotes\Components;
+namespace App\Filament\Resources\Components;
 
-use App\Filament\Resources\SupplierQuotes\Components\Pages\CreateComponent;
-use App\Filament\Resources\SupplierQuotes\Components\Pages\EditComponent;
-use App\Filament\Resources\SupplierQuotes\Components\Pages\ListComponents;
-use App\Filament\Resources\SupplierQuotes\Components\Schemas\ComponentForm;
-use App\Filament\Resources\SupplierQuotes\Components\Tables\ComponentsTable;
+use App\Filament\Resources\Components\Pages\CreateComponent;
+use App\Filament\Resources\Components\Pages\EditComponent;
+use App\Filament\Resources\Components\Pages\ListComponents;
+use App\Filament\Resources\Components\Schemas\ComponentForm;
+use App\Filament\Resources\Components\Tables\ComponentsTable;
 use App\Models\Component;
 use BackedEnum;
 use Filament\Resources\Resource;

@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Filament\Resources\SupplierQuotes\SupplierQuotes\Pages;
+namespace App\Filament\Resources\SupplierQuotes\Pages;
 use App\Filament\Resources\SupplierQuotes\SupplierQuoteResource;
-use Filament\Actions;
+use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
 
 class ListSupplierQuotes extends ListRecords
@@ -12,7 +12,7 @@ class ListSupplierQuotes extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make(),
+            CreateAction::make(),
         ];
     }
 }

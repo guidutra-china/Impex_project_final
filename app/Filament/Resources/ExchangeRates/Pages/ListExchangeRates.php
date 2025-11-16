@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Filament\Resources\SupplierQuotes\ExchangeRates\Pages;
+namespace App\Filament\Resources\ExchangeRates\Pages;
 
-use App\Filament\Resources\SupplierQuotes\ExchangeRates\ExchangeRateResource;
-use Filament\Actions;
+use App\Filament\Resources\ExchangeRates\ExchangeRateResource;
+use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
 
 class ListExchangeRates extends ListRecords
@@ -13,7 +13,7 @@ class ListExchangeRates extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make(),
+            CreateAction::make(),
         ];
     }
 }

@@ -1,10 +1,11 @@
 <?php
 
-namespace App\Filament\Resources\SupplierQuotes\Products\RelationManagers;
+namespace App\Filament\Resources\Products\RelationManagers;
 
 use App\Models\WhatIfScenario;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
+use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;

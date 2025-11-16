@@ -4,10 +4,10 @@ namespace App\Filament\Resources\SupplierQuotes;
 
 use App\Filament\Resources\SupplierQuotes\RelationManagers\ItemsRelationManager;
 use App\Filament\Resources\SupplierQuotes\Schemas\SupplierQuoteForm;
-use App\Filament\Resources\SupplierQuotes\SupplierQuotes\Pages\CreateSupplierQuote;
-use App\Filament\Resources\SupplierQuotes\SupplierQuotes\Pages\EditSupplierQuote;
-use App\Filament\Resources\SupplierQuotes\SupplierQuotes\Pages\ListSupplierQuotes;
-use App\Filament\Resources\SupplierQuotes\SupplierQuotes\Tables\SupplierQuotesTable;
+use App\Filament\Resources\SupplierQuotes\Pages\CreateSupplierQuote;
+use App\Filament\Resources\SupplierQuotes\Pages\EditSupplierQuote;
+use App\Filament\Resources\SupplierQuotes\Pages\ListSupplierQuotes;
+use App\Filament\Resources\SupplierQuotes\Tables\SupplierQuotesTable;
 use App\Models\SupplierQuote;
 use BackedEnum;
 use Filament\Resources\Resource;

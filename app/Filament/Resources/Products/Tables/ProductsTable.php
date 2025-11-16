@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Resources\SupplierQuotes\Products\Tables;
+namespace App\Filament\Resources\Products\Tables;
 
 use Filament\Tables\Columns\SelectColumn;
 use Filament\Tables\Columns\TextColumn;

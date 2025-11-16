@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Resources\SupplierQuotes\SupplierQuotes\Tables;
+namespace App\Filament\Resources\SupplierQuotes\Tables;
 
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;

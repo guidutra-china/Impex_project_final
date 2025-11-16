@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Resources\SupplierQuotes\SupplierQuotes\Pages;
+namespace App\Filament\Resources\SupplierQuotes\Pages;
 
 use App\Filament\Resources\SupplierQuotes\SupplierQuoteResource;
 use Filament\Resources\Pages\CreateRecord;

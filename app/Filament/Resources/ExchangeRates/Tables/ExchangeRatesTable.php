@@ -1,10 +1,18 @@
 <?php
 
-namespace App\Filament\Resources\SupplierQuotes\ExchangeRates\Tables;
+namespace App\Filament\Resources\ExchangeRates\Tables;
 
 use App\Models\ExchangeRate;
-use Filament\Forms;
-use Filament\Tables;
+use Filament\Actions\Action;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Forms\Components\DatePicker;
+use Filament\Tables\Columns\BadgeColumn;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -14,68 +22,68 @@ class ExchangeRatesTable
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('baseCurrency.code')
+                TextColumn::make('baseCurrency.code')
                     ->label('From')
                     ->sortable()
                     ->searchable(),
 
-                Tables\Columns\TextColumn::make('targetCurrency.code')
+                TextColumn::make('targetCurrency.code')
                     ->label('To')
                     ->sortable()
                     ->searchable(),
 
-                Tables\Columns\TextColumn::make('rate')
+                TextColumn::make('rate')
                     ->numeric(decimalPlaces: 6)
                     ->sortable(),
 
-                Tables\Columns\TextColumn::make('inverse_rate')
+                TextColumn::make('inverse_rate')
                     ->label('Inverse')
                     ->numeric(decimalPlaces: 6)
                     ->toggleable(isToggledHiddenByDefault: true),
 
-                Tables\Columns\TextColumn::make('date')
+                TextColumn::make('date')
                     ->date()
                     ->sortable(),
 
-                Tables\Columns\BadgeColumn::make('source')
+                BadgeColumn::make('source')
                     ->colors([
                         'success' => 'api',
                         'warning' => 'manual',
                         'info' => 'import',
                     ]),
 
-                Tables\Columns\BadgeColumn::make('status')
+                BadgeColumn::make('status')
                     ->colors([
                         'warning' => 'pending',
                         'success' => 'approved',
                         'danger' => 'rejected',
                     ]),
 
-                Tables\Columns\TextColumn::make('created_at')
+                TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                Tables\Filters\SelectFilter::make('base_currency_id')
+                SelectFilter::make('base_currency_id')
                     ->relationship('baseCurrency', 'code')
                     ->label('From Currency'),
 
-                Tables\Filters\SelectFilter::make('target_currency_id')
+                SelectFilter::make('target_currency_id')
                     ->relationship('targetCurrency', 'code')
                     ->label('To Currency'),
 
-                Tables\Filters\SelectFilter::make('status')
+                SelectFilter::make('status')
                     ->options([
                         'pending' => 'Pending',
                         'approved' => 'Approved',
                         'rejected' => 'Rejected',
                     ]),
 
-                Tables\Filters\Filter::make('date')
+                Filter::make('date')
                     ->form([
-                        Forms\Components\DatePicker::make('date_from'),
-                        Forms\Components\DatePicker::make('date_until'),
+                        DatePicker::make('date_from'),
+                        DatePicker::make('date_until'),
                     ])
                     ->query(function (Builder $query, array $data): Builder {
                         return $query
@@ -90,7 +98,7 @@ class ExchangeRatesTable
                     }),
             ])
             ->actions([
-                Tables\Actions\Action::make('duplicate')
+                Action::make('duplicate')
                     ->label('Use for Today')
                     ->icon('heroicon-o-document-duplicate')
                     ->action(function (ExchangeRate $record) {
@@ -101,12 +109,12 @@ class ExchangeRatesTable
                     ->requiresConfirmation()
                     ->color('success'),
 
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+                EditAction::make(),
+                DeleteAction::make(),
             ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
                 ]),
             ])
             ->defaultSort('date', 'desc');

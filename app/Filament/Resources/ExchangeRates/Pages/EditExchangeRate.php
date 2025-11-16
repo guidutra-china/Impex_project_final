@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Filament\Resources\SupplierQuotes\ExchangeRates\Pages;
+namespace App\Filament\Resources\ExchangeRates\Pages;
 
-use App\Filament\Resources\SupplierQuotes\ExchangeRates\ExchangeRateResource;
-use Filament\Actions;
+use App\Filament\Resources\ExchangeRates\ExchangeRateResource;
+use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
 
 class EditExchangeRate extends EditRecord
@@ -13,7 +13,7 @@ class EditExchangeRate extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\DeleteAction::make(),
+            DeleteAction::make(),
         ];
     }
 }

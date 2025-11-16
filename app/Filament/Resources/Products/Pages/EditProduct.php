@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Filament\Resources\SupplierQuotes\Products\Pages;
+namespace App\Filament\Resources\Products\Pages;
 
-use App\Filament\Resources\SupplierQuotes\Products\ProductResource;
+use App\Filament\Resources\Products\ProductResource;
 use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
 

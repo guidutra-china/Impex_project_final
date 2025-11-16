@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Resources\SupplierQuotes\Components\Schemas;
+namespace App\Filament\Resources\Components\Schemas;
 
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\Select;
