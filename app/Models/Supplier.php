@@ -47,4 +47,8 @@ class Supplier extends Model
         return $this->hasMany(SupplierFile::class)->where('file_type', 'document')->orderBy('date_uploaded', 'desc');
     }
 
+    public function products()
+    {
+        return $this->hasMany(Product::class);
+    }
 }

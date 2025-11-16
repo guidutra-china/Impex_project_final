@@ -32,6 +32,8 @@ class AdminPanelProvider extends PanelProvider
             ->passwordReset()
             ->emailverification()
             ->profile()
+            ->sidebarCollapsibleOnDesktop()
+            ->sidebarFullyCollapsibleOnDesktop()
             ->colors([
                 'primary' => Color::Indigo,
                 'danger' => Color::Red,

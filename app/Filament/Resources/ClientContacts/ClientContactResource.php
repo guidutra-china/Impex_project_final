@@ -6,7 +6,7 @@ use App\Filament\Resources\ClientContacts\Pages\CreateClientContact;
 use App\Filament\Resources\ClientContacts\Pages\EditClientContact;
 use App\Filament\Resources\ClientContacts\Pages\ListClientContacts;
 use App\Filament\Resources\ClientContacts\Schemas\ClientContactForm;
-use App\Filament\Resources\ClientContacts\Tables\ClientContactsTable;
+use App\Filament\Resources\SupplierQuotes\ClientContacts\Tables\ClientContactsTable;
 use App\Models\ClientContact;
 use BackedEnum;
 use Filament\Resources\Resource;

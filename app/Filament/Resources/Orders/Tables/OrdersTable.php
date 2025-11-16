@@ -2,10 +2,15 @@
 
 namespace App\Filament\Resources\Orders\Tables;
 
+use App\Models\Order;
+use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Tables;
+use Filament\Tables\Columns\BadgeColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 
 class OrdersTable
@@ -14,70 +19,73 @@ class OrdersTable
     {
         return $table
             ->columns([
-                TextColumn::make('order_number')
-                    ->searchable(),
-                TextColumn::make('client_id')
-                    ->numeric()
+               TextColumn::make('order_number')
+                    ->searchable()
                     ->sortable(),
-                TextColumn::make('order_date')
-                    ->date()
+
+               TextColumn::make('customer.name')
+                    ->searchable()
                     ->sortable(),
-                TextColumn::make('paymentTerm.name')
-                    ->label('Payment Term')
+
+               BadgeColumn::make('status')
+                    ->colors([
+                        'secondary' => 'pending',
+                        'warning' => 'processing',
+                        'info' => 'quoted',
+                        'success' => 'completed',
+                        'danger' => 'cancelled',
+                    ]),
+
+               TextColumn::make('currency.code')
+                    ->label('Currency')
                     ->sortable(),
-                TextColumn::make('total_amount_cents')
-                    ->numeric()
+
+               TextColumn::make('commission_percent')
+                    ->label('Commission')
+                    ->suffix('%')
                     ->sortable(),
-                TextColumn::make('currency_id')
-                    ->numeric()
+
+               TextColumn::make('total_amount')
+                    ->label('Total')
+                    ->money(fn ($record) => $record->currency?->code ?? 'USD', divideBy: 100)
                     ->sortable(),
-                TextColumn::make('exchange_rate_to_usd')
-                    ->numeric()
-                    ->sortable(),
-                TextColumn::make('total_amount_usd_cents')
-                    ->numeric()
-                    ->sortable(),
-                TextColumn::make('invoice_number')
-                    ->searchable(),
-                TextColumn::make('status')
-                    ->searchable(),
-                TextColumn::make('payment_status')
-                    ->searchable(),
-                TextColumn::make('shipping_company')
-                    ->searchable(),
-                TextColumn::make('shipping_document')
-                    ->searchable(),
-                TextColumn::make('shipping_value_cents')
-                    ->numeric()
-                    ->sortable(),
-                TextColumn::make('shipping_value_usd_cents')
-                    ->numeric()
-                    ->sortable(),
-                TextColumn::make('etd')
-                    ->date()
-                    ->sortable(),
-                TextColumn::make('eta')
-                    ->date()
-                    ->sortable(),
-                TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('updated_at')
+
+               TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                SelectFilter::make('status')
+                    ->options([
+                        'pending' => 'Pending',
+                        'processing' => 'Processing',
+                        'quoted' => 'Quoted',
+                        'completed' => 'Completed',
+                        'cancelled' => 'Cancelled',
+                    ]),
+
+                SelectFilter::make('customer_id')
+                    ->relationship('customer', 'name')
+                    ->label('Customer'),
+
+                SelectFilter::make('currency_id')
+                    ->relationship('currency', 'code')
+                    ->label('Currency'),
             ])
-            ->recordActions([
+            ->actions([
                 EditAction::make(),
+                Action::make('view_comparison')
+                    ->label('Compare Quotes')
+                    ->icon('heroicon-o-chart-bar')
+                    ->url(fn (Order $record): string => route('filament.admin.pages.quote-comparison', ['order' => $record->id]))
+                    ->visible(fn (Order $record) => $record->supplierQuotes()->count() > 0),
             ])
-            ->toolbarActions([
+            ->bulkActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),
-            ]);
+            ])
+            ->defaultSort('created_at', 'desc');
     }
 }

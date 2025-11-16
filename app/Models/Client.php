@@ -24,4 +24,10 @@ class Client extends Model
         return $this->hasMany(ClientContact::class);
     }
 
+    public function products()
+    {
+        return $this->hasMany(Product::class, 'customer_id');
+    }
+
+
 }

@@ -1,0 +1,111 @@
+<?php
+
+namespace App\Filament\Resources\SupplierQuotes\SupplierQuotes\Tables;
+
+use Filament\Actions\Action;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Tables;
+use Filament\Tables\Columns\BadgeColumn;
+use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\TernaryFilter;
+use Filament\Tables\Table;
+
+class SupplierQuotesTable
+{
+    public static function configure(Table $table): Table
+    {
+        return $table
+            ->columns([
+                TextColumn::make('quote_number')
+                    ->searchable()
+                    ->sortable(),
+
+                TextColumn::make('order.order_number')
+                    ->searchable()
+                    ->sortable(),
+
+                TextColumn::make('supplier.name')
+                    ->searchable()
+                    ->sortable()
+                    ->wrap(),
+
+                BadgeColumn::make('status')
+                    ->colors([
+                        'secondary' => 'draft',
+                        'info' => 'sent',
+                        'success' => 'accepted',
+                        'danger' => 'rejected',
+                    ]),
+
+                TextColumn::make('currency.code')
+                    ->label('Currency'),
+
+                TextColumn::make('total_price_after_commission')
+                    ->label('Total')
+                    ->money(fn ($record) => $record->currency?->code ?? 'USD', divideBy: 100)
+                    ->sortable(),
+
+                TextColumn::make('locked_exchange_rate')
+                    ->label('Rate')
+                    ->numeric(decimalPlaces: 4)
+                    ->toggleable(isToggledHiddenByDefault: true),
+
+                IconColumn::make('is_latest')
+                    ->label('Latest')
+                    ->boolean()
+                    ->toggleable(isToggledHiddenByDefault: true),
+
+                TextColumn::make('valid_until')
+                    ->date()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+
+                TextColumn::make('created_at')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+            ])
+            ->filters([
+                SelectFilter::make('status')
+                    ->options([
+                        'draft' => 'Draft',
+                        'sent' => 'Sent',
+                        'accepted' => 'Accepted',
+                        'rejected' => 'Rejected',
+                    ]),
+
+                SelectFilter::make('order_id')
+                    ->relationship('order', 'order_number')
+                    ->label('Order'),
+
+                SelectFilter::make('supplier_id')
+                    ->relationship('supplier', 'name')
+                    ->label('Supplier'),
+
+                TernaryFilter::make('is_latest')
+                    ->label('Latest Version Only'),
+            ])
+            ->actions([
+                EditAction::make(),
+                Action::make('calculate_commission')
+                    ->label('Recalculate')
+                    ->icon('heroicon-o-calculator')
+                    ->action(function ($record) {
+                        $record->calculateCommission();
+                        $record->lockExchangeRate();
+                    })
+                    ->requiresConfirmation()
+                    ->color('warning'),
+            ])
+            ->bulkActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
+                ]),
+            ])
+            ->defaultSort('created_at', 'desc');
+    }
+}
