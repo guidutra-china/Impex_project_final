@@ -15,7 +15,7 @@ class CostHistoryRelationManager extends RelationManager
 
     protected static ?string $title = 'Cost History';
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedClockRotateLeft;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedClock;
 
     public function table(Table $table): Table
     {
