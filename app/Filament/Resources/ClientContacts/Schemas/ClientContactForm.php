@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\ClientContacts\Schemas;
 
+use App\Enums\ContactFunctionEnum;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\RelationManagers\RelationManager;
@@ -37,9 +38,11 @@ class ClientContactForm
                 TextInput::make('wechat')
                     ->label('WeChat ID')
                     ->maxLength(50),
-                TextInput::make('function')
+                Select::make('function')
                     ->label('Function')
-                    ->maxLength(50),
+                    ->options(ContactFunctionEnum::class)
+                    ->searchable()
+                    ->nullable(),
             ]);
     }
 }

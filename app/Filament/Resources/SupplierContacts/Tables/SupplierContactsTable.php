@@ -35,6 +35,7 @@ class SupplierContactsTable
                     ->searchable(),
                 TextColumn::make('function')
                     ->label('Function')
+                    ->badge()        // ← Added badge display
                     ->sortable()
                     ->searchable(),
             ])

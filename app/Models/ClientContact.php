@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\ContactFunctionEnum;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -15,6 +16,11 @@ class ClientContact extends Model
         'wechat',
         'function',
     ];
+
+    protected $casts = [
+        'function' => ContactFunctionEnum::class,
+    ];
+
 
     public function client(): BelongsTo
     {
