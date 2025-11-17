@@ -12,6 +12,7 @@ class QuoteItem extends Model
 
     protected $fillable = [
         'supplier_quote_id',
+        'order_item_id',
         'product_id',
         'quantity',
         'unit_price_before_commission',
@@ -59,6 +60,14 @@ class QuoteItem extends Model
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);
+    }
+
+    /**
+     * Get the order item this quote item is for
+     */
+    public function orderItem(): BelongsTo
+    {
+        return $this->belongsTo(OrderItem::class);
     }
 
     /**

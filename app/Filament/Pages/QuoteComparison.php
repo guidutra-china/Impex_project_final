@@ -33,6 +33,8 @@ class QuoteComparison extends Page
 
     public ?array $comparison = null;
 
+    public ?array $summary = null;
+
     public function mount(): void
     {
         $this->orderId = request()->query('order');
@@ -44,11 +46,12 @@ class QuoteComparison extends Page
                 'items.product',
                 'supplierQuotes.supplier',
                 'supplierQuotes.currency',
-                'supplierQuotes.items.orderItem.product',
+                'supplierQuotes.items.product',
             ])->findOrFail($this->orderId);
 
             $comparisonService = new QuoteComparisonService();
             $this->comparison = $comparisonService->compareQuotes($this->order);
+            $this->summary = $comparisonService->getSummary($this->order);
         }
     }
 
@@ -71,6 +74,7 @@ class QuoteComparison extends Page
         return [
             'order' => $this->order,
             'comparison' => $this->comparison,
+            'summary' => $this->summary,
         ];
     }
 }

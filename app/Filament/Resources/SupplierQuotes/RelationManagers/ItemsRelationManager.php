@@ -97,6 +97,33 @@ class ItemsRelationManager extends RelationManager
             ])
             ->headerActions([
                 CreateAction::make()
+                    ->mutateFormDataUsing(function (array $data): array {
+                        // Calculate prices before saving
+                        $supplierQuote = $this->getOwnerRecord();
+                        $order = $supplierQuote->order;
+
+                        $quantity = $data['quantity'];
+                        $unitPriceBefore = $data['unit_price_before_commission'];
+
+                        // Calculate unit price after commission
+                        if ($order->commission_type === 'embedded') {
+                            $commissionMultiplier = 1 + ($order->commission_percent / 100);
+                            $unitPriceAfter = (int) round($unitPriceBefore * $commissionMultiplier);
+                        } else {
+                            $unitPriceAfter = $unitPriceBefore;
+                        }
+
+                        // Calculate totals
+                        $totalBefore = $unitPriceBefore * $quantity;
+                        $totalAfter = $unitPriceAfter * $quantity;
+
+                        // Add calculated fields
+                        $data['unit_price_after_commission'] = $unitPriceAfter;
+                        $data['total_price_before_commission'] = $totalBefore;
+                        $data['total_price_after_commission'] = $totalAfter;
+
+                        return $data;
+                    })
                     ->after(function () {
                         // Recalculate commission after adding items
                         $this->getOwnerRecord()->calculateCommission();
@@ -104,6 +131,33 @@ class ItemsRelationManager extends RelationManager
             ])
             ->actions([
                 EditAction::make()
+                    ->mutateFormDataUsing(function (array $data): array {
+                        // Calculate prices before saving
+                        $supplierQuote = $this->getOwnerRecord();
+                        $order = $supplierQuote->order;
+
+                        $quantity = $data['quantity'];
+                        $unitPriceBefore = $data['unit_price_before_commission'];
+
+                        // Calculate unit price after commission
+                        if ($order->commission_type === 'embedded') {
+                            $commissionMultiplier = 1 + ($order->commission_percent / 100);
+                            $unitPriceAfter = (int) round($unitPriceBefore * $commissionMultiplier);
+                        } else {
+                            $unitPriceAfter = $unitPriceBefore;
+                        }
+
+                        // Calculate totals
+                        $totalBefore = $unitPriceBefore * $quantity;
+                        $totalAfter = $unitPriceAfter * $quantity;
+
+                        // Add calculated fields
+                        $data['unit_price_after_commission'] = $unitPriceAfter;
+                        $data['total_price_before_commission'] = $totalBefore;
+                        $data['total_price_after_commission'] = $totalAfter;
+
+                        return $data;
+                    })
                     ->after(function () {
                         // Recalculate commission after editing items
                         $this->getOwnerRecord()->calculateCommission();

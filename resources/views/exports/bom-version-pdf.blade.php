@@ -1,4 +1,24 @@
-<!DOCTYPE html>
+@php
+    // Inline helper functions for PDF export
+    if (!function_exists('logo_base64')) {
+        function logo_base64() {
+            $logoPath = public_path('images/logo.svg');
+            if (file_exists($logoPath)) {
+                $imageData = base64_encode(file_get_contents($logoPath));
+                $mimeType = 'image/svg+xml';
+                return "data:{$mimeType};base64,{$imageData}";
+            }
+            return '';
+        }
+    }
+
+    if (!function_exists('company_name')) {
+        function company_name() {
+            return config('app.name', 'Impex Management System');
+        }
+    }
+@endphp
+        <!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8">
@@ -10,10 +30,20 @@
             color: #333;
         }
         .header {
-            text-align: center;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             margin-bottom: 30px;
             border-bottom: 2px solid #333;
             padding-bottom: 10px;
+        }
+        .header .logo {
+            max-height: 30px;
+            width: auto;
+        }
+        .header .title-section {
+            flex: 1;
+            text-align: center;
         }
         .header h1 {
             margin: 0;
@@ -23,6 +53,9 @@
             margin-top: 5px;
             font-size: 14px;
             color: #666;
+        }
+        .header .spacer {
+            width: 120px;
         }
         .product-info {
             margin-bottom: 20px;
@@ -134,116 +167,122 @@
     </style>
 </head>
 <body>
-    <div class="header">
+<div class="header">
+    <div>
+        <img src="{{ logo_base64() }}" alt="{{ company_name() }}" class="logo">
+    </div>
+    <div class="title-section">
         <h1>Bill of Materials</h1>
         <div class="version">{{ $version->version_display }}</div>
     </div>
+    <div class="spacer"></div>
+</div>
 
-    <div class="version-info">
-        <h3>Version Information</h3>
-        <p>
-            <strong>Version:</strong> {{ $version->version_display }}
-            <span class="status-badge status-{{ $version->status }}">
+<div class="version-info">
+    <h3>Version Information</h3>
+    <p>
+        <strong>Version:</strong> {{ $version->version_display }}
+        <span class="status-badge status-{{ $version->status }}">
                 {{ ucfirst($version->status) }}
             </span>
-        </p>
-        <p><strong>Created:</strong> {{ $version->created_at->format('M d, Y H:i') }}</p>
-        @if($version->created_by_user)
+    </p>
+    <p><strong>Created:</strong> {{ $version->created_at->format('M d, Y H:i') }}</p>
+    @if($version->created_by_user)
         <p><strong>Created By:</strong> {{ $version->created_by_user->name }}</p>
-        @endif
-        @if($version->change_notes)
+    @endif
+    @if($version->change_notes)
         <p><strong>Change Notes:</strong> {{ $version->change_notes }}</p>
-        @endif
-    </div>
+    @endif
+</div>
 
-    <div class="snapshot-notice">
-        ⓘ This is a historical snapshot. Costs shown are from {{ $version->created_at->format('M d, Y') }}.
-    </div>
+<div class="snapshot-notice">
+    ⓘ This is a historical snapshot. Costs shown are from {{ $version->created_at->format('M d, Y') }}.
+</div>
 
-    <div class="product-info">
-        <table>
-            <tr>
-                <td>Product Name:</td>
-                <td>{{ $product->name }}</td>
-            </tr>
-            <tr>
-                <td>SKU:</td>
-                <td>{{ $product->sku }}</td>
-            </tr>
-            @if($product->supplier)
+<div class="product-info">
+    <table>
+        <tr>
+            <td>Product Name:</td>
+            <td>{{ $product->name }}</td>
+        </tr>
+        <tr>
+            <td>SKU:</td>
+            <td>{{ $product->sku }}</td>
+        </tr>
+        @if($product->supplier)
             <tr>
                 <td>Supplier:</td>
                 <td>{{ $product->supplier->name }}</td>
             </tr>
-            @endif
-            @if($product->customer)
+        @endif
+        @if($product->customer)
             <tr>
                 <td>Customer:</td>
                 <td>{{ $product->customer->name }}</td>
             </tr>
-            @endif
-            <tr>
-                <td>Export Date:</td>
-                <td>{{ $exportDate }}</td>
-            </tr>
-        </table>
-    </div>
-
-    <table class="bom-table">
-        <thead>
-            <tr>
-                <th>Code</th>
-                <th>Component</th>
-                <th class="text-right">Quantity</th>
-                <th>UOM</th>
-                <th class="text-right">Waste %</th>
-                <th class="text-right">Actual Qty</th>
-                <th class="text-right">Unit Cost</th>
-                <th class="text-right">Total Cost</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach($bomItems as $item)
-            <tr>
-                <td>{{ $item->component->code }}</td>
-                <td>{{ $item->component->name }}</td>
-                <td class="text-right">{{ number_format($item->quantity, 2) }}</td>
-                <td>{{ $item->unit_of_measure }}</td>
-                <td class="text-right">{{ number_format($item->waste_factor, 1) }}%</td>
-                <td class="text-right">{{ number_format($item->actual_quantity, 2) }}</td>
-                <td class="text-right">${{ number_format($item->unit_cost_snapshot / 100, 2) }}</td>
-                <td class="text-right">${{ number_format($item->total_cost_snapshot / 100, 2) }}</td>
-            </tr>
-            @endforeach
-        </tbody>
+        @endif
+        <tr>
+            <td>Export Date:</td>
+            <td>{{ $exportDate }}</td>
+        </tr>
     </table>
+</div>
 
-    <div class="cost-summary">
-        <table>
-            <tr>
-                <td>BOM Material Cost:</td>
-                <td>${{ number_format($version->bom_material_cost_snapshot / 100, 2) }}</td>
-            </tr>
-            <tr>
-                <td>Direct Labor Cost:</td>
-                <td>${{ number_format($version->direct_labor_cost_snapshot / 100, 2) }}</td>
-            </tr>
-            <tr>
-                <td>Direct Overhead Cost:</td>
-                <td>${{ number_format($version->direct_overhead_cost_snapshot / 100, 2) }}</td>
-            </tr>
-            <tr class="total-row">
-                <td>Total Manufacturing Cost:</td>
-                <td>${{ number_format($version->total_manufacturing_cost_snapshot / 100, 2) }}</td>
-            </tr>
-        </table>
-    </div>
+<table class="bom-table">
+    <thead>
+    <tr>
+        <th>Code</th>
+        <th>Component</th>
+        <th class="text-right">Quantity</th>
+        <th>UOM</th>
+        <th class="text-right">Waste %</th>
+        <th class="text-right">Actual Qty</th>
+        <th class="text-right">Unit Cost</th>
+        <th class="text-right">Total Cost</th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach($bomItems as $item)
+        <tr>
+            <td>{{ $item->component->code }}</td>
+            <td>{{ $item->component->name }}</td>
+            <td class="text-right">{{ number_format($item->quantity, 2) }}</td>
+            <td>{{ $item->unit_of_measure }}</td>
+            <td class="text-right">{{ number_format($item->waste_factor, 1) }}%</td>
+            <td class="text-right">{{ number_format($item->actual_quantity, 2) }}</td>
+            <td class="text-right">${{ number_format($item->unit_cost_snapshot / 100, 2) }}</td>
+            <td class="text-right">${{ number_format($item->total_cost_snapshot / 100, 2) }}</td>
+        </tr>
+    @endforeach
+    </tbody>
+</table>
 
-    <div style="clear: both;"></div>
+<div class="cost-summary">
+    <table>
+        <tr>
+            <td>BOM Material Cost:</td>
+            <td>${{ number_format($version->bom_material_cost_snapshot / 100, 2) }}</td>
+        </tr>
+        <tr>
+            <td>Direct Labor Cost:</td>
+            <td>${{ number_format($version->direct_labor_cost_snapshot / 100, 2) }}</td>
+        </tr>
+        <tr>
+            <td>Direct Overhead Cost:</td>
+            <td>${{ number_format($version->direct_overhead_cost_snapshot / 100, 2) }}</td>
+        </tr>
+        <tr class="total-row">
+            <td>Total Manufacturing Cost:</td>
+            <td>${{ number_format($version->total_manufacturing_cost_snapshot / 100, 2) }}</td>
+        </tr>
+    </table>
+</div>
 
-    <div class="footer">
-        Generated by Impex Management System on {{ $exportDate }}<br>
-        BOM Version: {{ $version->version_display }} ({{ ucfirst($version->status) }})
-    </div>
+<div style="clear: both;"></div>
+
+<div class="footer">
+    Generated by Impex Management System on {{ $exportDate }}<br>
+    BOM Version: {{ $version->version_display }} ({{ ucfirst($version->status) }})
+</div>
 </body>
 </html>

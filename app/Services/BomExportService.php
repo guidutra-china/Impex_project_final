@@ -19,7 +19,7 @@ class BomExportService
     public function exportCurrentBomToPdf(Product $product): string
     {
         $data = [
-            'product' => $product->load('bomItems.component', 'supplier', 'customer'),
+            'product' => $product->load('bomItems.component', 'supplier'),
             'bomItems' => $product->bomItems,
             'exportDate' => now()->format('M d, Y H:i'),
         ];
@@ -28,11 +28,17 @@ class BomExportService
         $pdf->setPaper('a4', 'portrait');
 
         $filename = "BOM_{$product->sku}_{$product->name}_" . now()->format('Ymd_His') . ".pdf";
-        $path = "exports/bom/{$filename}";
+        $path = storage_path("app/exports/bom/{$filename}");  //
 
-        Storage::put($path, $pdf->output());
+        // Ensure directory exists
+        if (!file_exists(dirname($path))) {
+            mkdir(dirname($path), 0755, true);
+        }
 
-        return $path;
+        // Save PDF directly to file
+        file_put_contents($path, $pdf->output());  //
+
+        return "exports/bom/{$filename}";  //
     }
 
     /**
@@ -51,11 +57,17 @@ class BomExportService
         $pdf->setPaper('a4', 'portrait');
 
         $filename = "BOM_{$version->product->sku}_{$version->version_display}_" . now()->format('Ymd_His') . ".pdf";
-        $path = "exports/bom/{$filename}";
+        $path = storage_path("app/exports/bom/{$filename}");
 
-        Storage::put($path, $pdf->output());
+        // Ensure directory exists
+        if (!file_exists(dirname($path))) {
+            mkdir(dirname($path), 0755, true);
+        }
 
-        return $path;
+        // Save PDF directly to file
+        file_put_contents($path, $pdf->output());
+
+        return "exports/bom/{$filename}";
     }
 
     /**

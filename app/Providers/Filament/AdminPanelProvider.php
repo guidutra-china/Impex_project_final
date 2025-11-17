@@ -34,6 +34,11 @@ class AdminPanelProvider extends PanelProvider
             ->profile()
             ->sidebarCollapsibleOnDesktop()
             ->sidebarFullyCollapsibleOnDesktop()
+            ->brandName('IMPEX')
+            ->brandLogo(asset('images/logo.svg'))
+            ->darkModeBrandLogo(asset('images/logo-dark.svg'))
+            ->brandLogoHeight('2.5rem')
+            ->favicon(asset('images/logo.svg'))
             ->colors([
                 'primary' => Color::Indigo,
                 'danger' => Color::Red,

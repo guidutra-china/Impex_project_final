@@ -16,7 +16,7 @@ class QuoteComparisonService
     public function compareQuotes(Order $order): array
     {
         $quotes = $order->supplierQuotes()
-            ->where('status', '!=', 'draft')
+//            ->where('status', '!=', 'draft')
             ->with(['items.product', 'supplier', 'currency'])
             ->get();
 
