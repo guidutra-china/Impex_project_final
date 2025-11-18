@@ -160,14 +160,15 @@
                             <div class="rounded-lg border border-gray-200 dark:border-white/10 overflow-hidden bg-white dark:bg-transparent">
                                 {{-- Product Header --}}
                                 <div class="bg-gray-50 dark:bg-white/5 px-8 py-6 border-b border-gray-200 dark:border-white/10">
-                                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-                                        <div>
+                                    <div class="flex flex-wrap items-center justify-between gap-4">
+                                        <div class="flex items-baseline gap-4">
                                             <p class="text-xl font-bold text-gray-900 dark:text-white">
                                                 {{ $productComparison['product'] }}
-                                                <span class="text-base font-normal text-gray-600 dark:text-gray-400 ml-3">({{ $productComparison['product_code'] }})</span>
+                                                <span class="text-base font-normal text-gray-600 dark:text-gray-400 ml-2">({{ $productComparison['product_code'] }})</span>
                                             </p>
-                                            <p class="text-sm text-gray-600 dark:text-gray-400 mt-2">
-                                                Quantity: <span class="font-semibold">{{ $productComparison['quantity'] }}</span>
+                                            <span class="text-gray-400 dark:text-gray-500">|</span>
+                                            <p class="text-base text-gray-600 dark:text-gray-400">
+                                                Quantity: <span class="font-semibold text-gray-900 dark:text-white">{{ $productComparison['quantity'] }}</span>
                                             </p>
                                         </div>
                                         @if($productComparison['savings'] > 0)
@@ -185,12 +186,12 @@
                                     <table class="w-full divide-y divide-gray-200 dark:divide-white/10 text-base">
                                         <thead class="bg-gray-100 dark:bg-white/5">
                                         <tr>
-                                            <th scope="col" class="px-10 py-5 text-left font-semibold text-gray-900 dark:text-white w-1/5">Supplier</th>
-                                            <th scope="col" class="px-8 py-5 text-right font-semibold text-gray-900 dark:text-white w-1/6">Unit Price</th>
-                                            <th scope="col" class="px-8 py-5 text-right font-semibold text-gray-900 dark:text-white w-1/6">Total (Original)</th>
-                                            <th scope="col" class="px-8 py-5 text-right font-semibold text-gray-900 dark:text-white w-1/6">Price ({{ $order->currency->code }})</th>
-                                            <th scope="col" class="px-8 py-5 text-center font-semibold text-gray-900 dark:text-white w-1/6">Status</th>
-                                            <th scope="col" class="px-8 py-5 text-center font-semibold text-gray-900 dark:text-white w-1/6">Best</th>
+                                            <th scope="col" class="px-6 py-4 text-left font-semibold text-gray-900 dark:text-white w-[22%]">Supplier</th>
+                                            <th scope="col" class="px-4 py-4 text-right font-semibold text-gray-900 dark:text-white w-[16%]">Unit Price</th>
+                                            <th scope="col" class="px-4 py-4 text-right font-semibold text-gray-900 dark:text-white w-[18%]">Total (Original)</th>
+                                            <th scope="col" class="px-4 py-4 text-right font-semibold text-gray-900 dark:text-white w-[18%]">Price ({{ $order->currency->code }})</th>
+                                            <th scope="col" class="px-4 py-4 text-center font-semibold text-gray-900 dark:text-white w-[13%]">Status</th>
+                                            <th scope="col" class="px-4 py-4 text-center font-semibold text-gray-900 dark:text-white w-[13%]">Best</th>
                                         </tr>
                                         </thead>
                                         <tbody class="divide-y divide-gray-100 dark:divide-white/5">
@@ -199,10 +200,10 @@
                                                 $isCheapest = $price['supplier_id'] === $productComparison['cheapest']['supplier_id'];
                                             @endphp
                                             <tr class="{{ $isCheapest ? 'bg-success-50 dark:bg-success-500/10 font-semibold' : 'hover:bg-gray-50 dark:hover:bg-white/5' }}">
-                                                <td class="px-10 py-5 whitespace-nowrap text-gray-900 dark:text-white text-lg">
+                                                <td class="px-6 py-4 whitespace-nowrap text-gray-900 dark:text-white text-base">
                                                     {{ $price['supplier'] }}
                                                 </td>
-                                                <td class="px-8 py-5 text-right whitespace-nowrap text-gray-700 dark:text-gray-300">
+                                                <td class="px-4 py-4 text-right whitespace-nowrap text-gray-700 dark:text-gray-300">
                                                     <span class="font-mono text-base">
                                                         @if($price['price'])
                                                             {{ $price['currency'] ?? '' }} {{ number_format($price['price'] / 100, 2) }}
@@ -211,7 +212,7 @@
                                                         @endif
                                                     </span>
                                                 </td>
-                                                <td class="px-8 py-5 text-right whitespace-nowrap text-gray-700 dark:text-gray-300">
+                                                <td class="px-4 py-4 text-right whitespace-nowrap text-gray-700 dark:text-gray-300">
                                                     <span class="font-mono text-base">
                                                         @if(isset($price['total']) && $price['total'])
                                                             {{ $price['currency'] ?? '' }} {{ number_format($price['total'] / 100, 2) }}
@@ -220,7 +221,7 @@
                                                         @endif
                                                     </span>
                                                 </td>
-                                                <td class="px-8 py-5 text-right whitespace-nowrap">
+                                                <td class="px-4 py-4 text-right whitespace-nowrap">
                                                     <span class="font-mono text-lg {{ $isCheapest ? 'text-success-700 dark:text-success-300 font-bold' : 'text-gray-900 dark:text-white' }}">
                                                         @if($price['converted_price'])
                                                             {{ $order->currency->symbol }}{{ number_format($price['converted_price'] / 100, 2) }}
@@ -229,7 +230,7 @@
                                                         @endif
                                                     </span>
                                                 </td>
-                                                <td class="px-8 py-5 text-center whitespace-nowrap">
+                                                <td class="px-4 py-4 text-center whitespace-nowrap">
                                                     <x-filament::badge
                                                             :color="match($price['status']) {
                                                             'accepted' => 'success',
@@ -242,7 +243,7 @@
                                                         {{ ucfirst($price['status']) }}
                                                     </x-filament::badge>
                                                 </td>
-                                                <td class="px-8 py-5 text-center whitespace-nowrap">
+                                                <td class="px-4 py-4 text-center whitespace-nowrap">
                                                     @if($isCheapest)
                                                         <x-filament::badge color="success" class="px-4 py-2 text-base">⭐ Best</x-filament::badge>
                                                     @else
