@@ -40,18 +40,18 @@ class SuppliersToQuoteRelationManager extends RelationManager
                 /** @var Order $owner */
                 $owner = $this->getOwnerRecord();
 
-                // Get category IDs from the RFQ
-                $categoryIds = $owner->categories()->pluck('categories.id');
+                // Get category ID from the RFQ
+                $categoryId = $owner->category_id;
 
-                if ($categoryIds->isEmpty()) {
-                    // No categories, return empty query
+                if (!$categoryId) {
+                    // No category, return empty query
                     return Supplier::query()->whereRaw('1 = 0');
                 }
 
-                // Find suppliers with any matching categories
+                // Find suppliers with matching category
                 return Supplier::query()
-                    ->whereHas('categories', function ($q) use ($categoryIds) {
-                        $q->whereIn('categories.id', $categoryIds);
+                    ->whereHas('categories', function ($q) use ($categoryId) {
+                        $q->where('categories.id', $categoryId);
                     })
                     ->distinct();
             })
