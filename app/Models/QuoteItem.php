@@ -43,8 +43,23 @@ class QuoteItem extends Model
     {
         parent::boot();
 
-        // Auto-calculate totals
+        // Auto-calculate commission and totals
         static::saving(function ($item) {
+            // Get commission from supplier quote's order
+            $commissionPercent = $item->supplierQuote->order->commission_percent ?? 0;
+            $commissionType = $item->supplierQuote->order->commission_type ?? 'embedded';
+            
+            // Calculate unit price after commission
+            if ($commissionType === 'embedded') {
+                // Commission is embedded in the price
+                $item->unit_price_after_commission = $item->unit_price_before_commission;
+            } else {
+                // Commission is added on top
+                $commissionMultiplier = 1 + ($commissionPercent / 100);
+                $item->unit_price_after_commission = (int) round($item->unit_price_before_commission * $commissionMultiplier);
+            }
+            
+            // Calculate totals
             $item->total_price_before_commission = $item->unit_price_before_commission * $item->quantity;
             $item->total_price_after_commission = $item->unit_price_after_commission * $item->quantity;
         });
