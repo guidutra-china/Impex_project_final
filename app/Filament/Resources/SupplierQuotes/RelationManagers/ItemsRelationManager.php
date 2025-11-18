@@ -16,7 +16,7 @@ use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\BulkActionGroup;
 
-class QuoteItemsRelationManager extends RelationManager
+class ItemsRelationManager extends RelationManager
 {
     protected static string $relationship = 'items';
 
