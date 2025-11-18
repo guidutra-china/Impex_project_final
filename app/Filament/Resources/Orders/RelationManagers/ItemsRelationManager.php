@@ -26,10 +26,35 @@ class ItemsRelationManager extends RelationManager
         return $schema
             ->components([
                 Select::make('product_id')
-                    ->relationship('product', 'name')
+                    ->relationship(
+                        name: 'product',
+                        titleAttribute: 'name',
+                        modifyQueryUsing: function ($query) {
+                            $order = $this->getOwnerRecord();
+                            $categoryIds = $order->categories()->pluck('categories.id')->toArray();
+                            
+                            // If order has categories, filter products by those categories
+                            if (!empty($categoryIds)) {
+                                $query->whereIn('category_id', $categoryIds);
+                            }
+                            
+                            return $query;
+                        }
+                    )
                     ->required()
                     ->searchable()
                     ->preload()
+                    ->helperText(function () {
+                        $order = $this->getOwnerRecord();
+                        $categoryIds = $order->categories()->pluck('categories.id')->toArray();
+                        
+                        if (empty($categoryIds)) {
+                            return 'No categories selected. All products are available.';
+                        }
+                        
+                        $categoryNames = $order->categories()->pluck('name')->implode(', ');
+                        return "Filtered by categories: {$categoryNames}";
+                    })
                     ->columnSpan(2),
 
                 TextInput::make('quantity')

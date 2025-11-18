@@ -177,11 +177,20 @@ class Order extends Model
     // ========================================
 
     /**
-     * Get the tags for this RFQ (polymorphic relationship)
+     * Get the tags for this order (polymorphic relationship)
      */
     public function tags(): MorphToMany
     {
         return $this->morphToMany(Tag::class, 'taggable');
+    }
+
+    /**
+     * Get the categories for this order
+     */
+    public function categories(): BelongsToMany
+    {
+        return $this->belongsToMany(Category::class, 'category_order')
+            ->withTimestamps();
     }
 
     /**
