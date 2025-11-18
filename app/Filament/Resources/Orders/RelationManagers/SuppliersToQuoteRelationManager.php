@@ -34,24 +34,24 @@ class SuppliersToQuoteRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         return $table
-            ->heading('Suppliers Matching RFQ Categories')
-            ->description('Send quotation requests to suppliers with matching categories')
+            ->heading('Suppliers Matching RFQ Tags')
+            ->description('Send quotation requests to suppliers with matching tags')
             ->query(function () {
                 /** @var Order $owner */
                 $owner = $this->getOwnerRecord();
 
-                // Get category ID from the RFQ
-                $categoryId = $owner->category_id;
+                // Get tag IDs from the RFQ
+                $tagIds = $owner->tags()->pluck('tags.id');
 
-                if (!$categoryId) {
-                    // No category, return empty query
+                if ($tagIds->isEmpty()) {
+                    // No tags, return empty query
                     return Supplier::query()->whereRaw('1 = 0');
                 }
 
-                // Find suppliers with matching category
+                // Find suppliers with matching tags
                 return Supplier::query()
-                    ->whereHas('categories', function ($q) use ($categoryId) {
-                        $q->where('categories.id', $categoryId);
+                    ->whereHas('tags', function ($q) use ($tagIds) {
+                        $q->whereIn('tags.id', $tagIds);
                     })
                     ->distinct();
             })
@@ -62,8 +62,8 @@ class SuppliersToQuoteRelationManager extends RelationManager
                     ->sortable()
                     ->weight('bold'),
 
-                TextColumn::make('categories.name')
-                    ->label('Categories')
+                TextColumn::make('tags.name')
+                    ->label('Tags')
                     ->badge()
                     ->separator(',')
                     ->color('info'),
