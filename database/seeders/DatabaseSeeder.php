@@ -145,12 +145,12 @@ class DatabaseSeeder extends Seeder
     private function createCurrencies(): void
     {
         $currencies = [
-            ['code' => 'USD', 'name' => 'US Dollar', 'symbol' => '$'],
-            ['code' => 'EUR', 'name' => 'Euro', 'symbol' => '€'],
-            ['code' => 'GBP', 'name' => 'British Pound', 'symbol' => '£'],
-            ['code' => 'CNY', 'name' => 'Chinese Yuan', 'symbol' => '¥'],
-            ['code' => 'JPY', 'name' => 'Japanese Yen', 'symbol' => '¥'],
-            ['code' => 'BRL', 'name' => 'Brazilian Real', 'symbol' => 'R$'],
+            ['code' => 'USD', 'name' => 'US Dollar', 'name_plural' => 'US Dollars', 'symbol' => '$'],
+            ['code' => 'EUR', 'name' => 'Euro', 'name_plural' => 'Euros', 'symbol' => '€'],
+            ['code' => 'GBP', 'name' => 'British Pound', 'name_plural' => 'British Pounds', 'symbol' => '£'],
+            ['code' => 'CNY', 'name' => 'Chinese Yuan', 'name_plural' => 'Chinese Yuan', 'symbol' => '¥'],
+            ['code' => 'JPY', 'name' => 'Japanese Yen', 'name_plural' => 'Japanese Yen', 'symbol' => '¥'],
+            ['code' => 'BRL', 'name' => 'Brazilian Real', 'name_plural' => 'Brazilian Reais', 'symbol' => 'R$'],
         ];
 
         foreach ($currencies as $currency) {
