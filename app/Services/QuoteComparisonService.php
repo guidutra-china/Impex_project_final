@@ -141,34 +141,42 @@ class QuoteComparisonService
             return null;
         }
 
-        // Sort by converted total for fair comparison
+        // Sort by sum of converted item prices for fair comparison
         $cheapestOverall = $quotes->sortBy(function ($quote) {
-            return $quote->converted_total_cents ?? (
-                $quote->locked_exchange_rate 
-                    ? (int) round($quote->total_price_after_commission / $quote->locked_exchange_rate)
-                    : $quote->total_price_after_commission
-            );
+            return $quote->items->sum(function ($item) use ($quote) {
+                return $item->converted_price_cents ?? (
+                    $quote->locked_exchange_rate 
+                        ? (int) round($item->total_price_after_commission / $quote->locked_exchange_rate)
+                        : $item->total_price_after_commission
+                );
+            });
         })->first();
         
         $mostExpensive = $quotes->sortByDesc(function ($quote) {
-            return $quote->converted_total_cents ?? (
-                $quote->locked_exchange_rate 
-                    ? (int) round($quote->total_price_after_commission / $quote->locked_exchange_rate)
-                    : $quote->total_price_after_commission
-            );
+            return $quote->items->sum(function ($item) use ($quote) {
+                return $item->converted_price_cents ?? (
+                    $quote->locked_exchange_rate 
+                        ? (int) round($item->total_price_after_commission / $quote->locked_exchange_rate)
+                        : $item->total_price_after_commission
+                );
+            });
         })->first();
 
-        $cheapestConverted = $cheapestOverall->converted_total_cents ?? (
-            $cheapestOverall->locked_exchange_rate 
-                ? (int) round($cheapestOverall->total_price_after_commission / $cheapestOverall->locked_exchange_rate)
-                : $cheapestOverall->total_price_after_commission
-        );
+        $cheapestConverted = $cheapestOverall->items->sum(function ($item) use ($cheapestOverall) {
+            return $item->converted_price_cents ?? (
+                $cheapestOverall->locked_exchange_rate 
+                    ? (int) round($item->total_price_after_commission / $cheapestOverall->locked_exchange_rate)
+                    : $item->total_price_after_commission
+            );
+        });
         
-        $mostExpensiveConverted = $mostExpensive->converted_total_cents ?? (
-            $mostExpensive->locked_exchange_rate 
-                ? (int) round($mostExpensive->total_price_after_commission / $mostExpensive->locked_exchange_rate)
-                : $mostExpensive->total_price_after_commission
-        );
+        $mostExpensiveConverted = $mostExpensive->items->sum(function ($item) use ($mostExpensive) {
+            return $item->converted_price_cents ?? (
+                $mostExpensive->locked_exchange_rate 
+                    ? (int) round($item->total_price_after_commission / $mostExpensive->locked_exchange_rate)
+                    : $item->total_price_after_commission
+            );
+        });
 
         $savings = $mostExpensiveConverted - $cheapestConverted;
         $savingsPercent = $mostExpensiveConverted > 0 
@@ -176,19 +184,21 @@ class QuoteComparisonService
             : 0;
 
         $allQuotes = $quotes->map(function ($quote) use ($order) {
-            // Convert total to order currency
-            $convertedTotal = $quote->converted_total_cents ?? (
-                $quote->locked_exchange_rate 
-                    ? (int) round($quote->total_price_after_commission / $quote->locked_exchange_rate)
-                    : $quote->total_price_after_commission
-            );
+            // Sum converted item prices instead of converting total
+            $convertedTotal = $quote->items->sum(function ($item) {
+                return $item->converted_price_cents ?? (
+                    $quote->locked_exchange_rate 
+                        ? (int) round($item->total_price_after_commission / $quote->locked_exchange_rate)
+                        : $item->total_price_after_commission
+                );
+            });
             
             return [
                 'quote_id' => $quote->id,
                 'supplier_id' => $quote->supplier->id,
                 'supplier' => $quote->supplier->name,
                 'total_before_commission' => $quote->total_price_before_commission,
-                'total_after_commission' => $convertedTotal,  // Use converted total
+                'total_after_commission' => $convertedTotal,  // Sum of converted item prices
                 'original_total' => $quote->total_price_after_commission,  // Keep original for reference
                 'commission_amount' => $quote->commission_amount,
                 'currency' => $quote->currency->symbol,
