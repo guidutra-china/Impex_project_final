@@ -2,11 +2,7 @@
 
 namespace App\Filament\Resources\SupplierQuotes\RelationManagers;
 
-use Filament\Actions\BulkActionGroup;
-use Filament\Actions\CreateAction;
-use Filament\Actions\DeleteAction;
-use Filament\Actions\DeleteBulkAction;
-use Filament\Actions\EditAction;
+use App\Models\OrderItem;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -14,25 +10,65 @@ use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Filament\Actions\CreateAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\BulkActionGroup;
 
-class ItemsRelationManager extends RelationManager
+class QuoteItemsRelationManager extends RelationManager
 {
     protected static string $relationship = 'items';
 
     protected static ?string $title = 'Quote Items';
 
+    protected static ?string $recordTitleAttribute = 'product.name';
+
     public function form(Schema $schema): Schema
     {
         return $schema
-            ->schema([
+            ->components([
+                Select::make('order_item_id')
+                    ->label('RFQ Item')
+                    ->options(function () {
+                        $supplierQuote = $this->getOwnerRecord();
+                        $order = $supplierQuote->order;
+                        
+                        return $order->items()
+                            ->with('product')
+                            ->get()
+                            ->mapWithKeys(function ($item) {
+                                return [$item->id => $item->product->name . ' (Qty: ' . $item->quantity . ')'];
+                            });
+                    })
+                    ->required()
+                    ->searchable()
+                    ->preload()
+                    ->reactive()
+                    ->afterStateUpdated(function ($state, callable $set) {
+                        if ($state) {
+                            $orderItem = OrderItem::find($state);
+                            if ($orderItem) {
+                                $set('product_id', $orderItem->product_id);
+                                $set('quantity', $orderItem->quantity);
+                            }
+                        }
+                    })
+                    ->helperText('Select which RFQ item this quote is for')
+                    ->columnSpan(2),
+
                 Select::make('product_id')
                     ->relationship('product', 'name')
                     ->required()
                     ->searchable()
                     ->preload()
-                    ->columnSpan(2),
+                    ->disabled()
+                    ->dehydrated()
+                    ->label('Product')
+                    ->columnSpan(1),
 
                 TextInput::make('quantity')
+                    ->label('Quoted Quantity')
                     ->required()
                     ->numeric()
                     ->minValue(1)
@@ -41,141 +77,94 @@ class ItemsRelationManager extends RelationManager
 
                 TextInput::make('unit_price_before_commission')
                     ->label('Unit Price (cents)')
-                    ->helperText('Price per unit in cents')
                     ->required()
                     ->numeric()
                     ->minValue(0)
+                    ->helperText('Price in cents (e.g., 1000 = $10.00)')
                     ->columnSpan(1),
 
+                TextInput::make('delivery_days')
+                    ->label('Delivery Time (days)')
+                    ->numeric()
+                    ->minValue(0)
+                    ->helperText('Number of days for delivery')
+                    ->columnSpan(1),
+
+                TextInput::make('supplier_part_number')
+                    ->label('Supplier Part Number')
+                    ->maxLength(255)
+                    ->columnSpan(1),
+
+                Textarea::make('supplier_notes')
+                    ->label('Supplier Notes')
+                    ->rows(3)
+                    ->columnSpan(2),
+
                 Textarea::make('notes')
-                    ->rows(2)
-                    ->columnSpanFull(),
+                    ->label('Internal Notes')
+                    ->rows(3)
+                    ->columnSpan(2),
             ])
-            ->columns(4);
+            ->columns(2);
     }
 
     public function table(Table $table): Table
     {
         return $table
-            ->recordTitleAttribute('product.name')
             ->columns([
-                TextColumn::make('product.code')
-                    ->label('Code')
-                    ->searchable(),
-
-                TextColumn::make('product.name')
+                TextColumn::make('orderItem.product.name')
+                    ->label('Product')
                     ->searchable()
-                    ->wrap(),
+                    ->sortable()
+                    ->weight('bold'),
 
                 TextColumn::make('quantity')
-                    ->alignCenter(),
+                    ->label('Qty')
+                    ->sortable(),
 
-                TextColumn::make('unit_price_before_commission')
+                TextColumn::make('unit_price_before_dollars')
                     ->label('Unit Price')
-                    ->money(fn () => $this->getOwnerRecord()->currency?->code ?? 'USD', divideBy: 100),
+                    ->money('USD')
+                    ->sortable(),
 
-                TextColumn::make('unit_price_after_commission')
-                    ->label('Unit Price (w/ Commission)')
-                    ->money(fn () => $this->getOwnerRecord()->currency?->code ?? 'USD', divideBy: 100)
+                TextColumn::make('total_price_before_dollars')
+                    ->label('Total Price')
+                    ->money('USD')
+                    ->sortable()
+                    ->weight('bold'),
+
+                TextColumn::make('delivery_days')
+                    ->label('Delivery')
+                    ->suffix(' days')
+                    ->sortable()
+                    ->placeholder('—'),
+
+                TextColumn::make('supplier_part_number')
+                    ->label('Part #')
+                    ->searchable()
+                    ->placeholder('—')
+                    ->toggleable(),
+
+                TextColumn::make('supplier_notes')
+                    ->label('Notes')
+                    ->limit(50)
+                    ->placeholder('—')
                     ->toggleable(isToggledHiddenByDefault: true),
-
-                TextColumn::make('total_price_before_commission')
-                    ->label('Subtotal')
-                    ->money(fn () => $this->getOwnerRecord()->currency?->code ?? 'USD', divideBy: 100),
-
-                TextColumn::make('total_price_after_commission')
-                    ->label('Total (w/ Commission)')
-                    ->money(fn () => $this->getOwnerRecord()->currency?->code ?? 'USD', divideBy: 100),
-
-                TextColumn::make('converted_price_cents')
-                    ->label('Converted Price')
-                    ->money(fn () => $this->getOwnerRecord()->order?->currency?->code ?? 'USD', divideBy: 100)
-                    ->toggleable(isToggledHiddenByDefault: true),
-            ])
-            ->filters([
-                //
             ])
             ->headerActions([
                 CreateAction::make()
-                    ->mutateFormDataUsing(function (array $data): array {
-                        // Calculate prices before saving
-                        $supplierQuote = $this->getOwnerRecord();
-                        $order = $supplierQuote->order;
-
-                        $quantity = $data['quantity'];
-                        $unitPriceBefore = $data['unit_price_before_commission'];
-
-                        // Calculate unit price after commission
-                        if ($order->commission_type === 'embedded') {
-                            $commissionMultiplier = 1 + ($order->commission_percent / 100);
-                            $unitPriceAfter = (int) round($unitPriceBefore * $commissionMultiplier);
-                        } else {
-                            $unitPriceAfter = $unitPriceBefore;
-                        }
-
-                        // Calculate totals
-                        $totalBefore = $unitPriceBefore * $quantity;
-                        $totalAfter = $unitPriceAfter * $quantity;
-
-                        // Add calculated fields
-                        $data['unit_price_after_commission'] = $unitPriceAfter;
-                        $data['total_price_before_commission'] = $totalBefore;
-                        $data['total_price_after_commission'] = $totalAfter;
-
-                        return $data;
-                    })
-                    ->after(function () {
-                        // Recalculate commission after adding items
-                        $this->getOwnerRecord()->calculateCommission();
-                    }),
+                    ->label('Add Item')
+                    ->icon('heroicon-o-plus'),
             ])
             ->actions([
-                EditAction::make()
-                    ->mutateFormDataUsing(function (array $data): array {
-                        // Calculate prices before saving
-                        $supplierQuote = $this->getOwnerRecord();
-                        $order = $supplierQuote->order;
-
-                        $quantity = $data['quantity'];
-                        $unitPriceBefore = $data['unit_price_before_commission'];
-
-                        // Calculate unit price after commission
-                        if ($order->commission_type === 'embedded') {
-                            $commissionMultiplier = 1 + ($order->commission_percent / 100);
-                            $unitPriceAfter = (int) round($unitPriceBefore * $commissionMultiplier);
-                        } else {
-                            $unitPriceAfter = $unitPriceBefore;
-                        }
-
-                        // Calculate totals
-                        $totalBefore = $unitPriceBefore * $quantity;
-                        $totalAfter = $unitPriceAfter * $quantity;
-
-                        // Add calculated fields
-                        $data['unit_price_after_commission'] = $unitPriceAfter;
-                        $data['total_price_before_commission'] = $totalBefore;
-                        $data['total_price_after_commission'] = $totalAfter;
-
-                        return $data;
-                    })
-                    ->after(function () {
-                        // Recalculate commission after editing items
-                        $this->getOwnerRecord()->calculateCommission();
-                    }),
-                DeleteAction::make()
-                    ->after(function () {
-                        // Recalculate commission after deleting items
-                        $this->getOwnerRecord()->calculateCommission();
-                    }),
+                EditAction::make(),
+                DeleteAction::make(),
             ])
             ->bulkActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make()
-                        ->after(function () {
-                            // Recalculate commission after bulk delete
-                            $this->getOwnerRecord()->calculateCommission();
-                        }),
+                    DeleteBulkAction::make(),
                 ]),
-            ]);
+            ])
+            ->defaultSort('id');
     }
 }

@@ -20,6 +20,9 @@ class QuoteItem extends Model
         'total_price_before_commission',
         'total_price_after_commission',
         'converted_price_cents',
+        'delivery_days',
+        'supplier_part_number',
+        'supplier_notes',
         'notes',
     ];
 
@@ -30,6 +33,7 @@ class QuoteItem extends Model
         'total_price_before_commission' => 'integer',
         'total_price_after_commission' => 'integer',
         'converted_price_cents' => 'integer',
+        'delivery_days' => 'integer',
     ];
 
     /**
