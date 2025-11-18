@@ -108,8 +108,9 @@ class DatabaseSeeder extends Seeder
                         
                         ProductFeature::create([
                             'product_id' => $product->id,
-                            'category_feature_id' => $feature->id,
-                            'value' => $value,
+                            'feature_name' => $feature->feature_name,
+                            'feature_value' => $value,
+                            'unit' => $feature->unit,
                         ]);
                     }
                 }
