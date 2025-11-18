@@ -16,24 +16,53 @@ class OrderForm
     {
         return $schema
             ->components([
-                // Grid para colocar RFQ Information e Customer & Currency lado a lado
-                Grid::make()
+                // Uma única seção contendo RFQ Information e Customer & Currency
+                Section::make('RFQ Information')
                     ->schema([
-                        // RFQ Information - Coluna 1
-                        Section::make('RFQ Information')
+                        Grid::make()
                             ->schema([
+                                // Coluna 1 - RFQ Information
                                 TextInput::make('order_number')
                                     ->label('RFQ Number')
                                     ->disabled()
                                     ->dehydrated(false)
-                                    ->placeholder('Auto-generated'),
+                                    ->placeholder('Auto-generated')
+                                    ->columnSpan(1),
 
+                                // Coluna 2 - Customer
+                                Select::make('customer_id')
+                                    ->relationship('customer', 'name')
+                                    ->required()
+                                    ->searchable()
+                                    ->preload()
+                                    ->createOptionForm([
+                                        TextInput::make('name')
+                                            ->required(),
+                                        TextInput::make('email')
+                                            ->email(),
+                                    ])
+                                    ->label('Customer')
+                                    ->columnSpan(1),
+
+                                // Coluna 1 - Customer Nr. RFQ
                                 TextInput::make('customer_nr_rfq')
                                     ->label('Customer Nr. RFQ')
                                     ->placeholder('Customer reference number')
                                     ->maxLength(255)
-                                    ->helperText('Customer\'s reference number'),
+                                    ->helperText('Customer\'s reference number')
+                                    ->columnSpan(1),
 
+                                // Coluna 2 - Order Currency
+                                Select::make('currency_id')
+                                    ->relationship('currency', 'code', fn ($query) => $query->where('is_active', true))
+                                    ->required()
+                                    ->searchable()
+                                    ->preload()
+                                    ->label('Order Currency')
+                                    ->helperText('Currency for customer quotes')
+                                    ->columnSpan(1),
+
+                                // Coluna 1 - Status
                                 Select::make('status')
                                     ->options([
                                         'pending' => 'Pending',
@@ -43,8 +72,22 @@ class OrderForm
                                         'cancelled' => 'Cancelled',
                                     ])
                                     ->required()
-                                    ->default('pending'),
+                                    ->default('pending')
+                                    ->columnSpan(1),
 
+                                // Coluna 2 - Commission %
+                                TextInput::make('commission_percent')
+                                    ->label('Commission %')
+                                    ->required()
+                                    ->numeric()
+                                    ->default(5.00)
+                                    ->minValue(0)
+                                    ->maxValue(99.99)
+                                    ->step(0.01)
+                                    ->suffix('%')
+                                    ->columnSpan(1),
+
+                                // Coluna 1 - Tags
                                 Select::make('tags')
                                     ->relationship('tags', 'name')
                                     ->multiple()
@@ -56,43 +99,10 @@ class OrderForm
                                             ->unique('tags', 'name')
                                             ->maxLength(255),
                                     ])
-                                    ->helperText('Tags help match suppliers with this RFQ'),
-                            ])
-                            ->columns(1),
+                                    ->helperText('Tags help match suppliers with this RFQ')
+                                    ->columnSpan(1),
 
-                        // Customer & Currency - Coluna 2
-                        Section::make('Customer & Currency')
-                            ->schema([
-                                Select::make('customer_id')
-                                    ->relationship('customer', 'name')
-                                    ->required()
-                                    ->searchable()
-                                    ->preload()
-                                    ->createOptionForm([
-                                        TextInput::make('name')
-                                            ->required(),
-                                        TextInput::make('email')
-                                            ->email(),
-                                    ]),
-
-                                Select::make('currency_id')
-                                    ->relationship('currency', 'code', fn ($query) => $query->where('is_active', true))
-                                    ->required()
-                                    ->searchable()
-                                    ->preload()
-                                    ->label('Order Currency')
-                                    ->helperText('Currency for customer quotes'),
-
-                                TextInput::make('commission_percent')
-                                    ->label('Commission %')
-                                    ->required()
-                                    ->numeric()
-                                    ->default(5.00)
-                                    ->minValue(0)
-                                    ->maxValue(99.99)
-                                    ->step(0.01)
-                                    ->suffix('%'),
-
+                                // Coluna 2 - Commission Type
                                 Select::make('commission_type')
                                     ->options([
                                         'embedded' => 'Embedded (Hidden in prices)',
@@ -100,13 +110,13 @@ class OrderForm
                                     ])
                                     ->required()
                                     ->default('embedded')
-                                    ->helperText('How commission is displayed to customer'),
+                                    ->helperText('How commission is displayed to customer')
+                                    ->columnSpan(1),
                             ])
-                            ->columns(1),
-                    ])
-                    ->columns([
-                        'default' => 1,  // 1 coluna em mobile
-                        'lg' => 2,       // 2 colunas em desktop
+                            ->columns([
+                                'default' => 1,  // 1 coluna em mobile
+                                'lg' => 2,       // 2 colunas em desktop
+                            ]),
                     ]),
 
                 // Seção de Notes mantida separada
