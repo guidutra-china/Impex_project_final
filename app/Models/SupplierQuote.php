@@ -164,17 +164,22 @@ class SupplierQuote extends Model
         $order = $this->order ?? Order::find($this->order_id);
         $rfqNumber = $order->order_number ?? 'RFQ-UNKNOWN';
         
-        // Count existing quotes from this supplier for this order
-        $existingQuotesCount = SupplierQuote::withTrashed()
-            ->where('supplier_id', $this->supplier_id)
-            ->where('order_id', $this->order_id)
-            ->count();
+        // Find the next available revision number
+        $revisionNumber = 1;
+        $quoteNumber = "";
         
-        // Revision number is count + 1
-        $revisionNumber = $existingQuotesCount + 1;
-        
-        // Generate quote number: [Supplier Prefix]-[RFQ Number]-Rev[N]
-        $quoteNumber = "{$supplierPrefix}-{$rfqNumber}-Rev{$revisionNumber}";
+        // Loop until we find a quote number that doesn't exist
+        do {
+            $quoteNumber = "{$supplierPrefix}-{$rfqNumber}-Rev{$revisionNumber}";
+            
+            $exists = SupplierQuote::withTrashed()
+                ->where('quote_number', $quoteNumber)
+                ->exists();
+            
+            if ($exists) {
+                $revisionNumber++;
+            }
+        } while ($exists);
         
         return $quoteNumber;
     }
