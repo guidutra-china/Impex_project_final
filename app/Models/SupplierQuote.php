@@ -145,8 +145,8 @@ class SupplierQuote extends Model
 
     /**
      * Generate quote number
-     * Format: [3 letters of Supplier] + [RFQ Number] + Rev[N]
-     * Example: TRA-RFQ-2025-0001-Rev1
+     * Format: [3 letters of Supplier][2-digit year][sequential number]_Rev[N]
+     * Example: TRA250004_Rev1
      *
      * @return string
      */
@@ -160,9 +160,19 @@ class SupplierQuote extends Model
         // If supplier name has less than 3 letters, pad with 'X'
         $supplierPrefix = str_pad($supplierPrefix, 3, 'X', STR_PAD_RIGHT);
         
-        // Get RFQ number from order
+        // Get 2-digit year
+        $year = now()->format('y');
+        
+        // Get RFQ number from order and extract only the sequential number
         $order = $this->order ?? Order::find($this->order_id);
-        $rfqNumber = $order->order_number ?? 'RFQ-UNKNOWN';
+        $rfqNumber = $order->order_number ?? '0000';
+        
+        // Extract sequential number from RFQ format (e.g., "RFQ-2025-0004" -> "0004")
+        if (preg_match('/(\d{4})$/', $rfqNumber, $matches)) {
+            $sequentialNumber = $matches[1];
+        } else {
+            $sequentialNumber = '0000';
+        }
         
         // Find the next available revision number
         $revisionNumber = 1;
@@ -170,7 +180,7 @@ class SupplierQuote extends Model
         
         // Loop until we find a quote number that doesn't exist
         do {
-            $quoteNumber = "{$supplierPrefix}-{$rfqNumber}-Rev{$revisionNumber}";
+            $quoteNumber = "{$supplierPrefix}{$year}{$sequentialNumber}_Rev{$revisionNumber}";
             
             $exists = SupplierQuote::withTrashed()
                 ->where('quote_number', $quoteNumber)
