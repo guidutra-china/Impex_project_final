@@ -160,24 +160,22 @@
                             <div class="rounded-lg border border-gray-200 dark:border-white/10 overflow-hidden bg-white dark:bg-transparent">
                                 {{-- Product Header --}}
                                 <div class="bg-gray-50 dark:bg-white/5 px-8 py-6 border-b border-gray-200 dark:border-white/10">
-                                    <div class="flex items-center justify-between gap-4">
-                                        <div class="flex items-baseline space-x-4">
-                                            <p class="text-xl font-bold text-gray-900 dark:text-white whitespace-nowrap">
-                                                {{ $productComparison['product'] }}
-                                                <span class="text-base font-normal text-gray-600 dark:text-gray-400">({{ $productComparison['product_code'] }})</span>
-                                            </p>
+                                    <div class="flex items-center justify-between gap-6">
+                                        <div class="flex items-center gap-4 flex-1">
+                                            <span class="text-xl font-bold text-gray-900 dark:text-white whitespace-nowrap">
+                                                {{ $productComparison['product'] }} ({{ $productComparison['product_code'] }})
+                                            </span>
                                             <span class="text-gray-400 dark:text-gray-500">|</span>
-                                            <p class="text-base text-gray-600 dark:text-gray-400 whitespace-nowrap">
-                                                Quantity: <span class="font-semibold text-gray-900 dark:text-white">{{ $productComparison['quantity'] }}</span>
-                                            </p>
-                                        </div>
-                                        @if($productComparison['savings'] > 0)
-                                            <div class="bg-success-50 dark:bg-success-500/10 px-6 py-3 rounded-lg whitespace-nowrap flex items-center">
-                                                <p class="text-base font-bold text-success-700 dark:text-success-300">
+                                            <span class="text-base text-gray-600 dark:text-gray-400 whitespace-nowrap">
+                                                Quantity: <strong class="text-gray-900 dark:text-white">{{ $productComparison['quantity'] }}</strong>
+                                            </span>
+                                            @if($productComparison['savings'] > 0)
+                                                <span class="text-gray-400 dark:text-gray-500">|</span>
+                                                <span class="text-base font-bold text-success-700 dark:text-success-300 bg-success-50 dark:bg-success-500/10 px-4 py-2 rounded-lg whitespace-nowrap">
                                                     💰 Savings: {{ $order->currency->symbol }}{{ number_format($productComparison['savings'] / 100, 2) }}
-                                                </p>
-                                            </div>
-                                        @endif
+                                                </span>
+                                            @endif
+                                        </div>
                                     </div>
                                 </div>
 
