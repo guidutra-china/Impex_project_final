@@ -33,15 +33,6 @@ class Supplier extends Model
     }
 
     /**
-     * Get the categories for this supplier
-     */
-    public function categories(): BelongsToMany
-    {
-        return $this->belongsToMany(Category::class, 'category_supplier')
-            ->withTimestamps();
-    }
-
-    /**
      * Get RFQ statuses for this supplier
      */
     public function rfqStatuses(): HasMany

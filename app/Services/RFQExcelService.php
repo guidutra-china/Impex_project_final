@@ -8,7 +8,6 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Style\Border;
-use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
 
 class RFQExcelService
 {
@@ -41,38 +40,13 @@ class RFQExcelService
             'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'E7E6E6']],
         ];
 
-        $currentRow = 1;
-
-        // Add logo if exists
-        $logoPath = public_path('images/logo.svg');
-        $logoPngPath = null;
-        
-        if (file_exists($logoPath)) {
-            // Convert SVG to PNG for Excel compatibility
-            $logoPngPath = $this->convertSvgToPng($logoPath);
-            
-            if ($logoPngPath && file_exists($logoPngPath)) {
-                $drawing = new Drawing();
-                $drawing->setName('Impex Logo');
-                $drawing->setDescription('Impex Logo');
-                $drawing->setPath($logoPngPath);
-                $drawing->setHeight(60);
-                $drawing->setCoordinates('A1');
-                $drawing->setWorksheet($sheet);
-                
-                // Adjust row height for logo
-                $sheet->getRowDimension(1)->setRowHeight(50);
-                $currentRow = 2;
-            }
-        }
-
         // Title
-        $sheet->setCellValue('A' . $currentRow, 'REQUEST FOR QUOTATION');
-        $sheet->mergeCells('A' . $currentRow . ':D' . $currentRow);
-        $sheet->getStyle('A' . $currentRow)->applyFromArray($headerStyle);
-        $sheet->getRowDimension($currentRow)->setRowHeight(30);
+        $sheet->setCellValue('A1', 'REQUEST FOR QUOTATION');
+        $sheet->mergeCells('A1:D1');
+        $sheet->getStyle('A1')->applyFromArray($headerStyle);
+        $sheet->getRowDimension(1)->setRowHeight(30);
 
-        $currentRow += 2;
+        $currentRow = 3;
 
         // RFQ Number
         $sheet->setCellValue('A' . $currentRow, 'RFQ Number:');
@@ -176,56 +150,6 @@ class RFQExcelService
         $writer = new Xlsx($spreadsheet);
         $writer->save($filePath);
 
-        // Clean up temporary PNG logo if created
-        if ($logoPngPath && file_exists($logoPngPath)) {
-            unlink($logoPngPath);
-        }
-
         return $filePath;
-    }
-
-    /**
-     * Convert SVG to PNG for Excel compatibility
-     *
-     * @param string $svgPath
-     * @return string|null Path to PNG file or null if conversion fails
-     */
-    protected function convertSvgToPng(string $svgPath): ?string
-    {
-        try {
-            // For SVG, we'll create a simple placeholder or use ImageMagick if available
-            // Check if Imagick extension is available
-            if (extension_loaded('imagick')) {
-                $imagick = new \Imagick();
-                $imagick->setBackgroundColor(new \ImagickPixel('transparent'));
-                $imagick->readImage($svgPath);
-                $imagick->setImageFormat('png');
-                
-                $pngPath = storage_path('app/temp/logo_' . time() . '.png');
-                $imagick->writeImage($pngPath);
-                $imagick->clear();
-                $imagick->destroy();
-                
-                return $pngPath;
-            }
-            
-            // If no Imagick, try to find a PNG logo instead
-            $pngLogoPath = public_path('images/logo.png');
-            if (file_exists($pngLogoPath)) {
-                return $pngLogoPath;
-            }
-            
-            return null;
-        } catch (\Exception $e) {
-            \Log::warning('Failed to convert SVG to PNG: ' . $e->getMessage());
-            
-            // Try to find PNG alternative
-            $pngLogoPath = public_path('images/logo.png');
-            if (file_exists($pngLogoPath)) {
-                return $pngLogoPath;
-            }
-            
-            return null;
-        }
     }
 }
