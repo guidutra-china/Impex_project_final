@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
@@ -17,7 +18,6 @@ class Order extends Model
     protected $fillable = [
         'customer_id',
         'currency_id',
-        'category_id',
         'order_number',
         'customer_nr_rfq',
         'status',
@@ -129,9 +129,9 @@ class Order extends Model
      */
     public function generateOrderNumber(): string
     {
-        $year = date('y'); // 2 digits year
-        $count = Order::whereYear('created_at', date('Y'))->count() + 1;
-        return "RFQ-{$year}-" . str_pad($count, 4, '0', STR_PAD_LEFT);
+        $year = date('Y');
+        $count = Order::whereYear('created_at', $year)->count() + 1;
+        return "ORD-{$year}-" . str_pad($count, 4, '0', STR_PAD_LEFT);
     }
 
     /**
@@ -186,11 +186,12 @@ class Order extends Model
     }
 
     /**
-     * Get the category for this order
+     * Get the categories for this order
      */
-    public function category(): BelongsTo
+    public function categories(): BelongsToMany
     {
-        return $this->belongsTo(Category::class);
+        return $this->belongsToMany(Category::class, 'category_order')
+            ->withTimestamps();
     }
 
     /**
@@ -202,19 +203,19 @@ class Order extends Model
     }
 
     /**
-     * Get suppliers that match this RFQ's tags
+     * Get suppliers that match this RFQ's categories
      */
     public function matchingSuppliers(): Collection
     {
-        $tagIds = $this->tags()->pluck('tags.id')->toArray();
+        $categoryIds = $this->categories()->pluck('categories.id')->toArray();
 
-        if (empty($tagIds)) {
+        if (empty($categoryIds)) {
             return collect();
         }
 
-        return Supplier::whereHas('tags', function($q) use ($tagIds) {
-            $q->whereIn('tags.id', $tagIds);
-        })->with('tags')->get();
+        return Supplier::whereHas('categories', function($q) use ($categoryIds) {
+            $q->whereIn('categories.id', $categoryIds);
+        })->with('categories')->get();
     }
 
     /**
