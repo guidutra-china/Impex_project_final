@@ -141,21 +141,55 @@ class QuoteComparisonService
             return null;
         }
 
-        $cheapestOverall = $quotes->sortBy('total_price_after_commission')->first();
-        $mostExpensive = $quotes->sortByDesc('total_price_after_commission')->first();
+        // Sort by converted total for fair comparison
+        $cheapestOverall = $quotes->sortBy(function ($quote) {
+            return $quote->converted_total_cents ?? (
+                $quote->locked_exchange_rate 
+                    ? (int) round($quote->total_price_after_commission / $quote->locked_exchange_rate)
+                    : $quote->total_price_after_commission
+            );
+        })->first();
+        
+        $mostExpensive = $quotes->sortByDesc(function ($quote) {
+            return $quote->converted_total_cents ?? (
+                $quote->locked_exchange_rate 
+                    ? (int) round($quote->total_price_after_commission / $quote->locked_exchange_rate)
+                    : $quote->total_price_after_commission
+            );
+        })->first();
 
-        $savings = $mostExpensive->total_price_after_commission - $cheapestOverall->total_price_after_commission;
-        $savingsPercent = $mostExpensive->total_price_after_commission > 0 
-            ? ($savings / $mostExpensive->total_price_after_commission) * 100 
+        $cheapestConverted = $cheapestOverall->converted_total_cents ?? (
+            $cheapestOverall->locked_exchange_rate 
+                ? (int) round($cheapestOverall->total_price_after_commission / $cheapestOverall->locked_exchange_rate)
+                : $cheapestOverall->total_price_after_commission
+        );
+        
+        $mostExpensiveConverted = $mostExpensive->converted_total_cents ?? (
+            $mostExpensive->locked_exchange_rate 
+                ? (int) round($mostExpensive->total_price_after_commission / $mostExpensive->locked_exchange_rate)
+                : $mostExpensive->total_price_after_commission
+        );
+
+        $savings = $mostExpensiveConverted - $cheapestConverted;
+        $savingsPercent = $mostExpensiveConverted > 0 
+            ? ($savings / $mostExpensiveConverted) * 100 
             : 0;
 
         $allQuotes = $quotes->map(function ($quote) use ($order) {
+            // Convert total to order currency
+            $convertedTotal = $quote->converted_total_cents ?? (
+                $quote->locked_exchange_rate 
+                    ? (int) round($quote->total_price_after_commission / $quote->locked_exchange_rate)
+                    : $quote->total_price_after_commission
+            );
+            
             return [
                 'quote_id' => $quote->id,
                 'supplier_id' => $quote->supplier->id,
                 'supplier' => $quote->supplier->name,
                 'total_before_commission' => $quote->total_price_before_commission,
-                'total_after_commission' => $quote->total_price_after_commission,
+                'total_after_commission' => $convertedTotal,  // Use converted total
+                'original_total' => $quote->total_price_after_commission,  // Keep original for reference
                 'commission_amount' => $quote->commission_amount,
                 'currency' => $quote->currency->symbol,
                 'order_currency' => $order->currency->symbol,
