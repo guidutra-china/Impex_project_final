@@ -3,8 +3,11 @@
 namespace App\Filament\Resources\Orders\Pages;
 
 use App\Filament\Resources\Orders\OrderResource;
+use App\Services\RFQExcelService;
+use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class EditOrder extends EditRecord
 {
@@ -13,6 +16,21 @@ class EditOrder extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
+            Action::make('download_rfq_excel')
+                ->label('Download RFQ Excel')
+                ->icon('heroicon-o-arrow-down-tray')
+                ->color('success')
+                ->action(function () {
+                    $order = $this->record;
+                    
+                    // Generate Excel
+                    $excelService = new RFQExcelService();
+                    $filePath = $excelService->generateRFQ($order);
+                    
+                    // Stream the file
+                    return response()->download($filePath, basename($filePath))->deleteFileAfterSend(true);
+                }),
+            
             DeleteAction::make(),
         ];
     }

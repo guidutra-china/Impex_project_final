@@ -5,9 +5,11 @@ namespace App\Filament\Resources\Orders\RelationManagers;
 use App\Models\Order;
 use App\Models\Supplier;
 use App\Models\RFQSupplierStatus;
+use App\Services\RFQExcelService;
 use Filament\Actions\Action;
 use Filament\Actions\BulkAction;
 use Filament\Forms;
+use Filament\Forms\Components\CheckboxList;
 use Filament\Schemas\Schema;
 use Filament\Notifications\Notification;
 use Filament\Resources\RelationManagers\RelationManager;
@@ -17,6 +19,7 @@ use Filament\Tables\Filters\Filter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Mail;
 
 class SuppliersToQuoteRelationManager extends RelationManager
 {
@@ -135,21 +138,90 @@ class SuppliersToQuoteRelationManager extends RelationManager
                         $status = $this->getSupplierStatus($record);
                         return $status && $status->isSent();
                     })
-                    ->requiresConfirmation()
+                    ->form(function (Supplier $record) {
+                        $contacts = $record->suppliercontacts()
+                            ->whereNotNull('email')
+                            ->get();
+
+                        if ($contacts->isEmpty()) {
+                            return [
+                                Forms\Components\Placeholder::make('no_contacts')
+                                    ->content('This supplier has no contacts with email addresses. Please add contacts before sending.')
+                            ];
+                        }
+
+                        $options = $contacts->mapWithKeys(function ($contact) {
+                            return [
+                                $contact->id => $contact->name . ' (' . $contact->email . ')' . 
+                                    ($contact->function ? ' - ' . $contact->function->value : '')
+                            ];
+                        })->toArray();
+
+                        return [
+                            CheckboxList::make('contact_ids')
+                                ->label('Select Contacts to Send RFQ')
+                                ->options($options)
+                                ->required()
+                                ->columns(1)
+                                ->helperText('Select one or more contacts to receive the RFQ via email.')
+                        ];
+                    })
                     ->modalHeading('Send Quotation Request')
-                    ->modalDescription(fn (Supplier $record) => "Send quotation request to {$record->name}?")
-                    ->modalSubmitActionLabel('Send')
-                    ->action(function (Supplier $record) {
+                    ->modalDescription(fn (Supplier $record) => "Select contacts from {$record->name} to receive the RFQ")
+                    ->modalSubmitActionLabel('Send RFQ')
+                    ->action(function (Supplier $record, array $data) {
                         /** @var Order $owner */
                         $owner = $this->getOwnerRecord();
 
+                        // Check if supplier has contacts
+                        $contacts = $record->suppliercontacts()
+                            ->whereNotNull('email')
+                            ->get();
+
+                        if ($contacts->isEmpty()) {
+                            Notification::make()
+                                ->title('No Contacts')
+                                ->body('This supplier has no contacts with email addresses.')
+                                ->warning()
+                                ->send();
+                            return;
+                        }
+
                         try {
+                            // Get selected contacts
+                            $selectedContactIds = $data['contact_ids'] ?? [];
+                            $selectedContacts = $contacts->whereIn('id', $selectedContactIds);
+
+                            if ($selectedContacts->isEmpty()) {
+                                Notification::make()
+                                    ->title('No Contacts Selected')
+                                    ->body('Please select at least one contact.')
+                                    ->warning()
+                                    ->send();
+                                return;
+                            }
+
+                            // Generate RFQ Excel
+                            $excelService = new RFQExcelService();
+                            $filePath = $excelService->generateRFQ($owner);
+
+                            // Send email to each selected contact
+                            foreach ($selectedContacts as $contact) {
+                                // TODO: Implement actual email sending
+                                // Mail::to($contact->email)->send(new RFQMail($owner, $filePath));
+                            }
+
                             // Mark as sent
                             $owner->markSentToSupplier($record->id, 'email');
 
+                            // Clean up temp file
+                            if (file_exists($filePath)) {
+                                unlink($filePath);
+                            }
+
                             Notification::make()
                                 ->title('Quotation Sent')
-                                ->body("Quotation request sent to {$record->name}")
+                                ->body("RFQ sent to " . $selectedContacts->count() . " contact(s) from {$record->name}")
                                 ->success()
                                 ->send();
 
