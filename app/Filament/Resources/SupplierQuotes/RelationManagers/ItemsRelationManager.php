@@ -76,11 +76,15 @@ class ItemsRelationManager extends RelationManager
                     ->columnSpan(1),
 
                 TextInput::make('unit_price_before_commission')
-                    ->label('Unit Price (cents)')
+                    ->label('Unit Price')
                     ->required()
                     ->numeric()
+                    ->prefix('$')
+                    ->step(0.01)
                     ->minValue(0)
-                    ->helperText('Price in cents (e.g., 1000 = $10.00)')
+                    ->helperText('Price will be stored in cents')
+                    ->dehydrateStateUsing(fn ($state) => $state ? (int) ($state * 100) : null)
+                    ->formatStateUsing(fn ($state) => $state ? $state / 100 : null)
                     ->columnSpan(1),
 
                 TextInput::make('delivery_days')
