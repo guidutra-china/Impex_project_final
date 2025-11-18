@@ -34,24 +34,24 @@ class SuppliersToQuoteRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         return $table
-            ->heading('Suppliers Matching RFQ Tags')
-            ->description('Send quotation requests to suppliers with matching tags')
+            ->heading('Suppliers Matching RFQ Categories')
+            ->description('Send quotation requests to suppliers with matching categories')
             ->query(function () {
                 /** @var Order $owner */
                 $owner = $this->getOwnerRecord();
 
-                // Get tag IDs from the RFQ
-                $tagIds = $owner->tags()->pluck('tags.id');
+                // Get category IDs from the RFQ
+                $categoryIds = $owner->categories()->pluck('categories.id');
 
-                if ($tagIds->isEmpty()) {
-                    // No tags, return empty query
+                if ($categoryIds->isEmpty()) {
+                    // No categories, return empty query
                     return Supplier::query()->whereRaw('1 = 0');
                 }
 
-                // Find suppliers with any matching tags
+                // Find suppliers with any matching categories
                 return Supplier::query()
-                    ->whereHas('tags', function ($q) use ($tagIds) {
-                        $q->whereIn('tags.id', $tagIds);
+                    ->whereHas('categories', function ($q) use ($categoryIds) {
+                        $q->whereIn('categories.id', $categoryIds);
                     })
                     ->distinct();
             })
@@ -62,8 +62,8 @@ class SuppliersToQuoteRelationManager extends RelationManager
                     ->sortable()
                     ->weight('bold'),
 
-                TextColumn::make('tags.name')
-                    ->label('Tags')
+                TextColumn::make('categories.name')
+                    ->label('Categories')
                     ->badge()
                     ->separator(',')
                     ->color('info'),
@@ -273,7 +273,7 @@ class SuppliersToQuoteRelationManager extends RelationManager
                     }),
             ])
             ->emptyStateHeading('No Matching Suppliers')
-            ->emptyStateDescription('Add tags to this RFQ to find matching suppliers')
+            ->emptyStateDescription('Add categories to this RFQ to find matching suppliers')
             ->emptyStateIcon('heroicon-o-tag')
             ->poll('30s'); // Auto-refresh every 30 seconds
     }

@@ -16,6 +16,15 @@ class EditOrder extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
+            DeleteAction::make(),
+        ];
+    }
+
+    protected function getFormActions(): array
+    {
+        return [
+            $this->getSaveFormAction(),
+            $this->getCancelFormAction(),
             Action::make('download_rfq_excel')
                 ->label('Download RFQ Excel')
                 ->icon('heroicon-o-arrow-down-tray')
@@ -30,8 +39,6 @@ class EditOrder extends EditRecord
                     // Stream the file
                     return response()->download($filePath, basename($filePath))->deleteFileAfterSend(true);
                 }),
-            
-            DeleteAction::make(),
         ];
     }
 

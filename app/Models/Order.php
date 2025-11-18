@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
@@ -177,11 +178,20 @@ class Order extends Model
     // ========================================
 
     /**
-     * Get the tags for this RFQ (polymorphic relationship)
+     * Get the tags for this order (polymorphic relationship)
      */
     public function tags(): MorphToMany
     {
         return $this->morphToMany(Tag::class, 'taggable');
+    }
+
+    /**
+     * Get the categories for this order
+     */
+    public function categories(): BelongsToMany
+    {
+        return $this->belongsToMany(Category::class, 'category_order')
+            ->withTimestamps();
     }
 
     /**
@@ -193,19 +203,19 @@ class Order extends Model
     }
 
     /**
-     * Get suppliers that match this RFQ's tags
+     * Get suppliers that match this RFQ's categories
      */
     public function matchingSuppliers(): Collection
     {
-        $tagIds = $this->tags()->pluck('tags.id')->toArray();
+        $categoryIds = $this->categories()->pluck('categories.id')->toArray();
 
-        if (empty($tagIds)) {
+        if (empty($categoryIds)) {
             return collect();
         }
 
-        return Supplier::whereHas('tags', function($q) use ($tagIds) {
-            $q->whereIn('tags.id', $tagIds);
-        })->with('tags')->get();
+        return Supplier::whereHas('categories', function($q) use ($categoryIds) {
+            $q->whereIn('categories.id', $categoryIds);
+        })->with('categories')->get();
     }
 
     /**

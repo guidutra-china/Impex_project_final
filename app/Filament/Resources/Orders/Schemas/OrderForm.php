@@ -87,19 +87,13 @@ class OrderForm
                                     ->suffix('%')
                                     ->columnSpan(1),
 
-                                // Coluna 1 - Tags
-                                Select::make('tags')
-                                    ->relationship('tags', 'name')
+                                // Coluna 1 - Categories
+                                Select::make('categories')
+                                    ->relationship('categories', 'name')
                                     ->multiple()
                                     ->preload()
                                     ->searchable()
-                                    ->createOptionForm([
-                                        TextInput::make('name')
-                                            ->required()
-                                            ->unique('tags', 'name')
-                                            ->maxLength(255),
-                                    ])
-                                    ->helperText('Tags help match suppliers with this RFQ')
+                                    ->helperText('Categories help match suppliers and define product features')
                                     ->columnSpan(1),
 
                                 // Coluna 2 - Commission Type
