@@ -4,7 +4,9 @@ namespace Database\Seeders;
 
 use App\Models\User;
 use App\Models\Client;
+use App\Models\ClientContact;
 use App\Models\Supplier;
+use App\Models\SupplierContact;
 use App\Models\Category;
 use App\Models\Tag;
 use App\Models\Product;
@@ -64,6 +66,15 @@ class DatabaseSeeder extends Seeder
         
         $this->command->info('✓ Created ' . $clients->count() . ' clients');
 
+        // Create client contacts (1-3 contacts per client)
+        foreach ($clients as $client) {
+            ClientContact::factory(rand(1, 3))->create([
+                'client_id' => $client->id,
+            ]);
+        }
+        
+        $this->command->info('✓ Created client contacts');
+
         // Create suppliers with tags and categories
         $suppliers = Supplier::factory(20)->create();
         
@@ -77,9 +88,14 @@ class DatabaseSeeder extends Seeder
             $supplier->categories()->attach(
                 $categories->random(rand(1, 3))->pluck('id')
             );
+            
+            // Create supplier contacts (1-3 contacts per supplier)
+            SupplierContact::factory(rand(1, 3))->create([
+                'supplier_id' => $supplier->id,
+            ]);
         }
         
-        $this->command->info('✓ Created ' . $suppliers->count() . ' suppliers with tags and categories');
+        $this->command->info('✓ Created ' . $suppliers->count() . ' suppliers with tags, categories, and contacts');
 
         // Create components
         $components = Component::factory(30)->create();
@@ -132,7 +148,9 @@ class DatabaseSeeder extends Seeder
         $this->command->info('Summary:');
         $this->command->info('  - Users: ' . User::count());
         $this->command->info('  - Clients: ' . Client::count());
+        $this->command->info('  - Client Contacts: ' . ClientContact::count());
         $this->command->info('  - Suppliers: ' . Supplier::count());
+        $this->command->info('  - Supplier Contacts: ' . SupplierContact::count());
         $this->command->info('  - Categories: ' . Category::count());
         $this->command->info('  - Tags: ' . Tag::count());
         $this->command->info('  - Products: ' . Product::count());
