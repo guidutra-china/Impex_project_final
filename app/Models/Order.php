@@ -18,6 +18,7 @@ class Order extends Model
     protected $fillable = [
         'customer_id',
         'currency_id',
+        'category_id',
         'order_number',
         'customer_nr_rfq',
         'status',
@@ -213,12 +214,11 @@ class Order extends Model
     }
 
     /**
-     * Get the categories for this order
+     * Get the category for this order
      */
-    public function categories(): BelongsToMany
+    public function category(): BelongsTo
     {
-        return $this->belongsToMany(Category::class, 'category_order')
-            ->withTimestamps();
+        return $this->belongsTo(Category::class);
     }
 
     /**
@@ -230,18 +230,16 @@ class Order extends Model
     }
 
     /**
-     * Get suppliers that match this RFQ's categories
+     * Get suppliers that match this RFQ's category
      */
     public function matchingSuppliers(): Collection
     {
-        $categoryIds = $this->categories()->pluck('categories.id')->toArray();
-
-        if (empty($categoryIds)) {
+        if (!$this->category_id) {
             return collect();
         }
 
-        return Supplier::whereHas('categories', function($q) use ($categoryIds) {
-            $q->whereIn('categories.id', $categoryIds);
+        return Supplier::whereHas('categories', function($q) {
+            $q->where('categories.id', $this->category_id);
         })->with('categories')->get();
     }
 

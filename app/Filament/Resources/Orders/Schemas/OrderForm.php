@@ -103,14 +103,13 @@ class OrderForm
                                     ->helperText('Tags help match suppliers with this RFQ')
                                     ->columnSpan(1),
 
-                                // Coluna 1 - Categories (for filtering products)
-                                Select::make('categories')
-                                    ->label('Categories')
-                                    ->relationship('categories', 'name')
-                                    ->multiple()
+                                // Coluna 1 - Category (for filtering products)
+                                Select::make('category_id')
+                                    ->label('Category')
+                                    ->relationship('category', 'name')
                                     ->preload()
                                     ->searchable()
-                                    ->helperText('Categories filter available products in Order Items')
+                                    ->helperText('Category filters available products in Order Items')
                                     ->columnSpan(1),
 
                                 // Coluna 2 - Commission Type

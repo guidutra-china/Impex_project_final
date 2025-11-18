@@ -31,11 +31,10 @@ class ItemsRelationManager extends RelationManager
                         titleAttribute: 'name',
                         modifyQueryUsing: function ($query) {
                             $order = $this->getOwnerRecord();
-                            $categoryIds = $order->categories()->pluck('categories.id')->toArray();
                             
-                            // If order has categories, filter products by those categories
-                            if (!empty($categoryIds)) {
-                                $query->whereIn('category_id', $categoryIds);
+                            // If order has a category, filter products by that category
+                            if ($order->category_id) {
+                                $query->where('category_id', $order->category_id);
                             }
                             
                             return $query;
@@ -46,14 +45,13 @@ class ItemsRelationManager extends RelationManager
                     ->preload()
                     ->helperText(function () {
                         $order = $this->getOwnerRecord();
-                        $categoryIds = $order->categories()->pluck('categories.id')->toArray();
                         
-                        if (empty($categoryIds)) {
-                            return 'No categories selected. All products are available.';
+                        if (!$order->category_id) {
+                            return 'No category selected. All products are available.';
                         }
                         
-                        $categoryNames = $order->categories()->pluck('name')->implode(', ');
-                        return "Filtered by categories: {$categoryNames}";
+                        $categoryName = $order->category?->name;
+                        return "Filtered by category: {$categoryName}";
                     })
                     ->columnSpan(2),
 
