@@ -32,7 +32,7 @@ class RFQExcelService
         $headerStyle = [
             'font' => ['bold' => true, 'size' => 12, 'color' => ['rgb' => 'FFFFFF']],
             'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '4472C4']],
-            'alignment' => ['horizontal' => Alignment::HORIZONTAL_LEFT, 'vertical' => Alignment::VERTICAL_CENTER],
+            'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER],
         ];
 
         $labelStyle = [
@@ -51,6 +51,12 @@ class RFQExcelService
         // RFQ Number
         $sheet->setCellValue('A' . $currentRow, 'RFQ Number:');
         $sheet->setCellValue('B' . $currentRow, $order->order_number);
+        $sheet->getStyle('A' . $currentRow)->applyFromArray($labelStyle);
+        $currentRow++;
+
+        // Supplier Name (placeholder - to be filled when sending to specific supplier)
+        $sheet->setCellValue('A' . $currentRow, 'Supplier Name:');
+        $sheet->setCellValue('B' . $currentRow, '[To be filled]');
         $sheet->getStyle('A' . $currentRow)->applyFromArray($labelStyle);
         $currentRow++;
 
@@ -109,7 +115,11 @@ class RFQExcelService
                 $features = $item->product->features ?? collect();
                 if ($features->isNotEmpty()) {
                     $featuresList = $features->map(function ($feature) {
-                        return "• {$feature->name}: {$feature->value}";
+                        $display = "• {$feature->feature_name}: {$feature->feature_value}";
+                        if ($feature->unit) {
+                            $display .= " {$feature->unit}";
+                        }
+                        return $display;
                     })->implode("\n");
                     $sheet->setCellValue('D' . $currentRow, $featuresList);
                     $sheet->getStyle('D' . $currentRow)->getAlignment()->setWrapText(true);

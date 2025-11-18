@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Exceptions\MissingExchangeRateException;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -65,9 +66,10 @@ class SupplierQuote extends Model
             }
         });
 
-        // Lock exchange rate when quote is created
+        // Lock exchange rate and calculate commission when quote is created
         static::created(function ($quote) {
             $quote->lockExchangeRate();
+            $quote->calculateCommission();
         });
     }
 
@@ -129,14 +131,38 @@ class SupplierQuote extends Model
 
     /**
      * Generate quote number
+     * Format: [3 letters of Supplier] + [RFQ Number] + Rev[N]
+     * Example: TRA-RFQ-2025-0001-Rev1
      *
      * @return string
      */
     public function generateQuoteNumber(): string
     {
-        $year = date('Y');
-        $count = SupplierQuote::whereYear('created_at', $year)->count() + 1;
-        return "QUO-{$year}-" . str_pad($count, 4, '0', STR_PAD_LEFT);
+        // Get supplier name and extract first 3 letters
+        $supplier = $this->supplier ?? Supplier::find($this->supplier_id);
+        $supplierName = $supplier->company_name ?? 'SUP';
+        $supplierPrefix = strtoupper(substr(preg_replace('/[^A-Za-z]/', '', $supplierName), 0, 3));
+        
+        // If supplier name has less than 3 letters, pad with 'X'
+        $supplierPrefix = str_pad($supplierPrefix, 3, 'X', STR_PAD_RIGHT);
+        
+        // Get RFQ number from order
+        $order = $this->order ?? Order::find($this->order_id);
+        $rfqNumber = $order->order_number ?? 'RFQ-UNKNOWN';
+        
+        // Count existing quotes from this supplier for this order
+        $existingQuotesCount = SupplierQuote::withTrashed()
+            ->where('supplier_id', $this->supplier_id)
+            ->where('order_id', $this->order_id)
+            ->count();
+        
+        // Revision number is count + 1
+        $revisionNumber = $existingQuotesCount + 1;
+        
+        // Generate quote number: [Supplier Prefix]-[RFQ Number]-Rev[N]
+        $quoteNumber = "{$supplierPrefix}-{$rfqNumber}-Rev{$revisionNumber}";
+        
+        return $quoteNumber;
     }
 
     /**
@@ -146,7 +172,7 @@ class SupplierQuote extends Model
     {
         $orderCurrencyId = $this->order->currency_id;
         $quoteCurrencyId = $this->currency_id;
-        $quoteDate = $this->created_at->toDateString();
+        $quoteDate = $this->created_at ? $this->created_at->toDateString() : now()->toDateString();
 
         if ($orderCurrencyId === $quoteCurrencyId) {
             $lockedRate = 1.0;
@@ -154,7 +180,20 @@ class SupplierQuote extends Model
             $lockedRate = ExchangeRate::getConversionRate($quoteCurrencyId, $orderCurrencyId, $quoteDate);
             
             if (!$lockedRate) {
-                throw new \Exception("Missing exchange rate for conversion from currency {$quoteCurrencyId} to {$orderCurrencyId} on {$quoteDate}");
+                // Get currency names for better error message
+                $quoteCurrency = Currency::find($quoteCurrencyId);
+                $orderCurrency = Currency::find($orderCurrencyId);
+                
+                $quoteCurrencyName = $quoteCurrency ? $quoteCurrency->code : "Currency {$quoteCurrencyId}";
+                $orderCurrencyName = $orderCurrency ? $orderCurrency->code : "Currency {$orderCurrencyId}";
+                
+                throw new MissingExchangeRateException(
+                    $quoteCurrencyId,
+                    $orderCurrencyId,
+                    $quoteDate,
+                    $quoteCurrencyName,
+                    $orderCurrencyName
+                );
             }
         }
 

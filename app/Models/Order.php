@@ -17,6 +17,7 @@ class Order extends Model
     protected $fillable = [
         'customer_id',
         'currency_id',
+        'category_id',
         'order_number',
         'customer_nr_rfq',
         'status',
@@ -128,9 +129,9 @@ class Order extends Model
      */
     public function generateOrderNumber(): string
     {
-        $year = date('Y');
-        $count = Order::whereYear('created_at', $year)->count() + 1;
-        return "ORD-{$year}-" . str_pad($count, 4, '0', STR_PAD_LEFT);
+        $year = date('y'); // 2 digits year
+        $count = Order::whereYear('created_at', date('Y'))->count() + 1;
+        return "RFQ-{$year}-" . str_pad($count, 4, '0', STR_PAD_LEFT);
     }
 
     /**
@@ -185,12 +186,11 @@ class Order extends Model
     }
 
     /**
-     * Get the categories for this order
+     * Get the category for this order
      */
-    public function categories(): BelongsToMany
+    public function category(): BelongsTo
     {
-        return $this->belongsToMany(Category::class, 'category_order')
-            ->withTimestamps();
+        return $this->belongsTo(Category::class);
     }
 
     /**
