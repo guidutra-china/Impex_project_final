@@ -154,7 +154,7 @@ class SupplierQuote extends Model
     {
         // Get supplier name and extract first 3 letters
         $supplier = $this->supplier ?? Supplier::find($this->supplier_id);
-        $supplierName = $supplier->company_name ?? 'SUP';
+        $supplierName = $supplier ? $supplier->name : 'SUP';
         $supplierPrefix = strtoupper(substr(preg_replace('/[^A-Za-z]/', '', $supplierName), 0, 3));
         
         // If supplier name has less than 3 letters, pad with 'X'
