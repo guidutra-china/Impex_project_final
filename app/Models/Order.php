@@ -127,11 +127,38 @@ class Order extends Model
      *
      * @return string
      */
+    /**
+     * Generate order number (RFQ number)
+     * Format: [CLIENT_CODE]-[YY]-[NNNN]
+     * Example: AMA-25-0001
+     */
     public function generateOrderNumber(): string
     {
-        $year = date('Y');
-        $count = Order::whereYear('created_at', $year)->count() + 1;
-        return "ORD-{$year}-" . str_pad($count, 4, '0', STR_PAD_LEFT);
+        // Get client code
+        $client = $this->customer ?? Client::find($this->customer_id);
+        $clientCode = $client && $client->code ? $client->code : 'XXX';
+        
+        // Get 2-digit year
+        $year = now()->format('y');
+        
+        // Find next sequential number for this client
+        $sequentialNumber = 1;
+        $orderNumber = "";
+        
+        // Loop until we find an order number that doesn't exist
+        do {
+            $orderNumber = "{$clientCode}-{$year}-" . str_pad($sequentialNumber, 4, '0', STR_PAD_LEFT);
+            
+            $exists = Order::withTrashed()
+                ->where('order_number', $orderNumber)
+                ->exists();
+            
+            if ($exists) {
+                $sequentialNumber++;
+            }
+        } while ($exists);
+        
+        return $orderNumber;
     }
 
     /**

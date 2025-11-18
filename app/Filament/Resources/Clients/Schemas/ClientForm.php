@@ -18,10 +18,40 @@ class ClientForm
             ->components([
                 Section::make()
                     ->schema([
+                        TextInput::make('code')
+                            ->label('Client Code (3 letters)')
+                            ->required()
+                            ->length(3)
+                            ->unique(ignoreRecord: true)
+                            ->regex('/^[A-Z]{3}$/')
+                            ->validationMessages([
+                                'regex' => 'Code must be exactly 3 uppercase letters.',
+                                'unique' => 'This code is already in use by another client.',
+                            ])
+                            ->helperText('Unique 3-letter code for RFQ numbering (e.g., AMA for Amazon)')
+                            ->live(onBlur: true)
+                            ->afterStateUpdated(function ($state, callable $set) {
+                                // Auto-uppercase
+                                if ($state) {
+                                    $set('code', strtoupper($state));
+                                }
+                            })
+                            ->placeholder('AMA'),
+
                         TextInput::make('name')
                             ->label('Company Name')
                             ->required()
-                            ->maxLength(255),
+                            ->maxLength(255)
+                            ->live(onBlur: true)
+                            ->afterStateUpdated(function ($state, callable $get, callable $set) {
+                                // Auto-suggest code if not set
+                                if ($state && !$get('code')) {
+                                    $suggested = strtoupper(substr(preg_replace('/[^A-Za-z]/', '', $state), 0, 3));
+                                    if (strlen($suggested) === 3) {
+                                        $set('code', $suggested);
+                                    }
+                                }
+                            }),
 
                         TextInput::make('phone')
                             ->label('Phone')
