@@ -68,8 +68,22 @@ class SupplierQuote extends Model
 
         // Lock exchange rate and calculate commission when quote is created
         static::created(function ($quote) {
-            $quote->lockExchangeRate();
-            $quote->calculateCommission();
+            try {
+                \Log::info('SupplierQuote created hook started', ['quote_id' => $quote->id]);
+                
+                $quote->lockExchangeRate();
+                \Log::info('Exchange rate locked', ['quote_id' => $quote->id, 'rate' => $quote->locked_exchange_rate]);
+                
+                $quote->calculateCommission();
+                \Log::info('Commission calculated', ['quote_id' => $quote->id]);
+            } catch (\Exception $e) {
+                \Log::error('Error in SupplierQuote created hook', [
+                    'quote_id' => $quote->id,
+                    'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString()
+                ]);
+                throw $e;
+            }
         });
     }
 
@@ -201,9 +215,11 @@ class SupplierQuote extends Model
         $this->locked_exchange_rate_date = $quoteDate;
         $this->save();
 
-        // Convert prices on all quote items
-        foreach ($this->items as $item) {
-            $item->convertPrice($lockedRate);
+        // Convert prices on all quote items (only if items exist)
+        if ($this->items()->exists()) {
+            foreach ($this->items as $item) {
+                $item->convertPrice($lockedRate);
+            }
         }
     }
 
@@ -213,11 +229,22 @@ class SupplierQuote extends Model
     public function calculateCommission()
     {
         $order = $this->order;
+        
+        // Safety checks
+        if (!$order || !isset($order->commission_percent)) {
+            return;
+        }
+        
         $commissionPercent = $order->commission_percent / 100;
         $commissionType = $this->commission_type ?? $order->commission_type;
 
         $totalBefore = 0;
         $totalAfter = 0;
+
+        // Only process if there are items
+        if (!$this->items()->exists()) {
+            return;
+        }
 
         foreach ($this->items as $item) {
             $totalBefore += $item->total_price_before_commission;
