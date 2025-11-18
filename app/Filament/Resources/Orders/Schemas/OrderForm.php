@@ -21,7 +21,7 @@ class OrderForm
                     ->schema([
                         Grid::make()
                             ->schema([
-                                // Coluna 1 - RFQ Information
+                                // Coluna 1 - RFQ Number
                                 TextInput::make('order_number')
                                     ->label('RFQ Number')
                                     ->disabled()
@@ -117,22 +117,28 @@ class OrderForm
                                 'default' => 1,  // 1 coluna em mobile
                                 'lg' => 2,       // 2 colunas em desktop
                             ]),
-                    ]),
+                    ])
+                ->columnSpanFull(),
+
 
                 // Seção de Notes mantida separada
                 Section::make('Notes')
                     ->schema([
-                        Textarea::make('customer_notes')
-                            ->label('Customer Request')
-                            ->helperText('Original customer request/requirements')
-                            ->rows(3)
-                            ->columnSpan(1),
+                        Grid::make()
+            ->schema([
+                Textarea::make('customer_notes')
+                    ->label('Customer Request')
+                    ->helperText('Original customer request/requirements')
+                    ->rows(3)
+                    ->columnSpan(1),
 
-                        Textarea::make('notes')
-                            ->label('Internal Notes')
-                            ->helperText('Internal notes (not visible to customer)')
-                            ->rows(3)
-                            ->columnSpan(1),
+                Textarea::make('notes')
+                    ->label('Internal Notes')
+                    ->helperText('Internal notes (not visible to customer)')
+                    ->rows(3)
+                    ->columnSpan(1),
+            ]),
+
 
                         Placeholder::make('total_amount_display')
                             ->label('Total Amount')
@@ -144,9 +150,10 @@ class OrderForm
                                 $amount = number_format($record->total_amount / 100, 2);
                                 return $currency ? "{$currency->symbol}{$amount}" : "\${$amount}";
                             })
-                            ->columnSpan(2),
+                            ->columnSpan(1),
                     ])
-                    ->columns(2),
+                    ->columnSpan(2),
             ]);
     }
 }
+
