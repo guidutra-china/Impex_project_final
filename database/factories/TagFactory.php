@@ -12,23 +12,20 @@ class TagFactory extends Factory
     public function definition(): array
     {
         $tags = [
-            'Import' => 'Import services',
-            'Export' => 'Export services',
-            'Logistics' => 'Logistics and shipping',
-            'Manufacturing' => 'Manufacturing capabilities',
-            'Quality Certified' => 'Quality certifications',
-            'Fast Delivery' => 'Quick turnaround time',
-            'Custom Design' => 'Custom design services',
-            'Bulk Orders' => 'Handles large volume orders',
-            'Small Batch' => 'Accepts small quantity orders',
-            'Eco-Friendly' => 'Environmentally conscious',
+            'Import',
+            'Export',
+            'Logistics',
+            'Manufacturing',
+            'Quality Certified',
+            'Fast Delivery',
+            'Custom Design',
+            'Bulk Orders',
+            'Small Batch',
+            'Eco-Friendly',
         ];
 
-        $name = $this->faker->unique()->randomElement(array_keys($tags));
-        
         return [
-            'name' => $name,
-            'description' => $tags[$name],
+            'name' => $this->faker->unique()->randomElement($tags),
         ];
     }
 }

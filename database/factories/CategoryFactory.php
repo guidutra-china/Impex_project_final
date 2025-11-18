@@ -27,6 +27,7 @@ class CategoryFactory extends Factory
         return [
             'name' => $name,
             'description' => $categories[$name],
+            'is_active' => true,
         ];
     }
 }

@@ -100,13 +100,11 @@ class DatabaseSeeder extends Seeder
         foreach ($products as $product) {
             // Add features based on category
             if ($product->category) {
-                $categoryFeatures = $product->category->features;
+                $categoryFeatures = $product->category->categoryFeatures;
                 
                 foreach ($categoryFeatures as $feature) {
-                    if ($feature->required || rand(0, 1)) {
-                        $value = $feature->type === 'select' && $feature->options
-                            ? json_decode($feature->options)[array_rand(json_decode($feature->options))]
-                            : fake()->word();
+                    if ($feature->is_required || rand(0, 1)) {
+                        $value = $feature->default_value ?? fake()->word();
                         
                         ProductFeature::create([
                             'product_id' => $product->id,

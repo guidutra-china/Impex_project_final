@@ -28,10 +28,11 @@ class CategoryFeatureFactory extends Factory
         
         return [
             'category_id' => Category::inRandomOrder()->first()?->id ?? Category::factory(),
-            'name' => $name,
-            'type' => $feature['type'],
-            'options' => $feature['options'] ? json_encode($feature['options']) : null,
-            'required' => $this->faker->boolean(30),
+            'feature_name' => $name,
+            'default_value' => null,
+            'unit' => null,
+            'sort_order' => 0,
+            'is_required' => $this->faker->boolean(30),
         ];
     }
 }

@@ -38,11 +38,13 @@ class ComponentFactory extends Factory
         $code = strtoupper($this->faker->bothify('COMP-####'));
         
         return [
+            'type' => $this->faker->randomElement(['raw_material', 'purchased_part', 'sub_assembly', 'packaging']),
             'name' => $name . ' ' . $this->faker->numerify('###'),
             'code' => $code,
             'description' => $this->faker->sentence(),
-            'unit' => $components[$name],
-            'unit_price' => $this->faker->numberBetween(10, 10000), // in cents
+            'unit_of_measure' => $components[$name],
+            'unit_cost' => $this->faker->numberBetween(10, 10000), // in cents
+            'is_active' => true,
         ];
     }
 }

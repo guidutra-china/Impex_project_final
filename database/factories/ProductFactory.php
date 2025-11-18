@@ -36,23 +36,23 @@ class ProductFactory extends Factory
         ];
 
         $name = $this->faker->randomElement($products);
-        $code = strtoupper($this->faker->bothify('PROD-####'));
+        $sku = strtoupper($this->faker->bothify('PROD-####'));
         
         return [
             'name' => $name,
-            'code' => $code,
+            'sku' => $sku,
             'description' => $this->faker->sentence(),
+            'price' => $this->faker->numberBetween(500, 50000), // in cents
+            'status' => 'active',
             'category_id' => Category::inRandomOrder()->first()?->id ?? Category::factory(),
-            'unit' => $this->faker->randomElement(['pcs', 'box', 'set', 'pair']),
-            'unit_price' => $this->faker->numberBetween(500, 50000), // in cents
             'hs_code' => $this->faker->numerify('####.##.##'),
-            'weight_kg' => $this->faker->randomFloat(2, 0.1, 10),
-            'dimensions' => $this->faker->numerify('##x##x##') . ' cm',
-            'material' => $this->faker->randomElement(['Plastic', 'Metal', 'Silicone', 'Fabric', 'Glass']),
-            'color' => $this->faker->optional()->colorName(),
-            'minimum_order_quantity' => $this->faker->randomElement([1, 10, 50, 100, 500]),
-            'stock_quantity' => $this->faker->numberBetween(0, 1000),
-            'notes' => $this->faker->optional()->sentence(),
+            'origin_country' => $this->faker->randomElement(['China', 'USA', 'Brazil', 'Germany', 'Japan']),
+            'brand' => $this->faker->optional()->company(),
+            'moq' => $this->faker->randomElement([1, 10, 50, 100, 500]),
+            'moq_unit' => 'pcs',
+            'lead_time_days' => $this->faker->numberBetween(7, 60),
+            'net_weight' => $this->faker->randomFloat(3, 0.1, 10),
+            'gross_weight' => $this->faker->randomFloat(3, 0.2, 12),
         ];
     }
 }

@@ -13,23 +13,21 @@ class ClientFactory extends Factory
     {
         $companyName = $this->faker->company();
         
-        // Generate 3-letter code from company name
+        // Generate 2-letter code from company name
         $words = explode(' ', $companyName);
-        $code = strtoupper(substr($words[0], 0, 3));
+        $code = strtoupper(substr($words[0], 0, 2));
         
         return [
             'name' => $companyName,
             'code' => $code,
-            'email' => $this->faker->companyEmail(),
             'phone' => $this->faker->phoneNumber(),
             'address' => $this->faker->streetAddress(),
             'city' => $this->faker->city(),
             'state' => $this->faker->state(),
+            'zip' => $this->faker->postcode(),
             'country' => $this->faker->country(),
-            'postal_code' => $this->faker->postcode(),
-            'tax_id' => $this->faker->numerify('##-#######'),
+            'tax_number' => $this->faker->numerify('##-#######'),
             'website' => $this->faker->optional()->domainName(),
-            'notes' => $this->faker->optional()->sentence(),
         ];
     }
 }
