@@ -1,5 +1,4 @@
 {
-    "$schema": "https://getcomposer.org/schema.json",
     "name": "laravel/laravel",
     "type": "project",
     "description": "The skeleton application for the Laravel framework.",
@@ -12,7 +11,8 @@
         "laravel/framework": "^12.38",
         "laravel/tinker": "^2.10.1",
         "phpoffice/phpspreadsheet": "^5.2",
-        "spatie/laravel-image-optimizer": "^1.8"
+        "spatie/laravel-image-optimizer": "^1.8",
+      "ext-mysql_xdevapi": "*"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",

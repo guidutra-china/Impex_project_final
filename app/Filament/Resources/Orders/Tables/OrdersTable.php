@@ -20,12 +20,27 @@ class OrdersTable
         return $table
             ->columns([
                TextColumn::make('order_number')
+                    ->label('RFQ Number')
                     ->searchable()
                     ->sortable(),
+
+               TextColumn::make('customer_nr_rfq')
+                    ->label('Customer Ref.')
+                    ->searchable()
+                    ->sortable()
+                    ->toggleable()
+                    ->placeholder('—'),
 
                TextColumn::make('customer.name')
                     ->searchable()
                     ->sortable(),
+
+               TextColumn::make('tags.name')
+                    ->label('Tags')
+                    ->badge()
+                    ->separator(',')
+                    ->toggleable()
+                    ->placeholder('No tags'),
 
                BadgeColumn::make('status')
                     ->colors([

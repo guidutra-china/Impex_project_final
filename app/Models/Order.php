@@ -6,7 +6,9 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
+use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Collection;
 
 class Order extends Model
 {
@@ -16,6 +18,7 @@ class Order extends Model
         'customer_id',
         'currency_id',
         'order_number',
+        'customer_nr_rfq',
         'status',
         'commission_percent',
         'commission_type',
@@ -167,5 +170,99 @@ class Order extends Model
     public function scopeForCustomer($query, $customerId)
     {
         return $query->where('customer_id', $customerId);
+    }
+
+    // ========================================
+    // RFQ (Request for Quotation) Methods
+    // ========================================
+
+    /**
+     * Get the tags for this RFQ (polymorphic relationship)
+     */
+    public function tags(): MorphToMany
+    {
+        return $this->morphToMany(Tag::class, 'taggable');
+    }
+
+    /**
+     * Get supplier statuses for this RFQ
+     */
+    public function supplierStatuses(): HasMany
+    {
+        return $this->hasMany(RFQSupplierStatus::class);
+    }
+
+    /**
+     * Get suppliers that match this RFQ's tags
+     */
+    public function matchingSuppliers(): Collection
+    {
+        $tagIds = $this->tags()->pluck('tags.id')->toArray();
+
+        if (empty($tagIds)) {
+            return collect();
+        }
+
+        return Supplier::whereHas('tags', function($q) use ($tagIds) {
+            $q->whereIn('tags.id', $tagIds);
+        })->with('tags')->get();
+    }
+
+    /**
+     * Check if RFQ has been sent to a specific supplier
+     */
+    public function isSentToSupplier(int $supplierId): bool
+    {
+        return $this->supplierStatuses()
+            ->where('supplier_id', $supplierId)
+            ->where('sent', true)
+            ->exists();
+    }
+
+    /**
+     * Get send status for a specific supplier
+     */
+    public function getSupplierStatus(int $supplierId): ?RFQSupplierStatus
+    {
+        return $this->supplierStatuses()
+            ->where('supplier_id', $supplierId)
+            ->first();
+    }
+
+    /**
+     * Mark RFQ as sent to a supplier
+     */
+    public function markSentToSupplier(int $supplierId, string $method = 'email'): RFQSupplierStatus
+    {
+        $status = RFQSupplierStatus::updateOrCreate(
+            [
+                'order_id' => $this->id,
+                'supplier_id' => $supplierId,
+            ],
+            [
+                'sent' => true,
+                'sent_at' => now(),
+                'sent_method' => $method,
+                'sent_by' => auth()->id(),
+            ]
+        );
+
+        return $status;
+    }
+
+    /**
+     * Get count of suppliers this RFQ has been sent to
+     */
+    public function getSentSuppliersCount(): int
+    {
+        return $this->supplierStatuses()->where('sent', true)->count();
+    }
+
+    /**
+     * Get count of matching suppliers for this RFQ
+     */
+    public function getMatchingSuppliersCount(): int
+    {
+        return $this->matchingSuppliers()->count();
     }
 }

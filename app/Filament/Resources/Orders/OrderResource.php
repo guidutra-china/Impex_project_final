@@ -6,6 +6,7 @@ use App\Filament\Resources\Orders\Pages\CreateOrder;
 use App\Filament\Resources\Orders\Pages\EditOrder;
 use App\Filament\Resources\Orders\Pages\ListOrders;
 use App\Filament\Resources\Orders\RelationManagers\SupplierQuotesRelationManager;
+use App\Filament\Resources\Orders\RelationManagers\SuppliersToQuoteRelationManager;
 use App\Filament\Resources\Orders\Schemas\OrderForm;
 use App\Filament\Resources\Orders\Tables\OrdersTable;
 use App\Filament\Resources\Orders\RelationManagers\ItemsRelationManager;
@@ -24,7 +25,9 @@ class OrderResource extends Resource
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCube;
     protected static string|UnitEnum|null $navigationGroup = 'Quotations';
 
-    // Navigation label defaults to 'Orders'
+    protected static ?string $navigationLabel = 'RFQs';
+    protected static ?string $modelLabel = 'RFQ';
+    protected static ?string $pluralModelLabel = 'RFQs';
 
     protected static ?int $navigationSort = 2;
 
@@ -41,6 +44,7 @@ class OrderResource extends Resource
     public static function getRelations(): array
     {
         return [
+            SuppliersToQuoteRelationManager::class,
             ItemsRelationManager::class,
             SupplierQuotesRelationManager::class,
         ];
