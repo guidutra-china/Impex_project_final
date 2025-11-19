@@ -147,7 +147,7 @@ class SuppliersToQuoteRelationManager extends RelationManager
                                 ],
                                 [
                                     'currency_id' => $owner->currency_id,
-                                    'status' => 'pending',
+                                    'status' => 'draft',
                                     'created_by' => auth()->id(),
                                     'updated_by' => auth()->id(),
                                 ]
