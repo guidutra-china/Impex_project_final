@@ -137,14 +137,19 @@ class SuppliersToQuoteRelationManager extends RelationManager
                         $owner = $this->getOwnerRecord();
                         $importService = app(SupplierQuoteImportService::class);
                         
-                        // Get the actual file path from Livewire temporary upload
-                        $file = $data['file'];
-                        if (is_string($file)) {
-                            $filePath = storage_path('app/' . $file);
-                        } else {
-                            // TemporaryUploadedFile object
-                            $filePath = $file->getRealPath();
-                        }
+                        // Get the uploaded file and save it to a known location
+                        $uploadedFile = $data['file'];
+                        
+                        // Save to temp directory with unique name
+                        $filename = 'import_' . time() . '_' . uniqid() . '.xlsx';
+                        $path = $uploadedFile->storeAs('temp/imports', $filename, 'local');
+                        $filePath = storage_path('app/' . $path);
+                        
+                        \Log::info('Import file saved', [
+                            'path' => $path,
+                            'full_path' => $filePath,
+                            'exists' => file_exists($filePath),
+                        ]);
                         
                         try {
                             // Create Supplier Quote if it doesn't exist
