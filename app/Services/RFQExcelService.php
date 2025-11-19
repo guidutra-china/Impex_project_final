@@ -110,10 +110,19 @@ class RFQExcelService
         // Table headers
         $sheet->setCellValue('A' . $currentRow, 'Product Name');
         $sheet->setCellValue('B' . $currentRow, 'Quantity');
-        $sheet->setCellValue('C' . $currentRow, $items->isNotEmpty() ? 'Target Price' : 'Unit Price');
-        $sheet->setCellValue('D' . $currentRow, 'Supplier Price');
-        $sheet->setCellValue('E' . $currentRow, $items->isNotEmpty() ? 'Features' : 'Description / Features');
-        $sheet->getStyle('A' . $currentRow . ':E' . $currentRow)->applyFromArray($labelStyle);
+        
+        if ($items->isNotEmpty()) {
+            // When items exist: Target Price | Supplier Price | Features
+            $sheet->setCellValue('C' . $currentRow, 'Target Price');
+            $sheet->setCellValue('D' . $currentRow, 'Supplier Price');
+            $sheet->setCellValue('E' . $currentRow, 'Features');
+            $sheet->getStyle('A' . $currentRow . ':E' . $currentRow)->applyFromArray($labelStyle);
+        } else {
+            // When no items: Unit Price | Description / Features (no Supplier Price column)
+            $sheet->setCellValue('C' . $currentRow, 'Unit Price');
+            $sheet->setCellValue('D' . $currentRow, 'Description / Features');
+            $sheet->getStyle('A' . $currentRow . ':D' . $currentRow)->applyFromArray($labelStyle);
+        }
         $currentRow++;
 
         if ($items->isNotEmpty()) {
@@ -163,24 +172,23 @@ class RFQExcelService
                 $currentRow++;
             }
         } else {
-            // No items - add empty rows for supplier to fill
+            // No items - add empty rows for supplier to fill (only 4 columns: A-D)
             $emptyRowsCount = 15; // Number of empty rows to add
             
             for ($i = 0; $i < $emptyRowsCount; $i++) {
                 // All cells are empty and editable
-                $sheet->setCellValue('A' . $currentRow, '');
-                $sheet->setCellValue('B' . $currentRow, '');
-                $sheet->setCellValue('C' . $currentRow, '');
-                $sheet->setCellValue('D' . $currentRow, '');
-                $sheet->setCellValue('E' . $currentRow, '');
+                $sheet->setCellValue('A' . $currentRow, ''); // Product Name
+                $sheet->setCellValue('B' . $currentRow, ''); // Quantity
+                $sheet->setCellValue('C' . $currentRow, ''); // Unit Price
+                $sheet->setCellValue('D' . $currentRow, ''); // Description / Features
                 
                 // Highlight all cells in yellow to indicate they should be filled
-                $sheet->getStyle('A' . $currentRow . ':E' . $currentRow)->getFill()
+                $sheet->getStyle('A' . $currentRow . ':D' . $currentRow)->getFill()
                     ->setFillType(Fill::FILL_SOLID)
                     ->getStartColor()->setRGB('FFFFCC'); // Light yellow
                 
                 // Apply borders
-                $sheet->getStyle('A' . $currentRow . ':E' . $currentRow)->applyFromArray([
+                $sheet->getStyle('A' . $currentRow . ':D' . $currentRow)->applyFromArray([
                     'borders' => [
                         'allBorders' => ['borderStyle' => Border::BORDER_THIN, 'color' => ['rgb' => '000000']],
                     ],

@@ -236,6 +236,12 @@ class SupplierQuoteImportService
             $unitPrice = $sheet->getCell(SupplierQuoteImportConfig::EXCEL_COLUMNS['unit_price'] . $rowNumber)->getValue();
             $supplierPrice = $sheet->getCell(SupplierQuoteImportConfig::EXCEL_COLUMNS['supplier_price'] . $rowNumber)->getValue();
             
+            // If supplier_price column is empty (RFQ without items), use unit_price as supplier_price
+            if ($this->shouldSkipValue($supplierPrice) && !$this->shouldSkipValue($unitPrice)) {
+                $supplierPrice = $unitPrice;
+                $unitPrice = null; // No target price in this case
+            }
+            
             try {
                 $rows->push(new SupplierQuoteImportRow(
                     productName: $productName,
