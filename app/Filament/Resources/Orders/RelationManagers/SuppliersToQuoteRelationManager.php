@@ -137,19 +137,23 @@ class SuppliersToQuoteRelationManager extends RelationManager
                         $owner = $this->getOwnerRecord();
                         $importService = app(SupplierQuoteImportService::class);
                         
-                        // Get the uploaded file and save it to a known location
-                        $uploadedFile = $data['file'];
+                        // Filament already stored the file, $data['file'] is the path
+                        $filePath = storage_path('app/public/' . $data['file']);
                         
-                        // Save to temp directory with unique name
-                        $filename = 'import_' . time() . '_' . uniqid() . '.xlsx';
-                        $path = $uploadedFile->storeAs('temp/imports', $filename, 'local');
-                        $filePath = storage_path('app/' . $path);
+                        // Try alternative paths if file doesn't exist
+                        if (!file_exists($filePath)) {
+                            $filePath = storage_path('app/' . $data['file']);
+                        }
                         
-                        \Log::info('Import file saved', [
-                            'path' => $path,
+                        \Log::info('Import file path', [
+                            'data_file' => $data['file'],
                             'full_path' => $filePath,
                             'exists' => file_exists($filePath),
                         ]);
+                        
+                        if (!file_exists($filePath)) {
+                            throw new \Exception('File does not exist at: ' . $filePath);
+                        }
                         
                         try {
                             // Create Supplier Quote if it doesn't exist
