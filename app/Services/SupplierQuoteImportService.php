@@ -242,14 +242,14 @@ class SupplierQuoteImportService
             }
             
             $quantity = $sheet->getCell(SupplierQuoteImportConfig::EXCEL_COLUMNS['quantity'] . $rowNumber)->getValue();
-            $targetPrice = $sheet->getCell(SupplierQuoteImportConfig::EXCEL_COLUMNS['target_price'] . $rowNumber)->getValue();
+            $unitPrice = $sheet->getCell(SupplierQuoteImportConfig::EXCEL_COLUMNS['unit_price'] . $rowNumber)->getValue();
             $supplierPrice = $sheet->getCell(SupplierQuoteImportConfig::EXCEL_COLUMNS['supplier_price'] . $rowNumber)->getValue();
             
             try {
                 $rows->push(new SupplierQuoteImportRow(
                     productName: $productName,
                     quantity: (int) $quantity,
-                    targetPrice: $this->parsePrice($targetPrice),
+                    targetPrice: $this->parsePrice($unitPrice),
                     supplierPrice: $this->parsePrice($supplierPrice),
                     rowNumber: $rowNumber
                 ));

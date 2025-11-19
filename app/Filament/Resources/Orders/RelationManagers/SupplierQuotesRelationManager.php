@@ -4,7 +4,9 @@ namespace App\Filament\Resources\Orders\RelationManagers;
 
 use App\Exceptions\MissingExchangeRateException;
 use App\Models\ExchangeRate;
+use App\Services\SupplierQuoteImportService;
 use Filament\Actions\Action;
+use Filament\Forms\Components\FileUpload;
 use Filament\Support\Exceptions\Halt;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
@@ -157,6 +159,58 @@ class SupplierQuotesRelationManager extends RelationManager
                     }),
             ])
             ->actions([
+                Action::make('import_from_excel')
+                    ->label('Import')
+                    ->icon('heroicon-o-arrow-up-tray')
+                    ->form([
+                        FileUpload::make('file')
+                            ->label('Excel File')
+                            ->acceptedFileTypes(['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/vnd.ms-excel'])
+                            ->maxSize(5120)
+                            ->required()
+                            ->helperText('Upload the Excel file returned by the supplier with filled prices.'),
+                    ])
+                    ->action(function (array $data, $record) {
+                        $importService = app(SupplierQuoteImportService::class);
+                        $filePath = storage_path('app/public/' . $data['file']);
+                        
+                        try {
+                            $result = $importService->importFromExcel($record, $filePath);
+                            
+                            if ($result['success']) {
+                                Notification::make()
+                                    ->success()
+                                    ->title('Import Successful')
+                                    ->body($result['message'])
+                                    ->send();
+                            } else {
+                                Notification::make()
+                                    ->warning()
+                                    ->title('Import Completed with Warnings')
+                                    ->body($result['message'])
+                                    ->send();
+                            }
+                        } catch (\Throwable $e) {
+                            Notification::make()
+                                ->danger()
+                                ->title('Import Failed')
+                                ->body($e->getMessage())
+                                ->send();
+                        } finally {
+                            // Clean up uploaded file
+                            if (file_exists($filePath)) {
+                                try {
+                                    @unlink($filePath);
+                                } catch (\Throwable $e) {
+                                    // Ignore cleanup errors
+                                }
+                            }
+                        }
+                    })
+                    ->color('info')
+                    ->modalHeading('Import Supplier Quote from Excel')
+                    ->modalSubmitActionLabel('Import'),
+                    
                 EditAction::make(),
                 DeleteAction::make(),
                 Action::make('calculate_commission')

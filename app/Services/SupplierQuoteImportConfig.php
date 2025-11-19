@@ -28,7 +28,7 @@ class SupplierQuoteImportConfig
     public const EXCEL_COLUMNS = [
         'product_name' => 'A',
         'quantity' => 'B',
-        'target_price' => 'C',
+        'unit_price' => 'C',
         'supplier_price' => 'D',
         'features' => 'E',
     ];
