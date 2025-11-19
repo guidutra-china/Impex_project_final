@@ -510,8 +510,6 @@ class SupplierQuoteImportService
         
         return $priceCents;
     }
-}
-
 
     /**
      * Create a new product
