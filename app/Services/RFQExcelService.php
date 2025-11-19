@@ -100,22 +100,23 @@ class RFQExcelService
         // Order Items
         $items = $order->items()->with(['product', 'product.features'])->get();
 
+        // Always add ORDER ITEMS section
+        // Items header
+        $sheet->setCellValue('A' . $currentRow, $items->isNotEmpty() ? 'ORDER ITEMS' : 'ORDER ITEMS (To be filled by supplier)');
+        $sheet->mergeCells('A' . $currentRow . ':E' . $currentRow);
+        $sheet->getStyle('A' . $currentRow)->applyFromArray($headerStyle);
+        $currentRow++;
+
+        // Table headers
+        $sheet->setCellValue('A' . $currentRow, 'Product Name');
+        $sheet->setCellValue('B' . $currentRow, 'Quantity');
+        $sheet->setCellValue('C' . $currentRow, $items->isNotEmpty() ? 'Target Price' : 'Unit Price');
+        $sheet->setCellValue('D' . $currentRow, 'Supplier Price');
+        $sheet->setCellValue('E' . $currentRow, $items->isNotEmpty() ? 'Features' : 'Description / Features');
+        $sheet->getStyle('A' . $currentRow . ':E' . $currentRow)->applyFromArray($labelStyle);
+        $currentRow++;
+
         if ($items->isNotEmpty()) {
-            // Items header
-            $sheet->setCellValue('A' . $currentRow, 'ORDER ITEMS');
-            $sheet->mergeCells('A' . $currentRow . ':E' . $currentRow);
-            $sheet->getStyle('A' . $currentRow)->applyFromArray($headerStyle);
-            $currentRow++;
-
-            // Table headers
-            $sheet->setCellValue('A' . $currentRow, 'Product Name');
-            $sheet->setCellValue('B' . $currentRow, 'Quantity');
-            $sheet->setCellValue('C' . $currentRow, 'Target Price');
-            $sheet->setCellValue('D' . $currentRow, 'Supplier Price');
-            $sheet->setCellValue('E' . $currentRow, 'Features');
-            $sheet->getStyle('A' . $currentRow . ':E' . $currentRow)->applyFromArray($labelStyle);
-            $currentRow++;
-
             // Items data
             foreach ($items as $item) {
                 $startRow = $currentRow;
@@ -159,6 +160,35 @@ class RFQExcelService
                     ],
                 ]);
 
+                $currentRow++;
+            }
+        } else {
+            // No items - add empty rows for supplier to fill
+            $emptyRowsCount = 15; // Number of empty rows to add
+            
+            for ($i = 0; $i < $emptyRowsCount; $i++) {
+                // All cells are empty and editable
+                $sheet->setCellValue('A' . $currentRow, '');
+                $sheet->setCellValue('B' . $currentRow, '');
+                $sheet->setCellValue('C' . $currentRow, '');
+                $sheet->setCellValue('D' . $currentRow, '');
+                $sheet->setCellValue('E' . $currentRow, '');
+                
+                // Highlight all cells in yellow to indicate they should be filled
+                $sheet->getStyle('A' . $currentRow . ':E' . $currentRow)->getFill()
+                    ->setFillType(Fill::FILL_SOLID)
+                    ->getStartColor()->setRGB('FFFFCC'); // Light yellow
+                
+                // Apply borders
+                $sheet->getStyle('A' . $currentRow . ':E' . $currentRow)->applyFromArray([
+                    'borders' => [
+                        'allBorders' => ['borderStyle' => Border::BORDER_THIN, 'color' => ['rgb' => '000000']],
+                    ],
+                ]);
+                
+                // Set row height
+                $sheet->getRowDimension($currentRow)->setRowHeight(25);
+                
                 $currentRow++;
             }
         }

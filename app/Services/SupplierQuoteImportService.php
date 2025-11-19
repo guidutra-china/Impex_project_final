@@ -249,16 +249,18 @@ class SupplierQuoteImportService
                     
                     $product = $this->findProduct($row->productName, $products);
                     
+                    // If product doesn't exist, create it
                     if (!$product) {
-                        $errors[] = "Row {$row->rowNumber}: Product '{$row->productName}' not found in system";
-                        continue;
+                        $product = $this->createProduct($row->productName);
+                        $products->put(strtolower($product->name), $product);
                     }
                     
                     $orderItem = $this->findOrderItem($product->id, $orderItems);
                     
+                    // If order item doesn't exist, create it
                     if (!$orderItem) {
-                        $errors[] = "Row {$row->rowNumber}: Product '{$row->productName}' not found in RFQ";
-                        continue;
+                        $orderItem = $this->createOrderItem($supplierQuote->order, $product, $row->quantity, $row->targetPrice);
+                        $orderItems->put($product->id, $orderItem);
                     }
                     
                     $this->createOrUpdateQuoteItem($supplierQuote, $orderItem, $product, $row);
@@ -465,5 +467,58 @@ class SupplierQuoteImportService
         }
         
         return $priceCents;
+    }
+}
+
+
+    /**
+     * Create a new product
+     *
+     * @param string $productName
+     * @return Product
+     */
+    protected function createProduct(string $productName): Product
+    {
+        Log::info('Creating new product from import', ['name' => $productName]);
+        
+        // Generate unique SKU
+        $sku = 'IMP-' . strtoupper(substr(md5($productName . microtime(true)), 0, 8));
+        
+        $product = Product::create([
+            'name' => $productName,
+            'sku' => $sku,
+            'status' => 'active',
+            'type' => 'standard',
+            'is_active' => true,
+        ]);
+        
+        return $product;
+    }
+
+    /**
+     * Create a new order item
+     *
+     * @param Order $order
+     * @param Product $product
+     * @param int $quantity
+     * @param int|null $targetPrice
+     * @return OrderItem
+     */
+    protected function createOrderItem(Order $order, Product $product, int $quantity, ?int $targetPrice): OrderItem
+    {
+        Log::info('Creating new order item from import', [
+            'order_id' => $order->id,
+            'product_id' => $product->id,
+            'quantity' => $quantity,
+        ]);
+        
+        $orderItem = OrderItem::create([
+            'order_id' => $order->id,
+            'product_id' => $product->id,
+            'quantity' => $quantity,
+            'requested_unit_price' => $targetPrice,
+        ]);
+        
+        return $orderItem;
     }
 }
