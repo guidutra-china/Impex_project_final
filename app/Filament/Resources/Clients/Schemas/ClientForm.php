@@ -19,16 +19,16 @@ class ClientForm
                 Section::make()
                     ->schema([
                         TextInput::make('code')
-                            ->label('Client Code (3 letters)')
+                            ->label('Client Code (5 letters)')
                             ->required()
-                            ->length(3)
+                            ->length(5)
                             ->unique(ignoreRecord: true)
-                            ->regex('/^[A-Z]{3}$/')
+                            ->regex('/^[A-Z]{5}$/')
                             ->validationMessages([
-                                'regex' => 'Code must be exactly 3 uppercase letters.',
+                                'regex' => 'Code must be exactly 5 uppercase letters.',
                                 'unique' => 'This code is already in use by another client.',
                             ])
-                            ->helperText('Unique 3-letter code for RFQ numbering (e.g., AMA for Amazon)')
+                            ->helperText('Unique 5-letter code for RFQ numbering (e.g., AMAZN for Amazon)')
                             ->live(onBlur: true)
                             ->afterStateUpdated(function ($state, callable $set) {
                                 // Auto-uppercase
@@ -36,7 +36,7 @@ class ClientForm
                                     $set('code', strtoupper($state));
                                 }
                             })
-                            ->placeholder('AMA'),
+                            ->placeholder('AMAZN'),
 
                         TextInput::make('name')
                             ->label('Company Name')
@@ -46,8 +46,8 @@ class ClientForm
                             ->afterStateUpdated(function ($state, callable $get, callable $set) {
                                 // Auto-suggest code if not set
                                 if ($state && !$get('code')) {
-                                    $suggested = strtoupper(substr(preg_replace('/[^A-Za-z]/', '', $state), 0, 3));
-                                    if (strlen($suggested) === 3) {
+                                    $suggested = strtoupper(substr(preg_replace('/[^A-Za-z]/', '', $state), 0, 5));
+                                    if (strlen($suggested) === 5) {
                                         $set('code', $suggested);
                                     }
                                 }

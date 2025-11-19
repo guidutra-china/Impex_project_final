@@ -19,6 +19,16 @@ class SupplierForm
             ->components([
                 Section::make()
                     ->schema([
+                        TextInput::make('supplier_code')
+                            ->label('Supplier Code')
+                            ->required()
+                            ->length(5)
+                            ->unique(ignoreRecord: true)
+                            ->regex('/^[A-Z]{5}$/')
+                            ->helperText('5 uppercase letters (e.g., ABCDE)')
+                            ->placeholder('ABCDE')
+                            ->maxLength(5),
+
                         TextInput::make('name')
                             ->label('Company Name')
                             ->required()

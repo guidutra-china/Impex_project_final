@@ -46,6 +46,24 @@ class SupplierQuoteImportService
                 );
             }
             
+            // Extract and validate supplier code
+            $supplierCode = $this->extractSupplierCode($worksheet);
+            
+            if ($supplierCode) {
+                // Validate supplier code matches
+                if ($supplierQuote->supplier->supplier_code !== $supplierCode) {
+                    throw new RFQImportException(
+                        "Supplier code mismatch. Expected: {$supplierQuote->supplier->supplier_code}, Found: {$supplierCode}"
+                    );
+                }
+                
+                Log::info('Supplier code validated', ['code' => $supplierCode]);
+            } else {
+                Log::warning('Supplier code not found in Excel file', [
+                    'supplier_quote_id' => $supplierQuote->id,
+                ]);
+            }
+            
             $rows = $this->extractDataRows($worksheet);
             
             return $this->processRows($supplierQuote, $rows);
@@ -149,6 +167,39 @@ class SupplierQuoteImportService
         }
         
         throw new RFQImportException('Could not find RFQ Number in Excel file');
+    }
+
+    /**
+     * Extract Supplier Code from worksheet
+     *
+     * @param Worksheet $sheet
+     * @return string|null
+     */
+    protected function extractSupplierCode(Worksheet $sheet): ?string
+    {
+        // Look for "Supplier Code:" in column A
+        for ($row = 1; $row <= min(20, $sheet->getHighestRow()); $row++) {
+            $cellValue = trim($sheet->getCell('A' . $row)->getValue() ?? '');
+            
+            if (stripos($cellValue, 'Supplier Code') !== false) {
+                $supplierCode = trim($sheet->getCell('B' . $row)->getValue() ?? '');
+                
+                // Remove placeholder text
+                if (stripos($supplierCode, '[To be filled') !== false) {
+                    return null;
+                }
+                
+                // Validate format (5 uppercase letters)
+                if (preg_match('/^[A-Z]{5}$/', $supplierCode)) {
+                    return $supplierCode;
+                }
+                
+                Log::warning('Invalid supplier code format in Excel', ['code' => $supplierCode]);
+                return null;
+            }
+        }
+        
+        return null;
     }
 
     /**

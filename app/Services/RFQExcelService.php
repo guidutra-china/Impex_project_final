@@ -80,6 +80,13 @@ class RFQExcelService
         $sheet->getStyle('A' . $currentRow)->applyFromArray($labelStyle);
         $currentRow++;
 
+        // Supplier Code (to be filled)
+        $sheet->setCellValue('A' . $currentRow, 'Supplier Code:');
+        $sheet->setCellValue('B' . $currentRow, '[To be filled - 5 letters]');
+        $sheet->getStyle('A' . $currentRow)->applyFromArray($labelStyle);
+        $sheet->getStyle('B' . $currentRow)->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB('FFFFCC'); // Yellow
+        $currentRow++;
+
         // Order Currency
         $sheet->setCellValue('A' . $currentRow, 'Order Currency:');
         $sheet->setCellValue('B' . $currentRow, $order->currency ? $order->currency->code : 'N/A');
