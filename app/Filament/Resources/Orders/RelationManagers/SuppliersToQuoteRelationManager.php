@@ -4,8 +4,11 @@ namespace App\Filament\Resources\Orders\RelationManagers;
 
 use App\Models\Order;
 use App\Models\Supplier;
+use App\Models\SupplierQuote;
 use App\Models\RFQSupplierStatus;
 use App\Services\RFQExcelService;
+use App\Services\SupplierQuoteImportService;
+use Filament\Forms\Components\FileUpload;
 use Filament\Actions\Action;
 use Filament\Actions\BulkAction;
 use Filament\Forms;
@@ -117,6 +120,75 @@ class SuppliersToQuoteRelationManager extends RelationManager
                     }),
             ])
             ->actions([
+                Action::make('import_quote')
+                    ->label('Import')
+                    ->icon('heroicon-o-arrow-up-tray')
+                    ->color('info')
+                    ->form([
+                        FileUpload::make('file')
+                            ->label('Excel File')
+                            ->acceptedFileTypes(['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/vnd.ms-excel'])
+                            ->maxSize(5120)
+                            ->required()
+                            ->helperText('Upload the Excel file returned by this supplier with filled prices.'),
+                    ])
+                    ->action(function (array $data, Supplier $record) {
+                        /** @var Order $owner */
+                        $owner = $this->getOwnerRecord();
+                        $importService = app(SupplierQuoteImportService::class);
+                        $filePath = storage_path('app/' . $data['file']);
+                        
+                        try {
+                            // Create Supplier Quote if it doesn't exist
+                            $supplierQuote = SupplierQuote::firstOrCreate(
+                                [
+                                    'order_id' => $owner->id,
+                                    'supplier_id' => $record->id,
+                                ],
+                                [
+                                    'currency_id' => $owner->currency_id,
+                                    'status' => 'pending',
+                                    'created_by' => auth()->id(),
+                                    'updated_by' => auth()->id(),
+                                ]
+                            );
+                            
+                            // Import Excel data
+                            $result = $importService->importFromExcel($supplierQuote, $filePath);
+                            
+                            if ($result['success']) {
+                                Notification::make()
+                                    ->success()
+                                    ->title('Import Successful')
+                                    ->body($result['message'] . " Supplier Quote created/updated for {$record->name}.")
+                                    ->send();
+                            } else {
+                                Notification::make()
+                                    ->warning()
+                                    ->title('Import Completed with Warnings')
+                                    ->body($result['message'])
+                                    ->send();
+                            }
+                        } catch (\Throwable $e) {
+                            Notification::make()
+                                ->danger()
+                                ->title('Import Failed')
+                                ->body($e->getMessage())
+                                ->send();
+                        } finally {
+                            // Clean up uploaded file
+                            if (file_exists($filePath)) {
+                                try {
+                                    @unlink($filePath);
+                                } catch (\Throwable $e) {
+                                    // Ignore cleanup errors
+                                }
+                            }
+                        }
+                    })
+                    ->modalHeading('Import Supplier Quote from Excel')
+                    ->modalSubmitActionLabel('Import'),
+                    
                 Action::make('send_quotation')
                     ->label(function (Supplier $record): string {
                         $status = $this->getSupplierStatus($record);
