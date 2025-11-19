@@ -462,8 +462,11 @@ class SupplierQuoteImportService
      * @param string $value
      * @return bool
      */
-    protected function shouldSkipValue(string $value): bool
+    protected function shouldSkipValue(string|null $value): bool
     {
+        if ($value === null) {
+            return true;
+        }
         return in_array(strtolower($value), SupplierQuoteImportConfig::SKIP_VALUES);
     }
 
