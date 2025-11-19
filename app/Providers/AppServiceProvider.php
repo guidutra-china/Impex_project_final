@@ -2,6 +2,10 @@
 
 namespace App\Providers;
 
+use App\Models\Client;
+use App\Models\Supplier;
+use App\Observers\ClientObserver;
+use App\Observers\SupplierObserver;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -19,6 +23,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        // Register model observers
+        Client::observe(ClientObserver::class);
+        Supplier::observe(SupplierObserver::class);
     }
 }

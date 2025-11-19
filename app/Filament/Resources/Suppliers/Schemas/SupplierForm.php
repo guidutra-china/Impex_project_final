@@ -21,13 +21,19 @@ class SupplierForm
                     ->schema([
                         TextInput::make('supplier_code')
                             ->label('Supplier Code')
-                            ->required()
                             ->length(5)
                             ->unique(ignoreRecord: true)
                             ->regex('/^[A-Z]{5}$/')
-                            ->helperText('5 uppercase letters (e.g., ABCDE)')
-                            ->placeholder('ABCDE')
-                            ->maxLength(5),
+                            ->helperText('Auto-generated from company name. Leave empty to auto-generate.')
+                            ->placeholder('Auto-generated')
+                            ->maxLength(5)
+                            ->live(onBlur: true)
+                            ->afterStateUpdated(function ($state, callable $set) {
+                                // Auto-uppercase
+                                if ($state) {
+                                    $set('supplier_code', strtoupper($state));
+                                }
+                            }),
 
                         TextInput::make('name')
                             ->label('Company Name')

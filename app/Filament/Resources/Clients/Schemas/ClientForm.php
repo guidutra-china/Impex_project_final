@@ -20,7 +20,6 @@ class ClientForm
                     ->schema([
                         TextInput::make('code')
                             ->label('Client Code (5 letters)')
-                            ->required()
                             ->length(5)
                             ->unique(ignoreRecord: true)
                             ->regex('/^[A-Z]{5}$/')
@@ -28,7 +27,7 @@ class ClientForm
                                 'regex' => 'Code must be exactly 5 uppercase letters.',
                                 'unique' => 'This code is already in use by another client.',
                             ])
-                            ->helperText('Unique 5-letter code for RFQ numbering (e.g., AMAZN for Amazon)')
+                            ->helperText('Auto-generated from company name. Leave empty to auto-generate.')
                             ->live(onBlur: true)
                             ->afterStateUpdated(function ($state, callable $set) {
                                 // Auto-uppercase
@@ -36,22 +35,12 @@ class ClientForm
                                     $set('code', strtoupper($state));
                                 }
                             })
-                            ->placeholder('AMAZN'),
+                            ->placeholder('Auto-generated'),
 
                         TextInput::make('name')
                             ->label('Company Name')
                             ->required()
-                            ->maxLength(255)
-                            ->live(onBlur: true)
-                            ->afterStateUpdated(function ($state, callable $get, callable $set) {
-                                // Auto-suggest code if not set
-                                if ($state && !$get('code')) {
-                                    $suggested = strtoupper(substr(preg_replace('/[^A-Za-z]/', '', $state), 0, 5));
-                                    if (strlen($suggested) === 5) {
-                                        $set('code', $suggested);
-                                    }
-                                }
-                            }),
+                            ->maxLength(255),
 
                         TextInput::make('phone')
                             ->label('Phone')
