@@ -136,7 +136,15 @@ class SuppliersToQuoteRelationManager extends RelationManager
                         /** @var Order $owner */
                         $owner = $this->getOwnerRecord();
                         $importService = app(SupplierQuoteImportService::class);
-                        $filePath = storage_path('app/' . $data['file']);
+                        
+                        // Get the actual file path from Livewire temporary upload
+                        $file = $data['file'];
+                        if (is_string($file)) {
+                            $filePath = storage_path('app/' . $file);
+                        } else {
+                            // TemporaryUploadedFile object
+                            $filePath = $file->getRealPath();
+                        }
                         
                         try {
                             // Create Supplier Quote if it doesn't exist
