@@ -68,7 +68,7 @@ class RFQExcelService
 
         // Title
         $sheet->setCellValue('A' . $currentRow, 'REQUEST FOR QUOTATION');
-        $sheet->mergeCells('A' . $currentRow . ':D' . $currentRow);
+        $sheet->mergeCells('A' . $currentRow . ':E' . $currentRow);
         $sheet->getStyle('A' . $currentRow)->applyFromArray($headerStyle);
         $sheet->getRowDimension($currentRow)->setRowHeight(30);
 
@@ -92,7 +92,7 @@ class RFQExcelService
         $currentRow++;
         
         $sheet->setCellValue('A' . $currentRow, $order->customer_notes ?? 'No customer request');
-        $sheet->mergeCells('A' . $currentRow . ':D' . $currentRow);
+        $sheet->mergeCells('A' . $currentRow . ':E' . $currentRow);
         $sheet->getStyle('A' . $currentRow)->getAlignment()->setWrapText(true);
         $sheet->getRowDimension($currentRow)->setRowHeight(60);
         $currentRow += 2;
@@ -103,7 +103,7 @@ class RFQExcelService
         if ($items->isNotEmpty()) {
             // Items header
             $sheet->setCellValue('A' . $currentRow, 'ORDER ITEMS');
-            $sheet->mergeCells('A' . $currentRow . ':D' . $currentRow);
+            $sheet->mergeCells('A' . $currentRow . ':E' . $currentRow);
             $sheet->getStyle('A' . $currentRow)->applyFromArray($headerStyle);
             $currentRow++;
 
@@ -111,8 +111,9 @@ class RFQExcelService
             $sheet->setCellValue('A' . $currentRow, 'Product Name');
             $sheet->setCellValue('B' . $currentRow, 'Quantity');
             $sheet->setCellValue('C' . $currentRow, 'Target Price');
-            $sheet->setCellValue('D' . $currentRow, 'Features');
-            $sheet->getStyle('A' . $currentRow . ':D' . $currentRow)->applyFromArray($labelStyle);
+            $sheet->setCellValue('D' . $currentRow, 'Supplier Price');
+            $sheet->setCellValue('E' . $currentRow, 'Features');
+            $sheet->getStyle('A' . $currentRow . ':E' . $currentRow)->applyFromArray($labelStyle);
             $currentRow++;
 
             // Items data
@@ -131,24 +132,28 @@ class RFQExcelService
                     : 'N/A';
                 $sheet->setCellValue('C' . $currentRow, $targetPrice);
                 
+                // Supplier Price (empty for supplier to fill)
+                $sheet->setCellValue('D' . $currentRow, '');
+                $sheet->getStyle('D' . $currentRow)->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB('FFFFCC'); // Light yellow
+                
                 // Features
                 $features = $item->product->features ?? collect();
                 if ($features->isNotEmpty()) {
                     $featuresList = $features->map(function ($feature) {
                         return "• {$feature->name}: {$feature->value}";
                     })->implode("\n");
-                    $sheet->setCellValue('D' . $currentRow, $featuresList);
-                    $sheet->getStyle('D' . $currentRow)->getAlignment()->setWrapText(true);
+                    $sheet->setCellValue('E' . $currentRow, $featuresList);
+                    $sheet->getStyle('E' . $currentRow)->getAlignment()->setWrapText(true);
                     
                     // Adjust row height based on number of features
                     $rowHeight = max(30, $features->count() * 15);
                     $sheet->getRowDimension($currentRow)->setRowHeight($rowHeight);
                 } else {
-                    $sheet->setCellValue('D' . $currentRow, 'No features');
+                    $sheet->setCellValue('E' . $currentRow, 'No features');
                 }
 
                 // Apply borders
-                $sheet->getStyle('A' . $currentRow . ':D' . $currentRow)->applyFromArray([
+                $sheet->getStyle('A' . $currentRow . ':E' . $currentRow)->applyFromArray([
                     'borders' => [
                         'allBorders' => ['borderStyle' => Border::BORDER_THIN, 'color' => ['rgb' => '000000']],
                     ],
@@ -162,7 +167,8 @@ class RFQExcelService
         $sheet->getColumnDimension('A')->setWidth(30);
         $sheet->getColumnDimension('B')->setWidth(15);
         $sheet->getColumnDimension('C')->setWidth(15);
-        $sheet->getColumnDimension('D')->setWidth(40);
+        $sheet->getColumnDimension('D')->setWidth(15);
+        $sheet->getColumnDimension('E')->setWidth(40);
 
         // Generate file
         $fileName = 'RFQ_' . $order->order_number . '_' . time() . '.xlsx';
