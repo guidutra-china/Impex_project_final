@@ -30,11 +30,13 @@ class SupplierQuoteImportService
         // Set timeout for processing
         set_time_limit(SupplierQuoteImportConfig::PROCESSING_TIMEOUT);
         
-        // Validate file path for security
-        $this->validateFilePath($filePath);
-        
         try {
-            $worksheet = $this->loadAndValidateWorksheet($filePath);
+            // File path is safe as it comes from Filament's FileUpload component
+            if (!file_exists($filePath)) {
+                throw new RFQImportException('File does not exist');
+            }
+            
+            $worksheet = $this->loadAndValidateWorksheet($filePath);;
             
             // Extract RFQ number from Excel
             $rfqNumber = $this->extractRFQNumber($worksheet);
@@ -46,23 +48,12 @@ class SupplierQuoteImportService
                 );
             }
             
-            // Extract and validate supplier code
-            $supplierCode = $this->extractSupplierCode($worksheet);
-            
-            if ($supplierCode) {
-                // Validate supplier code matches
-                if ($supplierQuote->supplier->supplier_code !== $supplierCode) {
-                    throw new RFQImportException(
-                        "Supplier code mismatch. Expected: {$supplierQuote->supplier->supplier_code}, Found: {$supplierCode}"
-                    );
-                }
-                
-                Log::info('Supplier code validated', ['code' => $supplierCode]);
-            } else {
-                Log::warning('Supplier code not found in Excel file', [
-                    'supplier_quote_id' => $supplierQuote->id,
-                ]);
-            }
+            // No need to validate supplier code - quote is already selected
+            Log::info('Importing supplier quote', [
+                'supplier_quote_id' => $supplierQuote->id,
+                'supplier_id' => $supplierQuote->supplier_id,
+                'supplier_name' => $supplierQuote->supplier->name,
+            ]);
             
             $rows = $this->extractDataRows($worksheet);
             

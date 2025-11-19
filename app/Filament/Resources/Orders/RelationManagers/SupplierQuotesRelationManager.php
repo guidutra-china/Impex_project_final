@@ -172,7 +172,9 @@ class SupplierQuotesRelationManager extends RelationManager
                     ])
                     ->action(function (array $data, $record) {
                         $importService = app(SupplierQuoteImportService::class);
-                        $filePath = storage_path('app/public/' . $data['file']);
+                        
+                        // Get the actual file path from Livewire temporary upload
+                        $filePath = storage_path('app/' . $data['file']);
                         
                         try {
                             $result = $importService->importFromExcel($record, $filePath);
