@@ -12,7 +12,15 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('clients', function (Blueprint $table) {
-            $table->string('code', 5)->unique()->nullable()->change();
+            $table->dropUnique('clients_code_unique');
+        });
+        
+        Schema::table('clients', function (Blueprint $table) {
+            $table->string('code', 5)->nullable()->change();
+        });
+        
+        Schema::table('clients', function (Blueprint $table) {
+            $table->unique('code', 'clients_code_unique');
         });
     }
 
@@ -22,7 +30,15 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('clients', function (Blueprint $table) {
-            $table->string('code', 2)->unique()->nullable()->change();
+            $table->dropUnique('clients_code_unique');
+        });
+        
+        Schema::table('clients', function (Blueprint $table) {
+            $table->string('code', 2)->nullable()->change();
+        });
+        
+        Schema::table('clients', function (Blueprint $table) {
+            $table->unique('code', 'clients_code_unique');
         });
     }
 };
