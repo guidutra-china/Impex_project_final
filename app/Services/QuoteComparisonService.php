@@ -185,7 +185,7 @@ class QuoteComparisonService
 
         $allQuotes = $quotes->map(function ($quote) use ($order) {
             // Sum converted item prices instead of converting total
-            $convertedTotal = $quote->items->sum(function ($item) {
+            $convertedTotal = $quote->items->sum(function ($item) use ($quote) {
                 return $item->converted_price_cents ?? (
                     $quote->locked_exchange_rate 
                         ? (int) round($item->total_price_after_commission / $quote->locked_exchange_rate)
