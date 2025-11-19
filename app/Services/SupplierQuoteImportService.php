@@ -297,9 +297,9 @@ class SupplierQuoteImportService
                     
                     $product = $this->findProduct($row->productName, $products);
                     
-                    // If product doesn't exist, create it
+                    // If product doesn't exist, create it with RFQ's category
                     if (!$product) {
-                        $product = $this->createProduct($row->productName);
+                        $product = $this->createProduct($row->productName, $supplierQuote->order->category_id);
                         $products->put(strtolower($product->name), $product);
                     }
                     
@@ -524,22 +524,33 @@ class SupplierQuoteImportService
      * Create a new product
      *
      * @param string $productName
+     * @param int|null $categoryId
      * @return Product
      */
-    protected function createProduct(string $productName): Product
+    protected function createProduct(string $productName, ?int $categoryId = null): Product
     {
-        Log::info('Creating new product from import', ['name' => $productName]);
+        Log::info('Creating new product from import', [
+            'name' => $productName,
+            'category_id' => $categoryId
+        ]);
         
         // Generate unique SKU
         $sku = 'IMP-' . strtoupper(substr(md5($productName . microtime(true)), 0, 8));
         
-        $product = Product::create([
+        $productData = [
             'name' => $productName,
             'sku' => $sku,
             'status' => 'active',
             'type' => 'standard',
             'is_active' => true,
-        ]);
+        ];
+        
+        // Add category if provided (from RFQ)
+        if ($categoryId) {
+            $productData['category_id'] = $categoryId;
+        }
+        
+        $product = Product::create($productData);
         
         return $product;
     }
