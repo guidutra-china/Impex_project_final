@@ -71,7 +71,7 @@ return new class extends Migration
                 'received',
                 'cancelled',
                 'closed'
-            ])->default('draft')->index();
+            ])->default('draft');
             
             // === DATAS ===
             $table->date('po_date');
@@ -91,8 +91,8 @@ return new class extends Migration
             // === INDEXES ===
             $table->index('po_number');
             $table->index('supplier_id');
-            $table->index('status');
             $table->index('po_date');
+            $table->index('status');
             $table->index(['supplier_id', 'status'], 'idx_supplier_status');
         });
     }
