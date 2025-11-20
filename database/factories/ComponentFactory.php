@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Models\Component;
+use App\Models\Currency;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class ComponentFactory extends Factory
@@ -44,6 +45,7 @@ class ComponentFactory extends Factory
             'description' => $this->faker->sentence(),
             'unit_of_measure' => $components[$name],
             'unit_cost' => $this->faker->numberBetween(10, 10000), // in cents
+            'currency_id' => Currency::inRandomOrder()->first()?->id ?? Currency::factory(),
             'is_active' => true,
         ];
     }

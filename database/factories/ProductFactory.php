@@ -4,6 +4,7 @@ namespace Database\Factories;
 
 use App\Models\Product;
 use App\Models\Category;
+use App\Models\Currency;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class ProductFactory extends Factory
@@ -45,6 +46,7 @@ class ProductFactory extends Factory
             'price' => $this->faker->numberBetween(500, 50000), // in cents
             'status' => 'active',
             'category_id' => Category::inRandomOrder()->first()?->id ?? Category::factory(),
+            'currency_id' => Currency::inRandomOrder()->first()?->id ?? Currency::factory(),
             'hs_code' => $this->faker->numerify('####.##.##'),
             'origin_country' => $this->faker->randomElement(['China', 'USA', 'Brazil', 'Germany', 'Japan']),
             'brand' => $this->faker->optional()->company(),
