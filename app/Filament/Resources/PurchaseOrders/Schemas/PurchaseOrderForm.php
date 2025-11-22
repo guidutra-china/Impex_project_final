@@ -272,7 +272,7 @@ class PurchaseOrderForm
                                             if ($product) {
                                                 $set('product_name', $product->name);
                                                 $set('product_sku', $product->sku);
-                                                $set('unit_price', $product->unit_price ?? 0);
+                                                $set('unit_cost', $product->unit_price ?? 0);
                                             }
                                         }
                                     })
@@ -286,24 +286,24 @@ class PurchaseOrderForm
                                     ->default(1)
                                     ->live(onBlur: true)
                                     ->afterStateUpdated(fn (Get $get, Set $set) => 
-                                        $set('total', $get('quantity') * $get('unit_price'))
+                                        $set('total_cost', $get('quantity') * $get('unit_cost'))
                                     )
                                     ->columnSpan(1),
                                 
-                                TextInput::make('unit_price')
-                                    ->label('Unit Price')
+                                TextInput::make('unit_cost')
+                                    ->label('Unit Cost')
                                     ->numeric()
                                     ->required()
                                     ->minValue(0)
                                     ->step(0.01)
                                     ->live(onBlur: true)
                                     ->afterStateUpdated(fn (Get $get, Set $set) => 
-                                        $set('total', $get('quantity') * $get('unit_price'))
+                                        $set('total_cost', $get('quantity') * $get('unit_cost'))
                                     )
                                     ->columnSpan(2),
                                 
-                                TextInput::make('total')
-                                    ->label('Total')
+                                TextInput::make('total_cost')
+                                    ->label('Total Cost')
                                     ->numeric()
                                     ->disabled()
                                     ->dehydrated()
@@ -522,7 +522,7 @@ class PurchaseOrderForm
     {
         // Calculate subtotal from items
         $items = collect($get('items') ?? []);
-        $subtotal = $items->sum('total');
+        $subtotal = $items->sum('total_cost');
         
         // Get costs
         $shipping = floatval($get('shipping_cost') ?? 0);
