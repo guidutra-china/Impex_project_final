@@ -76,7 +76,7 @@ class PurchaseOrdersTable
                     ])
                     ->toggleable(),
                 
-                TextColumn::make('order.rfq_number')
+                TextColumn::make('order.order_number')
                     ->label('RFQ')
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
