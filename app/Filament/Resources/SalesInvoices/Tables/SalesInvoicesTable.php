@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\SalesInvoices\Tables;
 
+use Filament\Actions\EditAction;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
@@ -117,7 +118,7 @@ class SalesInvoicesTable
                     ->label('Unpaid Only'),
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                EditAction::make(),
 
                 Tables\Actions\Action::make('mark_as_paid')
                     ->label('Mark as Paid')
