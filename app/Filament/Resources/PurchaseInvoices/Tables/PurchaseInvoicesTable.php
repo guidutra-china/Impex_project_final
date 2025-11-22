@@ -218,6 +218,18 @@ class PurchaseInvoicesTable
                             ->body("Invoice {$record->invoice_number} has been cancelled.")
                     ),
 
+                Action::make('download_pdf')
+                    ->label('Download PDF')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->color('gray')
+                    ->action(function ($record) {
+                        $pdf = \PDF::loadView('pdf.invoices.purchase-invoice', ['invoice' => $record]);
+                        $filename = str_replace('/', '-', $record->invoice_number) . '-Rev' . $record->revision_number . '.pdf';
+                        return response()->streamDownload(function () use ($pdf) {
+                            echo $pdf->output();
+                        }, $filename);
+                    }),
+
                 Action::make('create_revision')
                     ->label('Create Revision')
                     ->icon('heroicon-o-document-duplicate')
