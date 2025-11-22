@@ -92,10 +92,49 @@ class PurchaseOrderForm
                                 
                                 Select::make('supplier_quote_id')
                                     ->label('Supplier Quote')
-                                    ->relationship('supplierQuote', 'id')
-                                    ->searchable()
+                                    ->relationship(
+                                        name: 'supplierQuote',
+                                        titleAttribute: 'quote_number',
+                                        modifyQueryUsing: fn ($query) => $query->with(['supplier', 'currency', 'items.product'])
+                                    )
+                                    ->getOptionLabelFromRecordUsing(fn ($record) => 
+                                        ($record->supplier?->name ?? 'Unknown') . ' - ' . $record->quote_number
+                                    )
+                                    ->searchable(['quote_number', 'supplier.name'])
                                     ->preload()
-                                    ->native(false),
+                                    ->native(false)
+                                    ->live()
+                                    ->afterStateUpdated(function (Get $get, Set $set, ?string $state) {
+                                        if (!$state) return;
+                                        
+                                        $quote = \App\Models\SupplierQuote::with(['supplier', 'currency', 'items.product'])
+                                            ->find($state);
+                                        
+                                        if (!$quote) return;
+                                        
+                                        // Fill supplier and currency
+                                        $set('supplier_id', $quote->supplier_id);
+                                        $set('currency_id', $quote->currency_id);
+                                        $set('exchange_rate', $quote->locked_exchange_rate ?? $quote->currency?->exchange_rate ?? 1);
+                                        
+                                        // Fill items from quote
+                                        $items = [];
+                                        foreach ($quote->items as $quoteItem) {
+                                            $items[] = [
+                                                'product_id' => $quoteItem->product_id,
+                                                'product_name' => $quoteItem->product?->name ?? '',
+                                                'product_sku' => $quoteItem->product?->sku ?? '',
+                                                'quantity' => $quoteItem->quantity,
+                                                'unit_cost' => $quoteItem->unit_price_before_commission / 100, // Convert from cents
+                                                'total_cost' => $quoteItem->total_price_before_commission / 100, // Convert from cents
+                                                'notes' => $quoteItem->supplier_notes ?? '',
+                                            ];
+                                        }
+                                        $set('items', $items);
+                                        
+                                        // Trigger totals update
+                                        self::updateTotals($get, $set);
+                                    }),
                             ])
                             ->columns(2),
                     ])
