@@ -26,32 +26,34 @@ class PurchaseOrderForm
             ->components([
                 
                 // ==========================================
-                // SECTION 1: BASIC INFO & REFERENCE
+                // SECTION 1: PURCHASE ORDER INFORMATION
                 // ==========================================
-                Section::make('Basic Information & Reference')
-                    ->description('Purchase Order identification, dates, and source documents')
+                Section::make('Purchase Order Information')
                     ->schema([
-                        Group::make()
+                        Grid::make()
                             ->schema([
                                 TextInput::make('po_number')
                                     ->label('PO Number')
                                     ->default(fn () => 'PO-' . date('Y') . '-' . str_pad(rand(1, 9999), 4, '0', STR_PAD_LEFT))
                                     ->required()
                                     ->unique(ignoreRecord: true)
-                                    ->maxLength(50),
+                                    ->maxLength(50)
+                                    ->columnSpan(1),
                                 
                                 TextInput::make('revision_number')
                                     ->label('Revision')
                                     ->numeric()
                                     ->default(1)
                                     ->required()
-                                    ->minValue(1),
+                                    ->minValue(1)
+                                    ->columnSpan(1),
                                 
                                 DatePicker::make('po_date')
                                     ->label('PO Date')
                                     ->default(now())
                                     ->required()
-                                    ->native(false),
+                                    ->native(false)
+                                    ->columnSpan(1),
                                 
                                 Select::make('status')
                                     ->options([
@@ -64,19 +66,16 @@ class PurchaseOrderForm
                                     ])
                                     ->default('draft')
                                     ->required()
-                                    ->native(false),
-                            ])
-                            ->columns(4)
-                            ->columnSpan(1),
-                        
-                        Group::make()
-                            ->schema([
+                                    ->native(false)
+                                    ->columnSpan(1),
+                                
                                 Select::make('order_id')
                                     ->label('RFQ')
                                     ->relationship('order', 'order_number')
                                     ->searchable()
                                     ->preload()
-                                    ->native(false),
+                                    ->native(false)
+                                    ->columnSpan(1),
                                 
                                 Select::make('supplier_quote_id')
                                     ->label('Supplier Quote')
@@ -122,31 +121,29 @@ class PurchaseOrderForm
                                         
                                         // Trigger totals update
                                         self::updateTotals($get, $set);
-                                    }),
+                                    })
+                                    ->columnSpan(1),
                             ])
-                            ->columns(2)
-                            ->columnSpan(1),
+                            ->columns(2),
                     ])
-                    ->columns(2)
                     ->collapsible(),
                 
                 // ==========================================
-                // SECTION 3: SUPPLIER & CURRENCY
+                // SECTION 2: SUPPLIER & CURRENCY
                 // ==========================================
                 Section::make('Supplier & Currency')
-                    ->description('Select supplier and currency details')
                     ->schema([
-                        Select::make('supplier_id')
-                            ->label('Supplier')
-                            ->relationship('supplier', 'name')
-                            ->searchable()
-                            ->preload()
-                            ->required()
-                            ->native(false)
-                            ->columnSpan(2),
-                        
-                        Group::make()
+                        Grid::make()
                             ->schema([
+                                Select::make('supplier_id')
+                                    ->label('Supplier')
+                                    ->relationship('supplier', 'name')
+                                    ->searchable()
+                                    ->preload()
+                                    ->required()
+                                    ->native(false)
+                                    ->columnSpan(1),
+                                
                                 Select::make('currency_id')
                                     ->label('PO Currency')
                                     ->relationship('currency', 'code')
@@ -162,7 +159,8 @@ class PurchaseOrderForm
                                                 $set('exchange_rate', $currency->exchange_rate);
                                             }
                                         }
-                                    }),
+                                    })
+                                    ->columnSpan(1),
                                 
                                 TextInput::make('exchange_rate')
                                     ->label('Exchange Rate')
@@ -171,7 +169,8 @@ class PurchaseOrderForm
                                     ->minValue(0.000001)
                                     ->step(0.0001)
                                     ->default(1)
-                                    ->helperText('Rate locked at PO creation'),
+                                    ->helperText('Rate locked at PO creation')
+                                    ->columnSpan(1),
                                 
                                 Select::make('base_currency_id')
                                     ->label('Base Currency')
@@ -180,11 +179,11 @@ class PurchaseOrderForm
                                     ->preload()
                                     ->required()
                                     ->native(false)
-                                    ->default(fn () => Currency::where('code', 'USD')->first()?->id),
+                                    ->default(fn () => Currency::where('code', 'USD')->first()?->id)
+                                    ->columnSpan(1),
                             ])
-                            ->columns(3),
+                            ->columns(2),
                     ])
-                    ->columns(1)
                     ->collapsible(),
                 
                 // ==========================================
