@@ -18,7 +18,7 @@ return new class extends Migration
             
             // Relationships
             $table->foreignId('client_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('quote_id')->nullable()->constrained()->nullOnDelete();
+            $table->unsignedBigInteger('quote_id')->nullable()->comment('Reference to quote if exists');
             $table->foreignId('currency_id')->constrained();
             $table->foreignId('base_currency_id')->constrained('currencies');
             
