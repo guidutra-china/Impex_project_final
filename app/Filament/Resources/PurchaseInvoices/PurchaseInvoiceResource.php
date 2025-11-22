@@ -15,9 +15,7 @@ class PurchaseInvoiceResource extends Resource
 
     protected static ?string $navigationLabel = 'Purchase Invoices';
 
-    protected static ?string $navigationGroup = 'Purchasing';
-
-    protected static ?int $navigationSort = 4;
+    protected static ?int $navigationSort = 5;
 
     public static function form(\Filament\Schemas\Schema $schema): \Filament\Schemas\Schema
     {
