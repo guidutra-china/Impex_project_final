@@ -26,10 +26,10 @@ class PurchaseOrderForm
             ->components([
                 
                 // ==========================================
-                // SECTION 1: BASIC INFORMATION
+                // SECTION 1: BASIC INFO & REFERENCE
                 // ==========================================
-                Section::make('Basic Information')
-                    ->description('Purchase Order identification and dates')
+                Section::make('Basic Information & Reference')
+                    ->description('Purchase Order identification, dates, and source documents')
                     ->schema([
                         Group::make()
                             ->schema([
@@ -46,11 +46,7 @@ class PurchaseOrderForm
                                     ->default(1)
                                     ->required()
                                     ->minValue(1),
-                            ])
-                            ->columns(2),
-                        
-                        Group::make()
-                            ->schema([
+                                
                                 DatePicker::make('po_date')
                                     ->label('PO Date')
                                     ->default(now())
@@ -70,17 +66,9 @@ class PurchaseOrderForm
                                     ->required()
                                     ->native(false),
                             ])
-                            ->columns(2),
-                    ])
-                    ->columns(1)
-                    ->collapsible(),
-                
-                // ==========================================
-                // SECTION 2: REFERENCE (RFQ/QUOTE)
-                // ==========================================
-                Section::make('Reference')
-                    ->description('Link to RFQ and Supplier Quote (optional)')
-                    ->schema([
+                            ->columns(4)
+                            ->columnSpan(1),
+                        
                         Group::make()
                             ->schema([
                                 Select::make('order_id')
@@ -136,9 +124,10 @@ class PurchaseOrderForm
                                         self::updateTotals($get, $set);
                                     }),
                             ])
-                            ->columns(2),
+                            ->columns(2)
+                            ->columnSpan(1),
                     ])
-                    ->columns(1)
+                    ->columns(2)
                     ->collapsible(),
                 
                 // ==========================================
