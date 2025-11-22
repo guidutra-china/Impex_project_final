@@ -1,0 +1,359 @@
+<?php
+
+namespace App\Filament\Resources\PurchaseInvoices\Schemas;
+
+use App\Models\Currency;
+use App\Models\Product;
+use App\Models\PurchaseInvoice;
+use App\Models\PurchaseOrder;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Placeholder;
+use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
+use Filament\Schemas\Components\Group;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
+use Filament\Schemas\Schema;
+
+class PurchaseInvoiceForm
+{
+    public static function configure(Schema $schema): Schema
+    {
+        return $schema
+            ->components([
+                Group::make()
+                    ->schema([
+                        Section::make()
+                            ->schema(static::getDetailsComponents())
+                            ->columns(2),
+
+                        Section::make('Invoice Items')
+                            ->schema([
+                                static::getItemsRepeater(),
+                            ]),
+
+                        Section::make('Additional Costs')
+                            ->schema(static::getCostsComponents())
+                            ->columns(2)
+                            ->collapsible(),
+
+                        Section::make('Totals')
+                            ->schema(static::getTotalsComponents())
+                            ->columns(3)
+                            ->collapsible(),
+
+                        Section::make('Payment Information')
+                            ->schema(static::getPaymentComponents())
+                            ->columns(2)
+                            ->collapsible(),
+
+                        Section::make('Notes & Terms')
+                            ->schema(static::getNotesComponents())
+                            ->collapsed()
+                            ->collapsible(),
+                    ])
+                    ->columnSpan(['lg' => fn (?PurchaseInvoice $record) => $record === null ? 3 : 2]),
+
+                Group::make()
+                    ->schema([
+                        Section::make()
+                            ->schema(static::getSidebarComponents())
+                            ->hidden(fn (?PurchaseInvoice $record) => $record === null),
+                    ])
+                    ->columnSpan(['lg' => 1]),
+            ])
+            ->columns(3);
+    }
+
+    protected static function getDetailsComponents(): array
+    {
+        return [
+            TextInput::make('invoice_number')
+                ->label('Invoice Number')
+                ->default(fn () => PurchaseInvoice::generateInvoiceNumber())
+                ->disabled()
+                ->dehydrated()
+                ->required(),
+
+            TextInput::make('revision_number')
+                ->label('Revision')
+                ->default(1)
+                ->numeric()
+                ->disabled()
+                ->dehydrated(),
+
+            Select::make('status')
+                ->options([
+                    'draft' => 'Draft',
+                    'sent' => 'Sent',
+                    'paid' => 'Paid',
+                    'overdue' => 'Overdue',
+                    'cancelled' => 'Cancelled',
+                    'superseded' => 'Superseded',
+                ])
+                ->default('draft')
+                ->required(),
+
+            Select::make('purchase_order_id')
+                ->label('Purchase Order')
+                ->relationship('purchaseOrder', 'po_number')
+                ->searchable()
+                ->preload()
+                ->afterStateUpdated(function (Get $get, Set $set, $state) {
+                    if (!$state) return;
+
+                    $po = PurchaseOrder::with(['supplier', 'currency', 'baseCurrency', 'items.product'])->find($state);
+                    if (!$po) return;
+
+                    // Fill supplier and currency
+                    $set('supplier_id', $po->supplier_id);
+                    $set('currency_id', $po->currency_id);
+                    $set('base_currency_id', $po->base_currency_id);
+                    $set('exchange_rate', $po->exchange_rate);
+
+                    // Fill items from PO
+                    $items = $po->items->map(function ($item) {
+                        return [
+                            'product_id' => $item->product_id,
+                            'product_name' => $item->product_name,
+                            'product_sku' => $item->product_sku,
+                            'quantity' => $item->quantity,
+                            'unit_cost' => $item->unit_cost / 100, // Convert from cents
+                            'total_cost' => $item->total_cost / 100,
+                            'purchase_order_item_id' => $item->id,
+                            'notes' => $item->notes,
+                        ];
+                    })->toArray();
+
+                    $set('items', $items);
+                }),
+
+            Select::make('supplier_id')
+                ->label('Supplier')
+                ->relationship('supplier', 'name')
+                ->searchable()
+                ->preload()
+                ->required(),
+
+            DatePicker::make('invoice_date')
+                ->label('Invoice Date')
+                ->default(now())
+                ->required(),
+
+            DatePicker::make('due_date')
+                ->label('Due Date')
+                ->default(now()->addDays(30))
+                ->required(),
+
+            Select::make('currency_id')
+                ->label('Invoice Currency')
+                ->relationship('currency', 'code')
+                ->searchable()
+                ->preload()
+                ->required()
+                ->afterStateUpdated(function (Get $get, Set $set, $state) {
+                    $baseCurrencyId = $get('base_currency_id');
+                    
+                    if ($state == $baseCurrencyId) {
+                        $set('exchange_rate', 1);
+                    } else {
+                        $currency = Currency::find($state);
+                        if ($currency) {
+                            $set('exchange_rate', $currency->exchange_rate);
+                        }
+                    }
+                }),
+
+            TextInput::make('exchange_rate')
+                ->label('Exchange Rate')
+                ->numeric()
+                ->default(1)
+                ->step('any')
+                ->minValue(0.000001)
+                ->required()
+                ->helperText('Rate locked at invoice creation'),
+
+            Select::make('base_currency_id')
+                ->label('Base Currency')
+                ->relationship('baseCurrency', 'code')
+                ->default(fn () => Currency::where('is_base', true)->first()?->id)
+                ->required()
+                ->disabled()
+                ->dehydrated(),
+        ];
+    }
+
+    protected static function getItemsRepeater(): Repeater
+    {
+        return Repeater::make('items')
+            ->relationship()
+            ->schema([
+                Select::make('product_id')
+                    ->label('Product')
+                    ->relationship('product', 'name')
+                    ->searchable()
+                    ->preload()
+                    ->required()
+                    ->columnSpan(2)
+                    ->afterStateUpdated(function (Get $get, Set $set, $state) {
+                        if (!$state) return;
+
+                        $product = Product::find($state);
+                        if ($product) {
+                            $set('product_name', $product->name);
+                            $set('product_sku', $product->sku);
+                            $set('unit_cost', $product->cost / 100); // Convert from cents
+                        }
+                    }),
+
+                TextInput::make('quantity')
+                    ->label('Quantity')
+                    ->numeric()
+                    ->default(1)
+                    ->minValue(0.01)
+                    ->required()
+                    ->afterStateUpdated(function (Get $get, Set $set) {
+                        $quantity = (float) $get('quantity');
+                        $unitCost = (float) $get('unit_cost');
+                        $set('total_cost', $quantity * $unitCost);
+                    }),
+
+                TextInput::make('unit_cost')
+                    ->label('Unit Cost')
+                    ->numeric()
+                    ->default(0)
+                    ->minValue(0)
+                    ->required()
+                    ->prefix('$')
+                    ->afterStateUpdated(function (Get $get, Set $set) {
+                        $quantity = (float) $get('quantity');
+                        $unitCost = (float) $get('unit_cost');
+                        $set('total_cost', $quantity * $unitCost);
+                    }),
+
+                TextInput::make('total_cost')
+                    ->label('Total Cost')
+                    ->numeric()
+                    ->disabled()
+                    ->dehydrated()
+                    ->prefix('$'),
+
+                Textarea::make('notes')
+                    ->label('Notes')
+                    ->rows(2)
+                    ->columnSpanFull(),
+
+                // Hidden fields for caching
+                TextInput::make('product_name')->hidden()->dehydrated(),
+                TextInput::make('product_sku')->hidden()->dehydrated(),
+                TextInput::make('purchase_order_item_id')->hidden()->dehydrated(),
+            ])
+            ->columns(5)
+            ->defaultItems(1)
+            ->reorderable()
+            ->collapsible()
+            ->itemLabel(fn (array $state): ?string => $state['product_name'] ?? null);
+    }
+
+    protected static function getCostsComponents(): array
+    {
+        return [
+            TextInput::make('tax')
+                ->label('Tax')
+                ->numeric()
+                ->default(0)
+                ->minValue(0)
+                ->prefix('$'),
+        ];
+    }
+
+    protected static function getTotalsComponents(): array
+    {
+        return [
+            TextInput::make('subtotal')
+                ->label('Subtotal')
+                ->numeric()
+                ->disabled()
+                ->prefix('$')
+                ->helperText('Auto-calculated from items'),
+
+            TextInput::make('total')
+                ->label('Total')
+                ->numeric()
+                ->disabled()
+                ->prefix('$')
+                ->helperText('Subtotal + Tax'),
+
+            TextInput::make('total_base_currency')
+                ->label('Total (Base Currency)')
+                ->numeric()
+                ->disabled()
+                ->prefix('$')
+                ->helperText('Total × Exchange Rate'),
+        ];
+    }
+
+    protected static function getPaymentComponents(): array
+    {
+        return [
+            DatePicker::make('payment_date')
+                ->label('Payment Date'),
+
+            Select::make('payment_method')
+                ->label('Payment Method')
+                ->options([
+                    'bank_transfer' => 'Bank Transfer',
+                    'credit_card' => 'Credit Card',
+                    'cash' => 'Cash',
+                    'check' => 'Check',
+                    'paypal' => 'PayPal',
+                    'other' => 'Other',
+                ]),
+
+            Textarea::make('payment_reference')
+                ->label('Payment Reference')
+                ->rows(2)
+                ->columnSpanFull()
+                ->helperText('Transaction ID, check number, etc.'),
+        ];
+    }
+
+    protected static function getNotesComponents(): array
+    {
+        return [
+            Textarea::make('notes')
+                ->label('Internal Notes')
+                ->rows(3)
+                ->columnSpanFull(),
+
+            Textarea::make('terms_and_conditions')
+                ->label('Terms and Conditions')
+                ->rows(3)
+                ->columnSpanFull(),
+        ];
+    }
+
+    protected static function getSidebarComponents(): array
+    {
+        return [
+            Placeholder::make('created_at')
+                ->label('Created')
+                ->content(fn (PurchaseInvoice $record): string => $record->created_at->diffForHumans()),
+
+            Placeholder::make('updated_at')
+                ->label('Last modified')
+                ->content(fn (PurchaseInvoice $record): string => $record->updated_at->diffForHumans()),
+
+            Placeholder::make('sent_at')
+                ->label('Sent to supplier')
+                ->content(fn (PurchaseInvoice $record): string => $record->sent_at ? $record->sent_at->diffForHumans() : 'Not sent'),
+
+            Placeholder::make('paid_at')
+                ->label('Paid')
+                ->content(fn (PurchaseInvoice $record): string => $record->paid_at ? $record->paid_at->diffForHumans() : 'Not paid'),
+        ];
+    }
+}
