@@ -169,6 +169,123 @@ class OrdersTable
                             ->send();
                     })
                     ->visible(fn (Order $record) => in_array($record->status, ['pending', 'processing'])),
+                
+                // Status Transition Actions
+                Action::make('start_processing')
+                    ->label('Start Processing')
+                    ->icon('heroicon-o-play')
+                    ->color('warning')
+                    ->action(function (Order $record) {
+                        $record->update([
+                            'status' => 'processing',
+                            'processing_started_at' => now(),
+                        ]);
+                        
+                        Notification::make()
+                            ->success()
+                            ->title('RFQ processing started')
+                            ->body("RFQ {$record->order_number} is now being processed.")
+                            ->send();
+                    })
+                    ->requiresConfirmation()
+                    ->visible(fn (Order $record) => $record->status === 'pending'),
+                
+                Action::make('mark_as_quoted')
+                    ->label('Mark as Quoted')
+                    ->icon('heroicon-o-document-check')
+                    ->color('info')
+                    ->action(function (Order $record) {
+                        $quoteCount = $record->supplierQuotes()->count();
+                        
+                        if ($quoteCount === 0) {
+                            Notification::make()
+                                ->danger()
+                                ->title('Cannot mark as quoted')
+                                ->body('No supplier quotes found for this RFQ.')
+                                ->send();
+                            return;
+                        }
+                        
+                        $record->update([
+                            'status' => 'quoted',
+                            'quoted_at' => now(),
+                        ]);
+                        
+                        Notification::make()
+                            ->success()
+                            ->title('RFQ marked as quoted')
+                            ->body("RFQ {$record->order_number} has {$quoteCount} supplier quote(s).")
+                            ->send();
+                    })
+                    ->requiresConfirmation()
+                    ->visible(fn (Order $record) => $record->status === 'processing'),
+                
+                Action::make('complete')
+                    ->label('Complete')
+                    ->icon('heroicon-o-check-circle')
+                    ->color('success')
+                    ->action(function (Order $record) {
+                        $record->update([
+                            'status' => 'completed',
+                            'completed_at' => now(),
+                        ]);
+                        
+                        Notification::make()
+                            ->success()
+                            ->title('RFQ completed')
+                            ->body("RFQ {$record->order_number} has been completed successfully.")
+                            ->send();
+                    })
+                    ->requiresConfirmation()
+                    ->modalHeading('Complete RFQ')
+                    ->modalDescription('Are you sure you want to mark this RFQ as completed?')
+                    ->visible(fn (Order $record) => $record->status === 'quoted'),
+                
+                Action::make('cancel')
+                    ->label('Cancel')
+                    ->icon('heroicon-o-x-circle')
+                    ->color('danger')
+                    ->form([
+                        Textarea::make('cancellation_reason')
+                            ->label('Cancellation Reason')
+                            ->required()
+                            ->rows(3),
+                    ])
+                    ->action(function (Order $record, array $data) {
+                        $record->update([
+                            'status' => 'cancelled',
+                            'cancelled_at' => now(),
+                            'cancellation_reason' => $data['cancellation_reason'],
+                        ]);
+                        
+                        Notification::make()
+                            ->success()
+                            ->title('RFQ cancelled')
+                            ->body("RFQ {$record->order_number} has been cancelled.")
+                            ->send();
+                    })
+                    ->requiresConfirmation()
+                    ->visible(fn (Order $record) => in_array($record->status, ['pending', 'processing', 'quoted'])),
+                
+                Action::make('reopen')
+                    ->label('Reopen')
+                    ->icon('heroicon-o-arrow-path')
+                    ->color('gray')
+                    ->action(function (Order $record) {
+                        $record->update([
+                            'status' => 'pending',
+                            'cancelled_at' => null,
+                            'cancellation_reason' => null,
+                        ]);
+                        
+                        Notification::make()
+                            ->success()
+                            ->title('RFQ reopened')
+                            ->body("RFQ {$record->order_number} has been reopened.")
+                            ->send();
+                    })
+                    ->requiresConfirmation()
+                    ->visible(fn (Order $record) => $record->status === 'cancelled'),
             ])
             ->bulkActions([
                 BulkActionGroup::make([

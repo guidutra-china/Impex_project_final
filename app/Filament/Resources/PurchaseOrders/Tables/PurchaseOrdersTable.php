@@ -195,6 +195,114 @@ class PurchaseOrdersTable
             ])
             ->recordActions([
                 EditAction::make(),
+                
+                // Status Transition Actions
+                \Filament\Actions\Action::make('send_to_supplier')
+                    ->label('Send to Supplier')
+                    ->icon('heroicon-o-paper-airplane')
+                    ->color('warning')
+                    ->action(function ($record) {
+                        $record->update([
+                            'status' => 'sent',
+                            'sent_at' => now(),
+                        ]);
+                        
+                        \Filament\Notifications\Notification::make()
+                            ->success()
+                            ->title('PO sent to supplier')
+                            ->body("Purchase Order {$record->po_number} has been sent.")
+                            ->send();
+                        
+                        // TODO: Send email to supplier
+                    })
+                    ->requiresConfirmation()
+                    ->modalHeading('Send PO to Supplier')
+                    ->modalDescription('This will mark the PO as sent and notify the supplier.')
+                    ->visible(fn ($record) => $record->status === 'draft'),
+                
+                \Filament\Actions\Action::make('mark_as_confirmed')
+                    ->label('Mark as Confirmed')
+                    ->icon('heroicon-o-check-badge')
+                    ->color('info')
+                    ->action(function ($record) {
+                        $record->update([
+                            'status' => 'confirmed',
+                            'confirmed_at' => now(),
+                        ]);
+                        
+                        \Filament\Notifications\Notification::make()
+                            ->success()
+                            ->title('PO confirmed')
+                            ->body("Purchase Order {$record->po_number} has been confirmed by supplier.")
+                            ->send();
+                    })
+                    ->requiresConfirmation()
+                    ->visible(fn ($record) => $record->status === 'sent'),
+                
+                \Filament\Actions\Action::make('mark_as_received')
+                    ->label('Mark as Received')
+                    ->icon('heroicon-o-inbox-arrow-down')
+                    ->color('success')
+                    ->action(function ($record) {
+                        $record->update([
+                            'status' => 'received',
+                            'received_at' => now(),
+                            'actual_delivery_date' => now(),
+                        ]);
+                        
+                        \Filament\Notifications\Notification::make()
+                            ->success()
+                            ->title('PO received')
+                            ->body("Purchase Order {$record->po_number} has been received.")
+                            ->send();
+                    })
+                    ->requiresConfirmation()
+                    ->visible(fn ($record) => $record->status === 'confirmed'),
+                
+                \Filament\Actions\Action::make('mark_as_paid')
+                    ->label('Mark as Paid')
+                    ->icon('heroicon-o-banknotes')
+                    ->color('success')
+                    ->action(function ($record) {
+                        $record->update([
+                            'status' => 'paid',
+                            'paid_at' => now(),
+                        ]);
+                        
+                        \Filament\Notifications\Notification::make()
+                            ->success()
+                            ->title('PO paid')
+                            ->body("Purchase Order {$record->po_number} has been marked as paid.")
+                            ->send();
+                    })
+                    ->requiresConfirmation()
+                    ->visible(fn ($record) => $record->status === 'received'),
+                
+                \Filament\Actions\Action::make('cancel_po')
+                    ->label('Cancel')
+                    ->icon('heroicon-o-x-circle')
+                    ->color('danger')
+                    ->form([
+                        \Filament\Forms\Components\Textarea::make('cancellation_reason')
+                            ->label('Cancellation Reason')
+                            ->required()
+                            ->rows(3),
+                    ])
+                    ->action(function ($record, array $data) {
+                        $record->update([
+                            'status' => 'cancelled',
+                            'cancelled_at' => now(),
+                            'cancellation_reason' => $data['cancellation_reason'],
+                        ]);
+                        
+                        \Filament\Notifications\Notification::make()
+                            ->success()
+                            ->title('PO cancelled')
+                            ->body("Purchase Order {$record->po_number} has been cancelled.")
+                            ->send();
+                    })
+                    ->requiresConfirmation()
+                    ->visible(fn ($record) => in_array($record->status, ['draft', 'sent', 'confirmed'])),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

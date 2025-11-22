@@ -148,6 +148,54 @@ class SupplierQuotesTable
                     ->modalSubmitActionLabel('Create PO')
                     ->color('success')
                     ->visible(fn ($record) => $record->status === 'accepted'),
+                
+                // Status Transition Actions
+                Action::make('accept')
+                    ->label('Accept')
+                    ->icon('heroicon-o-check-circle')
+                    ->color('success')
+                    ->action(function ($record) {
+                        $record->update([
+                            'status' => 'accepted',
+                            'accepted_at' => now(),
+                        ]);
+                        
+                        \Filament\Notifications\Notification::make()
+                            ->success()
+                            ->title('Quote accepted')
+                            ->body("Supplier Quote {$record->quote_number} has been accepted.")
+                            ->send();
+                    })
+                    ->requiresConfirmation()
+                    ->modalHeading('Accept Supplier Quote')
+                    ->modalDescription('Are you sure you want to accept this quote?')
+                    ->visible(fn ($record) => in_array($record->status, ['draft', 'sent'])),
+                
+                Action::make('reject')
+                    ->label('Reject')
+                    ->icon('heroicon-o-x-circle')
+                    ->color('danger')
+                    ->form([
+                        \Filament\Forms\Components\Textarea::make('rejection_reason')
+                            ->label('Rejection Reason')
+                            ->required()
+                            ->rows(3),
+                    ])
+                    ->action(function ($record, array $data) {
+                        $record->update([
+                            'status' => 'rejected',
+                            'rejected_at' => now(),
+                            'rejection_reason' => $data['rejection_reason'],
+                        ]);
+                        
+                        \Filament\Notifications\Notification::make()
+                            ->success()
+                            ->title('Quote rejected')
+                            ->body("Supplier Quote {$record->quote_number} has been rejected.")
+                            ->send();
+                    })
+                    ->requiresConfirmation()
+                    ->visible(fn ($record) => in_array($record->status, ['draft', 'sent'])),
             ])
             ->bulkActions([
                 BulkActionGroup::make([
