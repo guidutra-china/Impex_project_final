@@ -215,7 +215,7 @@ class PurchaseOrderForm
                 ->numeric()
                 ->required()
                 ->minValue(0.000001)
-                ->step(0.0001)
+                ->step('any')
                 ->default(1)
                 ->helperText('Rate locked at PO creation'),
 
