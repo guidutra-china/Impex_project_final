@@ -13,18 +13,23 @@ class PurchaseOrderItem extends Model
     protected $fillable = [
         'purchase_order_id',
         'product_id',
+        'quantity',
+        'received_quantity',
+        'allocated_quantity',
+        'unit_cost',
+        'total_cost',
+        'selling_price',
+        'selling_total',
         'product_name',
         'product_sku',
-        'quantity',
-        'unit_price',
-        'total_price',
+        'expected_delivery_date',
+        'actual_delivery_date',
         'notes',
     ];
 
     protected $casts = [
-        'quantity' => 'integer',
-        'unit_price' => 'integer',
-        'total_price' => 'integer',
+        'expected_delivery_date' => 'date',
+        'actual_delivery_date' => 'date',
     ];
 
     // Relationships
@@ -39,49 +44,14 @@ class PurchaseOrderItem extends Model
     }
 
     // Accessors
-    public function getUnitPriceFormattedAttribute(): string
+    public function getAvailableQuantityAttribute(): int
     {
-        return number_format($this->unit_price / 100, 2);
+        return $this->received_quantity - $this->allocated_quantity;
     }
 
-    public function getTotalPriceFormattedAttribute(): string
+    public function getMarginAttribute(): ?float
     {
-        return number_format($this->total_price / 100, 2);
-    }
-
-    // Methods
-    public function calculateTotal(): void
-    {
-        $this->total_price = $this->quantity * $this->unit_price;
-        $this->save();
-    }
-
-    protected static function boot()
-    {
-        parent::boot();
-        
-        static::creating(function ($item) {
-            // Snapshot product name and SKU
-            if ($item->product_id && !$item->product_name) {
-                $product = Product::find($item->product_id);
-                $item->product_name = $product->name;
-                $item->product_sku = $product->sku;
-            }
-            
-            // Calculate total if not set
-            if (!$item->total_price) {
-                $item->total_price = $item->quantity * $item->unit_price;
-            }
-        });
-        
-        static::saved(function ($item) {
-            // Recalculate PO total
-            $item->purchaseOrder->calculateTotal();
-        });
-        
-        static::deleted(function ($item) {
-            // Recalculate PO total
-            $item->purchaseOrder->calculateTotal();
-        });
+        if (!$this->selling_price || $this->unit_cost == 0) return null;
+        return (($this->selling_price - $this->unit_cost) / $this->unit_cost) * 100;
     }
 }

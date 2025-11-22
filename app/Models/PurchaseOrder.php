@@ -4,9 +4,10 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class PurchaseOrder extends Model
 {
@@ -14,59 +15,55 @@ class PurchaseOrder extends Model
 
     protected $fillable = [
         'po_number',
+        'revision_number',
         'order_id',
         'supplier_quote_id',
         'supplier_id',
         'currency_id',
-        'payment_term_id',
-        'status',
-        'incoterm',
-        'delivery_address',
-        'delivery_terms',
+        'exchange_rate',
+        'base_currency_id',
         'subtotal',
         'shipping_cost',
-        'shipping_included_in_price',
         'insurance_cost',
-        'insurance_included_in_price',
         'other_costs',
-        'tax_amount',
-        'discount_amount',
-        'total_amount',
-        'locked_exchange_rate',
-        'total_in_base_currency',
-        'notes',
-        'internal_notes',
-        'sent_at',
-        'confirmed_at',
+        'discount',
+        'tax',
+        'total',
+        'total_base_currency',
+        'incoterm',
+        'incoterm_location',
+        'shipping_included_in_price',
+        'insurance_included_in_price',
+        'payment_term_id',
+        'payment_terms_text',
+        'delivery_address',
         'expected_delivery_date',
         'actual_delivery_date',
+        'status',
+        'po_date',
+        'sent_at',
+        'confirmed_at',
+        'notes',
+        'terms_and_conditions',
         'created_by',
-        'updated_by',
+        'approved_by',
     ];
 
     protected $casts = [
-        'subtotal' => 'integer',
-        'shipping_cost' => 'integer',
-        'shipping_included_in_price' => 'boolean',
-        'insurance_cost' => 'integer',
-        'insurance_included_in_price' => 'boolean',
-        'other_costs' => 'integer',
-        'tax_amount' => 'integer',
-        'discount_amount' => 'integer',
-        'total_amount' => 'integer',
-        'locked_exchange_rate' => 'decimal:6',
-        'total_in_base_currency' => 'integer',
-        'sent_at' => 'datetime',
-        'confirmed_at' => 'datetime',
+        'po_date' => 'date',
         'expected_delivery_date' => 'date',
         'actual_delivery_date' => 'date',
+        'sent_at' => 'datetime',
+        'confirmed_at' => 'datetime',
+        'shipping_included_in_price' => 'boolean',
+        'insurance_included_in_price' => 'boolean',
     ];
 
     // Relationships
-    public function order(): BelongsTo
-    {
-        return $this->belongsTo(Order::class);
-    }
+//    public function order(): BelongsTo
+//    {
+//        return $this->belongsTo(Order::class)->comment('RFQ relacionado');
+//    }
 
     public function supplierQuote(): BelongsTo
     {
@@ -83,6 +80,11 @@ class PurchaseOrder extends Model
         return $this->belongsTo(Currency::class);
     }
 
+    public function baseCurrency(): BelongsTo
+    {
+        return $this->belongsTo(Currency::class, 'base_currency_id');
+    }
+
     public function paymentTerm(): BelongsTo
     {
         return $this->belongsTo(PaymentTerm::class);
@@ -93,105 +95,72 @@ class PurchaseOrder extends Model
         return $this->hasMany(PurchaseOrderItem::class);
     }
 
+    public function payments(): HasMany
+    {
+        return $this->hasMany(SupplierPaymentAllocation::class);
+    }
+
+    public function shipments(): HasMany
+    {
+        return $this->hasMany(Shipment::class);
+    }
+
+    public function documents(): MorphMany
+    {
+        return $this->morphMany(Document::class, 'related');
+    }
+
+    public function qualityInspections(): MorphMany
+    {
+        return $this->morphMany(QualityInspection::class, 'inspectable');
+    }
+
+    public function supplierIssues(): HasMany
+    {
+        return $this->hasMany(SupplierIssue::class);
+    }
+
     public function createdBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
     }
 
-    public function updatedBy(): BelongsTo
+    public function approvedBy(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'updated_by');
-    }
-
-    // Scopes
-    public function scopeDraft($query)
-    {
-        return $query->where('status', 'draft');
-    }
-
-    public function scopeSent($query)
-    {
-        return $query->where('status', 'sent');
-    }
-
-    public function scopeConfirmed($query)
-    {
-        return $query->where('status', 'confirmed');
+        return $this->belongsTo(User::class, 'approved_by');
     }
 
     // Accessors
-    public function getSubtotalFormattedAttribute(): string
+    public function getTotalPaidAttribute(): int
     {
-        return number_format($this->subtotal / 100, 2);
+        return $this->payments()->sum('allocated_amount');
     }
 
-    public function getTotalAmountFormattedAttribute(): string
+    public function getBalanceAttribute(): int
     {
-        return number_format($this->total_amount / 100, 2);
+        return $this->total - $this->getTotalPaidAttribute();
     }
 
-    // Methods
-    public function calculateTotal(): void
+    public function getIsFullyPaidAttribute(): bool
     {
-        $subtotal = $this->items()->sum('total_price');
-        
-        $shipping = $this->shipping_included_in_price ? 0 : ($this->shipping_cost ?? 0);
-        $insurance = $this->insurance_included_in_price ? 0 : ($this->insurance_cost ?? 0);
-        $other = $this->other_costs ?? 0;
-        $tax = $this->tax_amount ?? 0;
-        $discount = $this->discount_amount ?? 0;
-        
-        $total = $subtotal + $shipping + $insurance + $other + $tax - $discount;
-        
-        $this->update([
-            'subtotal' => $subtotal,
-            'total_amount' => $total,
-        ]);
+        return $this->getBalanceAttribute() <= 0;
     }
 
-    public function lockExchangeRate(): void
+    // Scopes
+    public function scopePending($query)
     {
-        if (!$this->locked_exchange_rate && $this->currency_id) {
-            $baseCurrency = Currency::where('is_base', true)->first();
-            
-            if ($baseCurrency && $this->currency_id !== $baseCurrency->id) {
-                $this->locked_exchange_rate = $this->currency->exchange_rate;
-                $this->total_in_base_currency = $this->total_amount * $this->locked_exchange_rate;
-                $this->save();
-            }
-        }
+        return $query->whereIn('status', ['draft', 'pending_approval']);
     }
 
-    public function generatePoNumber(): string
+    public function scopeActive($query)
     {
-        $year = date('Y');
-        $month = date('m');
-        $lastPo = static::whereYear('created_at', $year)
-            ->whereMonth('created_at', $month)
-            ->orderBy('id', 'desc')
-            ->first();
-        
-        $sequence = $lastPo ? (int) substr($lastPo->po_number, -4) + 1 : 1;
-        
-        return sprintf('PO-%s%s-%04d', $year, $month, $sequence);
+        return $query->whereIn('status', ['approved', 'sent', 'confirmed', 'partially_received']);
     }
 
-    protected static function boot()
+    public function scopeOverdue($query)
     {
-        parent::boot();
-        
-        static::creating(function ($purchaseOrder) {
-            if (!$purchaseOrder->po_number) {
-                $purchaseOrder->po_number = $purchaseOrder->generatePoNumber();
-            }
-            
-            if (!$purchaseOrder->created_by) {
-                $purchaseOrder->created_by = auth()->id();
-            }
-        });
-        
-        static::updating(function ($purchaseOrder) {
-            $purchaseOrder->updated_by = auth()->id();
-        });
+        return $query->where('expected_delivery_date', '<', now())
+            ->whereNull('actual_delivery_date')
+            ->whereIn('status', ['sent', 'confirmed']);
     }
 }
