@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\PaymentTerm\RelationManagers;
 
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
@@ -27,16 +28,34 @@ class StagesRelationManager extends RelationManager
                     ->minValue(1)
                     ->maxValue(100)
                     ->suffix('%')
+                    ->label('Payment Percentage')
                     ->columnSpan(1),
-                TextInput::make('days_from_invoice')
+                
+                TextInput::make('days')
                     ->required()
                     ->numeric()
                     ->minValue(0)
                     ->suffix('days')
+                    ->label('Days')
+                    ->helperText('Number of days from the calculation base')
                     ->columnSpan(1),
+                
+                Select::make('calculation_base')
+                    ->required()
+                    ->options([
+                        'invoice_date' => 'Invoice Date',
+                        'shipment_date' => 'Shipment Date',
+                    ])
+                    ->default('invoice_date')
+                    ->label('Calculate From')
+                    ->helperText('Base date for calculating the due date')
+                    ->columnSpan(1),
+                
                 TextInput::make('sort_order')
                     ->numeric()
                     ->default(1)
+                    ->label('Order')
+                    ->helperText('Stage order (1, 2, 3...)')
                     ->columnSpan(1),
             ])->columns(3);
     }
@@ -49,12 +68,28 @@ class StagesRelationManager extends RelationManager
                 TextColumn::make('sort_order')
                     ->label('Order')
                     ->sortable(),
+                
                 TextColumn::make('percentage')
-                    ->label('Percentage')
+                    ->label('Payment %')
                     ->suffix('%')
                     ->sortable(),
-                TextColumn::make('days_from_invoice')
-                    ->label('Due (Days from Invoice)')
+                
+                TextColumn::make('days')
+                    ->label('Days')
+                    ->sortable(),
+                
+                TextColumn::make('calculation_base')
+                    ->label('Calculate From')
+                    ->badge()
+                    ->colors([
+                        'primary' => 'invoice_date',
+                        'success' => 'shipment_date',
+                    ])
+                    ->formatStateUsing(fn (string $state): string => match ($state) {
+                        'invoice_date' => 'Invoice Date',
+                        'shipment_date' => 'Shipment Date',
+                        default => $state,
+                    })
                     ->sortable(),
             ])
             ->filters([
