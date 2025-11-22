@@ -12,8 +12,8 @@ class CategoryFactory extends Factory
     public function definition(): array
     {
         $categories = [
-            'Electronics' => 'Electronic components and devices',
-            'Mechanical Parts' => 'Mechanical components and assemblies',
+            'Street Light' => 'All kind of Street Lighting',
+            'Flood Light' => 'Flood Lighting',
             'Textiles' => 'Fabrics and textile products',
             'Packaging' => 'Packaging materials and solutions',
             'Raw Materials' => 'Base materials and commodities',

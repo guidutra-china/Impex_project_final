@@ -12,11 +12,11 @@ class TagFactory extends Factory
     public function definition(): array
     {
         $tags = [
-            'Import',
-            'Export',
-            'Logistics',
-            'Manufacturing',
-            'Quality Certified',
+            'Street Light',
+            'Flood Light',
+            'Strips',
+            'Drivers',
+            'Smart Cities',
             'Fast Delivery',
             'Custom Design',
             'Bulk Orders',

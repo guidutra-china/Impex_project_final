@@ -57,6 +57,7 @@ class OrderForm
                                     ->relationship('currency', 'code', fn ($query) => $query->where('is_active', true))
                                     ->required()
                                     ->searchable()
+                                    ->default(1)
                                     ->preload()
                                     ->label('Order Currency')
                                     ->helperText('Currency for customer quotes')

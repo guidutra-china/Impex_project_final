@@ -3,209 +3,110 @@
 namespace App\Services;
 
 use App\Models\Document;
-use App\Models\DocumentVersion;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 
 class DocumentService
 {
     /**
-     * Allowed MIME types for security
+     * Upload de documento
      */
-    private const ALLOWED_MIME_TYPES = [
-        'application/pdf',
-        'image/jpeg',
-        'image/png',
-        'image/gif',
-        'application/msword',
-        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-        'application/vnd.ms-excel',
-        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-    ];
-
-    /**
-     * Max file size in bytes (10MB)
-     */
-    private const MAX_FILE_SIZE = 10 * 1024 * 1024;
-
-    /**
-     * Create a new document with file upload
-     *
-     * @param array $data
-     * @param UploadedFile $file
-     * @return Document
-     * @throws \Exception
-     */
-    public function createDocument(array $data, UploadedFile $file): Document
+    public function uploadDocument(array $data, UploadedFile $file): Document
     {
-        // Validate file
-        $this->validateFile($file);
+        // Gerar nome único
+        $filename = time() . '_' . $file->getClientOriginalName();
+        $path = $file->storeAs('documents/' . $data['document_type'], $filename);
 
-        return DB::transaction(function () use ($data, $file) {
-            // Generate safe filename
-            $safeFilename = Str::uuid() . '.' . $file->getClientOriginalExtension();
-            
-            // Store file
-            $path = $file->storeAs('documents', $safeFilename, 'private');
+        // Criar documento
+        $document = Document::create([
+            'document_type' => $data['document_type'],
+            'related_type' => $data['related_type'] ?? null,
+            'related_id' => $data['related_id'] ?? null,
+            'document_number' => $data['document_number'] ?? null,
+            'title' => $data['title'],
+            'description' => $data['description'] ?? null,
+            'file_path' => $path,
+            'file_name' => $file->getClientOriginalName(),
+            'file_size' => $file->getSize(),
+            'mime_type' => $file->getMimeType(),
+            'issue_date' => $data['issue_date'] ?? null,
+            'expiry_date' => $data['expiry_date'] ?? null,
+            'status' => $data['status'] ?? 'draft',
+            'is_public' => $data['is_public'] ?? false,
+            'notes' => $data['notes'] ?? null,
+            'uploaded_by' => auth()->id(),
+        ]);
 
-            // Generate document number if not provided
-            if (!isset($data['document_number'])) {
-                $data['document_number'] = $this->generateDocumentNumber();
-            }
-
-            // Create document
-            $document = Document::create([
-                ...$data,
-                'file_path' => $path,
-                'file_name' => $file->getClientOriginalName(),
-                'safe_filename' => $safeFilename,
-                'mime_type' => $file->getMimeType(),
-                'file_size' => $file->getSize(),
-                'uploaded_by' => auth()->id(),
-            ]);
-
-            return $document;
-        });
+        return $document;
     }
 
     /**
-     * Create a new version of existing document
-     *
-     * @param Document $document
-     * @param UploadedFile $file
-     * @param string|null $changeNotes
-     * @return DocumentVersion
-     * @throws \Exception
+     * Criar nova versão de documento
      */
-    public function createVersion(Document $document, UploadedFile $file, ?string $changeNotes = null): DocumentVersion
+    public function createVersion(Document $document, UploadedFile $file, string $changeNotes = null): void
     {
-        $this->validateFile($file);
+        // Salvar versão atual
+        $currentVersion = $document->versions()->count() + 1;
 
-        return DB::transaction(function () use ($document, $file, $changeNotes) {
-            // Get next version number
-            $nextVersion = $document->versions()->max('version_number') + 1;
+        $document->versions()->create([
+            'version_number' => $currentVersion - 1,
+            'file_path' => $document->file_path,
+            'file_name' => $document->file_name,
+            'file_size' => $document->file_size,
+            'change_notes' => 'Original version',
+            'uploaded_by' => $document->uploaded_by,
+        ]);
 
-            // Generate safe filename
-            $safeFilename = Str::uuid() . '.' . $file->getClientOriginalExtension();
-            
-            // Store file
-            $path = $file->storeAs('documents/versions', $safeFilename, 'private');
+        // Upload novo arquivo
+        $filename = time() . '_' . $file->getClientOriginalName();
+        $path = $file->storeAs('documents/' . $document->document_type, $filename);
 
-            // Create version
-            $version = DocumentVersion::create([
-                'document_id' => $document->id,
-                'version_number' => $nextVersion,
-                'file_path' => $path,
-                'file_name' => $file->getClientOriginalName(),
-                'file_size' => $file->getSize(),
-                'change_notes' => $changeNotes,
-                'uploaded_by' => auth()->id(),
-            ]);
+        // Atualizar documento
+        $document->update([
+            'file_path' => $path,
+            'file_name' => $file->getClientOriginalName(),
+            'file_size' => $file->getSize(),
+            'mime_type' => $file->getMimeType(),
+        ]);
 
-            // Update document's main file
-            $document->update([
-                'file_path' => $path,
-                'file_name' => $file->getClientOriginalName(),
-                'safe_filename' => $safeFilename,
-                'mime_type' => $file->getMimeType(),
-                'file_size' => $file->getSize(),
-            ]);
-
-            return $version;
-        });
+        // Criar registro de versão
+        $document->versions()->create([
+            'version_number' => $currentVersion,
+            'file_path' => $path,
+            'file_name' => $file->getClientOriginalName(),
+            'file_size' => $file->getSize(),
+            'change_notes' => $changeNotes,
+            'uploaded_by' => auth()->id(),
+        ]);
     }
 
     /**
-     * Delete document and its files
-     *
-     * @param Document $document
-     * @return bool
+     * Buscar documentos por relacionamento
      */
-    public function deleteDocument(Document $document): bool
+    public function getDocumentsByRelation(string $relatedType, int $relatedId): Collection
     {
-        return DB::transaction(function () use ($document) {
-            // Delete main file
-            if (Storage::disk('private')->exists($document->file_path)) {
-                Storage::disk('private')->delete($document->file_path);
-            }
-
-            // Delete version files
-            foreach ($document->versions as $version) {
-                if (Storage::disk('private')->exists($version->file_path)) {
-                    Storage::disk('private')->delete($version->file_path);
-                }
-            }
-
-            // Delete document (cascade will delete versions)
-            return $document->delete();
-        });
+        return Document::where('related_type', $relatedType)
+            ->where('related_id', $relatedId)
+            ->orderBy('created_at', 'desc')
+            ->get();
     }
 
     /**
-     * Mark expired documents
-     *
-     * @return int Number of documents marked as expired
+     * Verificar documentos expirados
      */
-    public function markExpiredDocuments(): int
+    public function getExpiringDocuments(int $days = 30): Collection
     {
         return Document::where('status', 'valid')
             ->whereNotNull('expiry_date')
-            ->where('expiry_date', '<', now())
-            ->update(['status' => 'expired']);
+            ->whereBetween('expiry_date', [now(), now()->addDays($days)])
+            ->get();
     }
 
     /**
-     * Get documents expiring soon
-     *
-     * @param int $days
-     * @return \Illuminate\Database\Eloquent\Collection
+     * Download de documento
      */
-    public function getExpiringSoon(int $days = 30)
+    public function downloadDocument(Document $document)
     {
-        return Document::expiringSoon($days)->get();
-    }
-
-    /**
-     * Validate uploaded file
-     *
-     * @param UploadedFile $file
-     * @return void
-     * @throws \Exception
-     */
-    private function validateFile(UploadedFile $file): void
-    {
-        // Check file size
-        if ($file->getSize() > self::MAX_FILE_SIZE) {
-            throw new \Exception('File size exceeds maximum allowed size of 10MB');
-        }
-
-        // Check MIME type
-        if (!in_array($file->getMimeType(), self::ALLOWED_MIME_TYPES)) {
-            throw new \Exception('File type not allowed. Allowed types: PDF, Images, Word, Excel');
-        }
-
-        // Check if file is valid
-        if (!$file->isValid()) {
-            throw new \Exception('Invalid file upload');
-        }
-    }
-
-    /**
-     * Generate unique document number
-     *
-     * @return string
-     */
-    private function generateDocumentNumber(): string
-    {
-        $year = date('Y');
-        $lastDocument = Document::whereYear('created_at', $year)
-            ->orderBy('id', 'desc')
-            ->first();
-
-        $nextNumber = $lastDocument ? (int) substr($lastDocument->document_number, -4) + 1 : 1;
-
-        return sprintf('DOC-%s-%04d', $year, $nextNumber);
+        return Storage::download($document->file_path, $document->file_name);
     }
 }

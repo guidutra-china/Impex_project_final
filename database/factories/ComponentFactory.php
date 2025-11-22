@@ -44,6 +44,7 @@ class ComponentFactory extends Factory
             'code' => $code,
             'description' => $this->faker->sentence(),
             'unit_of_measure' => $components[$name],
+            'currency_id' => $this->faker->randomElement(['USD', 'EUR', 'EUR', 'GBP', 'EUR', 'EUR', 'EUR', 'EUR', 'EUR', 'EUR', 'EUR', 'EUR', 'EUR', 'EUR', 'EUR', 'EUR', 'EUR', 'EUR','EUR', 'EUR', 'EUR', 'EUR']),
             'unit_cost' => $this->faker->numberBetween(10, 10000), // in cents
             'currency_id' => Currency::inRandomOrder()->first()?->id ?? Currency::factory(),
             'is_active' => true,

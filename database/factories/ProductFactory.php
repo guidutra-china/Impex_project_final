@@ -14,7 +14,7 @@ class ProductFactory extends Factory
     public function definition(): array
     {
         $products = [
-            'Smartphone Case',
+            'Argos Street Light',
             'Wireless Charger',
             'USB Cable',
             'Power Adapter',
