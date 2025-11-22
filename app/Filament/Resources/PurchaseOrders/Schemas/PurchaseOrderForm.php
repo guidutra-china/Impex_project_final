@@ -196,9 +196,16 @@ class PurchaseOrderForm
                 ->live()
                 ->afterStateUpdated(function (Get $get, Set $set, ?string $state) {
                     if ($state) {
-                        $currency = Currency::find($state);
-                        if ($currency && $currency->exchange_rate) {
-                            $set('exchange_rate', $currency->exchange_rate);
+                        $baseCurrencyId = $get('base_currency_id');
+                        
+                        // If same currency, set rate to 1
+                        if ($state == $baseCurrencyId) {
+                            $set('exchange_rate', 1);
+                        } else {
+                            $currency = Currency::find($state);
+                            if ($currency && $currency->exchange_rate) {
+                                $set('exchange_rate', $currency->exchange_rate);
+                            }
                         }
                     }
                 }),
