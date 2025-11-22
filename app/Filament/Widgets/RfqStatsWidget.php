@@ -32,18 +32,12 @@ class RfqStatsWidget extends BaseWidget
             Stat::make('Open RFQs', $openRfqs)
                 ->description('Active requests for quotation')
                 ->descriptionIcon('heroicon-m-document-text')
-                ->color('info')
-                ->url(route('filament.admin.resources.orders.index', [
-                    'tableFilters' => ['status' => ['values' => ['pending', 'sent']]]
-                ])),
+                ->color('info'),
             
             Stat::make('Quotes Received', $quotesReceived)
                 ->description('Awaiting review')
                 ->descriptionIcon('heroicon-m-inbox-arrow-down')
-                ->color('success')
-                ->url(route('filament.admin.resources.supplier-quotes.index', [
-                    'tableFilters' => ['status' => ['value' => 'sent']]
-                ])),
+                ->color('success'),
             
             Stat::make('Avg Response Time', $avgResponseTime . ' days')
                 ->description('Supplier response time')
