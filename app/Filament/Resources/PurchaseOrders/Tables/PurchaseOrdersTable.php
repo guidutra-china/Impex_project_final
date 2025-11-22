@@ -9,6 +9,7 @@ use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreBulkAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
 
@@ -19,95 +20,177 @@ class PurchaseOrdersTable
         return $table
             ->columns([
                 TextColumn::make('po_number')
-                    ->searchable(),
-                TextColumn::make('revision_number')
-                    ->numeric()
-                    ->sortable(),
-                TextColumn::make('order_id')
-                    ->numeric()
-                    ->sortable(),
-                TextColumn::make('supplierQuote.id')
-                    ->searchable(),
+                    ->label('PO Number')
+                    ->searchable()
+                    ->sortable()
+                    ->copyable()
+                    ->weight('bold'),
+                
                 TextColumn::make('supplier.name')
-                    ->searchable(),
-                TextColumn::make('currency.name')
-                    ->searchable(),
-                TextColumn::make('exchange_rate')
-                    ->numeric()
-                    ->sortable(),
-                TextColumn::make('baseCurrency.name')
-                    ->searchable(),
-                TextColumn::make('subtotal')
-                    ->numeric()
-                    ->sortable(),
-                TextColumn::make('shipping_cost')
-                    ->numeric()
-                    ->sortable(),
-                TextColumn::make('insurance_cost')
-                    ->numeric()
-                    ->sortable(),
-                TextColumn::make('other_costs')
-                    ->numeric()
-                    ->sortable(),
-                TextColumn::make('discount')
-                    ->numeric()
-                    ->sortable(),
-                TextColumn::make('tax')
-                    ->numeric()
-                    ->sortable(),
-                TextColumn::make('total')
-                    ->numeric()
-                    ->sortable(),
-                TextColumn::make('total_base_currency')
-                    ->numeric()
-                    ->sortable(),
-                TextColumn::make('incoterm')
-                    ->badge(),
-                TextColumn::make('incoterm_location')
-                    ->searchable(),
-                IconColumn::make('shipping_included_in_price')
-                    ->boolean(),
-                IconColumn::make('insurance_included_in_price')
-                    ->boolean(),
-                TextColumn::make('paymentTerm.name')
-                    ->searchable(),
-                TextColumn::make('expected_delivery_date')
-                    ->date()
-                    ->sortable(),
-                TextColumn::make('actual_delivery_date')
-                    ->date()
-                    ->sortable(),
+                    ->label('Supplier')
+                    ->searchable()
+                    ->sortable()
+                    ->limit(30),
+                
                 TextColumn::make('status')
-                    ->badge(),
+                    ->badge()
+                    ->colors([
+                        'secondary' => 'draft',
+                        'warning' => 'sent',
+                        'info' => 'confirmed',
+                        'success' => fn ($state) => in_array($state, ['received', 'paid']),
+                        'danger' => 'cancelled',
+                    ])
+                    ->sortable(),
+                
+                TextColumn::make('total')
+                    ->label('Total')
+                    ->money(fn ($record) => $record->currency?->code ?? 'USD')
+                    ->sortable()
+                    ->alignEnd()
+                    ->weight('bold'),
+                
+                TextColumn::make('currency.code')
+                    ->label('Currency')
+                    ->badge()
+                    ->sortable(),
+                
                 TextColumn::make('po_date')
-                    ->date()
+                    ->label('PO Date')
+                    ->date('M d, Y')
                     ->sortable(),
+                
+                TextColumn::make('expected_delivery_date')
+                    ->label('Expected Delivery')
+                    ->date('M d, Y')
+                    ->sortable()
+                    ->toggleable(),
+                
+                TextColumn::make('incoterm')
+                    ->badge()
+                    ->colors([
+                        'primary' => fn ($state) => in_array($state, ['EXW', 'FCA']),
+                        'success' => fn ($state) => in_array($state, ['FOB', 'FAS']),
+                        'warning' => fn ($state) => in_array($state, ['CFR', 'CIF', 'CPT', 'CIP']),
+                        'info' => fn ($state) => in_array($state, ['DAP', 'DPU', 'DDP']),
+                    ])
+                    ->toggleable(),
+                
+                TextColumn::make('order.rfq_number')
+                    ->label('RFQ')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                
+                TextColumn::make('supplierQuote.id')
+                    ->label('Quote ID')
+                    ->toggleable(isToggledHiddenByDefault: true),
+                
+                TextColumn::make('revision_number')
+                    ->label('Rev')
+                    ->numeric()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                
+                TextColumn::make('shipping_cost')
+                    ->label('Shipping')
+                    ->money(fn ($record) => $record->currency?->code ?? 'USD')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                
+                TextColumn::make('subtotal')
+                    ->label('Subtotal')
+                    ->money(fn ($record) => $record->currency?->code ?? 'USD')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                
+                TextColumn::make('total_base_currency')
+                    ->label('Total (Base)')
+                    ->money(fn ($record) => $record->baseCurrency?->code ?? 'USD')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                
+                IconColumn::make('shipping_included_in_price')
+                    ->label('Ship. Incl.')
+                    ->boolean()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                
+                TextColumn::make('paymentTerm.name')
+                    ->label('Payment Terms')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                
+                TextColumn::make('actual_delivery_date')
+                    ->label('Actual Delivery')
+                    ->date('M d, Y')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                
                 TextColumn::make('sent_at')
-                    ->dateTime()
-                    ->sortable(),
+                    ->label('Sent')
+                    ->dateTime('M d, Y H:i')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                
                 TextColumn::make('confirmed_at')
-                    ->dateTime()
-                    ->sortable(),
-                TextColumn::make('created_by')
-                    ->numeric()
-                    ->sortable(),
-                TextColumn::make('approved_by')
-                    ->numeric()
-                    ->sortable(),
+                    ->label('Confirmed')
+                    ->dateTime('M d, Y H:i')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                
                 TextColumn::make('created_at')
-                    ->dateTime()
+                    ->label('Created')
+                    ->dateTime('M d, Y H:i')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
+                
                 TextColumn::make('updated_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('deleted_at')
-                    ->dateTime()
+                    ->label('Updated')
+                    ->dateTime('M d, Y H:i')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
+                SelectFilter::make('status')
+                    ->options([
+                        'draft' => 'Draft',
+                        'sent' => 'Sent',
+                        'confirmed' => 'Confirmed',
+                        'received' => 'Received',
+                        'paid' => 'Paid',
+                        'cancelled' => 'Cancelled',
+                    ])
+                    ->multiple()
+                    ->label('Status'),
+                
+                SelectFilter::make('supplier_id')
+                    ->relationship('supplier', 'name')
+                    ->searchable()
+                    ->preload()
+                    ->label('Supplier'),
+                
+                SelectFilter::make('currency_id')
+                    ->relationship('currency', 'code')
+                    ->searchable()
+                    ->preload()
+                    ->label('Currency'),
+                
+                SelectFilter::make('incoterm')
+                    ->options([
+                        'EXW' => 'EXW',
+                        'FCA' => 'FCA',
+                        'CPT' => 'CPT',
+                        'CIP' => 'CIP',
+                        'DAP' => 'DAP',
+                        'DPU' => 'DPU',
+                        'DDP' => 'DDP',
+                        'FAS' => 'FAS',
+                        'FOB' => 'FOB',
+                        'CFR' => 'CFR',
+                        'CIF' => 'CIF',
+                    ])
+                    ->multiple()
+                    ->label('INCOTERM'),
+                
                 TrashedFilter::make(),
             ])
             ->recordActions([
@@ -119,6 +202,7 @@ class PurchaseOrdersTable
                     ForceDeleteBulkAction::make(),
                     RestoreBulkAction::make(),
                 ]),
-            ]);
+            ])
+            ->defaultSort('po_date', 'desc');
     }
 }
