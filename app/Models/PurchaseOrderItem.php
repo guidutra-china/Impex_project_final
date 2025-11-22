@@ -32,6 +32,29 @@ class PurchaseOrderItem extends Model
         'actual_delivery_date' => 'date',
     ];
 
+    /**
+     * Boot the model
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        // Auto-fill product_name and product_sku from product if not provided
+        static::saving(function ($item) {
+            if ($item->product_id && (!$item->product_name || !$item->product_sku)) {
+                $product = Product::find($item->product_id);
+                if ($product) {
+                    if (!$item->product_name) {
+                        $item->product_name = $product->name;
+                    }
+                    if (!$item->product_sku) {
+                        $item->product_sku = $product->sku ?? '';
+                    }
+                }
+            }
+        });
+    }
+
     // Relationships
     public function purchaseOrder(): BelongsTo
     {
