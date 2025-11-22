@@ -3,6 +3,8 @@
 namespace App\Filament\Resources\PurchaseInvoices\Tables;
 
 use Filament\Actions\Action;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
@@ -170,8 +172,8 @@ class PurchaseInvoicesTable
                     ->successNotificationTitle('Invoice cancelled'),
             ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
                 ]),
             ])
             ->defaultSort('created_at', 'desc');
