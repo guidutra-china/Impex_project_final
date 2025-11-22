@@ -28,10 +28,8 @@ return new class extends Migration
             $table->text('rejection_reason')->nullable()->after('rejected_at');
         });
 
-        // Add status timestamps to purchase_orders
+        // Add status timestamps to purchase_orders (sent_at and confirmed_at already exist)
         Schema::table('purchase_orders', function (Blueprint $table) {
-            $table->timestamp('sent_at')->nullable()->after('status');
-            $table->timestamp('confirmed_at')->nullable()->after('sent_at');
             $table->timestamp('received_at')->nullable()->after('confirmed_at');
             $table->timestamp('paid_at')->nullable()->after('received_at');
             $table->timestamp('cancelled_at')->nullable()->after('paid_at');
@@ -65,8 +63,6 @@ return new class extends Migration
 
         Schema::table('purchase_orders', function (Blueprint $table) {
             $table->dropColumn([
-                'sent_at',
-                'confirmed_at',
                 'received_at',
                 'paid_at',
                 'cancelled_at',
