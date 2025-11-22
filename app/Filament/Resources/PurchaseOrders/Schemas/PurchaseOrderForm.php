@@ -449,17 +449,26 @@ class PurchaseOrderForm
     public static function getTotalsComponents(): array
     {
         return [
-            Placeholder::make('subtotal')
+            TextInput::make('subtotal')
                 ->label('Subtotal')
-                ->content(fn (Get $get): string => number_format($get('subtotal') ?? 0, 2)),
+                ->numeric()
+                ->disabled()
+                ->dehydrated()
+                ->default(0),
 
-            Placeholder::make('total')
+            TextInput::make('total')
                 ->label('Total')
-                ->content(fn (Get $get): string => number_format($get('total') ?? 0, 2)),
+                ->numeric()
+                ->disabled()
+                ->dehydrated()
+                ->default(0),
 
-            Placeholder::make('total_base_currency')
+            TextInput::make('total_base_currency')
                 ->label('Total (Base Currency)')
-                ->content(fn (Get $get): string => number_format($get('total_base_currency') ?? 0, 2)),
+                ->numeric()
+                ->disabled()
+                ->dehydrated()
+                ->default(0),
         ];
     }
 
