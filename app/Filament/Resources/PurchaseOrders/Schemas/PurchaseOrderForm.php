@@ -85,7 +85,7 @@ class PurchaseOrderForm
                             ->schema([
                                 Select::make('order_id')
                                     ->label('RFQ')
-                                    ->relationship('order', 'rfq_number')
+                                    ->relationship('order', 'order_number')
                                     ->searchable()
                                     ->preload()
                                     ->native(false),
