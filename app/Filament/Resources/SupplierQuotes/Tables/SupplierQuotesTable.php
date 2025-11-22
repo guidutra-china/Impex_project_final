@@ -130,8 +130,8 @@ class SupplierQuotesTable
                                 'product_name' => $quoteItem->product?->name ?? '',
                                 'product_sku' => $quoteItem->product?->sku ?? '',
                                 'quantity' => $quoteItem->quantity,
-                                'unit_cost' => $quoteItem->unit_price_before_commission,
-                                'total_cost' => $quoteItem->total_price_before_commission,
+                                'unit_cost' => $quoteItem->unit_price_before_commission / 100,
+                                'total_cost' => $quoteItem->total_price_before_commission / 100,
                                 'notes' => $quoteItem->supplier_notes ?? '',
                             ]);
                         }
