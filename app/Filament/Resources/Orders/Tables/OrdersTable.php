@@ -124,8 +124,11 @@ class OrdersTable
                     ])
                     ->action(function (Order $record, array $data) {
                         $count = 0;
+                        $emailsSent = 0;
                         
                         foreach ($data['suppliers'] as $supplierId) {
+                            $supplier = Supplier::find($supplierId);
+                            
                             // Create supplier quote if not exists
                             $existingQuote = SupplierQuote::where('order_id', $record->id)
                                 ->where('supplier_id', $supplierId)
@@ -135,22 +138,34 @@ class OrdersTable
                                 SupplierQuote::create([
                                     'order_id' => $record->id,
                                     'supplier_id' => $supplierId,
-                                    'status' => 'draft',
+                                    'status' => 'sent',
                                     'currency_id' => $record->currency_id,
                                 ]);
                                 
                                 $count++;
                             }
                             
-                            // TODO: Send email to supplier
-                            // Mail::to(Supplier::find($supplierId)->email)
-                            //     ->send(new QuoteRequestMail($record, $data['message']));
+                            // Send email to supplier if email exists
+                            if ($supplier && $supplier->email) {
+                                try {
+                                    Mail::to($supplier->email)
+                                        ->send(new \App\Mail\QuoteRequestMail($record, $supplier, $data['message']));
+                                    $emailsSent++;
+                                } catch (\Exception $e) {
+                                    \Log::error('Failed to send quote request email to ' . $supplier->email . ': ' . $e->getMessage());
+                                }
+                            }
+                        }
+                        
+                        // Update RFQ status to processing
+                        if ($count > 0 && $record->status === 'pending') {
+                            $record->update(['status' => 'processing']);
                         }
                         
                         Notification::make()
                             ->success()
-                            ->title('Quote requests created')
-                            ->body("Created {$count} quote requests for " . count($data['suppliers']) . " suppliers.")
+                            ->title('Quote requests sent')
+                            ->body("Created {$count} quote requests. Sent {$emailsSent} emails to suppliers.")
                             ->send();
                     })
                     ->visible(fn (Order $record) => in_array($record->status, ['pending', 'processing'])),
