@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\SalesInvoices\Tables;
 
+use Filament\Actions\Action;
 use Filament\Actions\EditAction;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
@@ -120,7 +121,7 @@ class SalesInvoicesTable
             ->actions([
                 EditAction::make(),
 
-                Tables\Actions\Action::make('mark_as_paid')
+                Action::make('mark_as_paid')
                     ->label('Mark as Paid')
                     ->icon('heroicon-o-check-circle')
                     ->color('success')
@@ -135,7 +136,7 @@ class SalesInvoicesTable
                     })
                     ->successNotificationTitle('Invoice marked as paid'),
 
-                Tables\Actions\Action::make('mark_as_sent')
+                Action::make('mark_as_sent')
                     ->label('Mark as Sent')
                     ->icon('heroicon-o-paper-airplane')
                     ->color('warning')
@@ -149,7 +150,7 @@ class SalesInvoicesTable
                     })
                     ->successNotificationTitle('Invoice marked as sent'),
 
-                Tables\Actions\Action::make('cancel')
+                Action::make('cancel')
                     ->label('Cancel')
                     ->icon('heroicon-o-x-circle')
                     ->color('danger')
