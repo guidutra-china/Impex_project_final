@@ -23,6 +23,8 @@ class SalesInvoice extends Model
         'base_currency_id',
         'original_invoice_id',
         'superseded_by_invoice_id',
+        'superseded_by_id',
+        'supersedes_id',
         'revision_reason',
         'invoice_date',
         'shipment_date',
@@ -104,9 +106,39 @@ class SalesInvoice extends Model
         return $this->belongsTo(SalesInvoice::class, 'superseded_by_invoice_id');
     }
 
+    public function supersededBy(): BelongsTo
+    {
+        return $this->belongsTo(SalesInvoice::class, 'superseded_by_id');
+    }
+
+    public function supersedes(): BelongsTo
+    {
+        return $this->belongsTo(SalesInvoice::class, 'supersedes_id');
+    }
+
     public function revisions(): HasMany
     {
         return $this->hasMany(SalesInvoice::class, 'original_invoice_id');
+    }
+
+    /**
+     * Check if this invoice has been superseded
+     */
+    public function isSuperseded(): bool
+    {
+        return $this->superseded_by_id !== null;
+    }
+
+    /**
+     * Get the latest version of this invoice
+     */
+    public function getLatestVersion(): SalesInvoice
+    {
+        $current = $this;
+        while ($current->supersededBy) {
+            $current = $current->supersededBy;
+        }
+        return $current;
     }
 
     // Helper methods

@@ -8,6 +8,7 @@ use App\Models\Product;
 use App\Models\PurchaseInvoice;
 use App\Models\PurchaseOrder;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Actions\Action as FormAction;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
@@ -379,6 +380,40 @@ class PurchaseInvoiceForm
             Placeholder::make('paid_at')
                 ->label('Paid')
                 ->content(fn (PurchaseInvoice $record): string => $record->paid_at ? $record->paid_at->diffForHumans() : 'Not paid'),
+
+            Placeholder::make('supersedes_link')
+                ->label('Previous Version')
+                ->content(function (PurchaseInvoice $record): string {
+                    if ($record->supersedes_id) {
+                        $previous = $record->supersedes;
+                        return "<a href='/admin/purchase-invoices/{$previous->id}/edit' class='text-primary-600 hover:underline'>
+                                    {$previous->invoice_number} (Rev {$previous->revision_number})
+                                </a>";
+                    }
+                    return 'None';
+                })
+                ->html()
+                ->visible(fn (PurchaseInvoice $record): bool => $record->supersedes_id !== null),
+
+            Placeholder::make('superseded_by_link')
+                ->label('Superseded By')
+                ->content(function (PurchaseInvoice $record): string {
+                    if ($record->superseded_by_id) {
+                        $next = $record->supersededBy;
+                        return "<a href='/admin/purchase-invoices/{$next->id}/edit' class='text-primary-600 hover:underline font-bold'>
+                                    {$next->invoice_number} (Rev {$next->revision_number})
+                                </a>
+                                <p class='text-xs text-gray-500 mt-1'>This invoice has been superseded. Please use the newer version.</p>";
+                    }
+                    return 'None';
+                })
+                ->html()
+                ->visible(fn (PurchaseInvoice $record): bool => $record->superseded_by_id !== null),
+
+            Placeholder::make('revision_reason')
+                ->label('Revision Reason')
+                ->content(fn (PurchaseInvoice $record): string => $record->revision_reason ?? 'N/A')
+                ->visible(fn (PurchaseInvoice $record): bool => $record->revision_number > 1),
         ];
     }
 

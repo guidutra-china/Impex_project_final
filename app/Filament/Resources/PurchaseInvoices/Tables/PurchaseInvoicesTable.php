@@ -217,6 +217,59 @@ class PurchaseInvoicesTable
                             ->title('Invoice Cancelled')
                             ->body("Invoice {$record->invoice_number} has been cancelled.")
                     ),
+
+                Action::make('create_revision')
+                    ->label('Create Revision')
+                    ->icon('heroicon-o-document-duplicate')
+                    ->color('info')
+                    ->visible(fn ($record) => !in_array($record->status, ['draft', 'cancelled']) && !$record->isSuperseded())
+                    ->modalHeading('Create New Revision')
+                    ->modalDescription(fn ($record) => "This will create a new revision of invoice {$record->invoice_number}. The current invoice will be marked as superseded.")
+                    ->form([
+                        Textarea::make('revision_reason')
+                            ->label('Reason for Revision')
+                            ->required()
+                            ->rows(3)
+                            ->helperText('Please explain why this revision is needed.'),
+                    ])
+                    ->action(function ($record, array $data) {
+                        \DB::transaction(function () use ($record, $data) {
+                            // Create new revision
+                            $newRevision = $record->replicate();
+                            $newRevision->revision_number = $record->revision_number + 1;
+                            $newRevision->status = 'draft';
+                            $newRevision->revision_reason = $data['revision_reason'];
+                            $newRevision->supersedes_id = $record->id;
+                            $newRevision->superseded_by_id = null;
+                            $newRevision->sent_at = null;
+                            $newRevision->paid_at = null;
+                            $newRevision->cancelled_at = null;
+                            $newRevision->payment_date = null;
+                            $newRevision->save();
+
+                            // Copy items
+                            foreach ($record->items as $item) {
+                                $newItem = $item->replicate();
+                                $newItem->purchase_invoice_id = $newRevision->id;
+                                $newItem->save();
+                            }
+
+                            // Mark current invoice as superseded
+                            $record->update([
+                                'status' => 'superseded',
+                                'superseded_by_id' => $newRevision->id,
+                            ]);
+                        });
+                    })
+                    ->successNotification(
+                        fn ($record) => \Filament\Notifications\Notification::make()
+                            ->success()
+                            ->title('Revision Created')
+                            ->body("New revision {$record->invoice_number}-R" . ($record->revision_number + 1) . " has been created.")
+                    )
+                    ->after(function () {
+                        // Redirect to the new revision (optional, can be implemented later)
+                    }),
             ])
             ->bulkActions([
                 BulkActionGroup::make([
