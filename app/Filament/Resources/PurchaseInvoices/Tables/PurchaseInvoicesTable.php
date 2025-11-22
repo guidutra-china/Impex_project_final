@@ -6,6 +6,10 @@ use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
@@ -127,15 +131,42 @@ class PurchaseInvoicesTable
                     ->icon('heroicon-o-check-circle')
                     ->color('success')
                     ->visible(fn ($record) => in_array($record->status, ['sent', 'overdue']))
-                    ->requiresConfirmation()
-                    ->action(function ($record) {
+                    ->form([
+                        DatePicker::make('payment_date')
+                            ->label('Payment Date')
+                            ->default(now())
+                            ->required(),
+                        Select::make('payment_method')
+                            ->label('Payment Method')
+                            ->options([
+                                'bank_transfer' => 'Bank Transfer',
+                                'credit_card' => 'Credit Card',
+                                'cash' => 'Cash',
+                                'check' => 'Check',
+                                'paypal' => 'PayPal',
+                                'other' => 'Other',
+                            ])
+                            ->required(),
+                        TextInput::make('payment_reference')
+                            ->label('Payment Reference')
+                            ->helperText('Transaction ID, check number, etc.'),
+                    ])
+                    ->action(function ($record, array $data) {
                         $record->update([
                             'status' => 'paid',
                             'paid_at' => now(),
-                            'payment_date' => now(),
+                            'payment_date' => $data['payment_date'],
+                            'payment_method' => $data['payment_method'],
+                            'payment_reference' => $data['payment_reference'] ?? null,
                         ]);
                     })
-                    ->successNotificationTitle('Invoice marked as paid'),
+                    ->successNotificationTitle('Invoice marked as paid')
+                    ->successNotification(
+                        fn ($record) => \Filament\Notifications\Notification::make()
+                            ->success()
+                            ->title('Invoice Paid')
+                            ->body("Invoice {$record->invoice_number} has been marked as paid.")
+                    ),
 
                 Action::make('mark_as_sent')
                     ->label('Mark as Sent')
@@ -143,24 +174,35 @@ class PurchaseInvoicesTable
                     ->color('warning')
                     ->visible(fn ($record) => $record->status === 'draft')
                     ->requiresConfirmation()
+                    ->modalHeading('Send Invoice to Supplier')
+                    ->modalDescription(fn ($record) => "Are you sure you want to mark invoice {$record->invoice_number} as sent? This will change the status from Draft to Sent.")
+                    ->modalSubmitActionLabel('Yes, Mark as Sent')
                     ->action(function ($record) {
                         $record->update([
                             'status' => 'sent',
                             'sent_at' => now(),
                         ]);
                     })
-                    ->successNotificationTitle('Invoice marked as sent'),
+                    ->successNotification(
+                        fn ($record) => \Filament\Notifications\Notification::make()
+                            ->success()
+                            ->title('Invoice Sent')
+                            ->body("Invoice {$record->invoice_number} has been marked as sent to supplier.")
+                    ),
 
                 Action::make('cancel')
-                    ->label('Cancel')
+                    ->label('Cancel Invoice')
                     ->icon('heroicon-o-x-circle')
                     ->color('danger')
                     ->visible(fn ($record) => !in_array($record->status, ['paid', 'cancelled', 'superseded']))
-                    ->requiresConfirmation()
+                    ->modalHeading('Cancel Invoice')
+                    ->modalDescription(fn ($record) => "Are you sure you want to cancel invoice {$record->invoice_number}? This action cannot be undone.")
                     ->form([
-                        \Filament\Forms\Components\Textarea::make('cancellation_reason')
+                        Textarea::make('cancellation_reason')
                             ->label('Cancellation Reason')
-                            ->required(),
+                            ->required()
+                            ->rows(3)
+                            ->helperText('Please provide a reason for cancelling this invoice.'),
                     ])
                     ->action(function ($record, array $data) {
                         $record->update([
@@ -169,7 +211,12 @@ class PurchaseInvoicesTable
                             'cancellation_reason' => $data['cancellation_reason'],
                         ]);
                     })
-                    ->successNotificationTitle('Invoice cancelled'),
+                    ->successNotification(
+                        fn ($record) => \Filament\Notifications\Notification::make()
+                            ->warning()
+                            ->title('Invoice Cancelled')
+                            ->body("Invoice {$record->invoice_number} has been cancelled.")
+                    ),
             ])
             ->bulkActions([
                 BulkActionGroup::make([
