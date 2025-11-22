@@ -60,10 +60,10 @@ class PurchaseOrder extends Model
     ];
 
     // Relationships
-//    public function order(): BelongsTo
-//    {
-//        return $this->belongsTo(Order::class)->comment('RFQ relacionado');
-//    }
+    public function order(): BelongsTo
+    {
+        return $this->belongsTo(Order::class);
+    }
 
     public function supplierQuote(): BelongsTo
     {
