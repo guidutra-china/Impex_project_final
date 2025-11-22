@@ -5,13 +5,15 @@ namespace App\Filament\Resources\SalesInvoices;
 use App\Filament\Resources\SalesInvoices\Schemas\SalesInvoiceForm;
 use App\Filament\Resources\SalesInvoices\Tables\SalesInvoicesTable;
 use App\Models\SalesInvoice;
+use BackedEnum;
 use Filament\Resources\Resource;
+use Filament\Support\Icons\Heroicon;
 
 class SalesInvoiceResource extends Resource
 {
     protected static ?string $model = SalesInvoice::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-document-currency-dollar';
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedDocumentCurrencyDollar;
 
     protected static ?string $navigationLabel = 'Sales Invoices';
 

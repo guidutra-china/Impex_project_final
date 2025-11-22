@@ -5,13 +5,15 @@ namespace App\Filament\Resources\PurchaseInvoices;
 use App\Filament\Resources\PurchaseInvoices\Schemas\PurchaseInvoiceForm;
 use App\Filament\Resources\PurchaseInvoices\Tables\PurchaseInvoicesTable;
 use App\Models\PurchaseInvoice;
+use BackedEnum;
 use Filament\Resources\Resource;
+use Filament\Support\Icons\Heroicon;
 
 class PurchaseInvoiceResource extends Resource
 {
     protected static ?string $model = PurchaseInvoice::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-document-text';
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedDocumentText;
 
     protected static ?string $navigationLabel = 'Purchase Invoices';
 
