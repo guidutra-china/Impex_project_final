@@ -12,8 +12,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Add FULLTEXT index for fast searching
-        DB::statement('ALTER TABLE suppliers ADD FULLTEXT INDEX ft_suppliers_search (name, description, products_offered)');
+        // Add FULLTEXT index for fast searching on name column
+        DB::statement('ALTER TABLE suppliers ADD FULLTEXT INDEX ft_suppliers_search (name)');
     }
 
     /**
