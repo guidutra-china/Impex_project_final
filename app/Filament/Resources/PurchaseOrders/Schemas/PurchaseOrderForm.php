@@ -296,11 +296,21 @@ class PurchaseOrderForm
                                     ->required()
                                     ->minValue(0)
                                     ->step(0.01)
+                                    ->default(0)
                                     ->live(onBlur: true)
                                     ->afterStateUpdated(fn (Get $get, Set $set) => 
                                         $set('total_cost', $get('quantity') * $get('unit_cost'))
                                     )
                                     ->columnSpan(2),
+                                
+                                // Hidden fields for product snapshot
+                                TextInput::make('product_name')
+                                    ->hidden()
+                                    ->dehydrated(),
+                                
+                                TextInput::make('product_sku')
+                                    ->hidden()
+                                    ->dehydrated(),
                                 
                                 TextInput::make('total_cost')
                                     ->label('Total Cost')
