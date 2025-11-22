@@ -345,11 +345,13 @@ class PurchaseOrderForm
                                 // Hidden fields for product snapshot
                                 TextInput::make('product_name')
                                     ->hidden()
-                                    ->dehydrated(),
+                                    ->dehydrated()
+                                    ->default(''),
                                 
                                 TextInput::make('product_sku')
                                     ->hidden()
-                                    ->dehydrated(),
+                                    ->dehydrated()
+                                    ->default(''),
                                 
                                 TextInput::make('total_cost')
                                     ->label('Total Cost')
