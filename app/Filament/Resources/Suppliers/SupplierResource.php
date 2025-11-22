@@ -25,6 +25,22 @@ class SupplierResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBuildingOffice2;
 
+    protected static ?string $recordTitleAttribute = 'name';
+
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['name', 'email', 'country', 'products_offered'];
+    }
+
+    public static function getGlobalSearchResultDetails(\Illuminate\Database\Eloquent\Model $record): array
+    {
+        return [
+            'Country' => $record->country,
+            'Email' => $record->email,
+            'Rating' => $record->rating ? $record->rating . '/5' : 'N/A',
+        ];
+    }
+
     public static function form(Schema $schema): Schema
     {
         return SupplierForm::configure($schema);

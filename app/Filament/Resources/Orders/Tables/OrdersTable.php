@@ -3,15 +3,21 @@
 namespace App\Filament\Resources\Orders\Tables;
 
 use App\Models\Order;
+use App\Models\Supplier;
+use App\Models\SupplierQuote;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
+use Filament\Notifications\Notification;
 use Filament\Tables;
 use Filament\Tables\Columns\BadgeColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Support\Facades\Mail;
 
 class OrdersTable
 {
@@ -95,6 +101,59 @@ class OrdersTable
                     ->icon('heroicon-o-chart-bar')
                     ->url(fn (Order $record): string => route('filament.admin.pages.quote-comparison', ['order' => $record->id]))
                     ->visible(fn (Order $record) => $record->supplierQuotes()->count() > 0),
+                
+                Action::make('request_quotes_bulk')
+                    ->label('Request Quotes')
+                    ->icon('heroicon-o-paper-airplane')
+                    ->color('success')
+                    ->form([
+                        Select::make('suppliers')
+                            ->label('Select Suppliers')
+                            ->multiple()
+                            ->options(Supplier::pluck('name', 'id'))
+                            ->searchable()
+                            ->preload()
+                            ->required()
+                            ->helperText('Select multiple suppliers to request quotes from'),
+                        
+                        Textarea::make('message')
+                            ->label('Message')
+                            ->default('Please provide your best quote for the attached RFQ.')
+                            ->rows(3)
+                            ->helperText('This message will be included in the email to suppliers'),
+                    ])
+                    ->action(function (Order $record, array $data) {
+                        $count = 0;
+                        
+                        foreach ($data['suppliers'] as $supplierId) {
+                            // Create supplier quote if not exists
+                            $existingQuote = SupplierQuote::where('order_id', $record->id)
+                                ->where('supplier_id', $supplierId)
+                                ->first();
+                            
+                            if (!$existingQuote) {
+                                SupplierQuote::create([
+                                    'order_id' => $record->id,
+                                    'supplier_id' => $supplierId,
+                                    'status' => 'draft',
+                                    'currency_id' => $record->currency_id,
+                                ]);
+                                
+                                $count++;
+                            }
+                            
+                            // TODO: Send email to supplier
+                            // Mail::to(Supplier::find($supplierId)->email)
+                            //     ->send(new QuoteRequestMail($record, $data['message']));
+                        }
+                        
+                        Notification::make()
+                            ->success()
+                            ->title('Quote requests created')
+                            ->body("Created {$count} quote requests for " . count($data['suppliers']) . " suppliers.")
+                            ->send();
+                    })
+                    ->visible(fn (Order $record) => in_array($record->status, ['pending', 'processing'])),
             ])
             ->bulkActions([
                 BulkActionGroup::make([
