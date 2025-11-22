@@ -176,9 +176,6 @@ class PurchaseOrderForm
                         ];
                     }
                     $set('items', $items);
-                    
-                    // Trigger totals update
-                    self::updateTotals($get, $set);
                 }),
 
             Select::make('supplier_id')
