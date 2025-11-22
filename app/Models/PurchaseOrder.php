@@ -130,6 +130,26 @@ class PurchaseOrder extends Model
         return $this->belongsTo(User::class, 'approved_by');
     }
 
+    // Methods
+    public function recalculateTotals(): void
+    {
+        // Calculate subtotal from items
+        $this->subtotal = $this->items()->sum('total_cost');
+        
+        // Calculate total
+        $this->total = $this->subtotal 
+            + ($this->shipping_cost ?? 0)
+            + ($this->insurance_cost ?? 0)
+            + ($this->other_costs ?? 0)
+            - ($this->discount ?? 0)
+            + ($this->tax ?? 0);
+        
+        // Calculate total in base currency
+        $this->total_base_currency = $this->total * ($this->exchange_rate ?? 1);
+        
+        $this->saveQuietly(); // Save without triggering events
+    }
+
     // Accessors
     public function getTotalPaidAttribute(): int
     {

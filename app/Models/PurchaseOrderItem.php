@@ -53,6 +53,19 @@ class PurchaseOrderItem extends Model
                 }
             }
         });
+
+        // Recalculate PO totals after item is saved or deleted
+        static::saved(function ($item) {
+            if ($item->purchaseOrder) {
+                $item->purchaseOrder->recalculateTotals();
+            }
+        });
+
+        static::deleted(function ($item) {
+            if ($item->purchaseOrder) {
+                $item->purchaseOrder->recalculateTotals();
+            }
+        });
     }
 
     // Relationships
