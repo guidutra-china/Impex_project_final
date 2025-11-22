@@ -309,10 +309,6 @@ class PurchaseOrderForm
             ->itemLabel(fn (array $state): ?string => 
                 $state['product_name'] ?? 'New Item'
             )
-            ->live()
-            ->afterStateUpdated(function (Get $get, Set $set) {
-                self::updateTotals($get, $set);
-            })
             ->deleteAction(
                 fn ($action) => $action->after(fn (Get $get, Set $set) => 
                     self::updateTotals($get, $set)
