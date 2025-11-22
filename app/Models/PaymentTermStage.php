@@ -13,8 +13,13 @@ class PaymentTermStage extends Model
     protected $fillable = [
         'payment_term_id',
         'percentage',
-        'days_from_invoice',
+        'days',
+        'calculation_base',
         'sort_order',
+    ];
+
+    protected $casts = [
+        'calculation_base' => 'string',
     ];
 
     /**

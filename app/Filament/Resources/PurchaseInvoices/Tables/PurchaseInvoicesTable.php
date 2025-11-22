@@ -30,6 +30,11 @@ class PurchaseInvoicesTable
                     ->searchable()
                     ->sortable(),
 
+                TextColumn::make('paymentTerm.name')
+                    ->label('Payment Terms')
+                    ->sortable()
+                    ->toggleable(),
+
                 TextColumn::make('purchaseOrder.po_number')
                     ->label('PO #')
                     ->searchable()

@@ -17,12 +17,14 @@ class PurchaseInvoice extends Model
         'revision_number',
         'supplier_id',
         'purchase_order_id',
+        'payment_term_id',
         'currency_id',
         'base_currency_id',
         'original_invoice_id',
         'superseded_by_invoice_id',
         'revision_reason',
         'invoice_date',
+        'shipment_date',
         'due_date',
         'payment_date',
         'exchange_rate',
@@ -43,6 +45,7 @@ class PurchaseInvoice extends Model
 
     protected $casts = [
         'invoice_date' => 'date',
+        'shipment_date' => 'date',
         'due_date' => 'date',
         'payment_date' => 'date',
         'exchange_rate' => 'decimal:6',
@@ -70,6 +73,11 @@ class PurchaseInvoice extends Model
     public function baseCurrency(): BelongsTo
     {
         return $this->belongsTo(Currency::class, 'base_currency_id');
+    }
+
+    public function paymentTerm(): BelongsTo
+    {
+        return $this->belongsTo(PaymentTerm::class);
     }
 
     public function items(): HasMany

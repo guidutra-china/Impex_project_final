@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\PurchaseInvoices\Schemas;
 
 use App\Models\Currency;
+use App\Models\PaymentTerm;
 use App\Models\Product;
 use App\Models\PurchaseInvoice;
 use App\Models\PurchaseOrder;
@@ -138,10 +139,34 @@ class PurchaseInvoiceForm
                 ->preload()
                 ->required(),
 
+            Select::make('payment_term_id')
+                ->label('Payment Terms')
+                ->relationship('paymentTerm', 'name')
+                ->searchable()
+                ->preload()
+                ->required()
+                ->reactive()
+                ->afterStateUpdated(function (Get $get, Set $set, $state) {
+                    static::recalculateDueDate($get, $set);
+                })
+                ->helperText('Due date will be auto-calculated based on payment terms'),
+
             DatePicker::make('invoice_date')
                 ->label('Invoice Date')
                 ->default(now())
-                ->required(),
+                ->required()
+                ->reactive()
+                ->afterStateUpdated(function (Get $get, Set $set, $state) {
+                    static::recalculateDueDate($get, $set);
+                }),
+
+            DatePicker::make('shipment_date')
+                ->label('Shipment Date')
+                ->reactive()
+                ->afterStateUpdated(function (Get $get, Set $set, $state) {
+                    static::recalculateDueDate($get, $set);
+                })
+                ->helperText('Required if payment term is based on shipment date'),
 
             DatePicker::make('due_date')
                 ->label('Due Date')
@@ -355,5 +380,41 @@ class PurchaseInvoiceForm
                 ->label('Paid')
                 ->content(fn (PurchaseInvoice $record): string => $record->paid_at ? $record->paid_at->diffForHumans() : 'Not paid'),
         ];
+    }
+
+    /**
+     * Recalculate due date based on payment term stages
+     */
+    protected static function recalculateDueDate(Get $get, Set $set): void
+    {
+        $paymentTermId = $get('payment_term_id');
+        if (!$paymentTermId) return;
+
+        $paymentTerm = PaymentTerm::with('stages')->find($paymentTermId);
+        if (!$paymentTerm || $paymentTerm->stages->isEmpty()) return;
+
+        // Get the last stage (final payment)
+        $lastStage = $paymentTerm->stages->sortByDesc('sort_order')->first();
+        
+        // Determine base date based on calculation_base
+        $baseDate = null;
+        if ($lastStage->calculation_base === 'shipment_date') {
+            $shipmentDate = $get('shipment_date');
+            if ($shipmentDate) {
+                $baseDate = \Carbon\Carbon::parse($shipmentDate);
+            }
+        } else {
+            // Default to invoice_date
+            $invoiceDate = $get('invoice_date');
+            if ($invoiceDate) {
+                $baseDate = \Carbon\Carbon::parse($invoiceDate);
+            }
+        }
+
+        // Calculate due date
+        if ($baseDate) {
+            $dueDate = $baseDate->addDays($lastStage->days);
+            $set('due_date', $dueDate->format('Y-m-d'));
+        }
     }
 }

@@ -30,6 +30,11 @@ class SalesInvoicesTable
                     ->searchable()
                     ->sortable(),
 
+                TextColumn::make('paymentTerm.name')
+                    ->label('Payment Terms')
+                    ->sortable()
+                    ->toggleable(),
+
                 TextColumn::make('quote.quote_number')
                     ->label('Quote #')
                     ->searchable()
