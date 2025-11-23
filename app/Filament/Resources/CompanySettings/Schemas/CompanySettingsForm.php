@@ -2,10 +2,10 @@
 
 namespace App\Filament\Resources\CompanySettings\Schemas;
 
-use Filament\Forms\Components\FileUpload;
-use Filament\Forms\Components\Section;
-use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\TextInput;
+use Filament\Schemas\Components\FileUpload;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Textarea;
+use Filament\Schemas\Components\TextInput;
 
 class CompanySettingsForm
 {
