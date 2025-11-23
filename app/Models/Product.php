@@ -340,8 +340,9 @@ class Product extends Model
             // Modify the name to indicate it's a copy
             $newProductData['name'] = $this->name . ' (Copy)';
             
-            // Clear the SKU to allow auto-generation or manual entry
-            $newProductData['sku'] = null;
+            // Generate a temporary SKU (original SKU + timestamp)
+            // User can change it later to a proper SKU
+            $newProductData['sku'] = $this->sku . '-COPY-' . time();
 
             // Duplicate avatar if option is enabled and exists
             if ($options['avatar'] && $this->avatar) {
