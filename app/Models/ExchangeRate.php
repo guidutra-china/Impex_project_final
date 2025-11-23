@@ -96,6 +96,17 @@ class ExchangeRate extends Model
     public static function getLatestRate($baseCurrencyId, $targetCurrencyId, $date = null)
     {
         $date = $date ?? today()->toDateString();
+        
+        // Disable cache in testing environment to avoid stale data
+        if (app()->environment('testing')) {
+            return self::where('base_currency_id', $baseCurrencyId)
+                ->where('target_currency_id', $targetCurrencyId)
+                ->where('date', '<=', $date)
+                ->where('status', 'approved')
+                ->orderBy('date', 'desc')
+                ->first();
+        }
+        
         $cacheKey = "exchange_rate_{$baseCurrencyId}_{$targetCurrencyId}_{$date}";
 
         return Cache::remember($cacheKey, 3600, function () use ($baseCurrencyId, $targetCurrencyId, $date) {

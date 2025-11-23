@@ -233,27 +233,10 @@ test('it can convert between currencies using historical rates', function () {
         'approved_at' => now(),
     ]);
 
-    // Debug: verify the rate was created
+    // Verify the rate was created
     expect($exchangeRate)->not->toBeNull()
         ->and($exchangeRate->base_currency_id)->toBe($baseCurrency->id)
         ->and($exchangeRate->target_currency_id)->toBe($eurCurrency->id);
-
-    // Debug: verify we can find it
-    $found = ExchangeRate::where('base_currency_id', $baseCurrency->id)
-        ->where('target_currency_id', $eurCurrency->id)
-        ->first();
-    expect($found)->not->toBeNull();
-
-    // Debug: test getConversionRate directly
-    $rate = ExchangeRate::getConversionRate($baseCurrency->id, $eurCurrency->id, today()->toDateString());
-    dump([
-        'base_id' => $baseCurrency->id,
-        'eur_id' => $eurCurrency->id,
-        'date' => today()->toDateString(),
-        'rate_returned' => $rate,
-        'total_rates_in_db' => ExchangeRate::count(),
-    ]);
-    expect($rate)->not->toBeNull();
 
     $service = new CurrencyExchangeService();
     $result = $service->convert(100, 'USD', 'EUR', today()->toDateString());
