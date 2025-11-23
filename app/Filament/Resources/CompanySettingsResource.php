@@ -17,9 +17,12 @@ class CompanySettingsResource extends Resource
 
     protected static ?string $modelLabel = 'Company Settings';
 
-    protected static ?string $navigationGroup = 'Settings';
+    protected static ?int $navigationSort = 100;
 
-    protected static ?int $navigationSort = 1;
+    public static function getNavigationGroup(): ?string
+    {
+        return 'Settings';
+    }
 
     public static function getPages(): array
     {
