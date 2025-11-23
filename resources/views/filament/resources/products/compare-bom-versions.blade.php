@@ -1,9 +1,9 @@
 <x-filament-panels::page>
     <div class="space-y-6">
         {{-- Version Selectors --}}
-        <x-filament-panels::form wire:submit="$refresh">
+        <div class="mb-6">
             {{ $this->form }}
-        </x-filament-panels::form>
+        </div>
 
         @if($version1 && $version2)
             {{-- Version Headers --}}
