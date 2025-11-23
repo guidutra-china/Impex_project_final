@@ -100,14 +100,14 @@ class WhatIfScenariosRelationManager extends RelationManager
                         Repeater::make('component_adjustments')
                             ->label('Component Cost Adjustments')
                             ->schema([
-                                Select::make('component_id')
-                                    ->label('Component')
+                                Select::make('component_product_id')
+                                    ->label('Component Product')
                                     ->options(function () {
                                         $product = $this->getOwnerRecord();
                                         return $product->bomItems()
-                                            ->with('component')
+                                            ->with('componentProduct')
                                             ->get()
-                                            ->pluck('component.name', 'component_id');
+                                            ->pluck('componentProduct.name', 'component_product_id');
                                     })
                                     ->required()
                                     ->searchable(),
@@ -152,7 +152,7 @@ class WhatIfScenariosRelationManager extends RelationManager
                         $componentCostAdjustments = [];
                         if (!empty($data['component_adjustments'])) {
                             foreach ($data['component_adjustments'] as $adjustment) {
-                                $componentCostAdjustments[$adjustment['component_id']] = (int) ($adjustment['new_cost'] * 100);
+                                $componentCostAdjustments[$adjustment['component_product_id']] = (int) ($adjustment['new_cost'] * 100);
                             }
                         }
 

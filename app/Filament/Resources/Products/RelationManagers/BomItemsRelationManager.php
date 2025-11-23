@@ -32,10 +32,10 @@ class BomItemsRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         return $table
-            ->recordTitleAttribute('component.name')
+            ->recordTitleAttribute('componentProduct.name')
             ->columns([
-                TextColumn::make('component.code')
-                    ->label('Code')
+                TextColumn::make('componentProduct.sku')
+                    ->label('SKU')
                     ->searchable()
                     ->sortable()
                     ->copyable()
@@ -43,30 +43,18 @@ class BomItemsRelationManager extends RelationManager
                     ->color('gray')
                     ->weight('bold'),
 
-                TextColumn::make('component.name')
-                    ->label('Component Name')
+                TextColumn::make('componentProduct.name')
+                    ->label('Component Product')
                     ->searchable()
                     ->sortable()
                     ->limit(30)
-                    ->tooltip(fn ($record) => $record->component->name),
+                    ->tooltip(fn ($record) => $record->componentProduct->name),
 
-                TextColumn::make('component.type')
-                    ->label('Type')
+                TextColumn::make('componentProduct.category.name')
+                    ->label('Category')
                     ->badge()
-                    ->color(fn (string $state): string => match ($state) {
-                        'raw_material' => 'info',
-                        'purchased_part' => 'success',
-                        'sub_assembly' => 'warning',
-                        'packaging' => 'gray',
-                        default => 'gray',
-                    })
-                    ->formatStateUsing(fn (string $state): string => match ($state) {
-                        'raw_material' => 'Raw Material',
-                        'purchased_part' => 'Purchased',
-                        'sub_assembly' => 'Sub-Assembly',
-                        'packaging' => 'Packaging',
-                        default => ucfirst($state),
-                    }),
+                    ->color(fn ($record) => $record->componentProduct?->category?->color ?? 'gray')
+                    ->default('-'),
 
                 TextColumn::make('quantity')
                     ->label('Qty')
@@ -219,24 +207,22 @@ class BomItemsRelationManager extends RelationManager
     {
         return $schema
             ->components([
-                Select::make('component_id')
-                    ->label('Component')
-                    ->relationship('component', 'name', fn ($query) => $query->active()->orderBy('code'))
-                    ->searchable(['code', 'name'])
+                Select::make('component_product_id')
+                    ->label('Component Product')
+                    ->relationship('componentProduct', 'name', function ($query) {
+                        // Exclude the current product to prevent circular references
+                        $currentProductId = $this->getOwnerRecord()->id;
+                        return $query->where('status', 'active')
+                            ->where('id', '!=', $currentProductId)
+                            ->orderBy('name');
+                    })
+                    ->searchable(['sku', 'name'])
                     ->preload()
                     ->required()
-                    ->getOptionLabelFromRecordUsing(fn ($record) => "{$record->code} - {$record->name}")
-                    ->helperText('Select the component to add to this product')
+                    ->getOptionLabelFromRecordUsing(fn ($record) => ($record->sku ? "{$record->sku} - " : '') . $record->name)
+                    ->helperText('Select a product to use as component (cannot select itself)')
                     ->columnSpan(2)
-                    ->live()
-                    ->afterStateUpdated(function ($state, callable $set) {
-                        if (!$state) return;
-
-                        $component = \App\Models\Component::find($state);
-                        if ($component) {
-                            $set('unit_of_measure', $component->unit_of_measure);
-                        }
-                    }),
+                    ->live(),
 
                 TextInput::make('quantity')
                     ->label('Quantity Required')

@@ -244,8 +244,8 @@
     <tbody>
     @foreach($bomItems as $item)
         <tr>
-            <td>{{ $item->component->code }}</td>
-            <td>{{ $item->component->name }}</td>
+            <td>{{ $item->componentProduct->sku ?? '-' }}</td>
+            <td>{{ $item->componentProduct->name }}</td>
             <td class="text-right">{{ number_format($item->quantity, 2) }}</td>
             <td>{{ $item->unit_of_measure }}</td>
             <td class="text-right">{{ number_format($item->waste_factor, 1) }}%</td>

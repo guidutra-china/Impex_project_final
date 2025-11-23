@@ -133,7 +133,7 @@ class BomVersionsRelationManager extends RelationManager
                 ViewAction::make()
                     ->modalHeading(fn ($record) => "BOM Version: {$record->version_display}")
                     ->modalContent(fn ($record) => view('filament.resources.products.bom-version-details', [
-                        'version' => $record->load('bomVersionItems.component'),
+                        'version' => $record->load('bomVersionItems.componentProduct'),
                     ])),
 
                 Action::make('activate')

@@ -84,12 +84,12 @@
                     <tr>
                         <td class="px-4 py-3 whitespace-nowrap">
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">
-                                {{ $item->component->code }}
+                                {{ $item->componentProduct->sku ?? '-' }}
                             </span>
                         </td>
                         <td class="px-4 py-3">
                             <div class="text-sm font-medium text-gray-900 dark:text-gray-100">
-                                {{ $item->component->name }}
+                                {{ $item->componentProduct->name }}
                             </div>
                             @if($item->notes)
                                 <div class="text-xs text-gray-500 dark:text-gray-400">

@@ -82,14 +82,14 @@
                         </tr>
                     </thead>
                     <tbody class="text-sm">
-                        @foreach($scenario->component_cost_adjustments as $componentId => $newCost)
+                        @foreach($scenario->component_cost_adjustments as $componentProductId => $newCost)
                             @php
-                                $bomItem = $scenario->product->bomItems->firstWhere('component_id', $componentId);
+                                $bomItem = $scenario->product->bomItems->firstWhere('component_product_id', $componentProductId);
                                 $currentCost = $bomItem ? $bomItem->unit_cost : 0;
                                 $difference = $newCost - $currentCost;
                             @endphp
                             <tr class="border-t border-gray-100 dark:border-gray-800">
-                                <td class="py-2">{{ $bomItem->component->name ?? 'Unknown' }}</td>
+                                <td class="py-2">{{ $bomItem->componentProduct->name ?? 'Unknown' }}</td>
                                 <td class="text-right">${{ number_format($currentCost / 100, 2) }}</td>
                                 <td class="text-right font-semibold">${{ number_format($newCost / 100, 2) }}</td>
                                 <td class="text-right {{ $difference < 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400' }}">

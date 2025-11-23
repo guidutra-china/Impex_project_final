@@ -31,11 +31,11 @@ class CompareBomVersions extends Page
         $version2Id = request()->query('version2');
 
         if ($version1Id) {
-            $this->version1 = BomVersion::with('bomVersionItems.component')->find($version1Id);
+            $this->version1 = BomVersion::with('bomVersionItems.componentProduct')->find($version1Id);
         }
 
         if ($version2Id) {
-            $this->version2 = BomVersion::with('bomVersionItems.component')->find($version2Id);
+            $this->version2 = BomVersion::with('bomVersionItems.componentProduct')->find($version2Id);
         }
 
         $this->form->fill([
@@ -59,7 +59,7 @@ class CompareBomVersions extends Page
                     ->required()
                     ->live()
                     ->afterStateUpdated(function ($state) {
-                        $this->version1 = BomVersion::with('bomVersionItems.component')->find($state);
+                        $this->version1 = BomVersion::with('bomVersionItems.componentProduct')->find($state);
                     }),
 
                 Select::make('version2_id')
@@ -73,7 +73,7 @@ class CompareBomVersions extends Page
                     ->required()
                     ->live()
                     ->afterStateUpdated(function ($state) {
-                        $this->version2 = BomVersion::with('bomVersionItems.component')->find($state);
+                        $this->version2 = BomVersion::with('bomVersionItems.componentProduct')->find($state);
                     }),
             ])
             ->statePath('data');
@@ -85,21 +85,21 @@ class CompareBomVersions extends Page
             return [];
         }
 
-        $v1Items = $this->version1->bomVersionItems->keyBy('component_id');
-        $v2Items = $this->version2->bomVersionItems->keyBy('component_id');
+        $v1Items = $this->version1->bomVersionItems->keyBy('component_product_id');
+        $v2Items = $this->version2->bomVersionItems->keyBy('component_product_id');
 
-        $allComponentIds = $v1Items->keys()->merge($v2Items->keys())->unique();
+        $allComponentProductIds = $v1Items->keys()->merge($v2Items->keys())->unique();
 
         $comparison = [];
 
-        foreach ($allComponentIds as $componentId) {
-            $item1 = $v1Items->get($componentId);
-            $item2 = $v2Items->get($componentId);
+        foreach ($allComponentProductIds as $componentProductId) {
+            $item1 = $v1Items->get($componentProductId);
+            $item2 = $v2Items->get($componentProductId);
 
             $comparison[] = [
-                'component_id' => $componentId,
-                'component_name' => $item1?->component->name ?? $item2?->component->name,
-                'component_code' => $item1?->component->code ?? $item2?->component->code,
+                'component_product_id' => $componentProductId,
+                'component_name' => $item1?->componentProduct->name ?? $item2?->componentProduct->name,
+                'component_sku' => $item1?->componentProduct->sku ?? $item2?->componentProduct->sku,
                 'in_v1' => $item1 !== null,
                 'in_v2' => $item2 !== null,
                 'v1_quantity' => $item1?->quantity,
