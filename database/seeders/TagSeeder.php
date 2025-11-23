@@ -13,14 +13,13 @@ class TagSeeder extends Seeder
      */
     public function run(): void
     {
+        // Maximum 5 tags for development
         $tags = [
             ['name' => 'Flood Light'],
             ['name' => 'Street Light'],
             ['name' => 'Solar Light'],
             ['name' => 'Christmas'],
             ['name' => 'Strips'],
-            ['name' => 'Drivers'],
-            ['name' => 'LED Chip'],
         ];
 
         foreach ($tags as $tag) {

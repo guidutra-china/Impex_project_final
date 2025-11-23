@@ -11,10 +11,12 @@ class CurrencySeeder extends Seeder
      * Run the database seeds.
      * 
      * Seeds common currencies with exchange rates relative to USD
+     * Maximum 5 currencies for development environment
      * Exchange rates are approximate and should be updated regularly
      */
     public function run(): void
     {
+        // Maximum 5 currencies for development
         $currencies = [
             [
                 'code' => 'USD',
@@ -56,22 +58,7 @@ class CurrencySeeder extends Seeder
                 'is_base' => false,
                 'is_active' => true,
             ],
-            [
-                'code' => 'JPY',
-                'name' => 'Japanese Yen',
-                'name_plural' => 'Japanese Yen',
-                'symbol' => '¥',
-                'is_base' => false,
-                'is_active' => true,
-            ],
-            [
-                'code' => 'MXN',
-                'name' => 'Mexican Peso',
-                'name_plural' => 'Mexican Pesos',
-                'symbol' => '$',
-                'is_base' => false,
-                'is_active' => true,
-            ],
+
         ];
 
         foreach ($currencies as $currency) {
