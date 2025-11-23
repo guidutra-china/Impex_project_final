@@ -65,6 +65,7 @@ test('it throws exception when API key is not configured', function () {
     config(['services.exchangerate.api_key' => null]);
 
     $service = new CurrencyExchangeService();
+    $service->fetchExchangeRates('USD'); // This will trigger the API key check
 })->throws(Exception::class, 'ExchangeRate API key not configured');
 
 test('it throws exception when no base currency is configured', function () {
@@ -229,7 +230,7 @@ test('it can convert between currencies using historical rates', function () {
     ]);
 
     $service = new CurrencyExchangeService();
-    $result = $service->convert(100, 'USD', 'EUR');
+    $result = $service->convert(100, 'USD', 'EUR', today()->toDateString());
 
     expect($result)->toBe(92.0);
 });
@@ -275,6 +276,7 @@ test('it can get rate history for a currency pair', function () {
         'inverse_rate' => 1 / 0.92,
         'date' => today(),
         'source' => 'api',
+        'source_name' => 'ExchangeRate-API',
         'status' => 'approved',
         'approved_at' => now(),
     ]);
@@ -298,6 +300,7 @@ test('it can get latest rate for a currency pair', function () {
         'inverse_rate' => 1 / 0.92,
         'date' => today(),
         'source' => 'api',
+        'source_name' => 'ExchangeRate-API',
         'status' => 'approved',
         'approved_at' => now(),
     ]);
