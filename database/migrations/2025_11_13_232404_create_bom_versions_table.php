@@ -48,7 +48,7 @@ return new class extends Migration
             
             // Relationships
             $table->foreignId('bom_version_id')->constrained('bom_versions')->cascadeOnDelete();
-            $table->foreignId('component_id')->constrained('components')->restrictOnDelete();
+            $table->foreignId('component_id')->constrained('products')->restrictOnDelete();
             
             // Quantity (snapshot at version creation)
             $table->decimal('quantity', 10, 4)->default(1);
