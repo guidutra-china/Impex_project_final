@@ -7,6 +7,7 @@ use App\Filament\Resources\Products\Pages\EditProduct;
 use App\Filament\Resources\Products\Pages\ListProducts;
 use App\Filament\Resources\Products\Pages\ViewProduct;
 use App\Filament\Resources\Products\RelationManagers\BomItemsRelationManager;
+use App\Filament\Resources\Products\RelationManagers\BomVersionsRelationManager;
 use App\Filament\Resources\Products\RelationManagers\DocumentsRelationManager;
 use App\Filament\Resources\Products\RelationManagers\FeaturesRelationManager;
 use App\Filament\Resources\Products\RelationManagers\PhotosRelationManager;
@@ -43,6 +44,7 @@ class ProductResource extends Resource
     {
         return [
             BomItemsRelationManager::class,
+            BomVersionsRelationManager::class,
             FeaturesRelationManager::class,
             PhotosRelationManager::class,
             DocumentsRelationManager::class,
