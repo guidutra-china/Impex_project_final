@@ -99,26 +99,12 @@ class ExchangeRate extends Model
         
         // Disable cache in testing environment to avoid stale data
         if (app()->environment('testing')) {
-            $query = self::where('base_currency_id', $baseCurrencyId)
+            return self::where('base_currency_id', $baseCurrencyId)
                 ->where('target_currency_id', $targetCurrencyId)
-                ->where('date', '<=', $date)
+                ->whereDate('date', '<=', $date)
                 ->where('status', 'approved')
-                ->orderBy('date', 'desc');
-            
-            dump([
-                'searching_for' => [
-                    'base_currency_id' => $baseCurrencyId,
-                    'target_currency_id' => $targetCurrencyId,
-                    'date' => $date,
-                    'status' => 'approved',
-                ],
-                'sql' => $query->toSql(),
-                'bindings' => $query->getBindings(),
-                'all_records_in_table' => self::all()->toArray(),
-                'result' => $query->first(),
-            ]);
-            
-            return $query->first();
+                ->orderBy('date', 'desc')
+                ->first();
         }
         
         $cacheKey = "exchange_rate_{$baseCurrencyId}_{$targetCurrencyId}_{$date}";
@@ -126,7 +112,7 @@ class ExchangeRate extends Model
         return Cache::remember($cacheKey, 3600, function () use ($baseCurrencyId, $targetCurrencyId, $date) {
             return self::where('base_currency_id', $baseCurrencyId)
                 ->where('target_currency_id', $targetCurrencyId)
-                ->where('date', '<=', $date)
+                ->whereDate('date', '<=', $date)
                 ->where('status', 'approved')
                 ->orderBy('date', 'desc')
                 ->first();
