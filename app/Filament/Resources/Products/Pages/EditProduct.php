@@ -36,7 +36,7 @@ class EditProduct extends EditRecord
             ->send();
         
         // Force page reload to show updated costs
-        $this->redirect(static::getUrl('edit', ['record' => $this->record]), navigate: false);
+        $this->redirect(static::getUrl(['record' => $this->record]), navigate: false);
     }
 
     protected function getHeaderActions(): array
