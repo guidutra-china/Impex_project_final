@@ -105,6 +105,7 @@ class SalesInvoiceForm
                 ->relationship('quote', 'quote_number')
                 ->searchable()
                 ->preload()
+                ->live()
                 ->afterStateUpdated(function (Get $get, Set $set, $state) {
                     if (!$state) return;
 
@@ -119,16 +120,24 @@ class SalesInvoiceForm
 
                     // Fill items from Quote
                     $items = $quote->items->map(function ($item) {
+                        $product = $item->product;
+                        $unitPrice = $item->unit_price_after_commission / 100; // Convert from cents
+                        $quantity = $item->quantity;
+                        $total = $item->total_price_after_commission / 100; // Convert from cents
+                        
+                        // Calculate commission (difference between before and after)
+                        $commission = ($item->unit_price_after_commission - $item->unit_price_before_commission) / 100;
+                        
                         return [
                             'product_id' => $item->product_id,
-                            'product_name' => $item->product_name,
-                            'product_sku' => $item->product_sku,
-                            'quantity' => $item->quantity,
-                            'unit_price' => $item->unit_price / 100, // Convert from cents
-                            'commission' => $item->commission / 100,
-                            'total' => $item->total_price / 100,
+                            'product_name' => $product->name ?? '',
+                            'product_sku' => $product->sku ?? '',
+                            'quantity' => $quantity,
+                            'unit_price' => $unitPrice,
+                            'commission' => $commission,
+                            'total' => $total,
                             'quote_item_id' => $item->id,
-                            'notes' => $item->notes,
+                            'notes' => $item->notes ?? '',
                         ];
                     })->toArray();
 
