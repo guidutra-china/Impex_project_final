@@ -7,6 +7,7 @@ use App\Models\CompanySetting;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Support\Icons\Heroicon;
+use UnitEnum;
 
 class CompanySettingsResource extends Resource
 {
@@ -20,7 +21,7 @@ class CompanySettingsResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBuildingOffice2;
 
-    protected static ?string $navigationGroup = 'Settings';
+    protected static string|UnitEnum|null $navigationGroup = 'Settings';
 
     public static function getPages(): array
     {
