@@ -115,9 +115,20 @@ class ProductForm
                             ->numeric()
                             ->prefix(fn (Get $get) => \App\Models\Currency::find($get('currency_id'))?->symbol ?? '$')
                             ->step(0.01)
-                            ->helperText('Price will be stored in cents')
+                            ->helperText(fn (?Product $record) => 
+                                $record && $record->bomItems()->count() > 0 
+                                    ? 'Auto-synced from Calculated Selling Price (product has BOM)'
+                                    : 'Manually enter price (product has no BOM)'
+                            )
+                            ->disabled(fn (?Product $record) => $record && $record->bomItems()->count() > 0)
+                            ->dehydrated(fn (?Product $record) => !$record || $record->bomItems()->count() === 0)
                             ->dehydrateStateUsing(fn ($state) => $state ? (int) ($state * 100) : null)
-                            ->formatStateUsing(fn ($state) => $state ? $state / 100 : null)
+                            ->formatStateUsing(fn ($state, ?Product $record) => 
+                                // If product has BOM, show calculated_selling_price
+                                $record && $record->bomItems()->count() > 0
+                                    ? ($record->calculated_selling_price ? $record->calculated_selling_price / 100 : 0)
+                                    : ($state ? $state / 100 : null)
+                            )
                             ->live(),
 
                         TextInput::make('brand')

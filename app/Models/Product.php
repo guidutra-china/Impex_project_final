@@ -267,6 +267,11 @@ class Product extends Model
             $this->calculated_selling_price = $this->total_manufacturing_cost;
         }
 
+        // Auto-sync price with calculated_selling_price if product has BOM
+        if ($this->bomItems()->count() > 0) {
+            $this->price = $this->calculated_selling_price;
+        }
+
         $this->saveQuietly(); // Save without triggering events
     }
 
