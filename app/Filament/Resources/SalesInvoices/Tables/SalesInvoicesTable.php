@@ -47,6 +47,36 @@ class SalesInvoicesTable
                     ->sortable()
                     ->toggleable(),
 
+                TextColumn::make('approval_status')
+                    ->label('Approval')
+                    ->badge()
+                    ->colors([
+                        'warning' => 'pending_approval',
+                        'success' => 'accepted',
+                        'danger' => 'rejected',
+                    ])
+                    ->formatStateUsing(fn (string $state): string => match ($state) {
+                        'pending_approval' => 'Pending',
+                        'accepted' => 'Accepted',
+                        'rejected' => 'Rejected',
+                        default => $state,
+                    })
+                    ->sortable(),
+
+                TextColumn::make('deposit_status')
+                    ->label('Deposit')
+                    ->badge()
+                    ->getStateUsing(function ($record) {
+                        if (!$record->deposit_required) return 'Not Required';
+                        return $record->deposit_received ? 'Received' : 'Pending';
+                    })
+                    ->colors([
+                        'gray' => 'Not Required',
+                        'warning' => 'Pending',
+                        'success' => 'Received',
+                    ])
+                    ->toggleable(),
+
                 TextColumn::make('status')
                     ->badge()
                     ->colors([
@@ -62,6 +92,13 @@ class SalesInvoicesTable
                     ->label('Invoice Date')
                     ->date()
                     ->sortable(),
+
+                TextColumn::make('approval_deadline')
+                    ->label('Approval Deadline')
+                    ->date()
+                    ->sortable()
+                    ->color(fn ($record) => $record->isApprovalOverdue() ? 'danger' : null)
+                    ->toggleable(isToggledHiddenByDefault: true),
 
                 TextColumn::make('due_date')
                     ->label('Due Date')
@@ -97,6 +134,20 @@ class SalesInvoicesTable
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
+                SelectFilter::make('approval_status')
+                    ->label('Approval Status')
+                    ->options([
+                        'pending_approval' => 'Pending Approval',
+                        'accepted' => 'Accepted',
+                        'rejected' => 'Rejected',
+                    ])
+                    ->multiple(),
+
+                Tables\Filters\Filter::make('deposit_pending')
+                    ->query(fn ($query) => $query->where('deposit_required', true)
+                        ->where('deposit_received', false))
+                    ->label('Deposit Pending'),
+
                 SelectFilter::make('status')
                     ->options([
                         'draft' => 'Draft',
@@ -171,6 +222,70 @@ class SalesInvoicesTable
                             ->success()
                             ->title('Invoice Paid')
                             ->body("Invoice {$record->invoice_number} has been marked as paid.")
+                    ),
+
+                Action::make('mark_as_accepted')
+                    ->label('Mark as Accepted')
+                    ->icon('heroicon-o-check-badge')
+                    ->color('success')
+                    ->visible(fn ($record) => $record->approval_status === 'pending_approval')
+                    ->form([
+                        TextInput::make('approved_by')
+                            ->label('Approved By')
+                            ->helperText('Name or email of person who approved'),
+                    ])
+                    ->action(function ($record, array $data) {
+                        $record->update([
+                            'approval_status' => 'accepted',
+                            'approved_at' => now(),
+                            'approved_by' => $data['approved_by'] ?? 'Manual',
+                        ]);
+                    })
+                    ->successNotification(
+                        fn ($record) => \Filament\Notifications\Notification::make()
+                            ->success()
+                            ->title('Invoice Accepted')
+                            ->body("Invoice {$record->invoice_number} has been accepted by client.")
+                    ),
+
+                Action::make('mark_deposit_received')
+                    ->label('Mark Deposit Received')
+                    ->icon('heroicon-o-banknotes')
+                    ->color('success')
+                    ->visible(fn ($record) => $record->deposit_required && !$record->deposit_received)
+                    ->form([
+                        DatePicker::make('deposit_received_at')
+                            ->label('Deposit Received Date')
+                            ->default(now())
+                            ->required(),
+                        Select::make('deposit_payment_method')
+                            ->label('Payment Method')
+                            ->options([
+                                'bank_transfer' => 'Bank Transfer',
+                                'credit_card' => 'Credit Card',
+                                'cash' => 'Cash',
+                                'check' => 'Check',
+                                'paypal' => 'PayPal',
+                                'other' => 'Other',
+                            ])
+                            ->required(),
+                        TextInput::make('deposit_payment_reference')
+                            ->label('Payment Reference')
+                            ->helperText('Transaction ID, check number, etc.'),
+                    ])
+                    ->action(function ($record, array $data) {
+                        $record->update([
+                            'deposit_received' => true,
+                            'deposit_received_at' => $data['deposit_received_at'],
+                            'deposit_payment_method' => $data['deposit_payment_method'],
+                            'deposit_payment_reference' => $data['deposit_payment_reference'] ?? null,
+                        ]);
+                    })
+                    ->successNotification(
+                        fn ($record) => \Filament\Notifications\Notification::make()
+                            ->success()
+                            ->title('Deposit Received')
+                            ->body("Deposit for invoice {$record->invoice_number} has been confirmed.")
                     ),
 
                 Action::make('mark_as_sent')

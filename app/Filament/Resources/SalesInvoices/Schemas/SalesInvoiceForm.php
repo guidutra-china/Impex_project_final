@@ -48,6 +48,12 @@ class SalesInvoiceForm
                             ->columns(4)
                             ->collapsible(),
 
+                        Section::make('Approval & Deposit')
+                            ->schema(static::getApprovalComponents())
+                            ->columns(2)
+                            ->collapsible()
+                            ->collapsed(fn (?SalesInvoice $record) => $record !== null && $record->isApproved()),
+
                         Section::make('Payment Information')
                             ->schema(static::getPaymentComponents())
                             ->columns(2)
@@ -371,6 +377,87 @@ class SalesInvoiceForm
                 ->disabled()
                 ->prefix('$')
                 ->helperText('Total × Exchange Rate'),
+        ];
+    }
+
+    protected static function getApprovalComponents(): array
+    {
+        return [
+            Select::make('approval_status')
+                ->label('Approval Status')
+                ->options([
+                    'pending_approval' => 'Pending Approval',
+                    'accepted' => 'Accepted',
+                    'rejected' => 'Rejected',
+                ])
+                ->default('pending_approval')
+                ->required()
+                ->helperText('Client must accept before PO can be created'),
+
+            DatePicker::make('approval_deadline')
+                ->label('Approval Deadline')
+                ->default(now()->addDays(7))
+                ->helperText('Client should approve by this date'),
+
+            DatePicker::make('approved_at')
+                ->label('Approved At')
+                ->disabled()
+                ->visible(fn (Get $get) => $get('approval_status') === 'accepted'),
+
+            TextInput::make('approved_by')
+                ->label('Approved By')
+                ->disabled()
+                ->visible(fn (Get $get) => $get('approval_status') === 'accepted'),
+
+            Textarea::make('rejection_reason')
+                ->label('Rejection Reason')
+                ->rows(3)
+                ->columnSpanFull()
+                ->visible(fn (Get $get) => $get('approval_status') === 'rejected'),
+
+            // Deposit fields
+            Select::make('deposit_required')
+                ->label('Deposit Required?')
+                ->boolean()
+                ->default(false)
+                ->live()
+                ->helperText('Based on Payment Terms - first stage payment'),
+
+            TextInput::make('deposit_amount')
+                ->label('Deposit Amount')
+                ->numeric()
+                ->prefix('$')
+                ->helperText('Will be calculated from Payment Terms')
+                ->visible(fn (Get $get) => $get('deposit_required')),
+
+            Select::make('deposit_received')
+                ->label('Deposit Received?')
+                ->boolean()
+                ->default(false)
+                ->visible(fn (Get $get) => $get('deposit_required'))
+                ->helperText('Mark as received when deposit is confirmed'),
+
+            DatePicker::make('deposit_received_at')
+                ->label('Deposit Received At')
+                ->disabled()
+                ->visible(fn (Get $get) => $get('deposit_received')),
+
+            Select::make('deposit_payment_method')
+                ->label('Deposit Payment Method')
+                ->options([
+                    'bank_transfer' => 'Bank Transfer',
+                    'credit_card' => 'Credit Card',
+                    'cash' => 'Cash',
+                    'check' => 'Check',
+                    'paypal' => 'PayPal',
+                    'other' => 'Other',
+                ])
+                ->visible(fn (Get $get) => $get('deposit_received')),
+
+            TextInput::make('deposit_payment_reference')
+                ->label('Deposit Payment Reference')
+                ->helperText('Transaction ID, check number, etc.')
+                ->visible(fn (Get $get) => $get('deposit_received')),
         ];
     }
 

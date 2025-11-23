@@ -45,6 +45,19 @@ class SalesInvoice extends Model
         'paid_at',
         'cancelled_at',
         'cancellation_reason',
+        // Approval fields
+        'approval_status',
+        'approval_deadline',
+        'approved_at',
+        'approved_by',
+        'rejection_reason',
+        // Deposit fields
+        'deposit_required',
+        'deposit_amount',
+        'deposit_received',
+        'deposit_received_at',
+        'deposit_payment_method',
+        'deposit_payment_reference',
     ];
 
     protected $casts = [
@@ -56,6 +69,11 @@ class SalesInvoice extends Model
         'sent_at' => 'datetime',
         'paid_at' => 'datetime',
         'cancelled_at' => 'datetime',
+        'approval_deadline' => 'datetime',
+        'approved_at' => 'datetime',
+        'deposit_received' => 'boolean',
+        'deposit_required' => 'boolean',
+        'deposit_received_at' => 'datetime',
     ];
 
     // Relationships
@@ -170,6 +188,65 @@ class SalesInvoice extends Model
         if ($this->isOverdue() && $this->status !== 'overdue') {
             $this->update(['status' => 'overdue']);
         }
+    }
+
+    /**
+     * Check if invoice is approved
+     */
+    public function isApproved(): bool
+    {
+        return $this->approval_status === 'accepted';
+    }
+
+    /**
+     * Check if approval is pending
+     */
+    public function isApprovalPending(): bool
+    {
+        return $this->approval_status === 'pending_approval';
+    }
+
+    /**
+     * Check if approval is overdue
+     */
+    public function isApprovalOverdue(): bool
+    {
+        return $this->isApprovalPending() 
+            && $this->approval_deadline 
+            && $this->approval_deadline < now();
+    }
+
+    /**
+     * Check if deposit is required
+     */
+    public function requiresDeposit(): bool
+    {
+        return $this->deposit_required;
+    }
+
+    /**
+     * Check if deposit has been received
+     */
+    public function hasDepositReceived(): bool
+    {
+        return $this->deposit_received;
+    }
+
+    /**
+     * Check if can proceed to create PO
+     * (approved + deposit received if required)
+     */
+    public function canProceedToPO(): bool
+    {
+        if (!$this->isApproved()) {
+            return false;
+        }
+
+        if ($this->requiresDeposit() && !$this->hasDepositReceived()) {
+            return false;
+        }
+
+        return true;
     }
 
     // Boot method
