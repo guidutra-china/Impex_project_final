@@ -12,12 +12,13 @@
     </x-filament::section>
 
     @if($version1 && $version2)
-        {{-- Version Headers --}}
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+        {{-- Version Headers - Side by Side --}}
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+            {{-- Version 1 --}}
             <x-filament::section>
                 <x-slot name="heading">
                     <div class="flex items-center justify-between">
-                        <span>{{ $version1->version_display }}</span>
+                        <span class="text-lg font-bold">{{ $version1->version_display }}</span>
                         <x-filament::badge :color="match($version1->status) {
                             'active' => 'success',
                             'draft' => 'warning',
@@ -40,20 +41,21 @@
                     </div>
                     <div class="flex justify-between text-sm">
                         <span class="text-gray-600 dark:text-gray-400">Total Cost:</span>
-                        <span class="font-bold text-lg text-primary-600">${{ number_format($version1->total_manufacturing_cost_dollars, 2) }}</span>
+                        <span class="font-bold text-xl text-primary-600 dark:text-primary-400">${{ number_format($version1->total_manufacturing_cost_dollars, 2) }}</span>
                     </div>
                     @if($version1->change_notes)
                         <div class="pt-3 border-t border-gray-200 dark:border-gray-700">
-                            <p class="text-xs text-gray-600 dark:text-gray-400">{{ $version1->change_notes }}</p>
+                            <p class="text-xs text-gray-600 dark:text-gray-400 italic">{{ $version1->change_notes }}</p>
                         </div>
                     @endif
                 </div>
             </x-filament::section>
 
+            {{-- Version 2 --}}
             <x-filament::section>
                 <x-slot name="heading">
                     <div class="flex items-center justify-between">
-                        <span>{{ $version2->version_display }}</span>
+                        <span class="text-lg font-bold">{{ $version2->version_display }}</span>
                         <x-filament::badge :color="match($version2->status) {
                             'active' => 'success',
                             'draft' => 'warning',
@@ -76,124 +78,117 @@
                     </div>
                     <div class="flex justify-between text-sm">
                         <span class="text-gray-600 dark:text-gray-400">Total Cost:</span>
-                        <span class="font-bold text-lg text-success-600">${{ number_format($version2->total_manufacturing_cost_dollars, 2) }}</span>
+                        <span class="font-bold text-xl text-success-600 dark:text-success-400">${{ number_format($version2->total_manufacturing_cost_dollars, 2) }}</span>
                     </div>
                     @if($version2->change_notes)
                         <div class="pt-3 border-t border-gray-200 dark:border-gray-700">
-                            <p class="text-xs text-gray-600 dark:text-gray-400">{{ $version2->change_notes }}</p>
+                            <p class="text-xs text-gray-600 dark:text-gray-400 italic">{{ $version2->change_notes }}</p>
                         </div>
                     @endif
                 </div>
             </x-filament::section>
         </div>
 
-        {{-- Cost Summary --}}
-        <x-filament::section class="mt-6">
-            <x-slot name="heading">
-                Cost Summary Comparison
-            </x-slot>
+        {{-- Cost Summary - Side by Side Cards --}}
+        <div class="mt-6">
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Cost Summary Comparison</h2>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {{-- Version 1 Costs --}}
+                <x-filament::section>
+                    <x-slot name="heading">
+                        <span class="text-primary-600 dark:text-primary-400">{{ $version1->version_display }} Costs</span>
+                    </x-slot>
 
-            <div class="overflow-x-auto">
-                <table class="w-full divide-y divide-gray-200 dark:divide-gray-700">
-                    <thead>
-                        <tr class="bg-gray-50 dark:bg-gray-800">
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                                Cost Type
-                            </th>
-                            <th class="px-6 py-3 text-right text-xs font-medium text-primary-600 dark:text-primary-400 uppercase tracking-wider">
-                                {{ $version1->version_display }}
-                            </th>
-                            <th class="px-6 py-3 text-right text-xs font-medium text-success-600 dark:text-success-400 uppercase tracking-wider">
-                                {{ $version2->version_display }}
-                            </th>
-                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                                Difference
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody class="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
-                        <tr>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100">
-                                BOM Material Cost
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-right text-primary-600 dark:text-primary-400">
-                                ${{ number_format($version1->bom_material_cost_dollars, 2) }}
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-right text-success-600 dark:text-success-400">
-                                ${{ number_format($version2->bom_material_cost_dollars, 2) }}
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-right font-semibold">
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-center py-2 border-b border-gray-200 dark:border-gray-700">
+                            <span class="text-sm text-gray-600 dark:text-gray-400">BOM Material Cost</span>
+                            <span class="text-base font-semibold text-gray-900 dark:text-gray-100">${{ number_format($version1->bom_material_cost_dollars, 2) }}</span>
+                        </div>
+                        <div class="flex justify-between items-center py-2 border-b border-gray-200 dark:border-gray-700">
+                            <span class="text-sm text-gray-600 dark:text-gray-400">Direct Labor Cost</span>
+                            <span class="text-base font-semibold text-gray-900 dark:text-gray-100">${{ number_format($version1->direct_labor_cost_dollars, 2) }}</span>
+                        </div>
+                        <div class="flex justify-between items-center py-2 border-b border-gray-200 dark:border-gray-700">
+                            <span class="text-sm text-gray-600 dark:text-gray-400">Direct Overhead Cost</span>
+                            <span class="text-base font-semibold text-gray-900 dark:text-gray-100">${{ number_format($version1->direct_overhead_cost_dollars, 2) }}</span>
+                        </div>
+                        <div class="flex justify-between items-center py-3 bg-primary-50 dark:bg-primary-900/20 rounded-lg px-4 mt-2">
+                            <span class="text-base font-bold text-gray-900 dark:text-gray-100">Total Manufacturing Cost</span>
+                            <span class="text-xl font-bold text-primary-600 dark:text-primary-400">${{ number_format($version1->total_manufacturing_cost_dollars, 2) }}</span>
+                        </div>
+                    </div>
+                </x-filament::section>
+
+                {{-- Version 2 Costs --}}
+                <x-filament::section>
+                    <x-slot name="heading">
+                        <span class="text-success-600 dark:text-success-400">{{ $version2->version_display }} Costs</span>
+                    </x-slot>
+
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-center py-2 border-b border-gray-200 dark:border-gray-700">
+                            <span class="text-sm text-gray-600 dark:text-gray-400">BOM Material Cost</span>
+                            <div class="text-right">
+                                <div class="text-base font-semibold text-gray-900 dark:text-gray-100">${{ number_format($version2->bom_material_cost_dollars, 2) }}</div>
                                 @php
                                     $diff = $version2->bom_material_cost_snapshot - $version1->bom_material_cost_snapshot;
                                 @endphp
-                                <span class="{{ $diff < 0 ? 'text-success-600 dark:text-success-400' : 'text-danger-600 dark:text-danger-400' }}">
-                                    {{ $diff < 0 ? '↓' : '↑' }} ${{ number_format(abs($diff) / 100, 2) }}
-                                </span>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100">
-                                Direct Labor Cost
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-right text-primary-600 dark:text-primary-400">
-                                ${{ number_format($version1->direct_labor_cost_dollars, 2) }}
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-right text-success-600 dark:text-success-400">
-                                ${{ number_format($version2->direct_labor_cost_dollars, 2) }}
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-right font-semibold">
+                                @if($diff != 0)
+                                    <div class="text-xs {{ $diff < 0 ? 'text-success-600 dark:text-success-400' : 'text-danger-600 dark:text-danger-400' }}">
+                                        {{ $diff < 0 ? '↓' : '↑' }} ${{ number_format(abs($diff) / 100, 2) }}
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
+                        <div class="flex justify-between items-center py-2 border-b border-gray-200 dark:border-gray-700">
+                            <span class="text-sm text-gray-600 dark:text-gray-400">Direct Labor Cost</span>
+                            <div class="text-right">
+                                <div class="text-base font-semibold text-gray-900 dark:text-gray-100">${{ number_format($version2->direct_labor_cost_dollars, 2) }}</div>
                                 @php
                                     $diff = $version2->direct_labor_cost_snapshot - $version1->direct_labor_cost_snapshot;
                                 @endphp
-                                <span class="{{ $diff < 0 ? 'text-success-600 dark:text-success-400' : 'text-danger-600 dark:text-danger-400' }}">
-                                    {{ $diff < 0 ? '↓' : '↑' }} ${{ number_format(abs($diff) / 100, 2) }}
-                                </span>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100">
-                                Direct Overhead Cost
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-right text-primary-600 dark:text-primary-400">
-                                ${{ number_format($version1->direct_overhead_cost_dollars, 2) }}
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-right text-success-600 dark:text-success-400">
-                                ${{ number_format($version2->direct_overhead_cost_dollars, 2) }}
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-right font-semibold">
+                                @if($diff != 0)
+                                    <div class="text-xs {{ $diff < 0 ? 'text-success-600 dark:text-success-400' : 'text-danger-600 dark:text-danger-400' }}">
+                                        {{ $diff < 0 ? '↓' : '↑' }} ${{ number_format(abs($diff) / 100, 2) }}
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
+                        <div class="flex justify-between items-center py-2 border-b border-gray-200 dark:border-gray-700">
+                            <span class="text-sm text-gray-600 dark:text-gray-400">Direct Overhead Cost</span>
+                            <div class="text-right">
+                                <div class="text-base font-semibold text-gray-900 dark:text-gray-100">${{ number_format($version2->direct_overhead_cost_dollars, 2) }}</div>
                                 @php
                                     $diff = $version2->direct_overhead_cost_snapshot - $version1->direct_overhead_cost_snapshot;
                                 @endphp
-                                <span class="{{ $diff < 0 ? 'text-success-600 dark:text-success-400' : 'text-danger-600 dark:text-danger-400' }}">
-                                    {{ $diff < 0 ? '↓' : '↑' }} ${{ number_format(abs($diff) / 100, 2) }}
-                                </span>
-                            </td>
-                        </tr>
-                        <tr class="bg-gray-50 dark:bg-gray-800">
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900 dark:text-gray-100">
-                                Total Manufacturing Cost
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-base font-bold text-right text-primary-600 dark:text-primary-400">
-                                ${{ number_format($version1->total_manufacturing_cost_dollars, 2) }}
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-base font-bold text-right text-success-600 dark:text-success-400">
-                                ${{ number_format($version2->total_manufacturing_cost_dollars, 2) }}
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-base font-bold text-right">
+                                @if($diff != 0)
+                                    <div class="text-xs {{ $diff < 0 ? 'text-success-600 dark:text-success-400' : 'text-danger-600 dark:text-danger-400' }}">
+                                        {{ $diff < 0 ? '↓' : '↑' }} ${{ number_format(abs($diff) / 100, 2) }}
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
+                        <div class="flex justify-between items-center py-3 bg-success-50 dark:bg-success-900/20 rounded-lg px-4 mt-2">
+                            <span class="text-base font-bold text-gray-900 dark:text-gray-100">Total Manufacturing Cost</span>
+                            <div class="text-right">
+                                <div class="text-xl font-bold text-success-600 dark:text-success-400">${{ number_format($version2->total_manufacturing_cost_dollars, 2) }}</div>
                                 @php
                                     $diff = $version2->total_manufacturing_cost_snapshot - $version1->total_manufacturing_cost_snapshot;
                                 @endphp
-                                <span class="{{ $diff < 0 ? 'text-success-600 dark:text-success-400' : 'text-danger-600 dark:text-danger-400' }}">
-                                    {{ $diff < 0 ? '↓' : '↑' }} ${{ number_format(abs($diff) / 100, 2) }}
-                                </span>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+                                @if($diff != 0)
+                                    <div class="text-sm {{ $diff < 0 ? 'text-success-600 dark:text-success-400' : 'text-danger-600 dark:text-danger-400' }}">
+                                        {{ $diff < 0 ? '↓' : '↑' }} ${{ number_format(abs($diff) / 100, 2) }}
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                </x-filament::section>
             </div>
-        </x-filament::section>
+        </div>
 
-        {{-- Component Comparison --}}
+        {{-- Component Comparison Table --}}
         <x-filament::section class="mt-6">
             <x-slot name="heading">
                 Component Comparison
@@ -210,16 +205,16 @@
                                 Component
                             </th>
                             <th class="px-6 py-3 text-right text-xs font-medium text-primary-600 dark:text-primary-400 uppercase tracking-wider">
-                                V1 Qty
+                                {{ $version1->version_display }} Qty
                             </th>
                             <th class="px-6 py-3 text-right text-xs font-medium text-success-600 dark:text-success-400 uppercase tracking-wider">
-                                V2 Qty
+                                {{ $version2->version_display }} Qty
                             </th>
                             <th class="px-6 py-3 text-right text-xs font-medium text-primary-600 dark:text-primary-400 uppercase tracking-wider">
-                                V1 Unit Cost
+                                {{ $version1->version_display }} Cost
                             </th>
                             <th class="px-6 py-3 text-right text-xs font-medium text-success-600 dark:text-success-400 uppercase tracking-wider">
-                                V2 Unit Cost
+                                {{ $version2->version_display }} Cost
                             </th>
                             <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                                 Total Diff
@@ -240,10 +235,10 @@
                                         SKU: {{ $row['component_sku'] ?? '—' }}
                                     </div>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-right text-primary-600 dark:text-primary-400">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-right text-primary-600 dark:text-primary-400 font-medium">
                                     {{ $row['in_v1'] ? number_format($row['v1_quantity'], 2) : '—' }}
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-right text-success-600 dark:text-success-400">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-right text-success-600 dark:text-success-400 font-medium">
                                     {{ $row['in_v2'] ? number_format($row['v2_quantity'], 2) : '—' }}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-right text-primary-600 dark:text-primary-400">
