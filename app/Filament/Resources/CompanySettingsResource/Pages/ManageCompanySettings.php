@@ -22,7 +22,7 @@ class ManageCompanySettings extends Page implements HasForms
 
     // Define all form fields as public properties for Livewire
     public ?string $company_name = null;
-    public ?string $logo_path = null;
+    public mixed $logo_path = null;
     public ?string $address = null;
     public ?string $city = null;
     public ?string $state = null;
