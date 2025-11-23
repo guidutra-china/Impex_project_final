@@ -8,10 +8,12 @@ use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Notifications\Notification;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
@@ -252,6 +254,28 @@ class BomItemsRelationManager extends RelationManager
                     ->suffix('%')
                     ->helperText('Scrap/waste percentage (0-100)')
                     ->live(onBlur: true),
+
+                Placeholder::make('unit_cost_display')
+                    ->label('Unit Cost (Auto-calculated)')
+                    ->content(function (Get $get, $record) {
+                        // If editing existing record, show current unit cost
+                        if ($record && $record->unit_cost) {
+                            return '$' . number_format($record->unit_cost / 100, 2);
+                        }
+
+                        // If creating new, get price from selected component
+                        $componentProductId = $get('component_product_id');
+                        if ($componentProductId) {
+                            $component = \App\Models\Product::find($componentProductId);
+                            if ($component) {
+                                $price = $component->calculated_selling_price ?? $component->price ?? 0;
+                                return '$' . number_format($price / 100, 2);
+                            }
+                        }
+
+                        return 'Select a component to see price';
+                    })
+                    ->helperText('Automatically uses component\'s Current Price or Calculated Selling Price'),
 
                 Toggle::make('is_optional')
                     ->label('Optional Component')
