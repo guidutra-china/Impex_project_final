@@ -16,7 +16,7 @@ return new class extends Migration
             
             // Relationships
             $table->foreignId('product_id')->constrained('products')->cascadeOnDelete();
-            $table->foreignId('component_id')->constrained('components')->restrictOnDelete();
+            $table->foreignId('component_product_id')->constrained('products')->restrictOnDelete();
             
             // Quantity
             $table->decimal('quantity', 10, 4)->default(1)->comment('Quantity needed per product unit');
@@ -36,8 +36,8 @@ return new class extends Migration
             
             // Indexes
             $table->index(['product_id', 'sort_order']);
-            $table->index('component_id');
-            $table->unique(['product_id', 'component_id'], 'unique_product_component');
+            $table->index('component_product_id');
+            $table->unique(['product_id', 'component_product_id'], 'unique_product_component');
         });
     }
 
