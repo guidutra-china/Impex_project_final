@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Products;
 
+use App\Filament\Resources\Products\Pages\CompareBomVersions;
 use App\Filament\Resources\Products\Pages\CreateProduct;
 use App\Filament\Resources\Products\Pages\EditProduct;
 use App\Filament\Resources\Products\Pages\ListProducts;
@@ -58,6 +59,7 @@ class ProductResource extends Resource
             'create' => CreateProduct::route('/create'),
             'view' => ViewProduct::route('/{record}'),
             'edit' => EditProduct::route('/{record}/edit'),
+            'bom-comparison' => CompareBomVersions::route('/{record}/bom-comparison'),
         ];
     }
 }
