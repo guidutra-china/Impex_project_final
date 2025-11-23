@@ -40,11 +40,19 @@ class BomVersionItem extends Model
     }
 
     /**
-     * Get the component for this item
+     * Get the component for this item (legacy)
      */
     public function component(): BelongsTo
     {
-        return $this->belongsTo(Component::class);
+        return $this->belongsTo(Product::class, 'component_id');
+    }
+
+    /**
+     * Get the component product for this item
+     */
+    public function componentProduct(): BelongsTo
+    {
+        return $this->belongsTo(Product::class, 'component_id');
     }
 
     /**
