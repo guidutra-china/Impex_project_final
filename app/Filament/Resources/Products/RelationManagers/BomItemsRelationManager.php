@@ -104,6 +104,35 @@ class BomItemsRelationManager extends RelationManager
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->headerActions([
+                Action::make('recalculate_costs')
+                    ->label('Recalculate Costs')
+                    ->icon('heroicon-o-calculator')
+                    ->color('warning')
+                    ->requiresConfirmation()
+                    ->modalHeading('Recalculate All Costs')
+                    ->modalDescription('This will recalculate unit costs from component prices and update total manufacturing cost.')
+                    ->action(function () {
+                        $product = $this->getOwnerRecord();
+                        
+                        // Recalculate each BOM item
+                        foreach ($product->bomItems as $bomItem) {
+                            $bomItem->recalculate();
+                        }
+                        
+                        // Recalculate product costs
+                        $product->calculateAndUpdateCosts();
+                        $product->refresh();
+                        
+                        Notification::make()
+                            ->success()
+                            ->title('Costs Recalculated')
+                            ->body('All BOM item costs and manufacturing costs have been updated.')
+                            ->send();
+                        
+                        // Refresh the table
+                        $this->dispatch('refresh-product-costs');
+                    }),
+
                 Action::make('export_pdf')
                     ->label('Export PDF')
                     ->icon('heroicon-o-document-arrow-down')
