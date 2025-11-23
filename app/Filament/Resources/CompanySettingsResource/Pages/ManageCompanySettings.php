@@ -18,10 +18,29 @@ class ManageCompanySettings extends Page implements HasForms
 
     protected static string $resource = CompanySettingsResource::class;
 
-    // Remove static from $view
     protected string $view = 'filament.resources.company-settings.pages.manage-company-settings';
 
-    public ?array $data = [];
+    // Define all form fields as public properties for Livewire
+    public ?string $company_name = null;
+    public ?string $logo_path = null;
+    public ?string $address = null;
+    public ?string $city = null;
+    public ?string $state = null;
+    public ?string $zip_code = null;
+    public ?string $country = null;
+    public ?string $phone = null;
+    public ?string $email = null;
+    public ?string $website = null;
+    public ?string $tax_id = null;
+    public ?string $registration_number = null;
+    public ?string $bank_name = null;
+    public ?string $bank_account_number = null;
+    public ?string $bank_routing_number = null;
+    public ?string $bank_swift_code = null;
+    public ?string $footer_text = null;
+    public ?string $invoice_prefix = null;
+    public ?string $quote_prefix = null;
+    public ?string $po_prefix = null;
 
     public function mount(): void
     {
@@ -30,9 +49,13 @@ class ManageCompanySettings extends Page implements HasForms
         if (!$settings) {
             $settings = CompanySetting::create([
                 'company_name' => 'Your Company Name',
+                'invoice_prefix' => 'INV',
+                'quote_prefix' => 'QT',
+                'po_prefix' => 'PO',
             ]);
         }
 
+        // Fill the form with settings data
         $this->form->fill($settings->toArray());
     }
 
@@ -65,7 +88,7 @@ class ManageCompanySettings extends Page implements HasForms
         return [
             Action::make('save')
                 ->label('Save Settings')
-                ->submit('save'),
+                ->action('save'),
         ];
     }
 }
