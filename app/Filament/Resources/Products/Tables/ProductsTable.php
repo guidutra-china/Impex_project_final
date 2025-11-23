@@ -2,10 +2,13 @@
 
 namespace App\Filament\Resources\Products\Tables;
 
+use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
+use Filament\Forms\Components\Checkbox;
+use Filament\Notifications\Notification;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\SelectColumn;
 use Filament\Tables\Columns\TextColumn;
@@ -101,21 +104,40 @@ class ProductsTable
                     ->label('Lead Time')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true)
-                    ->suffix(' days')
+                    ->formatStateUsing(fn ($state) => $state ? "{$state} days" : '-'),
+
+                TextColumn::make('hs_code')
+                    ->label('HS Code')
+                    ->searchable()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true)
                     ->default('-'),
 
                 TextColumn::make('origin_country')
                     ->label('Origin')
                     ->searchable()
-                    ->toggleable(isToggledHiddenByDefault: true)
                     ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true)
                     ->default('-'),
 
-                TextColumn::make('hs_code')
-                    ->label('HS Code')
+                TextColumn::make('model_number')
+                    ->label('Model')
                     ->searchable()
+                    ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true)
-                    ->copyable(),
+                    ->default('-'),
+
+                TextColumn::make('net_weight')
+                    ->label('Net Weight')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->formatStateUsing(fn ($state) => $state ? "{$state} kg" : '-'),
+
+                TextColumn::make('gross_weight')
+                    ->label('Gross Weight')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->formatStateUsing(fn ($state) => $state ? "{$state} kg" : '-'),
 
                 TextColumn::make('pcs_per_carton')
                     ->label('Pcs/Carton')
@@ -124,11 +146,10 @@ class ProductsTable
                     ->default('-'),
 
                 TextColumn::make('carton_cbm')
-                    ->label('CBM')
-                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->label('Carton CBM')
                     ->sortable()
-                    ->suffix(' m³')
-                    ->default('-'),
+                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->formatStateUsing(fn ($state) => $state ? "{$state} m³" : '-'),
 
                 TextColumn::make('created_at')
                     ->label('Created')
@@ -146,8 +167,7 @@ class ProductsTable
                 SelectFilter::make('category')
                     ->relationship('category', 'name')
                     ->searchable()
-                    ->preload()
-                    ->label('Category'),
+                    ->preload(),
 
                 SelectFilter::make('status')
                     ->options([
@@ -198,6 +218,89 @@ class ProductsTable
                 EditAction::make()
                     ->label('Edit')
                     ->icon('heroicon-o-pencil-square'),
+                Action::make('duplicate')
+                    ->label('Duplicate')
+                    ->icon('heroicon-o-document-duplicate')
+                    ->color('warning')
+                    ->form([
+                        Checkbox::make('bom_items')
+                            ->label('Duplicate BOM Items')
+                            ->helperText('Copy all bill of materials components to the new product')
+                            ->default(true)
+                            ->inline(false),
+                        
+                        Checkbox::make('features')
+                            ->label('Duplicate Features')
+                            ->helperText('Copy all product features to the new product')
+                            ->default(true)
+                            ->inline(false),
+                        
+                        Checkbox::make('tags')
+                            ->label('Duplicate Tags')
+                            ->helperText('Copy all tags to the new product')
+                            ->default(true)
+                            ->inline(false),
+                        
+                        Checkbox::make('avatar')
+                            ->label('Duplicate Avatar Image')
+                            ->helperText('Copy the product image to the new product')
+                            ->default(true)
+                            ->inline(false),
+                    ])
+                    ->modalHeading('Duplicate Product')
+                    ->modalDescription('Choose what to duplicate from this product. The new product will have "(Copy)" added to its name and the SKU will be cleared.')
+                    ->modalSubmitActionLabel('Duplicate Product')
+                    ->modalWidth('md')
+                    ->action(function (\App\Models\Product $record, array $data) {
+                        try {
+                            // Prepare duplication options
+                            $options = [
+                                'bom_items' => $data['bom_items'] ?? false,
+                                'features' => $data['features'] ?? false,
+                                'tags' => $data['tags'] ?? false,
+                                'avatar' => $data['avatar'] ?? false,
+                            ];
+
+                            // Duplicate the product with selected options
+                            $newProduct = $record->duplicate($options);
+                            
+                            // Build notification message
+                            $duplicatedItems = [];
+                            if ($options['bom_items'] && $record->bomItems()->count() > 0) {
+                                $duplicatedItems[] = $record->bomItems()->count() . ' BOM items';
+                            }
+                            if ($options['features'] && $record->features()->count() > 0) {
+                                $duplicatedItems[] = $record->features()->count() . ' features';
+                            }
+                            if ($options['tags'] && $record->tags()->count() > 0) {
+                                $duplicatedItems[] = $record->tags()->count() . ' tags';
+                            }
+                            if ($options['avatar'] && $record->avatar) {
+                                $duplicatedItems[] = 'avatar image';
+                            }
+
+                            $message = "New product '{$newProduct->name}' has been created.";
+                            if (!empty($duplicatedItems)) {
+                                $message .= " Duplicated: " . implode(', ', $duplicatedItems) . ".";
+                            }
+                            
+                            Notification::make()
+                                ->title('Product duplicated successfully')
+                                ->body($message)
+                                ->success()
+                                ->duration(5000)
+                                ->send();
+                            
+                            // Redirect to edit the new product
+                            return redirect()->route('filament.admin.resources.products.edit', ['record' => $newProduct->id]);
+                        } catch (\Exception $e) {
+                            Notification::make()
+                                ->title('Error duplicating product')
+                                ->body($e->getMessage())
+                                ->danger()
+                                ->send();
+                        }
+                    }),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

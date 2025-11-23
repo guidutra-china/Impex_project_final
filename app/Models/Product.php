@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class Product extends Model
 {
@@ -281,6 +283,148 @@ class Product extends Model
     public function calculateAndUpdateCosts(): void
     {
         $this->calculateManufacturingCost();
+    }
+
+    /**
+     * Duplicate this product with all related data
+     * 
+     * @param array $options Options for duplication
+     *   - 'bom_items' (bool): Duplicate BOM items (default: true)
+     *   - 'features' (bool): Duplicate features (default: true)
+     *   - 'tags' (bool): Duplicate tags (default: true)
+     *   - 'avatar' (bool): Duplicate avatar image (default: true)
+     * 
+     * @return Product The newly created duplicate product
+     */
+    public function duplicate(array $options = []): Product
+    {
+        // Default options - duplicate everything by default
+        $defaultOptions = [
+            'bom_items' => true,
+            'features' => true,
+            'tags' => true,
+            'avatar' => true,
+        ];
+
+        // Merge user options with defaults
+        $options = array_merge($defaultOptions, $options);
+
+        return DB::transaction(function () use ($options) {
+            // Load relationships that need to be duplicated based on options
+            $relationships = [];
+            if ($options['bom_items']) {
+                $relationships[] = 'bomItems';
+            }
+            if ($options['features']) {
+                $relationships[] = 'features';
+            }
+            if ($options['tags']) {
+                $relationships[] = 'tags';
+            }
+
+            if (!empty($relationships)) {
+                $this->load($relationships);
+            }
+
+            // Prepare the data for the new product
+            $newProductData = $this->toArray();
+            
+            // Remove fields that should not be duplicated
+            unset(
+                $newProductData['id'],
+                $newProductData['created_at'],
+                $newProductData['updated_at'],
+                $newProductData['deleted_at']
+            );
+
+            // Modify the name to indicate it's a copy
+            $newProductData['name'] = $this->name . ' (Copy)';
+            
+            // Clear the SKU to allow auto-generation or manual entry
+            $newProductData['sku'] = null;
+
+            // Duplicate avatar if option is enabled and exists
+            if ($options['avatar'] && $this->avatar) {
+                $newProductData['avatar'] = $this->duplicateAvatar();
+            } else {
+                $newProductData['avatar'] = null;
+            }
+
+            // Create the new product
+            $newProduct = static::create($newProductData);
+
+            // Duplicate BOM items if option is enabled
+            if ($options['bom_items'] && $this->bomItems->isNotEmpty()) {
+                foreach ($this->bomItems as $bomItem) {
+                    BomItem::create([
+                        'product_id' => $newProduct->id,
+                        'component_product_id' => $bomItem->component_product_id,
+                        'quantity' => $bomItem->quantity,
+                        'unit_of_measure' => $bomItem->unit_of_measure,
+                        'waste_factor' => $bomItem->waste_factor,
+                        'actual_quantity' => $bomItem->actual_quantity,
+                        'unit_cost' => $bomItem->unit_cost,
+                        'total_cost' => $bomItem->total_cost,
+                        'sort_order' => $bomItem->sort_order,
+                        'notes' => $bomItem->notes,
+                        'is_optional' => $bomItem->is_optional,
+                    ]);
+                }
+            }
+
+            // Duplicate features if option is enabled
+            if ($options['features'] && $this->features->isNotEmpty()) {
+                foreach ($this->features as $feature) {
+                    ProductFeature::create([
+                        'product_id' => $newProduct->id,
+                        'feature_name' => $feature->feature_name,
+                        'feature_value' => $feature->feature_value,
+                        'sort_order' => $feature->sort_order,
+                    ]);
+                }
+            }
+
+            // Duplicate tags if option is enabled (many-to-many relationship)
+            if ($options['tags'] && $this->tags->isNotEmpty()) {
+                $newProduct->tags()->attach($this->tags->pluck('id'));
+            }
+
+            // Recalculate costs for the new product
+            $newProduct->refresh();
+            $newProduct->calculateManufacturingCost();
+
+            return $newProduct;
+        });
+    }
+
+    /**
+     * Duplicate the avatar file
+     * 
+     * @return string|null The path to the duplicated avatar
+     */
+    protected function duplicateAvatar(): ?string
+    {
+        if (!$this->avatar || !Storage::disk('public')->exists($this->avatar)) {
+            return null;
+        }
+
+        try {
+            // Generate new filename
+            $extension = pathinfo($this->avatar, PATHINFO_EXTENSION);
+            $newFilename = 'products/avatars/' . uniqid() . '.' . $extension;
+
+            // Copy the file
+            Storage::disk('public')->copy($this->avatar, $newFilename);
+
+            return $newFilename;
+        } catch (\Exception $e) {
+            // If duplication fails, return null (product will be created without avatar)
+            \Log::warning('Failed to duplicate product avatar', [
+                'original_avatar' => $this->avatar,
+                'error' => $e->getMessage(),
+            ]);
+            return null;
+        }
     }
 
     /**
