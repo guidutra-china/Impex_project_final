@@ -218,11 +218,21 @@ class Product extends Model
     }
 
     /**
-     * Get the components used in this product
+     * Get the component products used in this product (BOM)
      */
-    public function components()
+    public function componentProducts()
     {
-        return $this->belongsToMany(Component::class, 'bom_items')
+        return $this->belongsToMany(Product::class, 'bom_items', 'product_id', 'component_product_id')
+            ->withPivot(['quantity', 'unit_of_measure', 'waste_factor', 'actual_quantity', 'unit_cost', 'total_cost', 'sort_order', 'notes', 'is_optional'])
+            ->withTimestamps();
+    }
+
+    /**
+     * Get products that use this product as a component (reverse BOM)
+     */
+    public function usedInProducts()
+    {
+        return $this->belongsToMany(Product::class, 'bom_items', 'component_product_id', 'product_id')
             ->withPivot(['quantity', 'unit_of_measure', 'waste_factor', 'actual_quantity', 'unit_cost', 'total_cost', 'sort_order', 'notes', 'is_optional'])
             ->withTimestamps();
     }

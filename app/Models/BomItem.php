@@ -9,7 +9,7 @@ class BomItem extends Model
 {
     protected $fillable = [
         'product_id',
-        'component_id',
+        'component_product_id',  // Product used as component
         'quantity',
         'unit_of_measure',
         'waste_factor',
@@ -62,11 +62,11 @@ class BomItem extends Model
     }
 
     /**
-     * Get the component for this BOM item
+     * Get the component product for this BOM item
      */
-    public function component(): BelongsTo
+    public function componentProduct(): BelongsTo
     {
-        return $this->belongsTo(Component::class);
+        return $this->belongsTo(Product::class, 'component_product_id');
     }
 
     /**
@@ -86,12 +86,13 @@ class BomItem extends Model
         // Calculate actual quantity with waste
         $this->calculateActualQuantity();
 
-        // Get component cost (use fresh data if component is loaded)
-        if ($this->component) {
-            $this->unit_cost = $this->component->total_cost_per_unit;
-        } elseif ($this->component_id) {
-            $component = Component::find($this->component_id);
-            $this->unit_cost = $component ? $component->total_cost_per_unit : 0;
+        // Get component product cost (use fresh data if loaded)
+        if ($this->componentProduct) {
+            // Use the calculated selling price or price of the component product
+            $this->unit_cost = $this->componentProduct->calculated_selling_price ?? $this->componentProduct->price ?? 0;
+        } elseif ($this->component_product_id) {
+            $componentProduct = Product::find($this->component_product_id);
+            $this->unit_cost = $componentProduct ? ($componentProduct->calculated_selling_price ?? $componentProduct->price ?? 0) : 0;
         }
 
         // Calculate total cost for this BOM line
