@@ -61,7 +61,7 @@ class BomVersion extends Model
     /**
      * Create a new version from current BOM
      */
-    public static function createFromCurrentBom(Product $product, ?string $changNotes = null, ?int $userId = null): self
+    public static function createFromCurrentBom(Product $product, ?string $changeNotes = null, ?int $userId = null): self
     {
         // Get next version number
         $nextVersion = $product->bomVersions()->max('version_number') + 1;
