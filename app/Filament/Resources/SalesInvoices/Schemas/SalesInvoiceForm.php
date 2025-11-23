@@ -109,39 +109,11 @@ class SalesInvoiceForm
                 ->afterStateUpdated(function (Get $get, Set $set, $state) {
                     if (!$state) return;
 
-                    $quote = SupplierQuote::with(['order.customer', 'currency', 'items.product'])->find($state);
+                    $quote = SupplierQuote::with(['order.customer'])->find($state);
                     if (!$quote) return;
 
-                    // Fill client and currency from order
+                    // Fill only client from order
                     $set('client_id', $quote->order->customer_id ?? null);
-                    $set('currency_id', $quote->currency_id);
-                    // Note: SupplierQuote doesn't have base_currency_id or exchange_rate_locked
-                    // You may need to adjust this based on your actual schema
-
-                    // Fill items from Quote
-                    $items = $quote->items->map(function ($item) {
-                        $product = $item->product;
-                        $unitPrice = $item->unit_price_after_commission / 100; // Convert from cents
-                        $quantity = $item->quantity;
-                        $total = $item->total_price_after_commission / 100; // Convert from cents
-                        
-                        // Calculate commission (difference between before and after)
-                        $commission = ($item->unit_price_after_commission - $item->unit_price_before_commission) / 100;
-                        
-                        return [
-                            'product_id' => $item->product_id,
-                            'product_name' => $product->name ?? '',
-                            'product_sku' => $product->sku ?? '',
-                            'quantity' => $quantity,
-                            'unit_price' => $unitPrice,
-                            'commission' => $commission,
-                            'total' => $total,
-                            'quote_item_id' => $item->id,
-                            'notes' => $item->notes ?? '',
-                        ];
-                    })->toArray();
-
-                    $set('items', $items);
                 }),
 
             Select::make('client_id')
@@ -169,6 +141,34 @@ class SalesInvoiceForm
                 ->multiple()
                 ->searchable()
                 ->preload()
+                ->live()
+                ->afterStateUpdated(function (Get $get, Set $set, $state) {
+                    if (!$state || empty($state)) return;
+
+                    // Load selected Purchase Orders with items
+                    $purchaseOrders = PurchaseOrder::with(['items.product'])->whereIn('id', $state)->get();
+                    
+                    $items = [];
+                    foreach ($purchaseOrders as $po) {
+                        foreach ($po->items as $item) {
+                            $product = $item->product;
+                            $items[] = [
+                                'product_id' => $item->product_id,
+                                'product_name' => $product->name ?? '',
+                                'product_sku' => $product->sku ?? '',
+                                'quantity' => $item->quantity,
+                                'unit_price' => $item->unit_price / 100, // Convert from cents
+                                'commission' => 0, // Will be calculated
+                                'total' => ($item->unit_price * $item->quantity) / 100,
+                                'purchase_order_id' => $po->id,
+                                'purchase_order_item_id' => $item->id,
+                                'notes' => $item->notes ?? '',
+                            ];
+                        }
+                    }
+                    
+                    $set('items', $items);
+                })
                 ->helperText('Select multiple POs to consolidate into one invoice'),
 
             DatePicker::make('invoice_date')
