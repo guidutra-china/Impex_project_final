@@ -265,7 +265,25 @@ class CurrencyExchangeService
             return null;
         }
 
-        return ExchangeRate::getLatestRate($fromCurrency->id, $toCurrency->id, $date);
+        // Get base currency to determine which ExchangeRate record to fetch
+        $baseCurrency = Currency::where('is_base', true)->first();
+        
+        if (!$baseCurrency) {
+            return null;
+        }
+
+        // Always fetch rate where base currency is the first parameter
+        // If from is base: get BASE->TO
+        // If to is base: get BASE->FROM  
+        // If neither: we can only get BASE->TO (for display purposes)
+        if ($fromCurrency->id === $baseCurrency->id) {
+            return ExchangeRate::getLatestRate($baseCurrency->id, $toCurrency->id, $date);
+        } elseif ($toCurrency->id === $baseCurrency->id) {
+            return ExchangeRate::getLatestRate($baseCurrency->id, $fromCurrency->id, $date);
+        } else {
+            // For non-base pairs, return the target currency rate
+            return ExchangeRate::getLatestRate($baseCurrency->id, $toCurrency->id, $date);
+        }
     }
 
     /**
