@@ -67,6 +67,7 @@ class ProductsTable
                     ->label('Supplier')
                     ->searchable()
                     ->sortable()
+                    ->limit(20)
                     ->toggleable()
                     ->default('-'),
 
@@ -74,6 +75,7 @@ class ProductsTable
                     ->label('Customer')
                     ->searchable()
                     ->sortable()
+                    ->limit(10)
                     ->toggleable()
                     ->default('-'),
 
@@ -89,25 +91,23 @@ class ProductsTable
                 TextColumn::make('moq')
                     ->label('MOQ')
                     ->sortable()
-                    ->toggleable()
-                    ->formatStateUsing(fn ($state, $record) => $state ? "{$state} {$record->moq_unit}" : '-')
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->formatStateUsing(fn ($state, $record) => $state ? "{$state} {$record->moq_unit}" : '-'),
+
 
                 TextColumn::make('lead_time_days')
                     ->label('Lead Time')
                     ->sortable()
-                    ->toggleable()
+                    ->toggleable(isToggledHiddenByDefault: true)
                     ->suffix(' days')
-                    ->default('-')
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->default('-'),
 
                 TextColumn::make('origin_country')
                     ->label('Origin')
                     ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true)
                     ->sortable()
-                    ->toggleable()
-                    ->default('-')
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->default('-'),
 
                 TextColumn::make('hs_code')
                     ->label('HS Code')
@@ -118,23 +118,14 @@ class ProductsTable
                 TextColumn::make('pcs_per_carton')
                     ->label('Pcs/Carton')
                     ->sortable()
-                    ->toggleable()
-                    ->default('-')
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->default('-'),
 
                 TextColumn::make('carton_cbm')
                     ->label('CBM')
+                    ->toggleable(isToggledHiddenByDefault: true)
                     ->sortable()
-                    ->toggleable()
                     ->suffix(' m³')
-                    ->default('-')
-                    ->toggleable(isToggledHiddenByDefault: true),
-
-                TextColumn::make('tags.name')
-                    ->label('Tags')
-                    ->badge()
-                    ->separator(',')
-                    ->toggleable()
                     ->default('-'),
 
                 TextColumn::make('created_at')
@@ -172,12 +163,6 @@ class ProductsTable
                     ->searchable()
                     ->preload()
                     ->label('Customer'),
-
-                SelectFilter::make('tags')
-                    ->relationship('tags', 'name')
-                    ->searchable()
-                    ->preload()
-                    ->multiple(),
 
                 SelectFilter::make('origin_country')
                     ->label('Country of Origin')
