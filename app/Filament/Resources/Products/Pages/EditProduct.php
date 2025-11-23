@@ -16,14 +16,14 @@ class EditProduct extends EditRecord
     protected function getListeners(): array
     {
         return [
-            'refresh-product-costs' => 'refreshFormData',
+            'refresh-product-costs' => 'refreshProductCosts',
         ];
     }
 
     /**
-     * Refresh form data when BOM costs are updated
+     * Refresh product costs when BOM is updated
      */
-    public function refreshFormData(): void
+    public function refreshProductCosts(): void
     {
         // Refresh the record from database to get updated costs
         $this->record->refresh();
