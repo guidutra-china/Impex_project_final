@@ -109,11 +109,11 @@ class SalesInvoiceForm
                 ->afterStateUpdated(function (Get $get, Set $set, $state) {
                     if (!$state) return;
 
-                    $quote = SupplierQuote::with(['order.client', 'currency', 'items.product'])->find($state);
+                    $quote = SupplierQuote::with(['order.customer', 'currency', 'items.product'])->find($state);
                     if (!$quote) return;
 
                     // Fill client and currency from order
-                    $set('client_id', $quote->order->client_id ?? null);
+                    $set('client_id', $quote->order->customer_id ?? null);
                     $set('currency_id', $quote->currency_id);
                     // Note: SupplierQuote doesn't have base_currency_id or exchange_rate_locked
                     // You may need to adjust this based on your actual schema
