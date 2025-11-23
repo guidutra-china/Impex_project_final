@@ -80,6 +80,14 @@ class BomItemsRelationManager extends RelationManager
                     ->description('Quantity + Waste')
                     ->toggleable(),
 
+                TextColumn::make('componentProduct.price')
+                    ->label('Component Price')
+                    ->money('USD', divideBy: 100)
+                    ->sortable()
+                    ->description('Current price of component')
+                    ->toggleable(isToggledHiddenByDefault: false)
+                    ->color('info'),
+
                 TextColumn::make('unit_cost')
                     ->label('Unit Cost')
                     ->money('USD', divideBy: 100)
