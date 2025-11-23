@@ -4,6 +4,8 @@ namespace App\Filament\Resources\Products\Tables;
 
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\SelectColumn;
 use Filament\Tables\Columns\TextColumn;
@@ -204,6 +206,14 @@ class ProductsTable
                     ),
             ])
             ->defaultSort('created_at', 'desc')
+            ->actions([
+                ViewAction::make()
+                    ->label('View')
+                    ->icon('heroicon-o-eye'),
+                EditAction::make()
+                    ->label('Edit')
+                    ->icon('heroicon-o-pencil-square'),
+            ])
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
