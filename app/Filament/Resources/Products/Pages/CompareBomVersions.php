@@ -30,9 +30,10 @@ class CompareBomVersions extends Page
         return $this->record;
     }
 
-    public function mount(): void
+    public function mount(int | string $record): void
     {
-        $this->product = $this->getRecord();
+        $this->record = $this->resolveRecord($record);
+        $this->product = $this->record;
         
         // Get version IDs from query params
         $version1Id = request()->query('version1');
