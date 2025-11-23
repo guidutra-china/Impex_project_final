@@ -6,12 +6,15 @@ use App\Filament\Resources\Products\ProductResource;
 use App\Models\BomVersion;
 use App\Models\Product;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Concerns\InteractsWithForms;
+use Filament\Forms\Contracts\HasForms;
 use Filament\Resources\Pages\Concerns\InteractsWithRecord;
 use Filament\Resources\Pages\Page;
 use Filament\Schemas\Components\Form;
 
-class CompareBomVersions extends Page
+class CompareBomVersions extends Page implements HasForms
 {
+    use InteractsWithForms;
     use InteractsWithRecord;
 
     protected static string $resource = ProductResource::class;
