@@ -84,7 +84,7 @@ class BomVersion extends Model
         foreach ($product->bomItems as $bomItem) {
             BomVersionItem::create([
                 'bom_version_id' => $version->id,
-                'component_id' => $bomItem->component_id,
+                'component_id' => $bomItem->component_product_id,
                 'quantity' => $bomItem->quantity,
                 'unit_of_measure' => $bomItem->unit_of_measure,
                 'waste_factor' => $bomItem->waste_factor,
