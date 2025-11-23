@@ -99,12 +99,26 @@ class ExchangeRate extends Model
         
         // Disable cache in testing environment to avoid stale data
         if (app()->environment('testing')) {
-            return self::where('base_currency_id', $baseCurrencyId)
+            $query = self::where('base_currency_id', $baseCurrencyId)
                 ->where('target_currency_id', $targetCurrencyId)
                 ->where('date', '<=', $date)
                 ->where('status', 'approved')
-                ->orderBy('date', 'desc')
-                ->first();
+                ->orderBy('date', 'desc');
+            
+            dump([
+                'searching_for' => [
+                    'base_currency_id' => $baseCurrencyId,
+                    'target_currency_id' => $targetCurrencyId,
+                    'date' => $date,
+                    'status' => 'approved',
+                ],
+                'sql' => $query->toSql(),
+                'bindings' => $query->getBindings(),
+                'all_records_in_table' => self::all()->toArray(),
+                'result' => $query->first(),
+            ]);
+            
+            return $query->first();
         }
         
         $cacheKey = "exchange_rate_{$baseCurrencyId}_{$targetCurrencyId}_{$date}";
