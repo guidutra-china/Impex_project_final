@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Resources\PaymentTerm\RelationManagers;
+namespace App\Filament\Resources\PaymentTerms\RelationManagers;
 
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;

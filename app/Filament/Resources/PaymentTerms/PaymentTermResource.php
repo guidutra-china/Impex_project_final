@@ -2,7 +2,7 @@
 
 namespace App\Filament\Resources\PaymentTerms;
 
-use App\Filament\Resources\PaymentTerm\RelationManagers\StagesRelationManager;
+use App\Filament\Resources\PaymentTerms\RelationManagers\StagesRelationManager;
 use App\Filament\Resources\PaymentTerms\Pages\CreatePaymentTerm;
 use App\Filament\Resources\PaymentTerms\Pages\EditPaymentTerm;
 use App\Filament\Resources\PaymentTerms\Pages\ListPaymentTerms;
