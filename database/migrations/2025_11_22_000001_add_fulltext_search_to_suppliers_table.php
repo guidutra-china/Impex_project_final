@@ -12,8 +12,19 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Add FULLTEXT index for fast searching on name column
-        DB::statement('ALTER TABLE suppliers ADD FULLTEXT INDEX ft_suppliers_search (name)');
+        // FULLTEXT index is only supported by MySQL/MariaDB
+        // For SQLite (used in tests), we use a regular index instead
+        $driver = DB::getDriverName();
+        
+        if ($driver === 'mysql') {
+            // Add FULLTEXT index for fast searching on name column (MySQL only)
+            DB::statement('ALTER TABLE suppliers ADD FULLTEXT INDEX ft_suppliers_search (name)');
+        } else {
+            // For other databases (SQLite, PostgreSQL), use regular index
+            Schema::table('suppliers', function (Blueprint $table) {
+                $table->index('name', 'ft_suppliers_search');
+            });
+        }
     }
 
     /**
@@ -21,6 +32,14 @@ return new class extends Migration
      */
     public function down(): void
     {
-        DB::statement('ALTER TABLE suppliers DROP INDEX ft_suppliers_search');
+        $driver = DB::getDriverName();
+        
+        if ($driver === 'mysql') {
+            DB::statement('ALTER TABLE suppliers DROP INDEX ft_suppliers_search');
+        } else {
+            Schema::table('suppliers', function (Blueprint $table) {
+                $table->dropIndex('ft_suppliers_search');
+            });
+        }
     }
 };
