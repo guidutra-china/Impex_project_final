@@ -86,13 +86,45 @@ class BomItem extends Model
         // Calculate actual quantity with waste
         $this->calculateActualQuantity();
 
-        // Get component product cost (use fresh data if loaded)
-        if ($this->componentProduct) {
-            // Use the calculated selling price or price of the component product
-            $this->unit_cost = $this->componentProduct->calculated_selling_price ?? $this->componentProduct->price ?? 0;
-        } elseif ($this->component_product_id) {
+        // Get component product cost
+        $componentProduct = null;
+        
+        // Try to use already loaded relationship first
+        if ($this->relationLoaded('componentProduct') && $this->componentProduct) {
+            $componentProduct = $this->componentProduct;
+        } 
+        // Otherwise fetch fresh from database
+        elseif ($this->component_product_id) {
             $componentProduct = Product::find($this->component_product_id);
-            $this->unit_cost = $componentProduct ? ($componentProduct->calculated_selling_price ?? $componentProduct->price ?? 0) : 0;
+        }
+
+        // Set unit cost from component product price
+        if ($componentProduct) {
+            // Priority: calculated_selling_price > price > 0
+            $this->unit_cost = $componentProduct->calculated_selling_price 
+                            ?? $componentProduct->price 
+                            ?? 0;
+            
+            // Log for debugging (only in local/development)
+            if (config('app.debug')) {
+                \Log::info('BomItem calculateCosts', [
+                    'bom_item_id' => $this->id,
+                    'component_product_id' => $this->component_product_id,
+                    'component_name' => $componentProduct->name,
+                    'calculated_selling_price' => $componentProduct->calculated_selling_price,
+                    'price' => $componentProduct->price,
+                    'unit_cost_set' => $this->unit_cost,
+                ]);
+            }
+        } else {
+            $this->unit_cost = 0;
+            
+            if (config('app.debug')) {
+                \Log::warning('BomItem: Component product not found', [
+                    'bom_item_id' => $this->id,
+                    'component_product_id' => $this->component_product_id,
+                ]);
+            }
         }
 
         // Calculate total cost for this BOM line
@@ -136,7 +168,21 @@ class BomItem extends Model
      */
     public function recalculate(): void
     {
+        // Refresh the component product relationship to get latest prices
+        $this->load('componentProduct');
+        
+        // Recalculate costs
         $this->calculateCosts();
+        
+        // Save the updated costs
         $this->save();
+        
+        if (config('app.debug')) {
+            \Log::info('BomItem recalculated', [
+                'bom_item_id' => $this->id,
+                'unit_cost' => $this->unit_cost,
+                'total_cost' => $this->total_cost,
+            ]);
+        }
     }
 }
