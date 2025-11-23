@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Products\RelationManagers;
 
+use App\Models\BomVersion;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
