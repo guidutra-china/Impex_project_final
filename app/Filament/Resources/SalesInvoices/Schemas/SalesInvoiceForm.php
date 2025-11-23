@@ -230,10 +230,21 @@ class SalesInvoiceForm
             Select::make('base_currency_id')
                 ->label('Base Currency')
                 ->relationship('baseCurrency', 'code')
-                ->default(fn () => Currency::where('is_base', true)->first()?->id)
+                ->default(function () {
+                    $baseCurrency = Currency::where('is_base', true)->first();
+                    return $baseCurrency?->id;
+                })
                 ->required()
                 ->disabled()
-                ->dehydrated(),
+                ->dehydrated()
+                ->afterStateHydrated(function (Select $component, $state) {
+                    if (!$state) {
+                        $baseCurrency = Currency::where('is_base', true)->first();
+                        if ($baseCurrency) {
+                            $component->state($baseCurrency->id);
+                        }
+                    }
+                }),
         ];
     }
 
