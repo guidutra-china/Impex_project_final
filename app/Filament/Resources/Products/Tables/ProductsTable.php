@@ -44,7 +44,7 @@ class ProductsTable
                     ->default('-'),
 
                 TextColumn::make('brand')
-                    ->label('Brand')
+                    ->label('Family')
                     ->searchable()
                     ->sortable()
                     ->toggleable()
@@ -76,27 +76,31 @@ class ProductsTable
                         'active' => 'Active',
                         'inactive' => 'Inactive',
                     ])
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
 
                 TextColumn::make('moq')
                     ->label('MOQ')
                     ->sortable()
                     ->toggleable()
-                    ->formatStateUsing(fn ($state, $record) => $state ? "{$state} {$record->moq_unit}" : '-'),
+                    ->formatStateUsing(fn ($state, $record) => $state ? "{$state} {$record->moq_unit}" : '-')
+                    ->toggleable(isToggledHiddenByDefault: true),
 
                 TextColumn::make('lead_time_days')
                     ->label('Lead Time')
                     ->sortable()
                     ->toggleable()
                     ->suffix(' days')
-                    ->default('-'),
+                    ->default('-')
+                    ->toggleable(isToggledHiddenByDefault: true),
 
                 TextColumn::make('origin_country')
                     ->label('Origin')
                     ->searchable()
                     ->sortable()
                     ->toggleable()
-                    ->default('-'),
+                    ->default('-')
+                    ->toggleable(isToggledHiddenByDefault: true),
 
                 TextColumn::make('hs_code')
                     ->label('HS Code')
@@ -108,14 +112,16 @@ class ProductsTable
                     ->label('Pcs/Carton')
                     ->sortable()
                     ->toggleable()
-                    ->default('-'),
+                    ->default('-')
+                    ->toggleable(isToggledHiddenByDefault: true),
 
                 TextColumn::make('carton_cbm')
                     ->label('CBM')
                     ->sortable()
                     ->toggleable()
                     ->suffix(' m³')
-                    ->default('-'),
+                    ->default('-')
+                    ->toggleable(isToggledHiddenByDefault: true),
 
                 TextColumn::make('tags.name')
                     ->label('Tags')

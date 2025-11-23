@@ -66,7 +66,7 @@ class ProductForm
 
                         TextInput::make('sku')
                             ->label('SKU')
-                            ->required()
+//                            ->required()
                             ->unique(ignoreRecord: true)
                             ->maxLength(255),
 
@@ -90,7 +90,7 @@ class ProductForm
                             ->helperText('Select the currency for this product'),
 
                         TextInput::make('price')
-                            ->label('Unit Price')
+                            ->label('Current Price')
                             ->numeric()
                             ->prefix(fn (Get $get) => \App\Models\Currency::find($get('currency_id'))?->symbol ?? '$')
                             ->step(0.01)
@@ -100,17 +100,14 @@ class ProductForm
                             ->live(),
 
                         TextInput::make('brand')
-                            ->label('Brand')
+                            ->label('Family')
                             ->maxLength(255),
 
                         TextInput::make('model_number')
                             ->label('Model Number')
                             ->maxLength(255),
 
-                        Textarea::make('description')
-                            ->label('Description')
-                            ->rows(3)
-                            ->columnSpan(2),
+
 
                         TextEntry::make('created_at')
                             ->label('Created')
@@ -149,6 +146,11 @@ class ProductForm
                             ->label('Customer Product Code')
                             ->maxLength(255)
                             ->helperText('Customer\'s reference code for this product'),
+
+                        Textarea::make('description')
+                            ->label('Customer Description')
+                            ->rows(3)
+                            ->columnSpan(2),
                     ])
                     ->columns(2)
                     ->columnSpan(['lg' => 3])
