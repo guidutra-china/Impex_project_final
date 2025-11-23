@@ -125,7 +125,7 @@
                                 <tr class="border-b border-gray-100 dark:border-gray-800 {{ $row['quantity_changed'] || $row['cost_changed'] ? 'bg-yellow-50 dark:bg-yellow-900/10' : '' }}">
                                     <td class="px-4 py-3">
                                         <div class="font-medium">{{ $row['component_name'] }}</div>
-                                        <div class="text-xs text-gray-500 dark:text-gray-400">{{ $row['component_code'] }}</div>
+                                        <div class="text-xs text-gray-500 dark:text-gray-400">SKU: {{ $row['component_sku'] ?? '—' }}</div>
                                     </td>
                                     <td class="px-4 py-3 text-right text-blue-600 dark:text-blue-400">
                                         {{ $row['in_v1'] ? number_format($row['v1_quantity'], 2) : '—' }}
