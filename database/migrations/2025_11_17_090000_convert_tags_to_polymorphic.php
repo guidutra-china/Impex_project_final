@@ -23,19 +23,23 @@ return new class extends Migration
         });
 
         // Migrate existing supplier_tag data to taggables
-        DB::statement("
-            INSERT INTO taggables (tag_id, taggable_id, taggable_type, created_at, updated_at)
-            SELECT 
-                tag_id, 
-                supplier_id as taggable_id, 
-                'App\\\\Models\\\\Supplier' as taggable_type,
-                NOW() as created_at,
-                NOW() as updated_at
-            FROM supplier_tag
-        ");
-
-        // Drop old supplier_tag table
-        Schema::dropIfExists('supplier_tag');
+        // Check if supplier_tag table exists and has data
+        if (Schema::hasTable('supplier_tag')) {
+            $supplierTags = DB::table('supplier_tag')->get();
+            
+            foreach ($supplierTags as $supplierTag) {
+                DB::table('taggables')->insert([
+                    'tag_id' => $supplierTag->tag_id,
+                    'taggable_id' => $supplierTag->supplier_id,
+                    'taggable_type' => 'App\\Models\\Supplier',
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            }
+            
+            // Drop old supplier_tag table
+            Schema::dropIfExists('supplier_tag');
+        }
     }
 
     /**
@@ -50,12 +54,16 @@ return new class extends Migration
         });
 
         // Migrate data back from taggables to supplier_tag
-        DB::statement("
-            INSERT INTO supplier_tag (supplier_id, tag_id)
-            SELECT taggable_id as supplier_id, tag_id
-            FROM taggables
-            WHERE taggable_type = 'App\\\\Models\\\\Supplier'
-        ");
+        $supplierTaggables = DB::table('taggables')
+            ->where('taggable_type', 'App\\Models\\Supplier')
+            ->get();
+        
+        foreach ($supplierTaggables as $taggable) {
+            DB::table('supplier_tag')->insert([
+                'supplier_id' => $taggable->taggable_id,
+                'tag_id' => $taggable->tag_id,
+            ]);
+        }
 
         // Drop taggables table
         Schema::dropIfExists('taggables');
