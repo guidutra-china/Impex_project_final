@@ -10,6 +10,7 @@ use Filament\Resources\Pages\Page;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Notifications\Notification;
+use Filament\Schemas\Schema;
 
 class ManageCompanySettings extends Page implements HasForms
 {
@@ -17,7 +18,8 @@ class ManageCompanySettings extends Page implements HasForms
 
     protected static string $resource = CompanySettingsResource::class;
 
-    protected static string $view = 'filament.resources.company-settings.pages.manage-company-settings';
+    // Remove static from $view
+    protected string $view = 'filament.resources.company-settings.pages.manage-company-settings';
 
     public ?array $data = [];
 
@@ -34,11 +36,9 @@ class ManageCompanySettings extends Page implements HasForms
         $this->form->fill($settings->toArray());
     }
 
-    public function form(\Filament\Forms\Form $form): \Filament\Forms\Form
+    public function form(Schema $schema): Schema
     {
-        return $form
-            ->schema(CompanySettingsForm::getSchema())
-            ->statePath('data');
+        return $schema->components(CompanySettingsForm::getSchema());
     }
 
     public function save(): void
