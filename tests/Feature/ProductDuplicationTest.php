@@ -28,7 +28,8 @@ it('can duplicate a product without BOM items', function () {
     expect($duplicatedProduct)->toBeInstanceOf(Product::class);
     expect($duplicatedProduct->id)->not->toBe($originalProduct->id);
     expect($duplicatedProduct->name)->toBe('Original Product (Copy)');
-    expect($duplicatedProduct->sku)->toBeNull();
+    expect($duplicatedProduct->sku)->toContain('-COPY-');
+    expect($duplicatedProduct->sku)->toContain('ORIG-001');
     expect($duplicatedProduct->price)->toBe(10000);
     expect($duplicatedProduct->category_id)->toBe($category->id);
 });
@@ -167,7 +168,8 @@ it('duplicates all product data correctly', function () {
 
     // Assert all data is copied correctly
     expect($duplicatedProduct->name)->toBe('Complete Product (Copy)');
-    expect($duplicatedProduct->sku)->toBeNull(); // SKU should be cleared
+    expect($duplicatedProduct->sku)->toContain('-COPY-'); // SKU should have COPY suffix
+    expect($duplicatedProduct->sku)->toContain('COMP-001');
     expect($duplicatedProduct->price)->toBe(15000);
     expect($duplicatedProduct->moq)->toBe(100);
     expect($duplicatedProduct->moq_unit)->toBe('pcs');
