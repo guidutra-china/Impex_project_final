@@ -206,11 +206,25 @@
         <!-- Header -->
         <div class="header clearfix">
             <div class="company-info">
-                <div class="company-name">Your Company Name</div>
-                <div>123 Business Street</div>
-                <div>City, State 12345</div>
-                <div>Phone: (123) 456-7890</div>
-                <div>Email: info@yourcompany.com</div>
+                @if(companyLogo())
+                <img src="{{ companyLogo() }}" alt="Logo" style="max-width: 150px; max-height: 60px; margin-bottom: 10px;">
+                @endif
+                <div class="company-name">{{ companyName() }}</div>
+                @if(companySettings()?->address)
+                <div>{{ companySettings()->address }}</div>
+                @endif
+                @if(companySettings()?->city)
+                <div>{{ companySettings()->city }}@if(companySettings()->state), {{ companySettings()->state }}@endif @if(companySettings()->zip_code){{ companySettings()->zip_code }}@endif</div>
+                @endif
+                @if(companySettings()?->country)
+                <div>{{ companySettings()->country }}</div>
+                @endif
+                @if(companySettings()?->phone)
+                <div>Phone: {{ companySettings()->phone }}</div>
+                @endif
+                @if(companySettings()?->email)
+                <div>Email: {{ companySettings()->email }}</div>
+                @endif
             </div>
             <div class="invoice-info">
                 <div class="invoice-title">PURCHASE INVOICE</div>
@@ -238,9 +252,16 @@
             </div>
             <div class="party-box">
                 <div class="party-title">Bill To</div>
-                <div class="party-name">Your Company Name</div>
-                <div>123 Business Street</div>
-                <div>City, State 12345</div>
+                <div class="party-name">{{ companyName() }}</div>
+                @if(companySettings()?->address)
+                <div>{{ companySettings()->address }}</div>
+                @endif
+                @if(companySettings()?->city)
+                <div>{{ companySettings()->city }}@if(companySettings()->state), {{ companySettings()->state }}@endif @if(companySettings()->zip_code){{ companySettings()->zip_code }}@endif</div>
+                @endif
+                @if(companySettings()?->country)
+                <div>{{ companySettings()->country }}</div>
+                @endif
             </div>
         </div>
 
@@ -345,7 +366,7 @@
 
         <!-- Footer -->
         <div class="footer">
-            <div>Thank you for your business!</div>
+            <div>{{ companySettings()?->footer_text ?? 'Thank you for your business!' }}</div>
             <div style="margin-top: 5px;">
                 Generated on {{ now()->format('F d, Y \a\t H:i') }}
                 @if($invoice->revision_number > 1)
