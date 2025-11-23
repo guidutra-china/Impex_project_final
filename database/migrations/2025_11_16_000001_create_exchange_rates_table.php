@@ -25,12 +25,12 @@ return new class extends Migration
             
             // Approval workflow
             $table->enum('status', ['pending', 'approved', 'rejected'])->default('approved');
-            $table->foreignId('approved_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->unsignedBigInteger('approved_by')->nullable();
             $table->timestamp('approved_at')->nullable();
             
             // Audit fields
             $table->text('notes')->nullable();
-            $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->unsignedBigInteger('created_by')->nullable();
             $table->timestamps();
             $table->softDeletes();
             
