@@ -160,8 +160,7 @@ class BomVersionsRelationManager extends RelationManager
                     ->url(fn ($record) => route('filament.admin.resources.products.bom-comparison', [
                         'record' => $this->getOwnerRecord(),
                         'version1' => $record->id,
-                    ]))
-                    ->openUrlInNewTab(),
+                    ])),
             ])
             ->bulkActions([
                 BulkActionGroup::make([
