@@ -28,12 +28,15 @@ class EditProduct extends EditRecord
         // Refresh the record from database to get updated costs
         $this->record->refresh();
         
-        // Optionally send a notification
+        // Send notification
         \Filament\Notifications\Notification::make()
             ->success()
             ->title('Costs Updated')
             ->body('Manufacturing cost summary has been refreshed.')
             ->send();
+        
+        // Force page reload to show updated costs
+        $this->redirect(static::getUrl('edit', ['record' => $this->record]), navigate: false);
     }
 
     protected function getHeaderActions(): array
