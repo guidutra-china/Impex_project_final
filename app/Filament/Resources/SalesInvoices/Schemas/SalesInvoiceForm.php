@@ -6,7 +6,7 @@ use App\Models\Currency;
 use App\Models\PaymentTerm;
 use App\Models\Product;
 use App\Models\PurchaseOrder;
-use App\Models\Quote;
+use App\Models\SupplierQuote;
 use App\Models\SalesInvoice;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Actions\Action as FormAction;
@@ -108,7 +108,7 @@ class SalesInvoiceForm
                 ->afterStateUpdated(function (Get $get, Set $set, $state) {
                     if (!$state) return;
 
-                    $quote = Quote::with(['client', 'currency', 'baseCurrency', 'items.product'])->find($state);
+                    $quote = SupplierQuote::with(['client', 'currency', 'baseCurrency', 'items.product'])->find($state);
                     if (!$quote) return;
 
                     // Fill client and currency
