@@ -3,6 +3,7 @@
 use App\Models\Currency;
 use App\Models\ExchangeRate;
 use App\Services\CurrencyExchangeService;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 
 beforeEach(function () {
@@ -213,6 +214,8 @@ test('it handles HTTP errors gracefully', function () {
 })->throws(Exception::class, 'API request failed');
 
 test('it can convert between currencies using historical rates', function () {
+    Cache::flush(); // Clear cache to ensure fresh data
+    
     // Create exchange rate records
     $baseCurrency = Currency::where('code', 'USD')->first();
     $eurCurrency = Currency::where('code', 'EUR')->first();
@@ -290,6 +293,8 @@ test('it can get rate history for a currency pair', function () {
 });
 
 test('it can get latest rate for a currency pair', function () {
+    Cache::flush(); // Clear cache to ensure fresh data
+    
     $baseCurrency = Currency::where('code', 'USD')->first();
     $eurCurrency = Currency::where('code', 'EUR')->first();
 
