@@ -235,16 +235,8 @@ class SalesInvoiceForm
                     return $baseCurrency?->id;
                 })
                 ->required()
-                ->disabled()
-                ->dehydrated()
-                ->afterStateHydrated(function (Select $component, $state) {
-                    if (!$state) {
-                        $baseCurrency = Currency::where('is_base', true)->first();
-                        if ($baseCurrency) {
-                            $component->state($baseCurrency->id);
-                        }
-                    }
-                }),
+                ->searchable()
+                ->helperText('Base currency for conversion calculations'),
         ];
     }
 
