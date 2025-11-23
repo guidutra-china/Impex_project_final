@@ -20,6 +20,7 @@ use UnitEnum;
 class CustomerReceiptResource extends Resource
 {
     protected static ?string $model = CustomerReceipt::class;
+    protected static ?int $navigationSort = 7;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedDocumentCurrencyDollar;
     protected static string|UnitEnum|null $navigationGroup = 'Finance';

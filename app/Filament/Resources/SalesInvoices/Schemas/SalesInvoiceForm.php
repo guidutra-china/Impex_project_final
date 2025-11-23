@@ -443,6 +443,7 @@ class SalesInvoiceForm
             DatePicker::make('deposit_received_at')
                 ->label('Deposit Received At')
                 ->disabled()
+                ->default(now())
                 ->visible(fn (Get $get) => $get('deposit_received')),
 
             Select::make('deposit_payment_method')

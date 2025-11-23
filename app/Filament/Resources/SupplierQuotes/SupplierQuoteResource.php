@@ -25,7 +25,7 @@ class SupplierQuoteResource extends Resource
     protected static string | UnitEnum | null $navigationGroup = 'Quotations';
 
 
-    protected static ?int $navigationSort = 3;
+    protected static ?int $navigationSort = 10;
 
     protected static ?string $navigationLabel = 'Supplier Quotes';
 

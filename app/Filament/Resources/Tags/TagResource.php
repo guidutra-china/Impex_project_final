@@ -21,7 +21,7 @@ class TagResource extends Resource
 {
     protected static ?string $model = Tag::class;
 
-    protected static ?int $navigationSort = 3;
+    protected static ?int $navigationSort = 14;
     protected static string | UnitEnum | null $navigationGroup = 'Setup';
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedTag;
 

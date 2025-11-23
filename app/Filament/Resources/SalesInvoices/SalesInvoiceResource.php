@@ -8,16 +8,18 @@ use App\Models\SalesInvoice;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Support\Icons\Heroicon;
+use UnitEnum;
 
 class SalesInvoiceResource extends Resource
 {
     protected static ?string $model = SalesInvoice::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedDocumentCurrencyDollar;
+    protected static string|UnitEnum|null $navigationGroup = 'Clients';
 
     protected static ?string $navigationLabel = 'Sales Invoices';
 
-    protected static ?int $navigationSort = 6;
+    protected static ?int $navigationSort = 2;
 
     public static function form(\Filament\Schemas\Schema $schema): \Filament\Schemas\Schema
     {

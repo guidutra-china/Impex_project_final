@@ -17,10 +17,6 @@ class ClientContactsTable
                 TextColumn::make('name')
                     ->searchable()
                     ->sortable(),
-                TextColumn::make('client.name')
-                    ->label('Client')
-                    ->sortable()
-                    ->searchable(),
                 TextColumn::make('email')
                     ->label('E-mail')
                     ->sortable()

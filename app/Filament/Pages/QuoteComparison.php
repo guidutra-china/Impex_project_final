@@ -21,7 +21,7 @@ class QuoteComparison extends Page
 
     protected static string | UnitEnum | null $navigationGroup = 'Quotations';
 
-    protected static ?int $navigationSort = 4;
+    protected static ?int $navigationSort = 12;
 
     protected static ?string $navigationLabel = 'Quote Comparison';
 

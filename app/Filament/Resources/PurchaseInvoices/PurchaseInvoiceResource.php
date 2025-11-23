@@ -8,12 +8,14 @@ use App\Models\PurchaseInvoice;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Support\Icons\Heroicon;
+use UnitEnum;
 
 class PurchaseInvoiceResource extends Resource
 {
     protected static ?string $model = PurchaseInvoice::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedDocumentText;
+    protected static string|UnitEnum|null $navigationGroup = 'Suppliers';
 
     protected static ?string $navigationLabel = 'Purchase Invoices';
 

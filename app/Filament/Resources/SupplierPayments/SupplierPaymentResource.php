@@ -21,6 +21,9 @@ class SupplierPaymentResource extends Resource
 {
     protected static ?string $model = SupplierPayment::class;
 
+    protected static ?int $navigationSort = 8;
+
+
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCurrencyDollar;
     protected static string|UnitEnum|null $navigationGroup = 'Finance';
 

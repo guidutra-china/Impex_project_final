@@ -17,10 +17,6 @@ class SupplierContactsTable
                 TextColumn::make('name')
                     ->searchable()
                     ->sortable(),
-                TextColumn::make('supplier.name')
-                    ->label('Supplier')
-                    ->sortable()
-                    ->searchable(),
                 TextColumn::make('email')
                     ->label('E-mail')
                     ->sortable()

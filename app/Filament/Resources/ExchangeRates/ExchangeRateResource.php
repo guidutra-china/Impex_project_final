@@ -19,7 +19,7 @@ class ExchangeRateResource extends Resource
 {
     protected static ?string $model = ExchangeRate::class;
 
-    protected static ?int $navigationSort = 5
+    protected static ?int $navigationSort = 16
     ;
     protected static string | UnitEnum | null $navigationGroup = 'Setup';
 
