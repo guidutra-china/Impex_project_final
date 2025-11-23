@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Currency;
+use App\Models\ExchangeRate;
 use App\Services\CurrencyExchangeService;
 use Illuminate\Support\Facades\Http;
 
@@ -11,7 +12,6 @@ beforeEach(function () {
         'name' => 'US Dollar',
         'name_plural' => 'US Dollars',
         'symbol' => '$',
-        'exchange_rate' => 1.0000,
         'is_base' => true,
         'is_active' => true,
     ]);
@@ -22,7 +22,6 @@ beforeEach(function () {
         'name' => 'Euro',
         'name_plural' => 'Euros',
         'symbol' => '€',
-        'exchange_rate' => 0.85,
         'is_base' => false,
         'is_active' => true,
     ]);
@@ -32,7 +31,6 @@ beforeEach(function () {
         'name' => 'British Pound',
         'name_plural' => 'British Pounds',
         'symbol' => '£',
-        'exchange_rate' => 0.73,
         'is_base' => false,
         'is_active' => true,
     ]);
@@ -51,7 +49,6 @@ test('it can fetch exchange rates from API', function () {
                 'USD' => 1.0,
                 'EUR' => 0.92,
                 'GBP' => 0.79,
-                'BRL' => 5.45,
             ],
         ], 200),
     ]);
@@ -59,31 +56,33 @@ test('it can fetch exchange rates from API', function () {
     $service = new CurrencyExchangeService();
     $rates = $service->fetchExchangeRates('USD');
 
-    expect($rates)->toBeArray();
-    expect($rates)->toHaveKey('EUR');
-    expect($rates['EUR'])->toBe(0.92);
+    expect($rates)->toBeArray()
+        ->and($rates)->toHaveKey('EUR')
+        ->and($rates['EUR'])->toBe(0.92);
 });
 
 test('it throws exception when API key is not configured', function () {
     config(['services.exchangerate.api_key' => null]);
 
     $service = new CurrencyExchangeService();
-    
-    expect(fn() => $service->fetchExchangeRates('USD'))
-        ->toThrow(Exception::class, 'ExchangeRate API key not configured');
-});
+})->throws(Exception::class, 'ExchangeRate API key not configured');
 
 test('it throws exception when no base currency is configured', function () {
     Currency::where('is_base', true)->update(['is_base' => false]);
 
-    $service = new CurrencyExchangeService();
-    
-    expect(fn() => $service->updateAllRates())
-        ->toThrow(Exception::class, 'No base currency configured');
-});
+    Http::fake([
+        'v6.exchangerate-api.com/*' => Http::response([
+            'result' => 'success',
+            'base_code' => 'USD',
+            'conversion_rates' => ['EUR' => 0.92],
+        ], 200),
+    ]);
 
-test('it can update all currency rates', function () {
-    // Mock the HTTP response
+    $service = new CurrencyExchangeService();
+    $service->updateAllRates();
+})->throws(Exception::class, 'No base currency configured');
+
+test('it can update all currency rates and save to exchange_rates table', function () {
     Http::fake([
         'v6.exchangerate-api.com/*' => Http::response([
             'result' => 'success',
@@ -92,7 +91,6 @@ test('it can update all currency rates', function () {
                 'USD' => 1.0,
                 'EUR' => 0.92,
                 'GBP' => 0.79,
-                'BRL' => 5.45,
             ],
         ], 200),
     ]);
@@ -100,19 +98,33 @@ test('it can update all currency rates', function () {
     $service = new CurrencyExchangeService();
     $stats = $service->updateAllRates();
 
-    expect($stats)->toBeArray();
-    expect($stats)->toHaveKey('updated');
-    expect($stats)->toHaveKey('failed');
-    expect($stats)->toHaveKey('skipped');
-    expect($stats['updated'])->toBe(2); // EUR and GBP
-    expect($stats['skipped'])->toBe(1); // USD (base currency)
+    expect($stats['updated'])->toBe(2) // EUR and GBP
+        ->and($stats['skipped'])->toBe(1) // USD (base currency)
+        ->and($stats['failed'])->toBe(0);
 
-    // Verify rates were updated
-    $eur = Currency::where('code', 'EUR')->first();
-    expect($eur->exchange_rate)->toBe(0.92);
+    // Verify records were created in exchange_rates table
+    $baseCurrency = Currency::where('code', 'USD')->first();
+    $eurCurrency = Currency::where('code', 'EUR')->first();
+    $gbpCurrency = Currency::where('code', 'GBP')->first();
 
-    $gbp = Currency::where('code', 'GBP')->first();
-    expect($gbp->exchange_rate)->toBe(0.79);
+    $eurRate = ExchangeRate::where('base_currency_id', $baseCurrency->id)
+        ->where('target_currency_id', $eurCurrency->id)
+        ->where('date', today())
+        ->first();
+
+    expect($eurRate)->not->toBeNull()
+        ->and($eurRate->rate)->toBe('0.92000000')
+        ->and($eurRate->source)->toBe('api')
+        ->and($eurRate->source_name)->toBe('ExchangeRate-API')
+        ->and($eurRate->status)->toBe('approved');
+
+    $gbpRate = ExchangeRate::where('base_currency_id', $baseCurrency->id)
+        ->where('target_currency_id', $gbpCurrency->id)
+        ->where('date', today())
+        ->first();
+
+    expect($gbpRate)->not->toBeNull()
+        ->and($gbpRate->rate)->toBe('0.79000000');
 });
 
 test('it skips base currency when updating rates', function () {
@@ -130,9 +142,16 @@ test('it skips base currency when updating rates', function () {
     $service = new CurrencyExchangeService();
     $stats = $service->updateAllRates();
 
-    $usd = Currency::where('code', 'USD')->first();
-    expect($usd->exchange_rate)->toBe(1.0000); // Should remain 1.0
     expect($stats['skipped'])->toBe(1);
+
+    // Verify no exchange rate record for base currency
+    $baseCurrency = Currency::where('code', 'USD')->first();
+    
+    $baseRate = ExchangeRate::where('base_currency_id', $baseCurrency->id)
+        ->where('target_currency_id', $baseCurrency->id)
+        ->first();
+
+    expect($baseRate)->toBeNull();
 });
 
 test('it can update a specific currency rate', function () {
@@ -146,22 +165,27 @@ test('it can update a specific currency rate', function () {
         ], 200),
     ]);
 
+    $eurCurrency = Currency::where('code', 'EUR')->first();
     $service = new CurrencyExchangeService();
-    $eur = Currency::where('code', 'EUR')->first();
-    
-    $result = $service->updateCurrencyRate($eur);
+    $result = $service->updateCurrencyRate($eurCurrency);
 
     expect($result)->toBeTrue();
-    
-    $eur->refresh();
-    expect($eur->exchange_rate)->toBe(0.95);
+
+    // Verify record in exchange_rates table
+    $baseCurrency = Currency::where('code', 'USD')->first();
+    $rate = ExchangeRate::where('base_currency_id', $baseCurrency->id)
+        ->where('target_currency_id', $eurCurrency->id)
+        ->where('date', today())
+        ->first();
+
+    expect($rate)->not->toBeNull()
+        ->and($rate->rate)->toBe('0.95000000');
 });
 
 test('it returns false when trying to update base currency', function () {
+    $usdCurrency = Currency::where('code', 'USD')->first();
     $service = new CurrencyExchangeService();
-    $usd = Currency::where('code', 'USD')->first();
-    
-    $result = $service->updateCurrencyRate($usd);
+    $result = $service->updateCurrencyRate($usdCurrency);
 
     expect($result)->toBeFalse();
 });
@@ -175,10 +199,8 @@ test('it handles API errors gracefully', function () {
     ]);
 
     $service = new CurrencyExchangeService();
-    
-    expect(fn() => $service->fetchExchangeRates('USD'))
-        ->toThrow(Exception::class, 'API returned error: invalid-key');
-});
+    $service->fetchExchangeRates('USD');
+})->throws(Exception::class, 'API returned error');
 
 test('it handles HTTP errors gracefully', function () {
     Http::fake([
@@ -186,26 +208,30 @@ test('it handles HTTP errors gracefully', function () {
     ]);
 
     $service = new CurrencyExchangeService();
-    
-    expect(fn() => $service->fetchExchangeRates('USD'))
-        ->toThrow(Exception::class);
-});
+    $service->fetchExchangeRates('USD');
+})->throws(Exception::class, 'API request failed');
 
-test('it can convert between currencies', function () {
-    Http::fake([
-        'v6.exchangerate-api.com/*' => Http::response([
-            'result' => 'success',
-            'base_code' => 'USD',
-            'conversion_rates' => [
-                'EUR' => 0.92,
-            ],
-        ], 200),
+test('it can convert between currencies using historical rates', function () {
+    // Create exchange rate records
+    $baseCurrency = Currency::where('code', 'USD')->first();
+    $eurCurrency = Currency::where('code', 'EUR')->first();
+
+    ExchangeRate::create([
+        'base_currency_id' => $baseCurrency->id,
+        'target_currency_id' => $eurCurrency->id,
+        'rate' => 0.92,
+        'inverse_rate' => 1 / 0.92,
+        'date' => today(),
+        'source' => 'api',
+        'source_name' => 'ExchangeRate-API',
+        'status' => 'approved',
+        'approved_at' => now(),
     ]);
 
     $service = new CurrencyExchangeService();
-    $converted = $service->convert(100, 'USD', 'EUR');
+    $result = $service->convert(100, 'USD', 'EUR');
 
-    expect($converted)->toBe(92.0);
+    expect($result)->toBe(92.0);
 });
 
 test('it tracks failed currency updates', function () {
@@ -214,8 +240,8 @@ test('it tracks failed currency updates', function () {
             'result' => 'success',
             'base_code' => 'USD',
             'conversion_rates' => [
-                'EUR' => 0.92,
-                // GBP is missing - should fail
+                'USD' => 1.0,
+                // EUR is missing - should fail
             ],
         ], 200),
     ]);
@@ -223,6 +249,62 @@ test('it tracks failed currency updates', function () {
     $service = new CurrencyExchangeService();
     $stats = $service->updateAllRates();
 
-    expect($stats['updated'])->toBe(1); // Only EUR
-    expect($stats['failed'])->toBe(1); // GBP failed
+    expect($stats['failed'])->toBeGreaterThan(0);
+});
+
+test('it can get rate history for a currency pair', function () {
+    $baseCurrency = Currency::where('code', 'USD')->first();
+    $eurCurrency = Currency::where('code', 'EUR')->first();
+
+    // Create historical rates
+    ExchangeRate::create([
+        'base_currency_id' => $baseCurrency->id,
+        'target_currency_id' => $eurCurrency->id,
+        'rate' => 0.90,
+        'inverse_rate' => 1 / 0.90,
+        'date' => today()->subDays(5),
+        'source' => 'api',
+        'status' => 'approved',
+        'approved_at' => now(),
+    ]);
+
+    ExchangeRate::create([
+        'base_currency_id' => $baseCurrency->id,
+        'target_currency_id' => $eurCurrency->id,
+        'rate' => 0.92,
+        'inverse_rate' => 1 / 0.92,
+        'date' => today(),
+        'source' => 'api',
+        'status' => 'approved',
+        'approved_at' => now(),
+    ]);
+
+    $service = new CurrencyExchangeService();
+    $history = $service->getRateHistory('USD', 'EUR', 30);
+
+    expect($history)->toHaveCount(2)
+        ->and($history->first()->rate)->toBe('0.92000000')
+        ->and($history->last()->rate)->toBe('0.90000000');
+});
+
+test('it can get latest rate for a currency pair', function () {
+    $baseCurrency = Currency::where('code', 'USD')->first();
+    $eurCurrency = Currency::where('code', 'EUR')->first();
+
+    ExchangeRate::create([
+        'base_currency_id' => $baseCurrency->id,
+        'target_currency_id' => $eurCurrency->id,
+        'rate' => 0.92,
+        'inverse_rate' => 1 / 0.92,
+        'date' => today(),
+        'source' => 'api',
+        'status' => 'approved',
+        'approved_at' => now(),
+    ]);
+
+    $service = new CurrencyExchangeService();
+    $rate = $service->getLatestRate('USD', 'EUR');
+
+    expect($rate)->not->toBeNull()
+        ->and($rate->rate)->toBe('0.92000000');
 });

@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Currency;
+use App\Models\ExchangeRate;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Exception;
@@ -81,6 +82,7 @@ class CurrencyExchangeService
 
     /**
      * Update all currency exchange rates based on the base currency
+     * Saves historical records in exchange_rates table
      *
      * @return array Statistics about the update (updated, failed, skipped)
      */
@@ -88,6 +90,7 @@ class CurrencyExchangeService
     {
         $baseCurrency = $this->getBaseCurrency();
         $rates = $this->fetchExchangeRates($baseCurrency->code);
+        $today = today();
 
         $stats = [
             'updated' => 0,
@@ -115,11 +118,33 @@ class CurrencyExchangeService
             }
 
             try {
-                $currency->exchange_rate = $rates[$currency->code];
-                $currency->save();
+                $rate = $rates[$currency->code];
+
+                // Create historical record in exchange_rates table
+                ExchangeRate::updateOrCreate(
+                    [
+                        'base_currency_id' => $baseCurrency->id,
+                        'target_currency_id' => $currency->id,
+                        'date' => $today,
+                    ],
+                    [
+                        'rate' => $rate,
+                        'inverse_rate' => 1 / $rate,
+                        'source' => 'api',
+                        'source_name' => 'ExchangeRate-API',
+                        'status' => 'approved', // Auto-approve API rates
+                        'approved_at' => now(),
+                        'notes' => 'Automatically updated from ExchangeRate-API',
+                    ]
+                );
+
                 $stats['updated']++;
 
-                Log::info("Updated exchange rate for {$currency->code}: {$rates[$currency->code]}");
+                Log::info("Updated exchange rate for {$currency->code}", [
+                    'currency' => $currency->code,
+                    'rate' => $rate,
+                    'date' => $today->toDateString(),
+                ]);
             } catch (Exception $e) {
                 Log::error("Failed to update currency {$currency->code}", [
                     'error' => $e->getMessage(),
@@ -133,6 +158,7 @@ class CurrencyExchangeService
 
     /**
      * Update exchange rate for a specific currency
+     * Saves historical record in exchange_rates table
      *
      * @param Currency $currency
      * @return bool
@@ -151,10 +177,28 @@ class CurrencyExchangeService
             throw new Exception("No exchange rate found for currency: {$currency->code}");
         }
 
-        $currency->exchange_rate = $rates[$currency->code];
-        $currency->save();
+        $rate = $rates[$currency->code];
+        $today = today();
 
-        Log::info("Updated exchange rate for {$currency->code}: {$rates[$currency->code]}");
+        // Create historical record
+        ExchangeRate::updateOrCreate(
+            [
+                'base_currency_id' => $baseCurrency->id,
+                'target_currency_id' => $currency->id,
+                'date' => $today,
+            ],
+            [
+                'rate' => $rate,
+                'inverse_rate' => 1 / $rate,
+                'source' => 'api',
+                'source_name' => 'ExchangeRate-API',
+                'status' => 'approved',
+                'approved_at' => now(),
+                'notes' => 'Automatically updated from ExchangeRate-API',
+            ]
+        );
+
+        Log::info("Updated exchange rate for {$currency->code}: {$rate}");
 
         return true;
     }
@@ -173,21 +217,81 @@ class CurrencyExchangeService
     }
 
     /**
-     * Convert an amount from one currency to another
+     * Convert an amount from one currency to another using latest approved rates
      *
      * @param float $amount
-     * @param string $fromCurrency
-     * @param string $toCurrency
+     * @param string $fromCurrency Currency code
+     * @param string $toCurrency Currency code
+     * @param string|null $date Optional date for historical conversion
      * @return float
+     * @throws Exception
      */
-    public function convert(float $amount, string $fromCurrency, string $toCurrency): float
+    public function convert(float $amount, string $fromCurrency, string $toCurrency, ?string $date = null): float
     {
-        $rates = $this->fetchExchangeRates($fromCurrency);
+        if ($fromCurrency === $toCurrency) {
+            return $amount;
+        }
 
-        if (!isset($rates[$toCurrency])) {
+        $fromCurrencyModel = Currency::where('code', $fromCurrency)->first();
+        $toCurrencyModel = Currency::where('code', $toCurrency)->first();
+
+        if (!$fromCurrencyModel || !$toCurrencyModel) {
+            throw new Exception('Currency not found');
+        }
+
+        $rate = ExchangeRate::getConversionRate($fromCurrencyModel->id, $toCurrencyModel->id, $date);
+
+        if (!$rate) {
             throw new Exception("No exchange rate found for {$fromCurrency} to {$toCurrency}");
         }
 
-        return $amount * $rates[$toCurrency];
+        return $amount * $rate;
+    }
+
+    /**
+     * Get latest exchange rate for a currency pair
+     *
+     * @param string $fromCurrencyCode
+     * @param string $toCurrencyCode
+     * @param string|null $date
+     * @return ExchangeRate|null
+     */
+    public function getLatestRate(string $fromCurrencyCode, string $toCurrencyCode, ?string $date = null): ?ExchangeRate
+    {
+        $fromCurrency = Currency::where('code', $fromCurrencyCode)->first();
+        $toCurrency = Currency::where('code', $toCurrencyCode)->first();
+
+        if (!$fromCurrency || !$toCurrency) {
+            return null;
+        }
+
+        return ExchangeRate::getLatestRate($fromCurrency->id, $toCurrency->id, $date);
+    }
+
+    /**
+     * Get exchange rate history for a currency pair
+     *
+     * @param string $fromCurrencyCode
+     * @param string $toCurrencyCode
+     * @param int $days Number of days to look back
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public function getRateHistory(string $fromCurrencyCode, string $toCurrencyCode, int $days = 30)
+    {
+        $fromCurrency = Currency::where('code', $fromCurrencyCode)->first();
+        $toCurrency = Currency::where('code', $toCurrencyCode)->first();
+
+        if (!$fromCurrency || !$toCurrency) {
+            return collect();
+        }
+
+        $startDate = today()->subDays($days);
+
+        return ExchangeRate::where('base_currency_id', $fromCurrency->id)
+            ->where('target_currency_id', $toCurrency->id)
+            ->where('date', '>=', $startDate)
+            ->where('status', 'approved')
+            ->orderBy('date', 'desc')
+            ->get();
     }
 }
