@@ -66,7 +66,7 @@ class SalesInvoice extends Model
 
     public function quote(): BelongsTo
     {
-        return $this->belongsTo(Quote::class);
+        return $this->belongsTo(SupplierQuote::class);
     }
 
     public function currency(): BelongsTo
