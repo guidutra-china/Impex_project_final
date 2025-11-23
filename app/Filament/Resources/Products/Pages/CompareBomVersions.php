@@ -6,11 +6,14 @@ use App\Filament\Resources\Products\ProductResource;
 use App\Models\BomVersion;
 use App\Models\Product;
 use Filament\Forms\Components\Select;
+use Filament\Resources\Pages\Concerns\InteractsWithRecord;
 use Filament\Resources\Pages\Page;
 use Filament\Schemas\Components\Form;
 
 class CompareBomVersions extends Page
 {
+    use InteractsWithRecord;
+
     protected static string $resource = ProductResource::class;
 
     protected string $view = 'filament.resources.products.compare-bom-versions';
@@ -21,6 +24,11 @@ class CompareBomVersions extends Page
     public ?BomVersion $version1 = null;
     public ?BomVersion $version2 = null;
     public ?Product $product = null;
+
+    public function getRecord(): Product
+    {
+        return $this->record;
+    }
 
     public function mount(): void
     {
