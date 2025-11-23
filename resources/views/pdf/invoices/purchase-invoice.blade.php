@@ -12,9 +12,9 @@
         }
         body {
             font-family: 'DejaVu Sans', sans-serif;
-            font-size: 10pt;
+            font-size: 8pt;
             color: #333;
-            line-height: 1.4;
+            line-height: 1.2;
         }
         .container {
             padding: 20px;
@@ -29,7 +29,7 @@
             width: 50%;
         }
         .company-name {
-            font-size: 20pt;
+            font-size: 18pt;
             font-weight: bold;
             color: #2563eb;
             margin-bottom: 5px;
@@ -40,13 +40,13 @@
             text-align: right;
         }
         .invoice-title {
-            font-size: 24pt;
+            font-size: 22pt;
             font-weight: bold;
             color: #2563eb;
             margin-bottom: 5px;
         }
         .invoice-number {
-            font-size: 12pt;
+            font-size: 10pt;
             color: #666;
         }
         .clearfix::after {
@@ -59,8 +59,8 @@
         }
         .party-box {
             float: left;
-            width: 48%;
-            padding: 15px;
+            width: 42%;
+            padding: 10px;
             border: 1px solid #ddd;
             border-radius: 5px;
             background: #f9fafb;
@@ -70,14 +70,14 @@
         }
         .party-title {
             font-weight: bold;
-            font-size: 11pt;
+            font-size: 10pt;
             color: #2563eb;
             margin-bottom: 8px;
             text-transform: uppercase;
         }
         .party-name {
             font-weight: bold;
-            font-size: 12pt;
+            font-size: 10pt;
             margin-bottom: 5px;
         }
         .invoice-details {
@@ -137,7 +137,7 @@
             background: #2563eb;
             color: white;
             padding: 12px 10px;
-            font-size: 12pt;
+            font-size: 10pt;
             font-weight: bold;
             border-radius: 5px;
             margin-top: 5px;
@@ -151,7 +151,7 @@
         }
         .notes-title {
             font-weight: bold;
-            font-size: 11pt;
+            font-size: 10pt;
             color: #2563eb;
             margin-bottom: 8px;
             text-transform: uppercase;
@@ -167,14 +167,14 @@
             padding-top: 15px;
             border-top: 2px solid #e5e7eb;
             text-align: center;
-            font-size: 9pt;
+            font-size: 8pt;
             color: #666;
         }
         .status-badge {
             display: inline-block;
             padding: 5px 15px;
             border-radius: 20px;
-            font-size: 9pt;
+            font-size: 8pt;
             font-weight: bold;
             text-transform: uppercase;
             margin-left: 10px;
@@ -271,16 +271,16 @@
                 <span class="detail-label">Invoice Date:</span>
                 <span>{{ $invoice->invoice_date->format('F d, Y') }}</span>
             </div>
-            @if($invoice->shipment_date)
-            <div class="detail-row">
-                <span class="detail-label">Shipment Date:</span>
-                <span>{{ $invoice->shipment_date->format('F d, Y') }}</span>
-            </div>
-            @endif
-            <div class="detail-row">
-                <span class="detail-label">Due Date:</span>
-                <span>{{ $invoice->due_date->format('F d, Y') }}</span>
-            </div>
+{{--            @if($invoice->shipment_date)--}}
+{{--            <div class="detail-row">--}}
+{{--                <span class="detail-label">Shipment Date:</span>--}}
+{{--                <span>{{ $invoice->shipment_date->format('F d, Y') }}</span>--}}
+{{--            </div>--}}
+{{--            @endif--}}
+{{--            <div class="detail-row">--}}
+{{--                <span class="detail-label">Due Date:</span>--}}
+{{--                <span>{{ $invoice->due_date->format('F d, Y') }}</span>--}}
+{{--            </div>--}}
             @if($invoice->paymentTerm)
             <div class="detail-row">
                 <span class="detail-label">Payment Terms:</span>
