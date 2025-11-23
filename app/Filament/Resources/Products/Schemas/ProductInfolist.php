@@ -3,9 +3,9 @@
 namespace App\Filament\Resources\Products\Schemas;
 
 use App\Models\Product;
-use Filament\Schemas\Components\ImageEntry;
+use Filament\Infolists\Components\ImageEntry;
+use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Section;
-use Filament\Schemas\Components\TextEntry;
 use Filament\Schemas\Schema;
 
 class ProductInfolist
