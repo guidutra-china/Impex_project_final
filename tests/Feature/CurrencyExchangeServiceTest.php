@@ -7,6 +7,9 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 
 beforeEach(function () {
+    // Clear cache before each test
+    Cache::flush();
+    
     // Create a base currency
     Currency::factory()->create([
         'code' => 'USD',
@@ -214,13 +217,11 @@ test('it handles HTTP errors gracefully', function () {
 })->throws(Exception::class, 'API request failed');
 
 test('it can convert between currencies using historical rates', function () {
-    Cache::flush(); // Clear cache to ensure fresh data
-    
     // Create exchange rate records
     $baseCurrency = Currency::where('code', 'USD')->first();
     $eurCurrency = Currency::where('code', 'EUR')->first();
 
-    ExchangeRate::create([
+    $exchangeRate = ExchangeRate::create([
         'base_currency_id' => $baseCurrency->id,
         'target_currency_id' => $eurCurrency->id,
         'rate' => 0.92,
@@ -231,6 +232,28 @@ test('it can convert between currencies using historical rates', function () {
         'status' => 'approved',
         'approved_at' => now(),
     ]);
+
+    // Debug: verify the rate was created
+    expect($exchangeRate)->not->toBeNull()
+        ->and($exchangeRate->base_currency_id)->toBe($baseCurrency->id)
+        ->and($exchangeRate->target_currency_id)->toBe($eurCurrency->id);
+
+    // Debug: verify we can find it
+    $found = ExchangeRate::where('base_currency_id', $baseCurrency->id)
+        ->where('target_currency_id', $eurCurrency->id)
+        ->first();
+    expect($found)->not->toBeNull();
+
+    // Debug: test getConversionRate directly
+    $rate = ExchangeRate::getConversionRate($baseCurrency->id, $eurCurrency->id, today()->toDateString());
+    dump([
+        'base_id' => $baseCurrency->id,
+        'eur_id' => $eurCurrency->id,
+        'date' => today()->toDateString(),
+        'rate_returned' => $rate,
+        'total_rates_in_db' => ExchangeRate::count(),
+    ]);
+    expect($rate)->not->toBeNull();
 
     $service = new CurrencyExchangeService();
     $result = $service->convert(100, 'USD', 'EUR', today()->toDateString());
@@ -291,10 +314,8 @@ test('it can get rate history for a currency pair', function () {
         ->and($history->first()->rate)->toBe('0.92000000')
         ->and($history->last()->rate)->toBe('0.90000000');
 });
-
 test('it can get latest rate for a currency pair', function () {
-    Cache::flush(); // Clear cache to ensure fresh data
-    
+    // Create exchange rate
     $baseCurrency = Currency::where('code', 'USD')->first();
     $eurCurrency = Currency::where('code', 'EUR')->first();
 
