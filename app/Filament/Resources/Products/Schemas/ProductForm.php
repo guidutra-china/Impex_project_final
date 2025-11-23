@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Products\Schemas;
 use App\Enums\CountryTypeEnum;
 use App\Models\Category;
 use App\Models\Product;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -56,6 +57,21 @@ class ProductForm
                                     ->send();
                             })
                             ->helperText('Select a category to auto-populate feature templates')
+                            ->columnSpan(2),
+
+                        FileUpload::make('avatar')
+                            ->label('Product Avatar')
+                            ->image()
+                            ->imageEditor()
+                            ->imageEditorAspectRatios([
+                                '1:1',
+                                '4:3',
+                                '16:9',
+                            ])
+                            ->directory('products/avatars')
+                            ->visibility('public')
+                            ->maxSize(2048)
+                            ->helperText('Upload a main image for this product (max 2MB)')
                             ->columnSpan(2),
 
                         TextInput::make('name')

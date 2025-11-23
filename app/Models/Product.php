@@ -17,6 +17,7 @@ class Product extends Model
         // Basic Information
         'name',
         'sku',
+        'avatar',
         'description',
         'price',
         'currency_id',

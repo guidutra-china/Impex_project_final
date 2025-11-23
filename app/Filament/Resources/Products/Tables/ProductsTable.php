@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Products\Tables;
 
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
+use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\SelectColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\TextInputColumn;
@@ -17,6 +18,12 @@ class ProductsTable
     {
         return $table
             ->columns([
+                ImageColumn::make('avatar')
+                    ->label('Avatar')
+                    ->circular()
+                    ->defaultImageUrl(url('/images/default-product.png'))
+                    ->size(40),
+
                 TextColumn::make('name')
                     ->label('Product Name')
                     ->searchable()
