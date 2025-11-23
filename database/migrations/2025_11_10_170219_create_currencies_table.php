@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('name');
             $table->string('name_plural');
             $table->string('symbol');
+            $table->decimal('exchange_rate', 10, 4)->default(1.0000);
             $table->boolean('is_base')->default(false);
             $table->boolean('is_active')->default(true);
             $table->index('is_active');
