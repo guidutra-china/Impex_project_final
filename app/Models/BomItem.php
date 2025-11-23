@@ -100,10 +100,19 @@ class BomItem extends Model
 
         // Set unit cost from component product price
         if ($componentProduct) {
-            // Priority: calculated_selling_price > price > 0
-            $this->unit_cost = $componentProduct->calculated_selling_price 
-                            ?? $componentProduct->price 
-                            ?? 0;
+            // Priority: calculated_selling_price (if > 0) > price > 0
+            // Use calculated_selling_price if it exists and is greater than 0
+            if ($componentProduct->calculated_selling_price && $componentProduct->calculated_selling_price > 0) {
+                $this->unit_cost = $componentProduct->calculated_selling_price;
+            }
+            // Otherwise use price
+            elseif ($componentProduct->price && $componentProduct->price > 0) {
+                $this->unit_cost = $componentProduct->price;
+            }
+            // If both are zero or null, set to 0
+            else {
+                $this->unit_cost = 0;
+            }
             
             // Log for debugging (only in local/development)
             if (config('app.debug')) {
