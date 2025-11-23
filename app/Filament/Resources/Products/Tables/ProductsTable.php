@@ -21,8 +21,8 @@ class ProductsTable
                 ImageColumn::make('avatar')
                     ->label('Avatar')
                     ->circular()
-                    ->defaultImageUrl(url('/images/default-product.png'))
-                    ->size(40),
+                    ->size(40)
+                    ->default('No Picture'),
 
                 TextColumn::make('name')
                     ->label('Product Name')
