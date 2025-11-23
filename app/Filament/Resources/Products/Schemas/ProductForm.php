@@ -71,6 +71,11 @@ class ProductForm
                             ->directory('products/avatars')
                             ->visibility('public')
                             ->maxSize(2048)
+                            ->imagePreviewHeight('150')
+                            ->panelLayout('compact')
+                            ->removeUploadedFileButtonPosition('right')
+                            ->uploadButtonPosition('left')
+                            ->uploadProgressIndicatorPosition('left')
                             ->helperText('Upload a main image for this product (max 2MB)')
                             ->columnSpan(2),
 
