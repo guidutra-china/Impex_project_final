@@ -19,12 +19,12 @@ class ViewRecurringTransaction extends ViewRecord
     {
         return [
             Action::make('generate_now')
-                ->label('Generate Transaction Now')
+                ->label('Generate Next Transaction')
                 ->icon('heroicon-o-plus-circle')
                 ->color('success')
                 ->requiresConfirmation()
-                ->modalHeading('Generate Transaction Now')
-                ->modalDescription('This will create a new financial transaction based on this recurrence and update the next due date.')
+                ->modalHeading('Generate Next Transaction')
+                ->modalDescription('This will create the NEXT financial transaction based on this recurrence and update the next due date. Only ONE transaction will be created.')
                 ->action(function () {
                     $recurring = $this->record;
                     
@@ -42,12 +42,12 @@ class ViewRecurringTransaction extends ViewRecord
                         
                         Notification::make()
                             ->title('Transaction Generated!')
-                            ->body("Transaction {$transaction->transaction_number} created successfully.")
+                            ->body("Transaction {$transaction->transaction_number} created successfully. Next due date updated.")
                             ->success()
                             ->send();
                             
-                        // Redirect to edit to refresh data
-                        return redirect($this->getResource()::getUrl('edit', ['record' => $this->record]));
+                        // Redirect to view to refresh data
+                        return redirect($this->getResource()::getUrl('view', ['record' => $this->record]));
                     } catch (\Exception $e) {
                         Notification::make()
                             ->title('Error Generating Transaction')
@@ -64,28 +64,73 @@ class ViewRecurringTransaction extends ViewRecord
     {
         return $schema
             ->schema([
-                Section::make('Next Occurrences')
-                    ->description('View the next 5 dates when this recurrence will generate transactions')
+                Section::make('Recurrence Details')
+                    ->schema([
+                        Placeholder::make('name')
+                            ->label('Name')
+                            ->content(fn ($record) => $record->name),
+                        
+                        Placeholder::make('type')
+                            ->label('Type')
+                            ->content(fn ($record) => match($record->type) {
+                                'payable' => 'Payable',
+                                'receivable' => 'Receivable',
+                                default => $record->type
+                            }),
+                        
+                        Placeholder::make('amount')
+                            ->label('Amount')
+                            ->content(fn ($record) => money($record->amount, $record->currency->code)),
+                        
+                        Placeholder::make('frequency')
+                            ->label('Frequency')
+                            ->content(fn ($record) => match($record->frequency) {
+                                'daily' => 'Daily',
+                                'weekly' => 'Weekly',
+                                'monthly' => 'Monthly',
+                                'quarterly' => 'Quarterly',
+                                'yearly' => 'Yearly',
+                                default => $record->frequency
+                            }),
+                        
+                        Placeholder::make('next_due_date')
+                            ->label('Next Due Date')
+                            ->content(fn ($record) => $record->next_due_date->format('Y-m-d')),
+                        
+                        Placeholder::make('is_active')
+                            ->label('Status')
+                            ->content(fn ($record) => $record->is_active ? '✅ Active' : '❌ Inactive'),
+                    ])
+                    ->columns(2),
+                
+                Section::make('Next 5 Occurrences')
+                    ->description('Preview of the next 5 dates when this recurrence will generate transactions')
                     ->schema([
                         Placeholder::make('next_occurrences')
                             ->label('')
                             ->content(function ($record) {
                                 if (!$record->is_active) {
-                                    return 'Recurrence inactive - no transactions will be generated.';
+                                    return '⚠️ Recurrence is inactive - no transactions will be generated automatically.';
                                 }
                                 
                                 $occurrences = $record->getNextOccurrences(5);
                                 
                                 if (empty($occurrences)) {
-                                    return 'No future occurrences found.';
+                                    return '⚠️ No future occurrences found.';
                                 }
                                 
-                                $list = [];
+                                $html = '<div style="font-family: monospace;">';
                                 foreach ($occurrences as $index => $occurrence) {
-                                    $list[] = ($index + 1) . ". {$occurrence['date']}";
+                                    $number = $index + 1;
+                                    $date = $occurrence['date'];
+                                    $amount = money($occurrence['amount'], $record->currency->code);
+                                    $html .= "<div style='padding: 8px 0; border-bottom: 1px solid #e5e7eb;'>";
+                                    $html .= "<strong>{$number}.</strong> {$date} - {$amount}";
+                                    $html .= "</div>";
                                 }
+                                $html .= '</div>';
                                 
-                                return nl2br(implode("\n", $list));
+                                return new \Illuminate\Support\HtmlString($html);
                             })
                             ->columnSpanFull(),
                     ])
