@@ -2,9 +2,9 @@
 
 namespace App\Filament\Resources\PaymentMethods\Tables;
 
-use Filament\Tables\Actions\BulkActionGroup;
-use Filament\Tables\Actions\DeleteBulkAction;
-use Filament\Tables\Actions\EditAction;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
@@ -24,7 +24,7 @@ class PaymentMethodsTable
                 TextColumn::make('type')
                     ->label('Type')
                     ->badge()
-                    ->formatStateUsing(fn (string $state): string => match ($state) {
+                    ->formatStateUsing(fn (string $state): string => match($state) {
                         'bank_transfer' => 'Bank Transfer',
                         'wire_transfer' => 'Wire Transfer',
                         'paypal' => 'PayPal',
@@ -68,7 +68,6 @@ class PaymentMethodsTable
 
                 TextColumn::make('fixed_fee')
                     ->label('Fixed Fee')
-                    ->money('USD')
                     ->formatStateUsing(fn ($state) => $state ? '$' . number_format($state / 100, 2) : '—')
                     ->visible(fn ($record) => in_array($record->fee_type ?? 'none', ['fixed', 'fixed_plus_percentage'])),
 
@@ -137,10 +136,10 @@ class PaymentMethodsTable
                         'fixed_plus_percentage' => 'Fixed + Percentage',
                     ]),
             ])
-            ->actions([
+            ->recordActions([
                 EditAction::make(),
             ])
-            ->bulkActions([
+            ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),
