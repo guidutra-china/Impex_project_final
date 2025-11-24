@@ -13,24 +13,24 @@ class FinancialPaymentForm
     public static function configure(Schema $schema): Schema
     {
         return $schema->components([
-            Section::make('Informações do Pagamento')->schema([
-                Textarea::make('description')->label('Descrição')->required()->maxLength(65535)->columnSpanFull(),
-                Select::make('type')->label('Tipo')->required()->options(['debit' => 'Saída (Pagamento)', 'credit' => 'Entrada (Recebimento)'])->default('debit'),
-                Select::make('bank_account_id')->label('Conta Bancária')->relationship('bankAccount', 'name')->searchable()->preload()->required(),
-                Select::make('payment_method_id')->label('Método de Pagamento')->relationship('paymentMethod', 'name')->searchable()->preload()->required(),
-                DatePicker::make('payment_date')->label('Data do Pagamento')->required()->default(now()),
+            Section::make('Payment Information')->schema([
+                Textarea::make('description')->label('Description')->required()->maxLength(65535)->columnSpanFull(),
+                Select::make('type')->label('Type')->required()->options(['debit' => 'Debit (Payment)', 'credit' => 'Credit (Receipt)'])->default('debit'),
+                Select::make('bank_account_id')->label('Bank Account')->relationship('bankAccount', 'account_name')->searchable()->preload()->required(),
+                Select::make('payment_method_id')->label('Payment Method')->relationship('paymentMethod', 'name')->searchable()->preload()->required(),
+                DatePicker::make('payment_date')->label('Payment Date')->required()->default(now()),
             ])->columns(2),
-            Section::make('Valores')->schema([
-                TextInput::make('amount')->label('Valor')->required()->numeric()->prefix(fn ($get) => Currency::find($get('currency_id'))?->symbol ?? 'R$'),
-                Select::make('currency_id')->label('Moeda')->relationship('currency', 'code')->searchable()->preload()->required()->live()->afterStateUpdated(function ($state, callable $set) {
+            Section::make('Values')->schema([
+                TextInput::make('amount')->label('Amount')->required()->numeric()->prefix(fn ($get) => Currency::find($get('currency_id'))?->symbol ?? '$'),
+                Select::make('currency_id')->label('Currency')->relationship('currency', 'code')->searchable()->preload()->required()->live()->afterStateUpdated(function ($state, callable $set) {
                     if (!$state) return;
                     $baseCurrency = Currency::where('is_base', true)->first();
                     if (!$baseCurrency) return;
                     $rate = ExchangeRate::getConversionRate($state, $baseCurrency->id, now()->toDateString());
                     $set('exchange_rate_to_base', $rate ?? 1.0);
                 }),
-                TextInput::make('fee')->label('Taxas')->numeric()->default(0)->prefix(fn ($get) => Currency::find($get('currency_id'))?->symbol ?? 'R$'),
-                TextInput::make('exchange_rate_to_base')->label('Taxa de Câmbio')->numeric()->disabled()->dehydrated(),
+                TextInput::make('fee')->label('Fee')->numeric()->default(0)->prefix(fn ($get) => Currency::find($get('currency_id'))?->symbol ?? '$'),
+                TextInput::make('exchange_rate_to_base')->label('Exchange Rate')->numeric()->disabled()->dehydrated(),
             ])->columns(2),
         ]);
     }
