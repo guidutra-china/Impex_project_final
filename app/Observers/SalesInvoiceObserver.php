@@ -66,11 +66,11 @@ class SalesInvoiceObserver
         $stages = $salesInvoice->paymentTerm->stages()->orderBy('sort_order')->get();
         
         foreach ($stages as $index => $stage) {
-            // Calculate amount for this stage (convert to cents)
-            $stageAmount = (int) round($salesInvoice->total * 100 * ($stage->percentage / 100));
+            // Calculate amount for this stage (already in cents)
+            $stageAmount = (int) round($salesInvoice->total * ($stage->percentage / 100));
             
-            // Calculate base currency amount (convert to cents)
-            $stageAmountBase = (int) round($salesInvoice->total_base_currency * 100 * ($stage->percentage / 100));
+            // Calculate base currency amount (already in cents)
+            $stageAmountBase = (int) round($salesInvoice->total_base_currency * ($stage->percentage / 100));
             
             // Calculate due date
             $baseDate = $salesInvoice->invoice_date;
@@ -110,11 +110,11 @@ class SalesInvoiceObserver
             'description' => "Sales Invoice {$salesInvoice->invoice_number}",
             'type' => 'receivable',
             'status' => 'pending',
-            'amount' => (int) round($salesInvoice->total * 100), // Convert to cents
+            'amount' => (int) round($salesInvoice->total), // Already in cents
             'paid_amount' => 0,
             'currency_id' => $salesInvoice->currency_id,
             'exchange_rate_to_base' => $salesInvoice->exchange_rate,
-            'amount_base_currency' => (int) round($salesInvoice->total_base_currency * 100), // Convert to cents
+            'amount_base_currency' => (int) round($salesInvoice->total_base_currency), // Already in cents
             'transaction_date' => $salesInvoice->invoice_date,
             'due_date' => $salesInvoice->due_date,
             'financial_category_id' => $category->id,

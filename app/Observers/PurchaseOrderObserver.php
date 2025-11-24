@@ -63,11 +63,11 @@ class PurchaseOrderObserver
         $stages = $purchaseOrder->paymentTerm->stages()->orderBy('sort_order')->get();
         
         foreach ($stages as $index => $stage) {
-            // Calculate amount for this stage (convert to cents)
-            $stageAmount = (int) round($purchaseOrder->total * 100 * ($stage->percentage / 100));
+            // Calculate amount for this stage (already in cents)
+            $stageAmount = (int) round($purchaseOrder->total * ($stage->percentage / 100));
             
-            // Calculate base currency amount (convert to cents)
-            $stageAmountBase = (int) round($purchaseOrder->total_base_currency * 100 * ($stage->percentage / 100));
+            // Calculate base currency amount (already in cents)
+            $stageAmountBase = (int) round($purchaseOrder->total_base_currency * ($stage->percentage / 100));
             
             // Calculate due date
             $baseDate = $purchaseOrder->po_date;
@@ -110,11 +110,11 @@ class PurchaseOrderObserver
             'description' => "Purchase Order {$purchaseOrder->po_number}",
             'type' => 'payable',
             'status' => 'pending',
-            'amount' => (int) round($purchaseOrder->total * 100), // Convert to cents
+            'amount' => (int) round($purchaseOrder->total), // Already in cents
             'paid_amount' => 0,
             'currency_id' => $purchaseOrder->currency_id,
             'exchange_rate_to_base' => $purchaseOrder->exchange_rate,
-            'amount_base_currency' => (int) round($purchaseOrder->total_base_currency * 100), // Convert to cents
+            'amount_base_currency' => (int) round($purchaseOrder->total_base_currency), // Already in cents
             'transaction_date' => $purchaseOrder->po_date,
             'due_date' => $dueDate,
             'financial_category_id' => $category->id,
