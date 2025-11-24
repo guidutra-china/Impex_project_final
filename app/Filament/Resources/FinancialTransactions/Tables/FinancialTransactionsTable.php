@@ -2,7 +2,12 @@
 
 namespace App\Filament\Resources\FinancialTransactions\Tables;
 
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
 use Filament\Tables;
+use Filament\Tables\Columns\BadgeColumn;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
 class FinancialTransactionsTable
@@ -11,13 +16,13 @@ class FinancialTransactionsTable
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('transaction_number')
+                TextColumn::make('transaction_number')
                     ->label('Número')
                     ->searchable()
                     ->sortable()
                     ->copyable(),
 
-                Tables\Columns\BadgeColumn::make('type')
+                BadgeColumn::make('type')
                     ->label('Tipo')
                     ->formatStateUsing(fn (string $state): string => match ($state) {
                         'payable' => 'A Pagar',
@@ -29,22 +34,22 @@ class FinancialTransactionsTable
                         'success' => 'receivable',
                     ]),
 
-                Tables\Columns\TextColumn::make('description')
+                TextColumn::make('description')
                     ->label('Descrição')
                     ->searchable()
                     ->limit(50),
 
-                Tables\Columns\TextColumn::make('amount')
+                TextColumn::make('amount')
                     ->label('Valor')
                     ->money(fn ($record) => $record->currency->code, divideBy: 100)
                     ->sortable(),
 
-                Tables\Columns\TextColumn::make('due_date')
+                TextColumn::make('due_date')
                     ->label('Vencimento')
                     ->date('d/m/Y')
                     ->sortable(),
 
-                Tables\Columns\BadgeColumn::make('status')
+                BadgeColumn::make('status')
                     ->label('Status')
                     ->formatStateUsing(fn (string $state): string => match ($state) {
                         'pending' => 'Pendente',
@@ -62,7 +67,7 @@ class FinancialTransactionsTable
                         'gray' => 'cancelled',
                     ]),
 
-                Tables\Columns\TextColumn::make('category.name')
+                TextColumn::make('category.name')
                     ->label('Categoria')
                     ->searchable()
                     ->toggleable(),
@@ -90,12 +95,12 @@ class FinancialTransactionsTable
                     ->preload(),
             ])
             ->actions([
-                Tables\Actions\EditAction::make()
+                EditAction::make()
                     ->visible(fn ($record) => $record->status !== 'paid'),
             ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
                 ]),
             ])
             ->defaultSort('due_date', 'asc');
