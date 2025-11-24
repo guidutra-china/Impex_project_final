@@ -14,8 +14,6 @@ class ViewShipment extends ViewRecord
 {
     protected static string $resource = ShipmentResource::class;
 
-    protected static string $view = 'filament.resources.shipments.pages.view-shipment';
-
     public function infolist(Infolist $infolist): Infolist
     {
         return $infolist
