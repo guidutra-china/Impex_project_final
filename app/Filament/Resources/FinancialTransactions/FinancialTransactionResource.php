@@ -19,7 +19,7 @@ class FinancialTransactionResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-currency-dollar';
 
-    protected static ?string $navigationGroup = 'Financeiro';
+    protected static string $navigationGroup = 'Financeiro';
 
     protected static ?int $navigationSort = 1;
 

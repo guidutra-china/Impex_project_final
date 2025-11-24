@@ -17,7 +17,7 @@ class RecurringTransactionResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-arrow-path';
 
-    protected static ?string $navigationGroup = 'Financeiro';
+    protected static string $navigationGroup = 'Financeiro';
 
     protected static ?int $navigationSort = 3;
 
