@@ -200,8 +200,13 @@ class PurchaseOrder extends Model
     // Methods
     public function recalculateTotals(): void
     {
-        // Calculate subtotal from items (already in cents from database)
-        $subtotalCents = $this->items()->sum('total_cost');
+        // Calculate subtotal from items using RAW SQL to bypass Attribute getters
+        // CRITICAL: $this->items()->sum('total_cost') applies getters and divides by 100!
+        // We need the raw database value in cents
+        $subtotalCents = \DB::table('purchase_order_items')
+            ->where('purchase_order_id', $this->id)
+            ->whereNull('deleted_at')
+            ->sum('total_cost');
         
         // DEBUG: Log what we're getting
         \Log::info('=== PurchaseOrder.recalculateTotals DEBUG ===', [
