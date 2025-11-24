@@ -37,6 +37,9 @@ class DatabaseSeeder extends Seeder
         $this->createCurrencies();
         $this->command->info('✓ Created currencies');
 
+        // Create financial categories
+        $this->call(FinancialCategorySeeder::class);
+
         // Create categories (max 5)
         $categories = Category::factory(5)->create();
         $this->command->info('✓ Created ' . $categories->count() . ' categories');
