@@ -225,10 +225,20 @@ class PurchaseOrdersTable
                     ->icon('heroicon-o-check-badge')
                     ->color('info')
                     ->action(function ($record) {
-                        $record->update([
-                            'status' => 'confirmed',
-                            'confirmed_at' => now(),
-                        ]);
+                        // Use DB update to only change status fields without affecting money fields
+                        \DB::table('purchase_orders')
+                            ->where('id', $record->id)
+                            ->update([
+                                'status' => 'confirmed',
+                                'confirmed_at' => now(),
+                                'updated_at' => now(),
+                            ]);
+                        
+                        // Refresh the model to trigger Observer with correct values
+                        $record->refresh();
+                        
+                        // Manually fire the updated event for Observer
+                        $record->fireModelEvent('updated', false);
                         
                         \Filament\Notifications\Notification::make()
                             ->success()
