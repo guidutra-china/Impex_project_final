@@ -103,13 +103,16 @@ class AllocationsRelationManager extends RelationManager
                                 
                                 return FinancialTransaction::query()
                                     ->where('type', $type)
-                                    ->whereIn('status', ['pending', 'partially_paid'])
+                                    ->whereIn('status', ['pending', 'partially_paid', 'overdue'])
+                                    ->orderByRaw("FIELD(status, 'overdue', 'pending', 'partially_paid')")
+                                    ->orderBy('due_date', 'asc')
                                     ->get()
                                     ->mapWithKeys(function ($transaction) {
                                         $remaining = ($transaction->amount - $transaction->paid_amount) / 100;
                                         $currency = $transaction->currency->code;
+                                        $status = $transaction->status === 'overdue' ? '⚠️ OVERDUE' : strtoupper($transaction->status);
                                         return [
-                                            $transaction->id => "{$transaction->transaction_number} - {$transaction->description} (Remaining: {$currency} {$remaining})"
+                                            $transaction->id => "[{$status}] {$transaction->transaction_number} - {$transaction->description} (Remaining: {$currency} {$remaining})"
                                         ];
                                     })
                                     ->toArray();
