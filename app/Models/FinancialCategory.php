@@ -29,6 +29,31 @@ class FinancialCategory extends Model
     ];
 
     /**
+     * Boot method to auto-generate code if not provided
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($category) {
+            if (empty($category->code)) {
+                // Generate code from name
+                $code = strtoupper(substr(preg_replace('/[^A-Z0-9]/', '', strtoupper($category->name)), 0, 10));
+                
+                // Ensure uniqueness
+                $originalCode = $code;
+                $counter = 1;
+                while (static::where('code', $code)->exists()) {
+                    $code = $originalCode . $counter;
+                    $counter++;
+                }
+                
+                $category->code = $code;
+            }
+        });
+    }
+
+    /**
      * Get the parent category
      */
     public function parent(): BelongsTo

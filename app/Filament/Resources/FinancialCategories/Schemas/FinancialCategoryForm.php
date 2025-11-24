@@ -19,7 +19,23 @@ class FinancialCategoryForm
                         TextInput::make('name')
                             ->label('Nome')
                             ->required()
-                            ->maxLength(255),
+                            ->maxLength(255)
+                            ->live(onBlur: true)
+                            ->afterStateUpdated(function ($state, callable $set, $get) {
+                                // Auto-generate code if empty
+                                if (!$get('code') && $state) {
+                                    $code = strtoupper(substr(preg_replace('/[^A-Z0-9]/', '', strtoupper($state)), 0, 10));
+                                    $set('code', $code);
+                                }
+                            }),
+
+                        TextInput::make('code')
+                            ->label('Código')
+                            ->required()
+                            ->maxLength(20)
+                            ->unique(ignoreRecord: true)
+                            ->helperText('Auto-gerado do nome. Pode editar se necessário.')
+                            ->placeholder('Auto-gerado'),
 
                         Select::make('type')
                             ->label('Tipo')
