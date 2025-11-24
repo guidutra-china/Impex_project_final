@@ -200,19 +200,31 @@ class PurchaseOrder extends Model
     // Methods
     public function recalculateTotals(): void
     {
-        // Calculate subtotal from items
-        $this->subtotal = $this->items()->sum('total_cost');
+        // Calculate subtotal from items (already in cents from database)
+        $subtotalCents = $this->items()->sum('total_cost');
         
-        // Calculate total
-        $this->total = $this->subtotal 
-            + ($this->shipping_cost ?? 0)
-            + ($this->insurance_cost ?? 0)
-            + ($this->other_costs ?? 0)
-            - ($this->discount ?? 0)
-            + ($this->tax ?? 0);
+        // Get other costs in cents (raw values from database)
+        $shippingCents = $this->attributes['shipping_cost'] ?? 0;
+        $insuranceCents = $this->attributes['insurance_cost'] ?? 0;
+        $otherCostsCents = $this->attributes['other_costs'] ?? 0;
+        $discountCents = $this->attributes['discount'] ?? 0;
+        $taxCents = $this->attributes['tax'] ?? 0;
         
-        // Calculate total in base currency
-        $this->total_base_currency = $this->total * ($this->exchange_rate ?? 1);
+        // Calculate total in cents
+        $totalCents = $subtotalCents 
+            + $shippingCents
+            + $insuranceCents
+            + $otherCostsCents
+            - $discountCents
+            + $taxCents;
+        
+        // Calculate total in base currency (in cents)
+        $totalBaseCurrencyCents = $totalCents * ($this->exchange_rate ?? 1);
+        
+        // Set raw attributes directly to avoid setter multiplication
+        $this->attributes['subtotal'] = $subtotalCents;
+        $this->attributes['total'] = $totalCents;
+        $this->attributes['total_base_currency'] = $totalBaseCurrencyCents;
         
         $this->saveQuietly(); // Save without triggering events
     }
