@@ -462,21 +462,24 @@ class PurchaseOrderForm
         return [
             TextInput::make('subtotal')
                 ->label('Subtotal')
-                ->numeric()
+                ->formatStateUsing(fn ($state) => $state ? number_format($state / 100, 2, '.', ',') : '0.00')
+                ->prefix('$')
                 ->disabled()
                 ->dehydrated()
                 ->default(0),
 
             TextInput::make('total')
                 ->label('Total')
-                ->numeric()
+                ->formatStateUsing(fn ($state) => $state ? number_format($state / 100, 2, '.', ',') : '0.00')
+                ->prefix('$')
                 ->disabled()
                 ->dehydrated()
                 ->default(0),
 
             TextInput::make('total_base_currency')
                 ->label('Total (Base Currency)')
-                ->numeric()
+                ->formatStateUsing(fn ($state) => $state ? number_format($state / 100, 2, '.', ',') : '0.00')
+                ->prefix('$')
                 ->disabled()
                 ->dehydrated()
                 ->default(0),
