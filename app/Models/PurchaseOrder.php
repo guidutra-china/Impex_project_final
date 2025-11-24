@@ -207,14 +207,6 @@ class PurchaseOrder extends Model
             ->where('purchase_order_id', $this->id)
             ->sum('total_cost');
         
-        // DEBUG: Log what we're getting
-        \Log::info('=== PurchaseOrder.recalculateTotals DEBUG ===', [
-            'po_id' => $this->id,
-            'items_count' => $this->items()->count(),
-            'sum_total_cost' => $subtotalCents,
-            'items_raw' => $this->items()->get(['id', 'quantity', 'unit_cost', 'total_cost'])->toArray(),
-        ]);
-        
         // Get other costs in cents (raw values from database)
         $shippingCents = $this->getRawOriginal('shipping_cost') ?? 0;
         $insuranceCents = $this->getRawOriginal('insurance_cost') ?? 0;
@@ -233,12 +225,6 @@ class PurchaseOrder extends Model
         // Calculate total in base currency (in cents)
         $totalBaseCurrencyCents = $totalCents * ($this->exchange_rate ?? 1);
         
-        \Log::info('=== Before DB update ===', [
-            'subtotal_to_save' => $subtotalCents,
-            'total_to_save' => $totalCents,
-            'total_base_to_save' => $totalBaseCurrencyCents,
-        ]);
-        
         // Use raw SQL update to completely bypass Eloquent casting
         // This prevents any Attribute setters from being triggered
         \DB::table('purchase_orders')
@@ -250,26 +236,8 @@ class PurchaseOrder extends Model
                 'updated_at' => now(),
             ]);
         
-        // Check what was actually saved
-        $saved = \DB::table('purchase_orders')
-            ->where('id', $this->id)
-            ->first(['subtotal', 'total', 'total_base_currency']);
-        
-        \Log::info('=== After DB update (raw query) ===', [
-            'saved_subtotal' => $saved->subtotal,
-            'saved_total' => $saved->total,
-            'saved_total_base' => $saved->total_base_currency,
-        ]);
-        
         // Refresh the model to get the updated values
         $this->refresh();
-        
-        \Log::info('=== After refresh (via model) ===', [
-            'model_subtotal' => $this->subtotal,
-            'model_total' => $this->total,
-            'raw_subtotal' => $this->getRawOriginal('subtotal'),
-            'raw_total' => $this->getRawOriginal('total'),
-        ]);
     }
 
     // Accessors
