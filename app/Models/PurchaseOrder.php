@@ -205,7 +205,6 @@ class PurchaseOrder extends Model
         // We need the raw database value in cents
         $subtotalCents = \DB::table('purchase_order_items')
             ->where('purchase_order_id', $this->id)
-            ->whereNull('deleted_at')
             ->sum('total_cost');
         
         // DEBUG: Log what we're getting
