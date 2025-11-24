@@ -16,10 +16,17 @@ Artisan::command('inspire', function () {
 //     ->daily()
 //     ->at('02:00');
 
-// Generate recurring financial transactions every day at 3 AM
-Schedule::command('finance:generate-recurring')
+// Process recurring transactions every day at 3 AM
+Schedule::command('recurring:process')
     ->daily()
-    ->at('03:00');
+    ->at('03:00')
+    ->withoutOverlapping()
+    ->onSuccess(function () {
+        \Illuminate\Support\Facades\Log::info('Recurring transactions processed successfully');
+    })
+    ->onFailure(function () {
+        \Illuminate\Support\Facades\Log::error('Failed to process recurring transactions');
+    });
 
 // Other scheduling options:
 // ->hourly()                           // Every hour
