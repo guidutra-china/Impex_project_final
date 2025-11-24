@@ -20,4 +20,26 @@ class EditPurchaseOrder extends EditRecord
             RestoreAction::make(),
         ];
     }
+
+    /**
+     * Convert cents to decimal when loading form
+     */
+    protected function mutateFormDataBeforeFill(array $data): array
+    {
+        // Convert items unit_cost, total_cost, selling_price, selling_total from cents to decimal
+        if (isset($data['items'])) {
+            foreach ($data['items'] as $key => $item) {
+                $data['items'][$key]['unit_cost'] = ($item['unit_cost'] ?? 0) / 100;
+                $data['items'][$key]['total_cost'] = ($item['total_cost'] ?? 0) / 100;
+                if (isset($item['selling_price'])) {
+                    $data['items'][$key]['selling_price'] = $item['selling_price'] / 100;
+                }
+                if (isset($item['selling_total'])) {
+                    $data['items'][$key]['selling_total'] = $item['selling_total'] / 100;
+                }
+            }
+        }
+
+        return $data;
+    }
 }
