@@ -94,7 +94,7 @@ class ItemsRelationManager extends RelationManager
 
                 TextColumn::make('requested_unit_price')
                     ->label('Target Price')
-                    ->money(fn () => $this->getOwnerRecord()->currency?->code ?? 'USD', divideBy: 100)
+                    ->money(fn () => $this->getOwnerRecord()->currency?->code ?? 'USD')
                     ->placeholder('Not set'),
 
                 TextColumn::make('notes')

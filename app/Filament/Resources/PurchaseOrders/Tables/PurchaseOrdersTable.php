@@ -45,7 +45,7 @@ class PurchaseOrdersTable
                 
                 TextColumn::make('total')
                     ->label('Total')
-                    ->money(fn ($record) => $record->currency?->code ?? 'USD', divideBy: 100)
+                    ->money(fn ($record) => $record->currency?->code ?? 'USD')
                     ->sortable()
                     ->alignEnd()
                     ->weight('bold'),
@@ -93,19 +93,19 @@ class PurchaseOrdersTable
                 
                 TextColumn::make('shipping_cost')
                     ->label('Shipping')
-                    ->money(fn ($record) => $record->currency?->code ?? 'USD', divideBy: 100)
+                    ->money(fn ($record) => $record->currency?->code ?? 'USD')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 
                 TextColumn::make('subtotal')
                     ->label('Subtotal')
-                    ->money(fn ($record) => $record->currency?->code ?? 'USD', divideBy: 100)
+                    ->money(fn ($record) => $record->currency?->code ?? 'USD')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 
                 TextColumn::make('total_base_currency')
                     ->label('Total (Base)')
-                    ->money(fn ($record) => $record->baseCurrency?->code ?? 'USD', divideBy: 100)
+                    ->money(fn ($record) => $record->baseCurrency?->code ?? 'USD')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 

@@ -108,12 +108,12 @@ class SalesInvoicesTable
 
                 TextColumn::make('total')
                     ->label('Total')
-                    ->money(fn ($record) => $record->currency->code ?? 'USD', divideBy: 100)
+                    ->money(fn ($record) => $record->currency->code ?? 'USD')
                     ->sortable(),
 
                 TextColumn::make('commission')
                     ->label('Commission')
-                    ->money(fn ($record) => $record->currency->code ?? 'USD', divideBy: 100)
+                    ->money(fn ($record) => $record->currency->code ?? 'USD')
                     ->sortable()
                     ->toggleable(),
 
