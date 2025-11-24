@@ -29,7 +29,7 @@ class OrderItem extends Model
     {
         return \Illuminate\Database\Eloquent\Casts\Attribute::make(
             get: fn ($value) => $value / 100,
-            set: fn ($value) => $value < 100 && $value > 0 ? (int) round($value * 100) : (int) $value,
+            set: fn ($value) => (int) round($value * 100), // Always multiply by 100
         );
     }
 
