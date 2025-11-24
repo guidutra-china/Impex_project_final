@@ -6,11 +6,11 @@ use App\Filament\Resources\RecurringTransactions\RecurringTransactionResource;
 use App\Models\FinancialTransaction;
 use Filament\Actions\Action;
 use Filament\Actions\EditAction;
-use Filament\Infolists\Components\Section;
-use Filament\Infolists\Components\TextEntry;
-use Filament\Infolists\Infolist;
+use Filament\Forms\Components\Placeholder;
+use Filament\Forms\Components\Section;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
+use Filament\Schemas\Schema;
 
 class ViewRecurringTransaction extends ViewRecord
 {
@@ -47,10 +47,8 @@ class ViewRecurringTransaction extends ViewRecord
                             ->success()
                             ->send();
                             
-                        // Refresh to show updated next_due_date
-                        $this->refreshFormData([
-                            'next_due_date',
-                        ]);
+                        // Redirect to edit to refresh data
+                        return redirect($this->getResource()::getUrl('edit', ['record' => $this->record]));
                     } catch (\Exception $e) {
                         Notification::make()
                             ->title('Error Generating Transaction')
@@ -63,16 +61,16 @@ class ViewRecurringTransaction extends ViewRecord
         ];
     }
 
-    public function infolist(Infolist $infolist): Infolist
+    public function infolist(Schema $schema): Schema
     {
-        return $infolist
+        return $schema
             ->schema([
                 Section::make('Next Occurrences')
                     ->description('View the next 5 dates when this recurrence will generate transactions')
                     ->schema([
-                        TextEntry::make('next_occurrences')
+                        Placeholder::make('next_occurrences')
                             ->label('')
-                            ->state(function ($record) {
+                            ->content(function ($record) {
                                 if (!$record->is_active) {
                                     return 'Recurrence inactive - no transactions will be generated.';
                                 }
@@ -89,10 +87,8 @@ class ViewRecurringTransaction extends ViewRecord
                                     $list[] = ($index + 1) . ". {$formatted}";
                                 }
                                 
-                                return implode("\n", $list);
+                                return nl2br(implode("\n", $list));
                             })
-                            ->html()
-                            ->formatStateUsing(fn ($state) => nl2br(e($state)))
                             ->columnSpanFull(),
                     ])
                     ->collapsible()
