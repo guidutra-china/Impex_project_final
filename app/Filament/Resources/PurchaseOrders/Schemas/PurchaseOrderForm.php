@@ -465,7 +465,7 @@ class PurchaseOrderForm
                 ->formatStateUsing(fn ($state) => $state ? number_format($state, 2, '.', ',') : '0.00')
                 ->prefix('$')
                 ->disabled()
-                ->dehydrated()
+                ->dehydrated(false) // Don't save - calculated by recalculateTotals()
                 ->default(0),
 
             TextInput::make('total')
@@ -473,7 +473,7 @@ class PurchaseOrderForm
                 ->formatStateUsing(fn ($state) => $state ? number_format($state, 2, '.', ',') : '0.00')
                 ->prefix('$')
                 ->disabled()
-                ->dehydrated()
+                ->dehydrated(false) // Don't save - calculated by recalculateTotals()
                 ->default(0),
 
             TextInput::make('total_base_currency')
@@ -481,7 +481,7 @@ class PurchaseOrderForm
                 ->formatStateUsing(fn ($state) => $state ? number_format($state, 2, '.', ',') : '0.00')
                 ->prefix('$')
                 ->disabled()
-                ->dehydrated()
+                ->dehydrated(false) // Don't save - calculated by recalculateTotals()
                 ->default(0),
         ];
     }
