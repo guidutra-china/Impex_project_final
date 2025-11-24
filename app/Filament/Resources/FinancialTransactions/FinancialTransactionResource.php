@@ -17,7 +17,7 @@ class FinancialTransactionResource extends Resource
 {
     protected static ?string $model = FinancialTransaction::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-currency-dollar';
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-currency-dollar';
 
     protected static string|UnitEnum|null $navigationGroup = 'Financeiro';
 

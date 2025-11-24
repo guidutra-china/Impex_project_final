@@ -16,7 +16,7 @@ class FinancialPaymentResource extends Resource
 {
     protected static ?string $model = FinancialPayment::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-banknotes';
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-banknotes';
 
     protected static string|UnitEnum|null $navigationGroup = 'Financeiro';
 
