@@ -79,7 +79,7 @@ class PurchaseOrderObserver
     {
         // If payment term is set, use the first stage's due date
         if ($purchaseOrder->payment_term_id && $purchaseOrder->paymentTerm) {
-            $firstStage = $purchaseOrder->paymentTerm->stages()->orderBy('stage_number')->first();
+            $firstStage = $purchaseOrder->paymentTerm->stages()->orderBy('sort_order')->first();
             
             if ($firstStage) {
                 $baseDate = $purchaseOrder->po_date;
@@ -91,7 +91,7 @@ class PurchaseOrderObserver
                     $baseDate = $purchaseOrder->expected_delivery_date;
                 }
                 
-                return $baseDate->addDays($firstStage->days_after_base);
+                return $baseDate->addDays($firstStage->days);
             }
         }
 

@@ -63,7 +63,7 @@ class SalesInvoiceObserver
      */
     protected function createTransactionsFromPaymentTerm(SalesInvoice $salesInvoice, FinancialCategory $category): void
     {
-        $stages = $salesInvoice->paymentTerm->stages()->orderBy('stage_number')->get();
+        $stages = $salesInvoice->paymentTerm->stages()->orderBy('sort_order')->get();
         
         foreach ($stages as $index => $stage) {
             // Calculate amount for this stage
@@ -77,7 +77,7 @@ class SalesInvoiceObserver
             if ($stage->calculation_base === 'shipment_date' && $salesInvoice->shipment_date) {
                 $baseDate = Carbon::parse($salesInvoice->shipment_date);
             }
-            $dueDate = $baseDate->copy()->addDays($stage->days_after_base);
+            $dueDate = $baseDate->copy()->addDays($stage->days);
             
             // Create transaction
             FinancialTransaction::create([
