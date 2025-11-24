@@ -1,0 +1,355 @@
+<?php
+
+namespace App\Filament\Resources\Shipments\RelationManagers;
+
+use App\Services\Shipment\PackingService;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\CreateAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\Action;
+use Filament\Schemas\Components\Select;
+use Filament\Schemas\Components\TextInput;
+use Filament\Schemas\Components\Textarea;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
+use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Support\Icons\Heroicon;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\BadgeColumn;
+use Filament\Tables\Table;
+use BackedEnum;
+
+class PackingBoxesRelationManager extends RelationManager
+{
+    protected static string $relationship = 'packingBoxes';
+
+    protected static ?string $title = 'Packing Boxes';
+
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedArchiveBox;
+
+    protected static ?string $recordTitleAttribute = 'box_number';
+
+    public function form(Schema $schema): Schema
+    {
+        return $schema
+            ->components([
+                Section::make('Box Information')
+                    ->schema([
+                        Grid::make(3)
+                            ->schema([
+                                TextInput::make('box_number')
+                                    ->label('Box Number')
+                                    ->disabled()
+                                    ->dehydrated(false)
+                                    ->placeholder('Auto-generated'),
+
+                                Select::make('box_type')
+                                    ->label('Box Type')
+                                    ->options([
+                                        'carton' => 'Carton',
+                                        'wooden_crate' => 'Wooden Crate',
+                                        'pallet' => 'Pallet',
+                                        'drum' => 'Drum',
+                                        'bag' => 'Bag',
+                                        'other' => 'Other',
+                                    ])
+                                    ->default('carton')
+                                    ->required(),
+
+                                TextInput::make('box_label')
+                                    ->label('Box Label')
+                                    ->placeholder('e.g., Box A, Crate 1'),
+                            ]),
+                    ]),
+
+                Section::make('Dimensions (cm)')
+                    ->schema([
+                        Grid::make(3)
+                            ->schema([
+                                TextInput::make('length')
+                                    ->label('Length (cm)')
+                                    ->numeric()
+                                    ->minValue(0)
+                                    ->suffix('cm'),
+
+                                TextInput::make('width')
+                                    ->label('Width (cm)')
+                                    ->numeric()
+                                    ->minValue(0)
+                                    ->suffix('cm'),
+
+                                TextInput::make('height')
+                                    ->label('Height (cm)')
+                                    ->numeric()
+                                    ->minValue(0)
+                                    ->suffix('cm'),
+                            ]),
+                    ]),
+
+                Section::make('Weight')
+                    ->schema([
+                        Grid::make(2)
+                            ->schema([
+                                TextInput::make('gross_weight')
+                                    ->label('Gross Weight (kg)')
+                                    ->numeric()
+                                    ->minValue(0)
+                                    ->suffix('kg')
+                                    ->helperText('Total weight including packaging'),
+
+                                TextInput::make('net_weight')
+                                    ->label('Net Weight (kg)')
+                                    ->numeric()
+                                    ->minValue(0)
+                                    ->suffix('kg')
+                                    ->helperText('Weight of contents only')
+                                    ->disabled()
+                                    ->dehydrated(false),
+                            ]),
+                    ]),
+
+                Section::make('Notes')
+                    ->schema([
+                        Textarea::make('notes')
+                            ->label('Notes')
+                            ->rows(3)
+                            ->columnSpanFull(),
+                    ])
+                    ->collapsible()
+                    ->collapsed(),
+            ]);
+    }
+
+    public function table(Table $table): Table
+    {
+        return $table
+            ->columns([
+                TextColumn::make('box_number')
+                    ->label('Box #')
+                    ->searchable()
+                    ->sortable()
+                    ->weight('bold'),
+
+                TextColumn::make('box_label')
+                    ->label('Label')
+                    ->searchable()
+                    ->default('-'),
+
+                BadgeColumn::make('box_type')
+                    ->label('Type')
+                    ->formatStateUsing(fn ($state) => str_replace('_', ' ', ucwords($state, '_')))
+                    ->colors([
+                        'primary' => 'carton',
+                        'warning' => 'wooden_crate',
+                        'info' => 'pallet',
+                        'success' => 'drum',
+                    ]),
+
+                BadgeColumn::make('packing_status')
+                    ->label('Status')
+                    ->formatStateUsing(fn ($state) => ucfirst($state))
+                    ->colors([
+                        'secondary' => 'empty',
+                        'warning' => 'packing',
+                        'success' => 'sealed',
+                    ]),
+
+                TextColumn::make('total_items')
+                    ->label('Items')
+                    ->alignCenter()
+                    ->default(0)
+                    ->badge()
+                    ->color('primary'),
+
+                TextColumn::make('total_quantity')
+                    ->label('Quantity')
+                    ->alignCenter()
+                    ->default(0)
+                    ->badge()
+                    ->color('success'),
+
+                TextColumn::make('dimensions')
+                    ->label('Dimensions (L×W×H cm)')
+                    ->formatStateUsing(function ($record) {
+                        if ($record->length && $record->width && $record->height) {
+                            return "{$record->length}×{$record->width}×{$record->height}";
+                        }
+                        return '-';
+                    })
+                    ->toggleable(),
+
+                TextColumn::make('volume')
+                    ->label('Volume (m³)')
+                    ->numeric(3)
+                    ->alignEnd()
+                    ->default(0)
+                    ->toggleable(),
+
+                TextColumn::make('gross_weight')
+                    ->label('Gross Wt (kg)')
+                    ->numeric(2)
+                    ->alignEnd()
+                    ->default(0),
+
+                TextColumn::make('net_weight')
+                    ->label('Net Wt (kg)')
+                    ->numeric(2)
+                    ->alignEnd()
+                    ->default(0)
+                    ->toggleable(),
+
+                TextColumn::make('sealed_at')
+                    ->label('Sealed At')
+                    ->dateTime('Y-m-d H:i')
+                    ->toggleable()
+                    ->toggledHiddenByDefault(),
+
+                TextColumn::make('sealedBy.name')
+                    ->label('Sealed By')
+                    ->toggleable()
+                    ->toggledHiddenByDefault(),
+            ])
+            ->headerActions([
+                CreateAction::make()
+                    ->label('Create Box')
+                    ->using(function (array $data, $livewire) {
+                        $shipment = $livewire->getOwnerRecord();
+                        $service = new PackingService();
+                        
+                        return $service->createBox($shipment, $data);
+                    })
+                    ->successNotificationTitle('Box created successfully'),
+
+                Action::make('auto_pack')
+                    ->label('Auto-Pack Items')
+                    ->icon(Heroicon::OutlinedSparkles)
+                    ->color('success')
+                    ->form([
+                        TextInput::make('number_of_boxes')
+                            ->label('Number of Boxes')
+                            ->numeric()
+                            ->required()
+                            ->minValue(1)
+                            ->default(1)
+                            ->helperText('Items will be distributed evenly across boxes'),
+                    ])
+                    ->action(function (array $data, $livewire) {
+                        $shipment = $livewire->getOwnerRecord();
+                        $service = new PackingService();
+                        
+                        try {
+                            $service->autoPackItems($shipment, $data['number_of_boxes']);
+                            
+                            \Filament\Notifications\Notification::make()
+                                ->title('Auto-pack completed')
+                                ->success()
+                                ->send();
+                        } catch (\Exception $e) {
+                            \Filament\Notifications\Notification::make()
+                                ->title('Auto-pack failed')
+                                ->body($e->getMessage())
+                                ->danger()
+                                ->send();
+                        }
+                    })
+                    ->requiresConfirmation(),
+            ])
+            ->recordActions([
+                Action::make('view_contents')
+                    ->label('Contents')
+                    ->icon(Heroicon::OutlinedEye)
+                    ->color('info')
+                    ->modalHeading(fn ($record) => "Contents of {$record->box_number}")
+                    ->modalContent(function ($record) {
+                        $contents = $record->getItemsSummary();
+                        
+                        if (empty($contents)) {
+                            return view('filament.components.empty-state', [
+                                'message' => 'This box is empty',
+                            ]);
+                        }
+                        
+                        $html = '<div class="space-y-2">';
+                        foreach ($contents as $item) {
+                            $html .= '<div class="flex justify-between p-2 bg-gray-50 rounded">';
+                            $html .= '<span class="font-medium">' . $item['product_name'] . '</span>';
+                            $html .= '<span class="text-gray-600">' . $item['quantity'] . ' pcs</span>';
+                            $html .= '</div>';
+                        }
+                        $html .= '</div>';
+                        
+                        return new \Illuminate\Support\HtmlString($html);
+                    }),
+
+                Action::make('seal')
+                    ->label('Seal')
+                    ->icon(Heroicon::OutlinedLockClosed)
+                    ->color('warning')
+                    ->action(function ($record) {
+                        $service = new PackingService();
+                        
+                        try {
+                            $service->sealBox($record);
+                            
+                            \Filament\Notifications\Notification::make()
+                                ->title('Box sealed')
+                                ->success()
+                                ->send();
+                        } catch (\Exception $e) {
+                            \Filament\Notifications\Notification::make()
+                                ->title('Cannot seal box')
+                                ->body($e->getMessage())
+                                ->danger()
+                                ->send();
+                        }
+                    })
+                    ->requiresConfirmation()
+                    ->visible(fn ($record) => $record->packing_status !== 'sealed'),
+
+                Action::make('unseal')
+                    ->label('Unseal')
+                    ->icon(Heroicon::OutlinedLockOpen)
+                    ->color('warning')
+                    ->action(function ($record) {
+                        $service = new PackingService();
+                        $service->unsealBox($record);
+                        
+                        \Filament\Notifications\Notification::make()
+                            ->title('Box unsealed')
+                            ->success()
+                            ->send();
+                    })
+                    ->requiresConfirmation()
+                    ->visible(fn ($record) => $record->packing_status === 'sealed'),
+
+                EditAction::make()
+                    ->visible(fn ($record) => $record->packing_status !== 'sealed')
+                    ->using(function ($record, array $data) {
+                        $service = new PackingService();
+                        $service->updateBox($record, $data);
+                        return $record;
+                    }),
+
+                DeleteAction::make()
+                    ->visible(fn ($record) => $record->packing_status !== 'sealed')
+                    ->requiresConfirmation()
+                    ->using(function ($record) {
+                        $service = new PackingService();
+                        $service->deleteBox($record);
+                    }),
+            ])
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make()
+                        ->requiresConfirmation(),
+                ]),
+            ])
+            ->defaultSort('box_number', 'asc')
+            ->emptyStateHeading('No packing boxes')
+            ->emptyStateDescription('Create packing boxes and add items to them.')
+            ->emptyStateIcon(Heroicon::OutlinedArchiveBox);
+    }
+}
