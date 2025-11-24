@@ -29,6 +29,39 @@ class SalesInvoiceItem extends Model
         'quantity' => 'decimal:2',
     ];
 
+    /**
+     * Get unit_price in decimal format for display
+     */
+    protected function unitPrice(): \Illuminate\Database\Eloquent\Casts\Attribute
+    {
+        return \Illuminate\Database\Eloquent\Casts\Attribute::make(
+            get: fn ($value) => $value / 100,
+            set: fn ($value) => $value < 100 && $value > 0 ? (int) round($value * 100) : (int) $value,
+        );
+    }
+
+    /**
+     * Get commission in decimal format for display
+     */
+    protected function commission(): \Illuminate\Database\Eloquent\Casts\Attribute
+    {
+        return \Illuminate\Database\Eloquent\Casts\Attribute::make(
+            get: fn ($value) => $value / 100,
+            set: fn ($value) => $value < 100 && $value > 0 ? (int) round($value * 100) : (int) $value,
+        );
+    }
+
+    /**
+     * Get total in decimal format for display
+     */
+    protected function total(): \Illuminate\Database\Eloquent\Casts\Attribute
+    {
+        return \Illuminate\Database\Eloquent\Casts\Attribute::make(
+            get: fn ($value) => $value / 100,
+            set: fn ($value) => $value < 100 && $value > 0 ? (int) round($value * 100) : (int) $value,
+        );
+    }
+
     // Relationships
     public function salesInvoice(): BelongsTo
     {
@@ -69,31 +102,7 @@ class SalesInvoiceItem extends Model
                     $item->product_sku = $product->sku;
                 }
             }
-            
-            // Convert decimal to cents if values are too small (< 100)
-            // This handles cases where Filament passes decimal values
-            if ($item->unit_price < 100 && $item->unit_price > 0) {
-                $item->unit_price = (int) round($item->unit_price * 100);
-            }
-            if ($item->commission < 100 && $item->commission > 0) {
-                $item->commission = (int) round($item->commission * 100);
-            }
-            if ($item->total < 100 && $item->total > 0) {
-                $item->total = (int) round($item->total * 100);
-            }
-        });
-        
-        static::updating(function ($item) {
-            // Convert decimal to cents if values are too small (< 100)
-            if ($item->isDirty('unit_price') && $item->unit_price < 100 && $item->unit_price > 0) {
-                $item->unit_price = (int) round($item->unit_price * 100);
-            }
-            if ($item->isDirty('commission') && $item->commission < 100 && $item->commission > 0) {
-                $item->commission = (int) round($item->commission * 100);
-            }
-            if ($item->isDirty('total') && $item->total < 100 && $item->total > 0) {
-                $item->total = (int) round($item->total * 100);
-            }
+            // Note: Conversion now handled by Attribute casts (unitPrice, commission, total)
         });
 
         // Recalculate invoice totals after save/delete

@@ -153,19 +153,19 @@ class SalesInvoiceForm
                     foreach ($purchaseOrders as $po) {
                         foreach ($po->items as $item) {
                             $product = $item->product;
-                            // Calculate total (unit_cost is in cents)
-                            $unitCost = $item->unit_cost; // Already in cents
+                            // PurchaseOrderItem now uses Attribute cast, so unit_cost is already in decimal
+                            $unitCost = $item->unit_cost; // Already converted to decimal by Attribute cast
                             $quantity = $item->quantity;
-                            $total = $unitCost * $quantity; // Total in cents
+                            $total = $unitCost * $quantity; // Total in decimal
                             
                             $items[] = [
                                 'product_id' => $item->product_id,
                                 'product_name' => $product->name ?? '',
                                 'product_sku' => $product->sku ?? '',
                                 'quantity' => $quantity,
-                                'unit_price' => $unitCost / 100, // Convert to decimal for display
+                                'unit_price' => $unitCost, // Already in decimal, no conversion needed
                                 'commission' => 0,
-                                'total' => $total / 100, // Convert to decimal for display
+                                'total' => $total, // Already in decimal, no conversion needed
                                 'purchase_order_id' => $po->id,
                                 'purchase_order_item_id' => $item->id,
                                 'notes' => $item->notes ?? '',

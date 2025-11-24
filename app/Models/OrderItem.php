@@ -20,8 +20,18 @@ class OrderItem extends Model
 
     protected $casts = [
         'quantity' => 'integer',
-        'requested_unit_price' => 'integer',
     ];
+
+    /**
+     * Get requested_unit_price in decimal format for display
+     */
+    protected function requestedUnitPrice(): \Illuminate\Database\Eloquent\Casts\Attribute
+    {
+        return \Illuminate\Database\Eloquent\Casts\Attribute::make(
+            get: fn ($value) => $value / 100,
+            set: fn ($value) => $value < 100 && $value > 0 ? (int) round($value * 100) : (int) $value,
+        );
+    }
 
     /**
      * Get the order this item belongs to
@@ -39,26 +49,4 @@ class OrderItem extends Model
         return $this->belongsTo(Product::class);
     }
 
-    /**
-     * Get requested unit price in dollars
-     */
-    public function getRequestedUnitPriceDollarsAttribute(): ?float
-    {
-        return $this->requested_unit_price ? $this->requested_unit_price / 100 : null;
-    }
-
-    /**
-     * Boot the model
-     */
-    protected static function boot()
-    {
-        parent::boot();
-
-        // Convert decimal to cents if value is too small (< 100)
-        static::saving(function ($item) {
-            if (isset($item->requested_unit_price) && $item->requested_unit_price < 100 && $item->requested_unit_price > 0) {
-                $item->requested_unit_price = (int) round($item->requested_unit_price * 100);
-            }
-        });
-    }
 }
