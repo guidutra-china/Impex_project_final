@@ -153,14 +153,19 @@ class SalesInvoiceForm
                     foreach ($purchaseOrders as $po) {
                         foreach ($po->items as $item) {
                             $product = $item->product;
+                            // Calculate total (unit_cost is in cents)
+                            $unitCost = $item->unit_cost; // Already in cents
+                            $quantity = $item->quantity;
+                            $total = $unitCost * $quantity; // Total in cents
+                            
                             $items[] = [
                                 'product_id' => $item->product_id,
                                 'product_name' => $product->name ?? '',
                                 'product_sku' => $product->sku ?? '',
-                                'quantity' => $item->quantity,
-                                'unit_price' => $item->unit_cost / 100, // Convert from cents to decimal
-                                'commission' => 0, // Will be calculated
-                                'total' => ($item->unit_cost * $item->quantity) / 100, // Convert from cents
+                                'quantity' => $quantity,
+                                'unit_price' => $unitCost / 100, // Convert to decimal for display
+                                'commission' => 0,
+                                'total' => $total / 100, // Convert to decimal for display
                                 'purchase_order_id' => $po->id,
                                 'purchase_order_item_id' => $item->id,
                                 'notes' => $item->notes ?? '',

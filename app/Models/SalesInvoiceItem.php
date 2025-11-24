@@ -69,6 +69,31 @@ class SalesInvoiceItem extends Model
                     $item->product_sku = $product->sku;
                 }
             }
+            
+            // Convert decimal to cents if values are too small (< 100)
+            // This handles cases where Filament passes decimal values
+            if ($item->unit_price < 100 && $item->unit_price > 0) {
+                $item->unit_price = (int) round($item->unit_price * 100);
+            }
+            if ($item->commission < 100 && $item->commission > 0) {
+                $item->commission = (int) round($item->commission * 100);
+            }
+            if ($item->total < 100 && $item->total > 0) {
+                $item->total = (int) round($item->total * 100);
+            }
+        });
+        
+        static::updating(function ($item) {
+            // Convert decimal to cents if values are too small (< 100)
+            if ($item->isDirty('unit_price') && $item->unit_price < 100 && $item->unit_price > 0) {
+                $item->unit_price = (int) round($item->unit_price * 100);
+            }
+            if ($item->isDirty('commission') && $item->commission < 100 && $item->commission > 0) {
+                $item->commission = (int) round($item->commission * 100);
+            }
+            if ($item->isDirty('total') && $item->total < 100 && $item->total > 0) {
+                $item->total = (int) round($item->total * 100);
+            }
         });
 
         // Recalculate invoice totals after save/delete
