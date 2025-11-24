@@ -6,6 +6,7 @@ use App\Models\PurchaseOrder;
 use App\Models\FinancialTransaction;
 use App\Models\FinancialCategory;
 use App\Models\Currency;
+use Carbon\Carbon;
 
 class PurchaseOrderObserver
 {
@@ -16,21 +17,21 @@ class PurchaseOrderObserver
     {
         // Check if status changed to 'confirmed' (when supplier confirms the PO)
         if ($purchaseOrder->isDirty('status') && $purchaseOrder->status === 'confirmed') {
-            $this->createFinancialTransaction($purchaseOrder);
+            $this->createFinancialTransactions($purchaseOrder);
         }
     }
 
     /**
-     * Create a financial transaction (account payable) for the approved PO
+     * Create financial transaction(s) (accounts payable) for the confirmed PO
      */
-    protected function createFinancialTransaction(PurchaseOrder $purchaseOrder): void
+    protected function createFinancialTransactions(PurchaseOrder $purchaseOrder): void
     {
-        // Check if transaction already exists
-        $existingTransaction = FinancialTransaction::where('transactable_type', PurchaseOrder::class)
+        // Check if transactions already exist
+        $existingTransactions = FinancialTransaction::where('transactable_type', PurchaseOrder::class)
             ->where('transactable_id', $purchaseOrder->id)
-            ->first();
+            ->count();
 
-        if ($existingTransaction) {
+        if ($existingTransactions > 0) {
             return; // Already created
         }
 
@@ -45,13 +46,66 @@ class PurchaseOrderObserver
             ]
         );
 
-        // Get base currency
-        $baseCurrency = Currency::where('is_base', true)->first();
+        // Check if PO has payment terms with multiple stages
+        if ($purchaseOrder->payment_term_id && $purchaseOrder->paymentTerm) {
+            $this->createTransactionsFromPaymentTerm($purchaseOrder, $category);
+        } else {
+            // Create single transaction
+            $this->createSingleTransaction($purchaseOrder, $category);
+        }
+    }
 
-        // Calculate due date based on payment terms
-        $dueDate = $this->calculateDueDate($purchaseOrder);
+    /**
+     * Create multiple transactions based on payment term stages
+     */
+    protected function createTransactionsFromPaymentTerm(PurchaseOrder $purchaseOrder, FinancialCategory $category): void
+    {
+        $stages = $purchaseOrder->paymentTerm->stages()->orderBy('sort_order')->get();
+        
+        foreach ($stages as $index => $stage) {
+            // Calculate amount for this stage
+            $stageAmount = (int) round($purchaseOrder->total * ($stage->percentage / 100));
+            
+            // Calculate base currency amount
+            $stageAmountBase = (int) round($purchaseOrder->total_base_currency * ($stage->percentage / 100));
+            
+            // Calculate due date
+            $baseDate = $purchaseOrder->po_date;
+            if ($stage->calculation_base === 'shipment_date' && $purchaseOrder->expected_delivery_date) {
+                $baseDate = Carbon::parse($purchaseOrder->expected_delivery_date);
+            }
+            $dueDate = $baseDate->copy()->addDays($stage->days);
+            
+            // Create transaction
+            FinancialTransaction::create([
+                'description' => "Purchase Order {$purchaseOrder->po_number} - Parcela " . ($index + 1) . "/{$stages->count()}",
+                'type' => 'payable',
+                'status' => 'pending',
+                'amount' => $stageAmount,
+                'paid_amount' => 0,
+                'currency_id' => $purchaseOrder->currency_id,
+                'exchange_rate_to_base' => $purchaseOrder->exchange_rate,
+                'amount_base_currency' => $stageAmountBase,
+                'transaction_date' => $purchaseOrder->po_date,
+                'due_date' => $dueDate,
+                'financial_category_id' => $category->id,
+                'transactable_type' => PurchaseOrder::class,
+                'transactable_id' => $purchaseOrder->id,
+                'supplier_id' => $purchaseOrder->supplier_id,
+                'notes' => "Parcela {$stage->percentage}% - Vencimento em {$stage->days} dias",
+                'created_by' => $purchaseOrder->created_by,
+            ]);
+        }
+    }
 
-        // Create the financial transaction
+    /**
+     * Create a single transaction for the full PO amount
+     */
+    protected function createSingleTransaction(PurchaseOrder $purchaseOrder, FinancialCategory $category): void
+    {
+        // Calculate due date (default: 30 days after PO date)
+        $dueDate = $purchaseOrder->po_date->copy()->addDays(30);
+
         FinancialTransaction::create([
             'description' => "Purchase Order {$purchaseOrder->po_number}",
             'type' => 'payable',
@@ -70,32 +124,5 @@ class PurchaseOrderObserver
             'notes' => $purchaseOrder->notes,
             'created_by' => $purchaseOrder->created_by,
         ]);
-    }
-
-    /**
-     * Calculate due date based on payment terms
-     */
-    protected function calculateDueDate(PurchaseOrder $purchaseOrder): string
-    {
-        // If payment term is set, use the first stage's due date
-        if ($purchaseOrder->payment_term_id && $purchaseOrder->paymentTerm) {
-            $firstStage = $purchaseOrder->paymentTerm->stages()->orderBy('sort_order')->first();
-            
-            if ($firstStage) {
-                $baseDate = $purchaseOrder->po_date;
-                
-                // Calculate based on calculation_base
-                if ($firstStage->calculation_base === 'invoice_date') {
-                    $baseDate = $purchaseOrder->po_date;
-                } elseif ($firstStage->calculation_base === 'shipment_date' && $purchaseOrder->expected_delivery_date) {
-                    $baseDate = $purchaseOrder->expected_delivery_date;
-                }
-                
-                return $baseDate->addDays($firstStage->days);
-            }
-        }
-
-        // Default: 30 days after PO date
-        return $purchaseOrder->po_date->addDays(30);
     }
 }
