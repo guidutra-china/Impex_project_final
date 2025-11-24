@@ -42,7 +42,7 @@ class SalesInvoiceItem extends Model
     {
         return \Illuminate\Database\Eloquent\Casts\Attribute::make(
             get: fn ($value) => $value ? $value / 100 : 0,
-            set: fn ($value) => $value ? (int) round($value * 100) : 0,
+            set: fn ($value) => is_numeric($value) && $value ? (int) round($value * 100) : 0,
         );
     }
 
@@ -53,7 +53,7 @@ class SalesInvoiceItem extends Model
     {
         return \Illuminate\Database\Eloquent\Casts\Attribute::make(
             get: fn ($value) => $value ? $value / 100 : 0,
-            set: fn ($value) => $value ? (int) round($value * 100) : 0,
+            set: fn ($value) => is_numeric($value) && $value ? (int) round($value * 100) : 0,
         );
     }
 
@@ -64,7 +64,7 @@ class SalesInvoiceItem extends Model
     {
         return \Illuminate\Database\Eloquent\Casts\Attribute::make(
             get: fn ($value) => $value ? $value / 100 : 0,
-            set: fn ($value) => $value ? (int) round($value * 100) : 0,
+            set: fn ($value) => is_numeric($value) && $value ? (int) round($value * 100) : 0,
         );
     }
 
