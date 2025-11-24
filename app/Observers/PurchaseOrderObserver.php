@@ -20,6 +20,17 @@ class PurchaseOrderObserver
             $this->createFinancialTransactions($purchaseOrder);
         }
     }
+    
+    /**
+     * Public method to manually trigger financial transaction creation
+     * Used when status is changed via DB::table()->update() instead of Eloquent
+     */
+    public function handleConfirmation(PurchaseOrder $purchaseOrder): void
+    {
+        if ($purchaseOrder->status === 'confirmed') {
+            $this->createFinancialTransactions($purchaseOrder);
+        }
+    }
 
     /**
      * Create financial transaction(s) (accounts payable) for the confirmed PO

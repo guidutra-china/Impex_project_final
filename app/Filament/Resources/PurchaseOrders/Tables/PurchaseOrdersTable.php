@@ -237,9 +237,9 @@ class PurchaseOrdersTable
                         // Refresh the model to get updated values
                         $record->refresh();
                         
-                        // Manually call the Observer since we bypassed Eloquent
+                        // Manually call the Observer to create financial transactions
                         $observer = new \App\Observers\PurchaseOrderObserver();
-                        $observer->updated($record);
+                        $observer->handleConfirmation($record);
                         
                         \Filament\Notifications\Notification::make()
                             ->success()
