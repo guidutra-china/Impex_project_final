@@ -244,17 +244,37 @@ class SalesInvoice extends Model
     // Helper methods
     public function recalculateTotals(): void
     {
-        $subtotal = $this->items()->sum('total');
-        $commission = $this->items()->sum('commission');
-        $total = $subtotal + $this->tax;
-        $totalBaseCurrency = $total * $this->exchange_rate;
-
-        $this->update([
-            'subtotal' => $subtotal,
-            'commission' => $commission,
-            'total' => $total,
-            'total_base_currency' => $totalBaseCurrency,
-        ]);
+        // Use raw SQL to bypass Attribute getters (same fix as PurchaseOrder)
+        $subtotalCents = \DB::table('sales_invoice_items')
+            ->where('sales_invoice_id', $this->id)
+            ->sum('total');
+        
+        $commissionCents = \DB::table('sales_invoice_items')
+            ->where('sales_invoice_id', $this->id)
+            ->sum('commission');
+        
+        // Get tax in cents (raw value from database)
+        $taxCents = $this->getRawOriginal('tax') ?? 0;
+        
+        // Calculate total in cents
+        $totalCents = $subtotalCents + $taxCents;
+        
+        // Calculate total in base currency (in cents)
+        $totalBaseCurrencyCents = $totalCents * ($this->exchange_rate ?? 1);
+        
+        // Use raw SQL update to bypass Eloquent casting (same fix as PurchaseOrder)
+        \DB::table('sales_invoices')
+            ->where('id', $this->id)
+            ->update([
+                'subtotal' => $subtotalCents,
+                'commission' => $commissionCents,
+                'total' => $totalCents,
+                'total_base_currency' => $totalBaseCurrencyCents,
+                'updated_at' => now(),
+            ]);
+        
+        // Refresh the model to get the updated values
+        $this->refresh();
     }
 
     public function isOverdue(): bool
