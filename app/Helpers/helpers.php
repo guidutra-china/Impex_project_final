@@ -52,3 +52,32 @@ if (!function_exists('companyAddress')) {
         return $settings?->full_address ?? '';
     }
 }
+
+if (!function_exists('money')) {
+    /**
+     * Format an amount as money with currency symbol
+     *
+     * @param int $cents Amount in cents
+     * @param string $currencyCode Currency code (e.g., 'USD', 'BRL')
+     * @return string Formatted money string
+     */
+    function money(int $cents, string $currencyCode): string
+    {
+        $amount = $cents / 100;
+        
+        // Currency symbols mapping
+        $symbols = [
+            'USD' => '$',
+            'BRL' => 'R$',
+            'EUR' => '€',
+            'GBP' => '£',
+            'JPY' => '¥',
+            'CNY' => '¥',
+        ];
+        
+        $symbol = $symbols[$currencyCode] ?? $currencyCode . ' ';
+        
+        // Format with 2 decimals and thousands separator
+        return $symbol . number_format($amount, 2, '.', ',');
+    }
+}
