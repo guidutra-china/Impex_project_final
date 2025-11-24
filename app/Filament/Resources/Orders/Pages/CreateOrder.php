@@ -16,4 +16,13 @@ class CreateOrder extends CreateRecord
         
         return $data;
     }
+
+    /**
+     * Redirect to edit page after creation
+     * This ensures values are displayed correctly (cents converted to decimal)
+     */
+    protected function getRedirectUrl(): string
+    {
+        return $this->getResource()::getUrl('edit', ['record' => $this->record]);
+    }
 }
