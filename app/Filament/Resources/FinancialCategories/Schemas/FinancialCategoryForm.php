@@ -17,7 +17,7 @@ class FinancialCategoryForm
                 Section::make()
                     ->schema([
                         TextInput::make('name')
-                            ->label('Nome')
+                            ->label('Name')
                             ->required()
                             ->maxLength(255)
                             ->live(onBlur: true)
@@ -30,33 +30,33 @@ class FinancialCategoryForm
                             }),
 
                         TextInput::make('code')
-                            ->label('Código')
+                            ->label('Code')
                             ->required()
                             ->maxLength(20)
                             ->unique(ignoreRecord: true)
-                            ->helperText('Auto-gerado do nome. Pode editar se necessário.')
-                            ->placeholder('Auto-gerado'),
+                            ->helperText('Auto-generated from name. You can edit if needed.')
+                            ->placeholder('Auto-generated'),
 
                         Select::make('type')
-                            ->label('Tipo')
+                            ->label('Type')
                             ->required()
                             ->options([
-                                'expense' => 'Despesa',
-                                'revenue' => 'Receita',
-                                'exchange_variation' => 'Variação Cambial',
+                                'expense' => 'Expense',
+                                'revenue' => 'Revenue',
+                                'exchange_variation' => 'Exchange Variation',
                             ])
                             ->default('expense'),
 
                         Select::make('parent_id')
-                            ->label('Categoria Pai')
+                            ->label('Parent Category')
                             ->relationship('parent', 'name')
                             ->searchable()
                             ->preload()
                             ->nullable(),
 
                         Toggle::make('is_system')
-                            ->label('Categoria do Sistema')
-                            ->helperText('Categorias do sistema não podem ser deletadas')
+                            ->label('System Category')
+                            ->helperText('System categories cannot be deleted')
                             ->disabled()
                             ->dehydrated(false),
                     ])

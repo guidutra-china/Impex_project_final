@@ -24,7 +24,7 @@ class RecurringTransactionResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedArrowPath;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Financeiro';
+    protected static string|UnitEnum|null $navigationGroup = 'Finance';
 
     public static function form(Schema $schema): Schema
     {

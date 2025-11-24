@@ -17,26 +17,26 @@ class FinancialTransactionForm
     {
         return $schema
             ->components([
-                Section::make('Informações Básicas')
+                Section::make('Basic Information')
                     ->schema([
                         Textarea::make('description')
-                            ->label('Descrição')
+                            ->label('Description')
                             ->required()
                             ->maxLength(65535)
                             ->columnSpanFull(),
 
                         Select::make('type')
-                            ->label('Tipo')
+                            ->label('Type')
                             ->required()
                             ->options([
-                                'payable' => 'Conta a Pagar',
-                                'receivable' => 'Conta a Receber',
+                                'payable' => 'Payable',
+                                'receivable' => 'Receivable',
                             ])
                             ->default('payable')
                             ->live(),
 
                         Select::make('financial_category_id')
-                            ->label('Categoria')
+                            ->label('Category')
                             ->relationship('category', 'name')
                             ->searchable()
                             ->preload()
@@ -44,16 +44,16 @@ class FinancialTransactionForm
                     ])
                     ->columns(2),
 
-                Section::make('Valores')
+                Section::make('Values')
                     ->schema([
                         TextInput::make('amount')
-                            ->label('Valor')
+                            ->label('Amount')
                             ->required()
                             ->numeric()
-                            ->prefix(fn ($get) => Currency::find($get('currency_id'))?->symbol ?? 'R$'),
+                            ->prefix(fn ($get) => Currency::find($get('currency_id'))?->symbol ?? '$'),
 
                         Select::make('currency_id')
-                            ->label('Moeda')
+                            ->label('Currency')
                             ->relationship('currency', 'code')
                             ->searchable()
                             ->preload()
@@ -75,38 +75,38 @@ class FinancialTransactionForm
                             }),
 
                         TextInput::make('exchange_rate_to_base')
-                            ->label('Taxa de Câmbio')
+                            ->label('Exchange Rate')
                             ->numeric()
                             ->disabled()
                             ->dehydrated(),
                     ])
                     ->columns(3),
 
-                Section::make('Datas')
+                Section::make('Dates')
                     ->schema([
                         DatePicker::make('transaction_date')
-                            ->label('Data da Transação')
+                            ->label('Transaction Date')
                             ->required()
                             ->default(now()),
 
                         DatePicker::make('due_date')
-                            ->label('Data de Vencimento')
+                            ->label('Due Date')
                             ->required()
                             ->default(now()->addDays(30)),
                     ])
                     ->columns(2),
 
-                Section::make('Relacionamentos')
+                Section::make('Relationships')
                     ->schema([
                         Select::make('supplier_id')
-                            ->label('Fornecedor')
+                            ->label('Supplier')
                             ->relationship('supplier', 'name')
                             ->searchable()
                             ->preload()
                             ->visible(fn ($get) => $get('type') === 'payable'),
 
                         Select::make('client_id')
-                            ->label('Cliente')
+                            ->label('Client')
                             ->relationship('client', 'name')
                             ->searchable()
                             ->preload()

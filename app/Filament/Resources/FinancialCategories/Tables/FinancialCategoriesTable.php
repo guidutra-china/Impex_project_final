@@ -20,16 +20,16 @@ class FinancialCategoriesTable
         return $table
             ->columns([
                 TextColumn::make('name')
-                    ->label('Nome')
+                    ->label('Name')
                     ->searchable()
                     ->sortable(),
 
                 BadgeColumn::make('type')
-                    ->label('Tipo')
+                    ->label('Type')
                     ->formatStateUsing(fn (string $state): string => match ($state) {
-                        'expense' => 'Despesa',
-                        'revenue' => 'Receita',
-                        'exchange_variation' => 'Variação Cambial',
+                        'expense' => 'Expense',
+                        'revenue' => 'Revenue',
+                        'exchange_variation' => 'Exchange Variation',
                         default => $state,
                     })
                     ->colors([
@@ -39,41 +39,41 @@ class FinancialCategoriesTable
                     ]),
 
                 TextColumn::make('parent.name')
-                    ->label('Categoria Pai')
+                    ->label('Parent Category')
                     ->searchable()
                     ->toggleable(),
 
                 IconColumn::make('is_system')
-                    ->label('Sistema')
+                    ->label('System')
                     ->boolean()
                     ->toggleable(),
 
                 TextColumn::make('transactions_count')
-                    ->label('Transações')
+                    ->label('Transactions')
                     ->counts('transactions')
                     ->toggleable(),
             ])
             ->filters([
                 SelectFilter::make('type')
-                    ->label('Tipo')
+                    ->label('Type')
                     ->options([
-                        'expense' => 'Despesa',
-                        'revenue' => 'Receita',
-                        'exchange_variation' => 'Variação Cambial',
+                        'expense' => 'Expense',
+                        'revenue' => 'Revenue',
+                        'exchange_variation' => 'Exchange Variation',
                     ]),
 
                 TernaryFilter::make('is_system')
-                    ->label('Sistema')
-                    ->placeholder('Todas')
-                    ->trueLabel('Apenas do Sistema')
-                    ->falseLabel('Apenas Customizadas'),
+                    ->label('System')
+                    ->placeholder('All')
+                    ->trueLabel('System Only')
+                    ->falseLabel('Custom Only'),
             ])
-            ->actions([
+            ->recordActions([
                 EditAction::make(),
                 DeleteAction::make()
                     ->visible(fn ($record) => !$record->is_system),
             ])
-            ->bulkActions([
+            ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),

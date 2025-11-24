@@ -17,16 +17,16 @@ class FinancialTransactionsTable
         return $table
             ->columns([
                 TextColumn::make('transaction_number')
-                    ->label('Número')
+                    ->label('Number')
                     ->searchable()
                     ->sortable()
                     ->copyable(),
 
                 BadgeColumn::make('type')
-                    ->label('Tipo')
+                    ->label('Type')
                     ->formatStateUsing(fn (string $state): string => match ($state) {
-                        'payable' => 'A Pagar',
-                        'receivable' => 'A Receber',
+                        'payable' => 'Payable',
+                        'receivable' => 'Receivable',
                         default => $state,
                     })
                     ->colors([
@@ -35,28 +35,28 @@ class FinancialTransactionsTable
                     ]),
 
                 TextColumn::make('description')
-                    ->label('Descrição')
+                    ->label('Description')
                     ->searchable()
                     ->limit(50),
 
                 TextColumn::make('amount')
-                    ->label('Valor')
+                    ->label('Amount')
                     ->money(fn ($record) => $record->currency->code, divideBy: 100)
                     ->sortable(),
 
                 TextColumn::make('due_date')
-                    ->label('Vencimento')
-                    ->date('d/m/Y')
+                    ->label('Due Date')
+                    ->date('Y-m-d')
                     ->sortable(),
 
                 BadgeColumn::make('status')
                     ->label('Status')
                     ->formatStateUsing(fn (string $state): string => match ($state) {
-                        'pending' => 'Pendente',
-                        'partially_paid' => 'Parcial',
-                        'paid' => 'Pago',
-                        'overdue' => 'Vencido',
-                        'cancelled' => 'Cancelado',
+                        'pending' => 'Pending',
+                        'partially_paid' => 'Partially Paid',
+                        'paid' => 'Paid',
+                        'overdue' => 'Overdue',
+                        'cancelled' => 'Cancelled',
                         default => $state,
                     })
                     ->colors([
@@ -68,37 +68,37 @@ class FinancialTransactionsTable
                     ]),
 
                 TextColumn::make('category.name')
-                    ->label('Categoria')
+                    ->label('Category')
                     ->searchable()
                     ->toggleable(),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('type')
-                    ->label('Tipo')
+                    ->label('Type')
                     ->options([
-                        'payable' => 'A Pagar',
-                        'receivable' => 'A Receber',
+                        'payable' => 'Payable',
+                        'receivable' => 'Receivable',
                     ]),
 
                 Tables\Filters\SelectFilter::make('status')
                     ->label('Status')
                     ->options([
-                        'pending' => 'Pendente',
-                        'paid' => 'Pago',
-                        'overdue' => 'Vencido',
+                        'pending' => 'Pending',
+                        'paid' => 'Paid',
+                        'overdue' => 'Overdue',
                     ]),
 
                 Tables\Filters\SelectFilter::make('financial_category_id')
-                    ->label('Categoria')
+                    ->label('Category')
                     ->relationship('category', 'name')
                     ->searchable()
                     ->preload(),
             ])
-            ->actions([
+            ->recordActions([
                 EditAction::make()
                     ->visible(fn ($record) => $record->status !== 'paid'),
             ])
-            ->bulkActions([
+            ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),
