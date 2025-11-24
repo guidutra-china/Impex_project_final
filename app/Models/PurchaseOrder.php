@@ -204,11 +204,11 @@ class PurchaseOrder extends Model
         $subtotalCents = $this->items()->sum('total_cost');
         
         // Get other costs in cents (raw values from database)
-        $shippingCents = $this->attributes['shipping_cost'] ?? 0;
-        $insuranceCents = $this->attributes['insurance_cost'] ?? 0;
-        $otherCostsCents = $this->attributes['other_costs'] ?? 0;
-        $discountCents = $this->attributes['discount'] ?? 0;
-        $taxCents = $this->attributes['tax'] ?? 0;
+        $shippingCents = $this->getRawOriginal('shipping_cost') ?? 0;
+        $insuranceCents = $this->getRawOriginal('insurance_cost') ?? 0;
+        $otherCostsCents = $this->getRawOriginal('other_costs') ?? 0;
+        $discountCents = $this->getRawOriginal('discount') ?? 0;
+        $taxCents = $this->getRawOriginal('tax') ?? 0;
         
         // Calculate total in cents
         $totalCents = $subtotalCents 
@@ -221,12 +221,19 @@ class PurchaseOrder extends Model
         // Calculate total in base currency (in cents)
         $totalBaseCurrencyCents = $totalCents * ($this->exchange_rate ?? 1);
         
-        // Set raw attributes directly to avoid setter multiplication
-        $this->attributes['subtotal'] = $subtotalCents;
-        $this->attributes['total'] = $totalCents;
-        $this->attributes['total_base_currency'] = $totalBaseCurrencyCents;
+        // Use raw SQL update to completely bypass Eloquent casting
+        // This prevents any Attribute setters from being triggered
+        \DB::table('purchase_orders')
+            ->where('id', $this->id)
+            ->update([
+                'subtotal' => $subtotalCents,
+                'total' => $totalCents,
+                'total_base_currency' => $totalBaseCurrencyCents,
+                'updated_at' => now(),
+            ]);
         
-        $this->saveQuietly(); // Save without triggering events
+        // Refresh the model to get the updated values
+        $this->refresh();
     }
 
     // Accessors
