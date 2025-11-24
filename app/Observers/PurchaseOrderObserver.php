@@ -14,8 +14,8 @@ class PurchaseOrderObserver
      */
     public function updated(PurchaseOrder $purchaseOrder): void
     {
-        // Check if status changed to 'approved'
-        if ($purchaseOrder->isDirty('status') && $purchaseOrder->status === 'approved') {
+        // Check if status changed to 'confirmed' (when supplier confirms the PO)
+        if ($purchaseOrder->isDirty('status') && $purchaseOrder->status === 'confirmed') {
             $this->createFinancialTransaction($purchaseOrder);
         }
     }
