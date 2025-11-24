@@ -65,64 +65,64 @@ class PurchaseOrder extends Model
     protected function subtotal(): \Illuminate\Database\Eloquent\Casts\Attribute
     {
         return \Illuminate\Database\Eloquent\Casts\Attribute::make(
-            get: fn ($value) => $value / 100,
-            set: fn ($value) => (int) round($value * 100),
+            get: fn ($value) => $value ? $value / 100 : 0,
+            set: fn ($value) => $value ? (int) round($value * 100) : 0,
         );
     }
 
     protected function total(): \Illuminate\Database\Eloquent\Casts\Attribute
     {
         return \Illuminate\Database\Eloquent\Casts\Attribute::make(
-            get: fn ($value) => $value / 100,
-            set: fn ($value) => (int) round($value * 100),
+            get: fn ($value) => $value ? $value / 100 : 0,
+            set: fn ($value) => $value ? (int) round($value * 100) : 0,
         );
     }
 
     protected function totalBaseCurrency(): \Illuminate\Database\Eloquent\Casts\Attribute
     {
         return \Illuminate\Database\Eloquent\Casts\Attribute::make(
-            get: fn ($value) => $value / 100,
-            set: fn ($value) => (int) round($value * 100),
+            get: fn ($value) => $value ? $value / 100 : 0,
+            set: fn ($value) => $value ? (int) round($value * 100) : 0,
         );
     }
 
     protected function shippingCost(): \Illuminate\Database\Eloquent\Casts\Attribute
     {
         return \Illuminate\Database\Eloquent\Casts\Attribute::make(
-            get: fn ($value) => $value / 100,
-            set: fn ($value) => (int) round($value * 100),
+            get: fn ($value) => $value ? $value / 100 : 0,
+            set: fn ($value) => $value ? (int) round($value * 100) : 0,
         );
     }
 
     protected function insuranceCost(): \Illuminate\Database\Eloquent\Casts\Attribute
     {
         return \Illuminate\Database\Eloquent\Casts\Attribute::make(
-            get: fn ($value) => $value / 100,
-            set: fn ($value) => (int) round($value * 100),
+            get: fn ($value) => $value ? $value / 100 : 0,
+            set: fn ($value) => $value ? (int) round($value * 100) : 0,
         );
     }
 
     protected function otherCosts(): \Illuminate\Database\Eloquent\Casts\Attribute
     {
         return \Illuminate\Database\Eloquent\Casts\Attribute::make(
-            get: fn ($value) => $value / 100,
-            set: fn ($value) => (int) round($value * 100),
+            get: fn ($value) => $value ? $value / 100 : 0,
+            set: fn ($value) => $value ? (int) round($value * 100) : 0,
         );
     }
 
     protected function discount(): \Illuminate\Database\Eloquent\Casts\Attribute
     {
         return \Illuminate\Database\Eloquent\Casts\Attribute::make(
-            get: fn ($value) => $value / 100,
-            set: fn ($value) => (int) round($value * 100),
+            get: fn ($value) => $value ? $value / 100 : 0,
+            set: fn ($value) => $value ? (int) round($value * 100) : 0,
         );
     }
 
     protected function tax(): \Illuminate\Database\Eloquent\Casts\Attribute
     {
         return \Illuminate\Database\Eloquent\Casts\Attribute::make(
-            get: fn ($value) => $value / 100,
-            set: fn ($value) => (int) round($value * 100),
+            get: fn ($value) => $value ? $value / 100 : 0,
+            set: fn ($value) => $value ? (int) round($value * 100) : 0,
         );
     }
 

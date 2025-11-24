@@ -28,8 +28,8 @@ class OrderItem extends Model
     protected function requestedUnitPrice(): \Illuminate\Database\Eloquent\Casts\Attribute
     {
         return \Illuminate\Database\Eloquent\Casts\Attribute::make(
-            get: fn ($value) => $value / 100,
-            set: fn ($value) => (int) round($value * 100), // Always multiply by 100
+            get: fn ($value) => $value ? $value / 100 : 0,
+            set: fn ($value) => $value ? (int) round($value * 100) : 0,
         );
     }
 

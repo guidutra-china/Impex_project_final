@@ -82,8 +82,8 @@ class SalesInvoice extends Model
     protected function subtotal(): \Illuminate\Database\Eloquent\Casts\Attribute
     {
         return \Illuminate\Database\Eloquent\Casts\Attribute::make(
-            get: fn ($value) => $value / 100,
-            set: fn ($value) => (int) round($value * 100),
+            get: fn ($value) => $value ? $value / 100 : 0,
+            set: fn ($value) => $value ? (int) round($value * 100) : 0,
         );
     }
 
@@ -93,8 +93,8 @@ class SalesInvoice extends Model
     protected function commission(): \Illuminate\Database\Eloquent\Casts\Attribute
     {
         return \Illuminate\Database\Eloquent\Casts\Attribute::make(
-            get: fn ($value) => $value / 100,
-            set: fn ($value) => (int) round($value * 100),
+            get: fn ($value) => $value ? $value / 100 : 0,
+            set: fn ($value) => $value ? (int) round($value * 100) : 0,
         );
     }
 
@@ -104,8 +104,8 @@ class SalesInvoice extends Model
     protected function tax(): \Illuminate\Database\Eloquent\Casts\Attribute
     {
         return \Illuminate\Database\Eloquent\Casts\Attribute::make(
-            get: fn ($value) => $value / 100,
-            set: fn ($value) => (int) round($value * 100),
+            get: fn ($value) => $value ? $value / 100 : 0,
+            set: fn ($value) => $value ? (int) round($value * 100) : 0,
         );
     }
 
@@ -115,8 +115,8 @@ class SalesInvoice extends Model
     protected function total(): \Illuminate\Database\Eloquent\Casts\Attribute
     {
         return \Illuminate\Database\Eloquent\Casts\Attribute::make(
-            get: fn ($value) => $value / 100,
-            set: fn ($value) => (int) round($value * 100),
+            get: fn ($value) => $value ? $value / 100 : 0,
+            set: fn ($value) => $value ? (int) round($value * 100) : 0,
         );
     }
 
