@@ -18,7 +18,7 @@ class FinancialPaymentResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-banknotes';
 
-    protected static string $navigationGroup = 'Financeiro';
+    protected static string|UnitEnum|null $navigationGroup = 'Financeiro';
 
     protected static ?int $navigationSort = 2;
 
