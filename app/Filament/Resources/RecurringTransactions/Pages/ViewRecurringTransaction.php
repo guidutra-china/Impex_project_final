@@ -82,9 +82,8 @@ class ViewRecurringTransaction extends ViewRecord
                                 }
                                 
                                 $list = [];
-                                foreach ($occurrences as $index => $date) {
-                                    $formatted = $date->format('Y-m-d');
-                                    $list[] = ($index + 1) . ". {$formatted}";
+                                foreach ($occurrences as $index => $occurrence) {
+                                    $list[] = ($index + 1) . ". {$occurrence['date']}";
                                 }
                                 
                                 return nl2br(implode("\n", $list));
