@@ -16,14 +16,9 @@ return new class extends Migration
             $table->foreignId('sales_invoice_item_id')->nullable()->after('sales_order_item_id')->constrained('sales_invoice_items')->onDelete('cascade');
             
             // === QUANTITY TRACKING ===
-            $table->integer('quantity_ordered')->default(0)->after('quantity')->comment('From sales invoice');
-            $table->renameColumn('quantity', 'quantity_to_ship');
-            // After rename, add new columns
-        });
-        
-        // Second statement after rename
-        Schema::table('shipment_items', function (Blueprint $table) {
-            $table->integer('quantity_shipped')->default(0)->after('quantity_to_ship')->comment('Actually shipped (confirmed)');
+            // Note: 'quantity' column exists, we'll rename it later
+            $table->integer('quantity_ordered')->default(0)->after('product_id')->comment('From sales invoice');
+            $table->integer('quantity_shipped')->default(0)->after('quantity')->comment('Actually shipped (confirmed)');
             
             // === PRODUCT INFO (Enhanced) ===
             $table->text('product_description')->nullable()->after('product_sku');
@@ -35,9 +30,9 @@ return new class extends Migration
             $table->bigInteger('customs_value')->default(0)->after('unit_price')->comment('quantity * unit_price in cents');
             
             // === PHYSICAL PROPERTIES ===
-            $table->decimal('unit_weight', 10, 3)->nullable()->after('weight')->comment('Per unit in kg');
+            $table->decimal('unit_weight', 10, 3)->nullable()->after('customs_value')->comment('Per unit in kg');
             $table->decimal('total_weight', 10, 3)->nullable()->after('unit_weight')->comment('quantity * unit_weight');
-            $table->decimal('unit_volume', 10, 6)->nullable()->after('volume')->comment('Per unit in m³');
+            $table->decimal('unit_volume', 10, 6)->nullable()->after('total_weight')->comment('Per unit in m³');
             $table->decimal('total_volume', 10, 6)->nullable()->after('unit_volume')->comment('quantity * unit_volume');
             
             // === PACKING STATUS ===
@@ -47,6 +42,11 @@ return new class extends Migration
             
             // === NOTES ===
             $table->text('notes')->nullable()->after('quantity_remaining');
+        });
+        
+        // Rename 'quantity' to 'quantity_to_ship' in separate statement
+        Schema::table('shipment_items', function (Blueprint $table) {
+            $table->renameColumn('quantity', 'quantity_to_ship');
         });
         
         // Drop old columns
@@ -60,6 +60,18 @@ return new class extends Migration
      */
     public function down(): void
     {
+        // Restore original columns first
+        Schema::table('shipment_items', function (Blueprint $table) {
+            $table->decimal('weight', 10, 2)->nullable();
+            $table->decimal('volume', 10, 2)->nullable();
+        });
+        
+        // Rename back
+        Schema::table('shipment_items', function (Blueprint $table) {
+            $table->renameColumn('quantity_to_ship', 'quantity');
+        });
+        
+        // Drop new columns
         Schema::table('shipment_items', function (Blueprint $table) {
             $table->dropForeign(['sales_invoice_item_id']);
             $table->dropColumn([
@@ -80,10 +92,6 @@ return new class extends Migration
                 'quantity_remaining',
                 'notes',
             ]);
-            
-            $table->renameColumn('quantity_to_ship', 'quantity');
-            $table->decimal('weight', 10, 2)->nullable();
-            $table->decimal('volume', 10, 2)->nullable();
         });
     }
 };
