@@ -54,11 +54,6 @@ class SalesInvoiceForm
                             ->collapsible()
                             ->collapsed(fn (?SalesInvoice $record) => $record !== null && $record->isApproved()),
 
-                        Section::make('Payment Information')
-                            ->schema(static::getPaymentComponents())
-                            ->columns(2)
-                            ->collapsible(),
-
                         Section::make('Notes & Terms')
                             ->schema(static::getNotesComponents())
                             ->collapsed()
