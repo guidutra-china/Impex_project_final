@@ -3,13 +3,12 @@
 namespace App\Filament\Resources\RecurringTransactions\Pages;
 
 use App\Filament\Resources\RecurringTransactions\RecurringTransactionResource;
-use App\Models\FinancialTransaction;
 use Filament\Actions\Action;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\Placeholder;
-use Filament\Forms\Components\Section;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 
 class ViewRecurringTransaction extends ViewRecord
@@ -82,9 +81,8 @@ class ViewRecurringTransaction extends ViewRecord
                                 }
                                 
                                 $list = [];
-                                foreach ($occurrences as $index => $date) {
-                                    $formatted = $date->format('Y-m-d');
-                                    $list[] = ($index + 1) . ". {$formatted}";
+                                foreach ($occurrences as $index => $occurrence) {
+                                    $list[] = ($index + 1) . ". {$occurrence['date']}";
                                 }
                                 
                                 return nl2br(implode("\n", $list));
