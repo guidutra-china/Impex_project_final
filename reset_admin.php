@@ -1,16 +1,3 @@
-<?php
-
-/**
- * Reset Admin User Script
- * 
- * This script resets the admin@impex.ltd user with:
- * - New password: "password"
- * - super_admin role
- * - is_admin flag set to 1
- * 
- * Run: php artisan tinker < reset_admin.php
- */
-
 use App\Models\User;
 use Spatie\Permission\Models\Role;
 
