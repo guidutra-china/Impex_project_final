@@ -234,11 +234,12 @@ class PurchaseOrdersTable
                                 'updated_at' => now(),
                             ]);
                         
-                        // Refresh the model to trigger Observer with correct values
+                        // Refresh the model to get updated values
                         $record->refresh();
                         
-                        // Manually fire the updated event for Observer
-                        $record->fireModelEvent('updated', false);
+                        // Manually call the Observer since we bypassed Eloquent
+                        $observer = new \App\Observers\PurchaseOrderObserver();
+                        $observer->updated($record);
                         
                         \Filament\Notifications\Notification::make()
                             ->success()
