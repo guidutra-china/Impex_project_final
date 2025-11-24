@@ -109,7 +109,7 @@ class SalesInvoiceItem extends Model
     {
         return $this->quantity_remaining > 0;
     }
-}
+
     public function purchaseOrder(): BelongsTo
     {
         return $this->belongsTo(PurchaseOrder::class);
