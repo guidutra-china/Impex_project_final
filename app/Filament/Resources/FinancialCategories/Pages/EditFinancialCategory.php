@@ -13,8 +13,8 @@ class EditFinancialCategory extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\ViewAction::make(),
-            Actions\DeleteAction::make(),
+            Actions\DeleteAction::make()
+                ->visible(fn () => !$this->record->is_system),
         ];
     }
 
