@@ -12,6 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('shipment_items', function (Blueprint $table) {
+            // === NEW RELATIONSHIP ===
+            $table->foreignId('sales_invoice_item_id')->nullable()->after('sales_order_item_id')->constrained('sales_invoice_items')->onDelete('cascade');
+            
             // === QUANTITY TRACKING ===
             $table->integer('quantity_ordered')->default(0)->after('quantity')->comment('From sales invoice');
             $table->renameColumn('quantity', 'quantity_to_ship');
@@ -58,7 +61,9 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('shipment_items', function (Blueprint $table) {
+            $table->dropForeign(['sales_invoice_item_id']);
             $table->dropColumn([
+                'sales_invoice_item_id',
                 'quantity_ordered',
                 'quantity_shipped',
                 'product_description',
