@@ -3,63 +3,52 @@
 namespace App\Filament\Resources\Shipments\Pages;
 
 use App\Filament\Resources\Shipments\ShipmentResource;
+use Filament\Actions\EditAction;
 use Filament\Resources\Pages\ViewRecord;
-use Filament\Infolists\Infolist;
-use Filament\Infolists\Components\Section;
-use Filament\Infolists\Components\Grid;
-use Filament\Infolists\Components\TextEntry;
-use Filament\Infolists\Components\BadgeEntry;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Grid;
+use Filament\Forms\Components\Placeholder;
+use Filament\Schemas\Schema;
 
 class ViewShipment extends ViewRecord
 {
     protected static string $resource = ShipmentResource::class;
 
-    public function infolist(Infolist $infolist): Infolist
+    protected function getHeaderActions(): array
     {
-        return $infolist
+        return [
+            EditAction::make(),
+        ];
+    }
+
+    public function infolist(Schema $schema): Schema
+    {
+        return $schema
             ->schema([
                 Section::make('Shipment Overview')
                     ->schema([
                         Grid::make(4)
                             ->schema([
-                                TextEntry::make('shipment_number')
+                                Placeholder::make('shipment_number')
                                     ->label('Shipment #')
-                                    ->weight('bold')
-                                    ->size('lg'),
+                                    ->content(fn ($record) => $record->shipment_number),
 
-                                BadgeEntry::make('shipment_type')
+                                Placeholder::make('shipment_type')
                                     ->label('Type')
-                                    ->formatStateUsing(fn ($state) => ucfirst($state))
-                                    ->colors([
-                                        'primary' => 'outbound',
-                                        'success' => 'inbound',
-                                    ]),
+                                    ->content(fn ($record) => ucfirst($record->shipment_type)),
 
-                                BadgeEntry::make('status')
+                                Placeholder::make('status')
                                     ->label('Status')
-                                    ->formatStateUsing(fn ($state) => str_replace('_', ' ', ucwords($state, '_')))
-                                    ->colors([
-                                        'secondary' => 'draft',
-                                        'warning' => ['preparing', 'ready_to_ship'],
-                                        'info' => 'confirmed',
-                                        'primary' => ['picked_up', 'in_transit'],
-                                        'success' => 'delivered',
-                                        'danger' => ['cancelled', 'returned'],
-                                    ]),
+                                    ->content(fn ($record) => str_replace('_', ' ', ucwords($record->status, '_'))),
 
-                                BadgeEntry::make('packing_status')
+                                Placeholder::make('packing_status')
                                     ->label('Packing Status')
-                                    ->formatStateUsing(fn ($state) => match($state) {
+                                    ->content(fn ($record) => match($record->packing_status) {
                                         'not_packed' => 'Not Packed',
                                         'partially_packed' => 'Partially Packed',
                                         'fully_packed' => 'Fully Packed',
                                         default => 'N/A',
-                                    })
-                                    ->colors([
-                                        'secondary' => 'not_packed',
-                                        'warning' => 'partially_packed',
-                                        'success' => 'fully_packed',
-                                    ]),
+                                    }),
                             ]),
                     ]),
 
@@ -67,39 +56,43 @@ class ViewShipment extends ViewRecord
                     ->schema([
                         Grid::make(3)
                             ->schema([
-                                TextEntry::make('shipping_method')
+                                Placeholder::make('shipping_method')
                                     ->label('Shipping Method')
-                                    ->formatStateUsing(fn ($state) => ucfirst($state)),
+                                    ->content(fn ($record) => $record->shipping_method ? ucfirst($record->shipping_method) : '-'),
 
-                                TextEntry::make('carrier')
-                                    ->label('Carrier'),
+                                Placeholder::make('carrier')
+                                    ->label('Carrier')
+                                    ->content(fn ($record) => $record->carrier ?? '-'),
 
-                                TextEntry::make('tracking_number')
+                                Placeholder::make('tracking_number')
                                     ->label('Tracking Number')
-                                    ->copyable(),
+                                    ->content(fn ($record) => $record->tracking_number ?? '-'),
                             ]),
 
                         Grid::make(3)
                             ->schema([
-                                TextEntry::make('container_number')
-                                    ->label('Container Number'),
+                                Placeholder::make('container_number')
+                                    ->label('Container Number')
+                                    ->content(fn ($record) => $record->container_number ?? '-'),
 
-                                TextEntry::make('vessel_name')
-                                    ->label('Vessel/Flight'),
+                                Placeholder::make('vessel_name')
+                                    ->label('Vessel/Flight')
+                                    ->content(fn ($record) => $record->vessel_name ?? '-'),
 
-                                TextEntry::make('voyage_number')
-                                    ->label('Voyage/Flight #'),
+                                Placeholder::make('voyage_number')
+                                    ->label('Voyage/Flight #')
+                                    ->content(fn ($record) => $record->voyage_number ?? '-'),
                             ]),
 
                         Grid::make(2)
                             ->schema([
-                                TextEntry::make('origin_address')
+                                Placeholder::make('origin_address')
                                     ->label('Origin Address')
-                                    ->markdown(),
+                                    ->content(fn ($record) => $record->origin_address ?? '-'),
 
-                                TextEntry::make('destination_address')
+                                Placeholder::make('destination_address')
                                     ->label('Destination Address')
-                                    ->markdown(),
+                                    ->content(fn ($record) => $record->destination_address ?? '-'),
                             ]),
                     ])
                     ->columns(1),
@@ -108,32 +101,32 @@ class ViewShipment extends ViewRecord
                     ->schema([
                         Grid::make(3)
                             ->schema([
-                                TextEntry::make('shipment_date')
+                                Placeholder::make('shipment_date')
                                     ->label('Shipment Date')
-                                    ->date('Y-m-d'),
+                                    ->content(fn ($record) => $record->shipment_date ? $record->shipment_date->format('Y-m-d') : '-'),
 
-                                TextEntry::make('estimated_departure_date')
+                                Placeholder::make('estimated_departure_date')
                                     ->label('Est. Departure')
-                                    ->date('Y-m-d'),
+                                    ->content(fn ($record) => $record->estimated_departure_date ? $record->estimated_departure_date->format('Y-m-d') : '-'),
 
-                                TextEntry::make('estimated_arrival_date')
+                                Placeholder::make('estimated_arrival_date')
                                     ->label('Est. Arrival')
-                                    ->date('Y-m-d'),
+                                    ->content(fn ($record) => $record->estimated_arrival_date ? $record->estimated_arrival_date->format('Y-m-d') : '-'),
                             ]),
 
                         Grid::make(3)
                             ->schema([
-                                TextEntry::make('actual_departure_date')
+                                Placeholder::make('actual_departure_date')
                                     ->label('Actual Departure')
-                                    ->date('Y-m-d'),
+                                    ->content(fn ($record) => $record->actual_departure_date ? $record->actual_departure_date->format('Y-m-d') : '-'),
 
-                                TextEntry::make('actual_arrival_date')
+                                Placeholder::make('actual_arrival_date')
                                     ->label('Actual Arrival')
-                                    ->date('Y-m-d'),
+                                    ->content(fn ($record) => $record->actual_arrival_date ? $record->actual_arrival_date->format('Y-m-d') : '-'),
 
-                                TextEntry::make('actual_delivery_date')
+                                Placeholder::make('actual_delivery_date')
                                     ->label('Actual Delivery')
-                                    ->date('Y-m-d'),
+                                    ->content(fn ($record) => $record->actual_delivery_date ? $record->actual_delivery_date->format('Y-m-d') : '-'),
                             ]),
                     ]),
 
@@ -141,35 +134,32 @@ class ViewShipment extends ViewRecord
                     ->schema([
                         Grid::make(4)
                             ->schema([
-                                TextEntry::make('total_items')
+                                Placeholder::make('total_items')
                                     ->label('Total Items')
-                                    ->badge()
-                                    ->color('primary'),
+                                    ->content(fn ($record) => $record->total_items ?? 0),
 
-                                TextEntry::make('total_quantity')
+                                Placeholder::make('total_quantity')
                                     ->label('Total Quantity')
-                                    ->badge()
-                                    ->color('success'),
+                                    ->content(fn ($record) => $record->total_quantity ?? 0),
 
-                                TextEntry::make('total_boxes')
+                                Placeholder::make('total_boxes')
                                     ->label('Total Boxes')
-                                    ->badge()
-                                    ->color('info'),
+                                    ->content(fn ($record) => $record->total_boxes ?? 0),
 
-                                TextEntry::make('total_weight')
+                                Placeholder::make('total_weight')
                                     ->label('Total Weight')
-                                    ->formatStateUsing(fn ($state) => number_format($state, 2) . ' kg'),
+                                    ->content(fn ($record) => $record->total_weight ? number_format($record->total_weight, 2) . ' kg' : '0.00 kg'),
                             ]),
 
                         Grid::make(2)
                             ->schema([
-                                TextEntry::make('total_volume')
+                                Placeholder::make('total_volume')
                                     ->label('Total Volume')
-                                    ->formatStateUsing(fn ($state) => number_format($state, 3) . ' m³'),
+                                    ->content(fn ($record) => $record->total_volume ? number_format($record->total_volume, 3) . ' m³' : '0.000 m³'),
 
-                                TextEntry::make('total_customs_value')
+                                Placeholder::make('total_customs_value')
                                     ->label('Total Customs Value')
-                                    ->money('USD', 100),
+                                    ->content(fn ($record) => $record->total_customs_value ? '$' . number_format($record->total_customs_value / 100, 2) : '$0.00'),
                             ]),
                     ]),
 
@@ -177,35 +167,38 @@ class ViewShipment extends ViewRecord
                     ->schema([
                         Grid::make(4)
                             ->schema([
-                                TextEntry::make('shipping_cost')
+                                Placeholder::make('shipping_cost')
                                     ->label('Shipping Cost')
-                                    ->money('USD', 100),
+                                    ->content(fn ($record) => $record->shipping_cost ? '$' . number_format($record->shipping_cost, 2) : '$0.00'),
 
-                                TextEntry::make('insurance_cost')
+                                Placeholder::make('insurance_cost')
                                     ->label('Insurance Cost')
-                                    ->money('USD', 100),
+                                    ->content(fn ($record) => $record->insurance_cost ? '$' . number_format($record->insurance_cost, 2) : '$0.00'),
 
-                                TextEntry::make('currency.code')
-                                    ->label('Currency'),
+                                Placeholder::make('currency.code')
+                                    ->label('Currency')
+                                    ->content(fn ($record) => $record->currency?->code ?? '-'),
 
-                                TextEntry::make('incoterm')
-                                    ->label('Incoterm'),
+                                Placeholder::make('incoterm')
+                                    ->label('Incoterm')
+                                    ->content(fn ($record) => $record->incoterm ?? '-'),
                             ]),
 
-                        TextEntry::make('payment_terms')
-                            ->label('Payment Terms'),
+                        Placeholder::make('payment_terms')
+                            ->label('Payment Terms')
+                            ->content(fn ($record) => $record->payment_terms ?? '-'),
                     ]),
 
                 Section::make('Additional Information')
                     ->schema([
-                        TextEntry::make('notes')
+                        Placeholder::make('notes')
                             ->label('Internal Notes')
-                            ->markdown()
+                            ->content(fn ($record) => $record->notes ?? '-')
                             ->columnSpanFull(),
 
-                        TextEntry::make('special_instructions')
+                        Placeholder::make('special_instructions')
                             ->label('Special Instructions')
-                            ->markdown()
+                            ->content(fn ($record) => $record->special_instructions ?? '-')
                             ->columnSpanFull(),
                     ])
                     ->collapsible()
@@ -215,12 +208,13 @@ class ViewShipment extends ViewRecord
                     ->schema([
                         Grid::make(2)
                             ->schema([
-                                TextEntry::make('confirmed_at')
+                                Placeholder::make('confirmed_at')
                                     ->label('Confirmed At')
-                                    ->dateTime('Y-m-d H:i:s'),
+                                    ->content(fn ($record) => $record->confirmed_at ? $record->confirmed_at->format('Y-m-d H:i:s') : 'Not confirmed'),
 
-                                TextEntry::make('confirmedBy.name')
-                                    ->label('Confirmed By'),
+                                Placeholder::make('confirmed_by')
+                                    ->label('Confirmed By')
+                                    ->content(fn ($record) => $record->confirmedBy?->name ?? 'N/A'),
                             ]),
                     ])
                     ->visible(fn ($record) => $record->confirmed_at),
@@ -229,17 +223,17 @@ class ViewShipment extends ViewRecord
                     ->schema([
                         Grid::make(3)
                             ->schema([
-                                TextEntry::make('created_at')
+                                Placeholder::make('created_at')
                                     ->label('Created')
-                                    ->dateTime('Y-m-d H:i:s'),
+                                    ->content(fn ($record) => $record->created_at->format('Y-m-d H:i:s')),
 
-                                TextEntry::make('updated_at')
+                                Placeholder::make('updated_at')
                                     ->label('Updated')
-                                    ->dateTime('Y-m-d H:i:s'),
+                                    ->content(fn ($record) => $record->updated_at->format('Y-m-d H:i:s')),
 
-                                TextEntry::make('deleted_at')
+                                Placeholder::make('deleted_at')
                                     ->label('Deleted')
-                                    ->dateTime('Y-m-d H:i:s')
+                                    ->content(fn ($record) => $record->deleted_at ? $record->deleted_at->format('Y-m-d H:i:s') : '-')
                                     ->visible(fn ($record) => $record->deleted_at),
                             ]),
                     ])
