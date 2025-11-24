@@ -9,8 +9,8 @@ use App\Filament\Resources\PaymentMethods\Schemas\PaymentMethodForm;
 use App\Filament\Resources\PaymentMethods\Tables\PaymentMethodsTable;
 use App\Models\PaymentMethod;
 use BackedEnum;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use UnitEnum;
@@ -23,9 +23,9 @@ class PaymentMethodResource extends Resource
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCreditCard;
     protected static string|UnitEnum|null $navigationGroup = 'Finance';
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return PaymentMethodForm::configure($form);
+        return PaymentMethodForm::configure($schema);
     }
 
     public static function table(Table $table): Table
