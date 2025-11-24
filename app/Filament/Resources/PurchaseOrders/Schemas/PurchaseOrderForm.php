@@ -165,13 +165,17 @@ class PurchaseOrderForm
                     // Fill items from quote
                     $items = [];
                     foreach ($quote->items as $quoteItem) {
+                        // QuoteItem values are already in cents, convert to decimal for display
+                        $unitCost = $quoteItem->unit_price_before_commission; // In cents
+                        $totalCost = $quoteItem->total_price_before_commission; // In cents
+                        
                         $items[] = [
                             'product_id' => $quoteItem->product_id,
                             'product_name' => $quoteItem->product?->name ?? '',
                             'product_sku' => $quoteItem->product?->sku ?? '',
                             'quantity' => $quoteItem->quantity,
-                            'unit_cost' => $quoteItem->unit_price_before_commission / 100,
-                            'total_cost' => $quoteItem->total_price_before_commission / 100,
+                            'unit_cost' => $unitCost / 100, // Convert cents to decimal for form display
+                            'total_cost' => $totalCost / 100, // Convert cents to decimal for form display
                             'notes' => $quoteItem->supplier_notes ?? '',
                         ];
                     }
