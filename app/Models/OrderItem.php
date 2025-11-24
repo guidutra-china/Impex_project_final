@@ -46,4 +46,19 @@ class OrderItem extends Model
     {
         return $this->requested_unit_price ? $this->requested_unit_price / 100 : null;
     }
+
+    /**
+     * Boot the model
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        // Convert decimal to cents if value is too small (< 100)
+        static::saving(function ($item) {
+            if (isset($item->requested_unit_price) && $item->requested_unit_price < 100 && $item->requested_unit_price > 0) {
+                $item->requested_unit_price = (int) round($item->requested_unit_price * 100);
+            }
+        });
+    }
 }

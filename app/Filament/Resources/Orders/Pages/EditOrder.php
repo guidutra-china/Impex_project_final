@@ -42,6 +42,20 @@ class EditOrder extends EditRecord
         ];
     }
 
+    protected function mutateFormDataBeforeFill(array $data): array
+    {
+        // Convert items requested_unit_price from cents to decimal
+        if (isset($data['items'])) {
+            foreach ($data['items'] as $key => $item) {
+                if (isset($item['requested_unit_price'])) {
+                    $data['items'][$key]['requested_unit_price'] = $item['requested_unit_price'] / 100;
+                }
+            }
+        }
+
+        return $data;
+    }
+
     protected function mutateFormDataBeforeSave(array $data): array
     {
         $data['updated_by'] = auth()->id();
