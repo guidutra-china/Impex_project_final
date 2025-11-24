@@ -20,19 +20,19 @@ class ViewRecurringTransaction extends ViewRecord
     {
         return [
             Action::make('generate_now')
-                ->label('Gerar Transação Agora')
+                ->label('Generate Transaction Now')
                 ->icon('heroicon-o-plus-circle')
                 ->color('success')
                 ->requiresConfirmation()
-                ->modalHeading('Gerar Transação Agora')
-                ->modalDescription('Isso criará uma nova transação financeira baseada nesta recorrência e atualizará a próxima data de vencimento.')
+                ->modalHeading('Generate Transaction Now')
+                ->modalDescription('This will create a new financial transaction based on this recurrence and update the next due date.')
                 ->action(function () {
                     $recurring = $this->record;
                     
                     if (!$recurring->is_active) {
                         Notification::make()
-                            ->title('Recorrência Inativa')
-                            ->body('Esta recorrência está inativa. Ative-a primeiro.')
+                            ->title('Inactive Recurrence')
+                            ->body('This recurrence is inactive. Please activate it first.')
                             ->danger()
                             ->send();
                         return;
@@ -42,8 +42,8 @@ class ViewRecurringTransaction extends ViewRecord
                         $transaction = $recurring->generateTransaction();
                         
                         Notification::make()
-                            ->title('Transação Gerada!')
-                            ->body("Transação {$transaction->transaction_number} criada com sucesso.")
+                            ->title('Transaction Generated!')
+                            ->body("Transaction {$transaction->transaction_number} created successfully.")
                             ->success()
                             ->send();
                             
@@ -53,7 +53,7 @@ class ViewRecurringTransaction extends ViewRecord
                         ]);
                     } catch (\Exception $e) {
                         Notification::make()
-                            ->title('Erro ao Gerar Transação')
+                            ->title('Error Generating Transaction')
                             ->body($e->getMessage())
                             ->danger()
                             ->send();
@@ -67,25 +67,25 @@ class ViewRecurringTransaction extends ViewRecord
     {
         return $infolist
             ->schema([
-                Section::make('Próximas Ocorrências')
-                    ->description('Visualize as próximas 5 datas em que esta recorrência gerará transações')
+                Section::make('Next Occurrences')
+                    ->description('View the next 5 dates when this recurrence will generate transactions')
                     ->schema([
                         TextEntry::make('next_occurrences')
                             ->label('')
                             ->state(function ($record) {
                                 if (!$record->is_active) {
-                                    return 'Recorrência inativa - nenhuma transação será gerada.';
+                                    return 'Recurrence inactive - no transactions will be generated.';
                                 }
                                 
                                 $occurrences = $record->getNextOccurrences(5);
                                 
                                 if (empty($occurrences)) {
-                                    return 'Nenhuma ocorrência futura encontrada.';
+                                    return 'No future occurrences found.';
                                 }
                                 
                                 $list = [];
                                 foreach ($occurrences as $index => $date) {
-                                    $formatted = $date->format('d/m/Y');
+                                    $formatted = $date->format('Y-m-d');
                                     $list[] = ($index + 1) . ". {$formatted}";
                                 }
                                 
