@@ -163,9 +163,9 @@ class SalesInvoiceForm
                                 'product_name' => $product->name ?? '',
                                 'product_sku' => $product->sku ?? '',
                                 'quantity' => $item->quantity,
-                                'unit_price' => $item->unit_price / 100, // Convert from cents
+                                'unit_price' => $item->unit_cost / 100, // Convert from cents to decimal
                                 'commission' => 0, // Will be calculated
-                                'total' => ($item->unit_price * $item->quantity) / 100,
+                                'total' => ($item->unit_cost * $item->quantity) / 100, // Convert from cents
                                 'purchase_order_id' => $po->id,
                                 'purchase_order_item_id' => $item->id,
                                 'notes' => $item->notes ?? '',
