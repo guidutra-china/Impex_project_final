@@ -5,8 +5,8 @@ namespace App\Filament\Resources\Shipments\Pages;
 use App\Filament\Resources\Shipments\ShipmentResource;
 use Filament\Actions\EditAction;
 use Filament\Resources\Pages\ViewRecord;
-use Filament\Schemas\Components\Section;
-use Filament\Schemas\Components\Grid;
+use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Placeholder;
 use Filament\Schemas\Schema;
 
