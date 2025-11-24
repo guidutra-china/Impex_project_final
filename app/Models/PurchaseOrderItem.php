@@ -33,6 +33,28 @@ class PurchaseOrderItem extends Model
     ];
 
     /**
+     * Get unit_cost in decimal format for display
+     */
+    protected function unitCost(): \Illuminate\Database\Eloquent\Casts\Attribute
+    {
+        return \Illuminate\Database\Eloquent\Casts\Attribute::make(
+            get: fn ($value) => $value / 100,
+            set: fn ($value) => $value < 100 && $value > 0 ? (int) round($value * 100) : (int) $value,
+        );
+    }
+
+    /**
+     * Get total_cost in decimal format for display
+     */
+    protected function totalCost(): \Illuminate\Database\Eloquent\Casts\Attribute
+    {
+        return \Illuminate\Database\Eloquent\Casts\Attribute::make(
+            get: fn ($value) => $value / 100,
+            set: fn ($value) => $value < 100 && $value > 0 ? (int) round($value * 100) : (int) $value,
+        );
+    }
+
+    /**
      * Boot the model
      */
     protected static function boot()
@@ -52,21 +74,7 @@ class PurchaseOrderItem extends Model
                     }
                 }
             }
-            
-            // Convert decimal to cents if values are too small (< 100)
-            // This handles cases where Filament passes decimal values
-            if ($item->unit_cost < 100 && $item->unit_cost > 0) {
-                $item->unit_cost = (int) round($item->unit_cost * 100);
-            }
-            if ($item->total_cost < 100 && $item->total_cost > 0) {
-                $item->total_cost = (int) round($item->total_cost * 100);
-            }
-            if (isset($item->selling_price) && $item->selling_price < 100 && $item->selling_price > 0) {
-                $item->selling_price = (int) round($item->selling_price * 100);
-            }
-            if (isset($item->selling_total) && $item->selling_total < 100 && $item->selling_total > 0) {
-                $item->selling_total = (int) round($item->selling_total * 100);
-            }
+            // Note: Conversion now handled by Attribute casts (unitCost, totalCost)
         });
 
         // Recalculate PO totals after item is saved or deleted
