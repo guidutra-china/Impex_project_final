@@ -23,10 +23,16 @@ class SalesInvoiceItem extends Model
         'commission',
         'total',
         'notes',
+        // Shipment tracking
+        'quantity_shipped',
+        'quantity_remaining',
+        'shipment_status',
     ];
 
     protected $casts = [
         'quantity' => 'decimal:2',
+        'quantity_shipped' => 'integer',
+        'quantity_remaining' => 'integer',
     ];
 
     /**
@@ -67,12 +73,43 @@ class SalesInvoiceItem extends Model
     {
         return $this->belongsTo(SalesInvoice::class);
     }
-
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);
     }
 
+    /**
+     * NEW: Shipment items that shipped this invoice item
+     */
+    public function shipmentItems(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(ShipmentItem::class);
+    }
+
+    /**
+     * Get remaining quantity to ship
+     */
+    public function getRemainingQuantityAttribute(): int
+    {
+        return $this->quantity - $this->quantity_shipped;
+    }
+
+    /**
+     * Check if fully shipped
+     */
+    public function isFullyShipped(): bool
+    {
+        return $this->shipment_status === 'fully_shipped';
+    }
+
+    /**
+     * Check if can be shipped
+     */
+    public function canBeShipped(): bool
+    {
+        return $this->quantity_remaining > 0;
+    }
+}
     public function purchaseOrder(): BelongsTo
     {
         return $this->belongsTo(PurchaseOrder::class);
