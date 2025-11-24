@@ -229,6 +229,8 @@ class ItemsRelationManager extends RelationManager
             ->headerActions([
                 CreateAction::make()
                     ->label('Add Item')
+                    ->color('success')
+                    ->icon(Heroicon::OutlinedPlus)
                     ->using(function (array $data, $livewire) {
                         $shipment = $livewire->getOwnerRecord();
                         $service = new ShipmentService();

@@ -206,6 +206,22 @@ class SalesInvoice extends Model
     }
 
     /**
+     * NEW: Shipments that include items from this invoice
+     */
+    public function shipments(): BelongsToMany
+    {
+        return $this->belongsToMany(Shipment::class, 'shipment_invoices')
+            ->withPivot([
+                'total_items',
+                'total_quantity',
+                'total_weight',
+                'total_volume',
+                'total_customs_value',
+            ])
+            ->withTimestamps();
+    }
+
+    /**
      * Check if this invoice has been superseded
      */
     public function isSuperseded(): bool

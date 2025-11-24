@@ -215,6 +215,8 @@ class PackingBoxesRelationManager extends RelationManager
             ->headerActions([
                 CreateAction::make()
                     ->label('Create Box')
+                    ->color('success')
+                    ->icon(Heroicon::OutlinedCube)
                     ->using(function (array $data, $livewire) {
                         $shipment = $livewire->getOwnerRecord();
                         $service = new PackingService();

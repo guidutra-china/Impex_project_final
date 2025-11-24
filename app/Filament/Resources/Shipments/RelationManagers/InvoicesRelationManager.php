@@ -89,6 +89,8 @@ class InvoicesRelationManager extends RelationManager
             ->headerActions([
                 AttachAction::make()
                     ->label('Attach Invoice')
+                    ->color('info')
+                    ->icon(Heroicon::OutlinedPlusCircle)
                     ->preloadRecordSelect()
                     ->recordSelectOptionsQuery(function ($query) {
                         // Only show invoices that are not cancelled and have items
