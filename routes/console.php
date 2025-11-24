@@ -16,6 +16,11 @@ Artisan::command('inspire', function () {
 //     ->daily()
 //     ->at('02:00');
 
+// Generate recurring financial transactions every day at 3 AM
+Schedule::command('finance:generate-recurring')
+    ->daily()
+    ->at('03:00');
+
 // Other scheduling options:
 // ->hourly()                           // Every hour
 // ->everyTwoHours()                    // Every 2 hours
