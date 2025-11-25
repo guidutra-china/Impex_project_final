@@ -14,7 +14,7 @@ class SalesInvoiceResource extends Resource
 {
     protected static ?string $model = SalesInvoice::class;
 
-    protected static ?string $navigationGroup = 'Sales & Orders';
+    protected static UnitEnum|string|null $navigationGroup = 'Sales & Orders';
 
     protected static ?string $navigationIcon = 'heroicon-o-document-currency-dollar';
 

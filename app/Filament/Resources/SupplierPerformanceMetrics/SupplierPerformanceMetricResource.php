@@ -18,7 +18,7 @@ class SupplierPerformanceMetricResource extends Resource
 {
     protected static ?string $model = SupplierPerformanceMetric::class;
 
-    protected static ?string $navigationGroup = 'Suppliers';
+    protected static UnitEnum|string|null $navigationGroup = 'Suppliers';
 
     protected static ?string $navigationIcon = 'heroicon-o-chart-bar';
 

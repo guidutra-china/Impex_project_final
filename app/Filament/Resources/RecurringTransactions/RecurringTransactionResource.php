@@ -20,7 +20,7 @@ class RecurringTransactionResource extends Resource
 {
     protected static ?string $model = RecurringTransaction::class;
 
-    protected static ?string $navigationGroup = 'Finance';
+    protected static UnitEnum|string|null $navigationGroup = 'Finance';
 
     protected static ?string $navigationIcon = 'heroicon-o-arrow-path';
 

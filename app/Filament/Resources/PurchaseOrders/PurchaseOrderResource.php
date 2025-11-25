@@ -21,7 +21,7 @@ class PurchaseOrderResource extends Resource
 {
     protected static ?string $model = PurchaseOrder::class;
 
-    protected static ?string $navigationGroup = 'Purchasing & Inventory';
+    protected static UnitEnum|string|null $navigationGroup = 'Purchasing & Inventory';
 
     protected static ?string $navigationIcon = 'heroicon-o-shopping-cart';
 

@@ -22,7 +22,7 @@ class OrderResource extends Resource
 {
     protected static ?string $model = Order::class;
 
-    protected static ?string $navigationGroup = 'Sales & Orders';
+    protected static UnitEnum|string|null $navigationGroup = 'Sales & Orders';
 
     protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-list';
 

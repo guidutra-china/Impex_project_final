@@ -18,7 +18,7 @@ class SupplierContactResource extends Resource
 {
     protected static ?string $model = SupplierContact::class;
 
-    protected static ?string $navigationGroup = 'Suppliers';
+    protected static UnitEnum|string|null $navigationGroup = 'Suppliers';
 
     protected static ?string $navigationIcon = 'heroicon-o-user-circle';
 

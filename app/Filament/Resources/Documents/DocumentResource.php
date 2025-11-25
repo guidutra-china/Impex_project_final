@@ -20,7 +20,7 @@ class DocumentResource extends Resource
 {
     protected static ?string $model = Document::class;
 
-    protected static ?string $navigationGroup = 'Logistics';
+    protected static UnitEnum|string|null $navigationGroup = 'Logistics';
 
     protected static ?string $navigationIcon = 'heroicon-o-document';
 

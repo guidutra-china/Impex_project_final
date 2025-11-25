@@ -21,7 +21,7 @@ class BankAccountResource extends Resource
 {
     protected static ?string $model = BankAccount::class;
 
-    protected static ?string $navigationGroup = 'Finance';
+    protected static UnitEnum|string|null $navigationGroup = 'Finance';
 
     protected static ?string $navigationIcon = 'heroicon-o-building-library';
 

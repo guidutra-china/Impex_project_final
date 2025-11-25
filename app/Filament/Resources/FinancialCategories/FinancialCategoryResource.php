@@ -19,7 +19,7 @@ class FinancialCategoryResource extends Resource
 {
     protected static ?string $model = FinancialCategory::class;
 
-    protected static ?string $navigationGroup = 'Finance';
+    protected static UnitEnum|string|null $navigationGroup = 'Finance';
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 

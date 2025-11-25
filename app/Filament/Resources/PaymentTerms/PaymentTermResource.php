@@ -20,7 +20,7 @@ class PaymentTermResource extends Resource
 {
     protected static ?string $model = PaymentTerm::class;
 
-    protected static ?string $navigationGroup = 'Finance';
+    protected static UnitEnum|string|null $navigationGroup = 'Finance';
 
     protected static ?string $navigationIcon = 'heroicon-o-calendar-days';
 

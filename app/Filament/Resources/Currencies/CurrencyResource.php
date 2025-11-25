@@ -21,7 +21,7 @@ class CurrencyResource extends Resource
 {
     protected static ?string $model = Currency::class;
 
-    protected static ?string $navigationGroup = 'Configuration';
+    protected static UnitEnum|string|null $navigationGroup = 'Configuration';
 
     protected static ?string $navigationIcon = 'heroicon-o-currency-dollar';
 

@@ -18,7 +18,7 @@ class ClientContactResource extends Resource
 {
     protected static ?string $model = ClientContact::class;
 
-    protected static ?string $navigationGroup = 'Sales & Orders';
+    protected static UnitEnum|string|null $navigationGroup = 'Sales & Orders';
 
     protected static ?string $navigationIcon = 'heroicon-o-user';
 

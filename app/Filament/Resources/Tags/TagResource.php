@@ -21,7 +21,7 @@ class TagResource extends Resource
 {
     protected static ?string $model = Tag::class;
 
-    protected static ?string $navigationGroup = 'Purchasing & Inventory';
+    protected static UnitEnum|string|null $navigationGroup = 'Purchasing & Inventory';
 
     protected static ?string $navigationIcon = 'heroicon-o-tag';
 

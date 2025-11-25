@@ -20,7 +20,7 @@ class QualityInspectionResource extends Resource
 {
     protected static ?string $model = QualityInspection::class;
 
-    protected static ?string $navigationGroup = 'Purchasing & Inventory';
+    protected static UnitEnum|string|null $navigationGroup = 'Purchasing & Inventory';
 
     protected static ?string $navigationIcon = 'heroicon-o-shield-check';
 

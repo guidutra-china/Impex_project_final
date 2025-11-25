@@ -20,7 +20,7 @@ class CategoryResource extends Resource
 {
     protected static ?string $model = Category::class;
 
-    protected static ?string $navigationGroup = 'Purchasing & Inventory';
+    protected static UnitEnum|string|null $navigationGroup = 'Purchasing & Inventory';
 
     protected static ?string $navigationIcon = 'heroicon-o-folder';
 
