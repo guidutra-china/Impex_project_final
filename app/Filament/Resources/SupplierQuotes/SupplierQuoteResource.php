@@ -22,7 +22,7 @@ class SupplierQuoteResource extends Resource
 
     protected static UnitEnum|string|null $navigationGroup = 'Sales & Orders';
 
-    protected static ?string $navigationIcon = 'heroicon-o-document-text';
+    protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-document-text';
 
     protected static ?int $navigationSort = 2;
 

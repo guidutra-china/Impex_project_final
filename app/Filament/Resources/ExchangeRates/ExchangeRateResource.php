@@ -21,7 +21,7 @@ class ExchangeRateResource extends Resource
 
     protected static UnitEnum|string|null $navigationGroup = 'Configuration';
 
-    protected static ?string $navigationIcon = 'heroicon-o-arrows-right-left';
+    protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-arrows-right-left';
 
     protected static ?int $navigationSort = 2;
 

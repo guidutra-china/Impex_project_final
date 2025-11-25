@@ -22,7 +22,7 @@ class RecurringTransactionResource extends Resource
 
     protected static UnitEnum|string|null $navigationGroup = 'Finance';
 
-    protected static ?string $navigationIcon = 'heroicon-o-arrow-path';
+    protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-arrow-path';
 
     
 

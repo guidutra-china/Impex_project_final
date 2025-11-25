@@ -24,7 +24,7 @@ class SupplierResource extends Resource
 
     protected static UnitEnum|string|null $navigationGroup = 'Suppliers';
 
-    protected static ?string $navigationIcon = 'heroicon-o-building-office-2';
+    protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-building-office-2';
 
     protected static ?int $navigationSort = 1;
 

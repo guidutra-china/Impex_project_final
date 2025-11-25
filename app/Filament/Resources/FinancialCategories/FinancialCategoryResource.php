@@ -21,7 +21,7 @@ class FinancialCategoryResource extends Resource
 
     protected static UnitEnum|string|null $navigationGroup = 'Finance';
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-rectangle-stack';
 
     
 

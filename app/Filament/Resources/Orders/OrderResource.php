@@ -24,7 +24,7 @@ class OrderResource extends Resource
 
     protected static UnitEnum|string|null $navigationGroup = 'Sales & Orders';
 
-    protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-list';
+    protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-clipboard-document-list';
 
     protected static ?int $navigationSort = 1;
 

@@ -23,7 +23,7 @@ class TagResource extends Resource
 
     protected static UnitEnum|string|null $navigationGroup = 'Purchasing & Inventory';
 
-    protected static ?string $navigationIcon = 'heroicon-o-tag';
+    protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-tag';
 
     protected static ?int $navigationSort = 4;
 

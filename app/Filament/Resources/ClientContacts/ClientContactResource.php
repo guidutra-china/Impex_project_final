@@ -13,6 +13,7 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use UnitEnum;
 
 class ClientContactResource extends Resource
 {
@@ -20,7 +21,7 @@ class ClientContactResource extends Resource
 
     protected static UnitEnum|string|null $navigationGroup = 'Sales & Orders';
 
-    protected static ?string $navigationIcon = 'heroicon-o-user';
+    protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-user';
 
     protected static ?int $navigationSort = 5;
 

@@ -15,7 +15,7 @@ class CompanySettingsResource extends Resource
 
     protected static UnitEnum|string|null $navigationGroup = 'Configuration';
 
-    protected static ?string $navigationIcon = 'heroicon-o-cog-6-tooth';
+    protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-cog-6-tooth';
 
     protected static ?int $navigationSort = 3;
 

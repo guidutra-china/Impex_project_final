@@ -21,7 +21,7 @@ class PaymentMethodResource extends Resource
 
     protected static UnitEnum|string|null $navigationGroup = 'Finance';
 
-    protected static ?string $navigationIcon = 'heroicon-o-wallet';
+    protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-wallet';
 
     protected static ?int $navigationSort = 6;
 

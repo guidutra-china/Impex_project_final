@@ -15,6 +15,7 @@ use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use UnitEnum;
 
 class WarehouseResource extends Resource
 {
@@ -22,7 +23,7 @@ class WarehouseResource extends Resource
 
     protected static UnitEnum|string|null $navigationGroup = 'Purchasing & Inventory';
 
-    protected static ?string $navigationIcon = 'heroicon-o-building-storefront';
+    protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-building-storefront';
 
     protected static ?int $navigationSort = 5;
 

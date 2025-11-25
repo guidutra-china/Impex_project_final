@@ -19,7 +19,7 @@ class FinancialPaymentResource extends Resource
 
     protected static UnitEnum|string|null $navigationGroup = 'Finance';
 
-    protected static ?string $navigationIcon = 'heroicon-o-credit-card';
+    protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-credit-card';
 
     
 

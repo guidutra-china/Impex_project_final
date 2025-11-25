@@ -22,7 +22,7 @@ class ClientResource extends Resource
 
     protected static UnitEnum|string|null $navigationGroup = 'Sales & Orders';
 
-    protected static ?string $navigationIcon = 'heroicon-o-building-office';
+    protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-building-office';
 
     protected static ?int $navigationSort = 4;
 

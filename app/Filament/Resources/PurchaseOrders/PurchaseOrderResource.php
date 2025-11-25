@@ -23,7 +23,7 @@ class PurchaseOrderResource extends Resource
 
     protected static UnitEnum|string|null $navigationGroup = 'Purchasing & Inventory';
 
-    protected static ?string $navigationIcon = 'heroicon-o-shopping-cart';
+    protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-shopping-cart';
 
     protected static ?int $navigationSort = 1;
 

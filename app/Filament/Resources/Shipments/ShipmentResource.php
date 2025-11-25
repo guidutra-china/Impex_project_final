@@ -19,6 +19,7 @@ use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use UnitEnum;
 
 class ShipmentResource extends Resource
 {
@@ -26,7 +27,7 @@ class ShipmentResource extends Resource
 
     protected static UnitEnum|string|null $navigationGroup = 'Logistics';
 
-    protected static ?string $navigationIcon = 'heroicon-o-truck';
+    protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-truck';
 
     protected static ?int $navigationSort = 1;
 

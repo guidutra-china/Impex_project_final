@@ -23,7 +23,7 @@ class BankAccountResource extends Resource
 
     protected static UnitEnum|string|null $navigationGroup = 'Finance';
 
-    protected static ?string $navigationIcon = 'heroicon-o-building-library';
+    protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-building-library';
 
     protected static ?int $navigationSort = 5;
 

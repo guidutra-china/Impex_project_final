@@ -22,7 +22,7 @@ class CategoryResource extends Resource
 
     protected static UnitEnum|string|null $navigationGroup = 'Purchasing & Inventory';
 
-    protected static ?string $navigationIcon = 'heroicon-o-folder';
+    protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-folder';
 
     protected static ?int $navigationSort = 3;
 
