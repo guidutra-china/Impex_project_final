@@ -20,6 +20,13 @@ class RecurringTransactionResource extends Resource
 {
     protected static ?string $model = RecurringTransaction::class;
 
+    protected static ?string $navigationGroup = 'Finance';
+
+    protected static ?string $navigationIcon = 'heroicon-o-arrow-path';
+
+    protected static ?int $navigationSort = 3;
+
+
     protected static ?int $navigationSort = 3;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedArrowPath;

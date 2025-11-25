@@ -13,6 +13,13 @@ class CompanySettingsResource extends Resource
 {
     protected static ?string $model = CompanySetting::class;
 
+    protected static ?string $navigationGroup = 'Configuration';
+
+    protected static ?string $navigationIcon = 'heroicon-o-cog-6-tooth';
+
+    protected static ?int $navigationSort = 3;
+
+
     protected static ?string $navigationLabel = 'Company Settings';
 
     protected static ?string $modelLabel = 'Company Settings';

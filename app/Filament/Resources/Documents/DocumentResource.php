@@ -20,6 +20,13 @@ class DocumentResource extends Resource
 {
     protected static ?string $model = Document::class;
 
+    protected static ?string $navigationGroup = 'Logistics';
+
+    protected static ?string $navigationIcon = 'heroicon-o-document';
+
+    protected static ?int $navigationSort = 2;
+
+
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
     public static function form(Schema $schema): Schema

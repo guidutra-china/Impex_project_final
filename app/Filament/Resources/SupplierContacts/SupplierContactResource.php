@@ -18,6 +18,13 @@ class SupplierContactResource extends Resource
 {
     protected static ?string $model = SupplierContact::class;
 
+    protected static ?string $navigationGroup = 'Suppliers';
+
+    protected static ?string $navigationIcon = 'heroicon-o-user-circle';
+
+    protected static ?int $navigationSort = 2;
+
+
     protected static bool $shouldRegisterNavigation = false;
 
     protected static ?int $navigationSort = 3;

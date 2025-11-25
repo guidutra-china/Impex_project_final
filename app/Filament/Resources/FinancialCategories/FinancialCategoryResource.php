@@ -18,6 +18,13 @@ use UnitEnum;
 class FinancialCategoryResource extends Resource
 {
     protected static ?string $model = FinancialCategory::class;
+
+    protected static ?string $navigationGroup = 'Finance';
+
+    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+
+    protected static ?int $navigationSort = 4;
+
     protected static ?int $navigationSort = 4;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedFolder;

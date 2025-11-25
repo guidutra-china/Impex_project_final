@@ -20,6 +20,13 @@ class WarehouseResource extends Resource
 {
     protected static ?string $model = Warehouse::class;
 
+    protected static ?string $navigationGroup = 'Purchasing & Inventory';
+
+    protected static ?string $navigationIcon = 'heroicon-o-building-storefront';
+
+    protected static ?int $navigationSort = 5;
+
+
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
     public static function form(Schema $schema): Schema

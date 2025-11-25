@@ -18,6 +18,13 @@ use UnitEnum;
 class PaymentMethodResource extends Resource
 {
     protected static ?string $model = PaymentMethod::class;
+
+    protected static ?string $navigationGroup = 'Finance';
+
+    protected static ?string $navigationIcon = 'heroicon-o-wallet';
+
+    protected static ?int $navigationSort = 6;
+
     protected static ?int $navigationSort = 12;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCreditCard;

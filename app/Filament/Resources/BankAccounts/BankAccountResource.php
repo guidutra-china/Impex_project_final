@@ -20,6 +20,13 @@ use UnitEnum;
 class BankAccountResource extends Resource
 {
     protected static ?string $model = BankAccount::class;
+
+    protected static ?string $navigationGroup = 'Finance';
+
+    protected static ?string $navigationIcon = 'heroicon-o-building-library';
+
+    protected static ?int $navigationSort = 5;
+
     protected static ?int $navigationSort = 6;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBuildingOffice;

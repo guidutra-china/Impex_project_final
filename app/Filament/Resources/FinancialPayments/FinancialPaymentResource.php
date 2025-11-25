@@ -16,6 +16,13 @@ use UnitEnum;
 class FinancialPaymentResource extends Resource
 {
     protected static ?string $model = FinancialPayment::class;
+
+    protected static ?string $navigationGroup = 'Finance';
+
+    protected static ?string $navigationIcon = 'heroicon-o-credit-card';
+
+    protected static ?int $navigationSort = 2;
+
     protected static ?int $navigationSort = 2;
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBanknotes;
     protected static string|UnitEnum|null $navigationGroup = 'Finance';

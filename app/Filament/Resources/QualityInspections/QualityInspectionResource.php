@@ -20,6 +20,13 @@ class QualityInspectionResource extends Resource
 {
     protected static ?string $model = QualityInspection::class;
 
+    protected static ?string $navigationGroup = 'Purchasing & Inventory';
+
+    protected static ?string $navigationIcon = 'heroicon-o-shield-check';
+
+    protected static ?int $navigationSort = 6;
+
+
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
     public static function form(Schema $schema): Schema
