@@ -25,9 +25,8 @@ class ExchangeRateResource extends Resource
 
     protected static ?int $navigationSort = 2;
 
-    protected static ?int $navigationSort = 16
-    ;
-    protected static string | UnitEnum | null $navigationGroup = 'Setup';
+    
+    
 
     public static function form(Schema $schema): Schema
     {

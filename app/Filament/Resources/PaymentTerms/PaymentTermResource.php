@@ -27,7 +27,7 @@ class PaymentTermResource extends Resource
     protected static ?int $navigationSort = 7;
 
     
-    protected static string | UnitEnum | null $navigationGroup = 'Setup';
+    
 
     public static function form(Schema $schema): Schema
     {
