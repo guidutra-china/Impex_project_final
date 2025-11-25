@@ -24,11 +24,9 @@ class ClientContactResource extends Resource
 
     protected static ?int $navigationSort = 5;
 
-
     protected static bool $shouldRegisterNavigation = false;
 
-    protected static ?int $navigationSort = 4;
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedIdentification;
+    
 
     public static function form(Schema $schema): Schema
     {

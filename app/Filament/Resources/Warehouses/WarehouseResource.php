@@ -26,9 +26,6 @@ class WarehouseResource extends Resource
 
     protected static ?int $navigationSort = 5;
 
-
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
-
     public static function form(Schema $schema): Schema
     {
         return WarehouseForm::configure($schema);

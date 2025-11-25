@@ -26,13 +26,9 @@ class SupplierQuoteResource extends Resource
 
     protected static ?int $navigationSort = 2;
 
-
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedDocumentText;
-
     protected static string | UnitEnum | null $navigationGroup = 'Quotations';
 
-
-    protected static ?int $navigationSort = 10;
+    
 
     protected static ?string $navigationLabel = 'Supplier Quotes';
 

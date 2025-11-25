@@ -27,10 +27,7 @@ class BankAccountResource extends Resource
 
     protected static ?int $navigationSort = 5;
 
-    protected static ?int $navigationSort = 6;
-
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBuildingOffice;
-    protected static string|UnitEnum|null $navigationGroup = 'Finance';
+    
 
     public static function form(Schema $schema): Schema
     {

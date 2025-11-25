@@ -27,10 +27,8 @@ class TagResource extends Resource
 
     protected static ?int $navigationSort = 4;
 
-
-    protected static ?int $navigationSort = 14;
+    
     protected static string | UnitEnum | null $navigationGroup = 'Setup';
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedTag;
 
     public static function form(Schema $schema): Schema
     {

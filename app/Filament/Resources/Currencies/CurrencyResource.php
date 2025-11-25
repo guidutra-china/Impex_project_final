@@ -27,11 +27,8 @@ class CurrencyResource extends Resource
 
     protected static ?int $navigationSort = 1;
 
-
-    protected static ?int $navigationSort = 13;
+    
     protected static string | UnitEnum | null $navigationGroup = 'Setup';
-
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCurrencyDollar;
 
     public static function form(Schema $schema): Schema
     {

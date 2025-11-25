@@ -32,11 +32,7 @@ class ProductResource extends Resource
 
     protected static ?int $navigationSort = 2;
 
-
-    protected static ?int $navigationSort = 4;
-
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedFolder;
-    protected static string|UnitEnum|null $navigationGroup = 'Products';
+    
 
     public static function form(Schema $schema): Schema
     {

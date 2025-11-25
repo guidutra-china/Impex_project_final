@@ -25,10 +25,7 @@ class PaymentMethodResource extends Resource
 
     protected static ?int $navigationSort = 6;
 
-    protected static ?int $navigationSort = 12;
-
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCreditCard;
-    protected static string|UnitEnum|null $navigationGroup = 'Finance';
+    
 
     public static function form(Schema $schema): Schema
     {

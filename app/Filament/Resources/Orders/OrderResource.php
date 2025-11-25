@@ -28,15 +28,11 @@ class OrderResource extends Resource
 
     protected static ?int $navigationSort = 1;
 
-
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCube;
-    protected static string|UnitEnum|null $navigationGroup = 'Quotations';
-
     protected static ?string $navigationLabel = 'RFQs';
     protected static ?string $modelLabel = 'RFQ';
     protected static ?string $pluralModelLabel = 'RFQs';
 
-    protected static ?int $navigationSort = 9;
+    
 
     public static function form(Schema $schema): Schema
     {

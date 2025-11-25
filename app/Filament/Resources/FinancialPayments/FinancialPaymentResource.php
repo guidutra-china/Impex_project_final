@@ -21,11 +21,9 @@ class FinancialPaymentResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-credit-card';
 
-    protected static ?int $navigationSort = 2;
+    
 
     protected static ?int $navigationSort = 2;
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBanknotes;
-    protected static string|UnitEnum|null $navigationGroup = 'Finance';
     public static function form(Schema $schema): Schema
     {
         return FinancialPaymentForm::configure($schema);

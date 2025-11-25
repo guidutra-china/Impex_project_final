@@ -19,16 +19,11 @@ class CompanySettingsResource extends Resource
 
     protected static ?int $navigationSort = 3;
 
-
     protected static ?string $navigationLabel = 'Company Settings';
 
     protected static ?string $modelLabel = 'Company Settings';
 
-    protected static ?int $navigationSort = 100;
-
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBuildingOffice2;
-
-    protected static string|UnitEnum|null $navigationGroup = 'Settings';
+    
 
     public static function getPages(): array
     {

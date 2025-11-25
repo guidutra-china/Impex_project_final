@@ -26,11 +26,8 @@ class PaymentTermResource extends Resource
 
     protected static ?int $navigationSort = 7;
 
-
-    protected static ?int $navigationSort = 15;
+    
     protected static string | UnitEnum | null $navigationGroup = 'Setup';
-
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBanknotes;
 
     public static function form(Schema $schema): Schema
     {

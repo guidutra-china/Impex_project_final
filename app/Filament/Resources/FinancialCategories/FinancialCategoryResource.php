@@ -23,12 +23,9 @@ class FinancialCategoryResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
-    protected static ?int $navigationSort = 4;
+    
 
     protected static ?int $navigationSort = 4;
-
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedFolder;
-    protected static string|UnitEnum|null $navigationGroup = 'Finance';
 
     public static function form(Schema $schema): Schema
     {

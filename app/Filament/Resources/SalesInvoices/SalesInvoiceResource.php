@@ -20,13 +20,9 @@ class SalesInvoiceResource extends Resource
 
     protected static ?int $navigationSort = 3;
 
-
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedDocumentCurrencyDollar;
-    protected static string|UnitEnum|null $navigationGroup = 'Clients';
-
     protected static ?string $navigationLabel = 'Sales Invoices';
 
-    protected static ?int $navigationSort = 2;
+    
 
     public static function form(\Filament\Schemas\Schema $schema): \Filament\Schemas\Schema
     {

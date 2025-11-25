@@ -25,20 +25,14 @@ class ExchangeRateResource extends Resource
 
     protected static ?int $navigationSort = 2;
 
-
     protected static ?int $navigationSort = 16
     ;
     protected static string | UnitEnum | null $navigationGroup = 'Setup';
-
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCurrencyDollar;
-
-
 
     public static function form(Schema $schema): Schema
     {
         return ExchangeRateForm::configure($schema);
     }
-
 
     public static function table(Table $table): Table
     {

@@ -23,12 +23,9 @@ class FinancialTransactionResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-banknotes';
 
-    protected static ?int $navigationSort = 1;
+    
 
     protected static ?int $navigationSort = 1;
-
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCurrencyDollar;
-    protected static string|UnitEnum|null $navigationGroup = 'Finance';
 
     public static function form(Schema $schema): Schema
     {
