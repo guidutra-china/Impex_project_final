@@ -65,6 +65,7 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->plugin(
                 \BezhanSalleh\FilamentShield\FilamentShieldPlugin::make()
+                    ->navigationGroup('Security')
             )
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
             ->widgets([
