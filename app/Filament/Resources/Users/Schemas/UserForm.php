@@ -3,9 +3,10 @@
 namespace App\Filament\Resources\Users\Schemas;
 
 use Filament\Forms\Components\DateTimePicker;
-use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
@@ -39,6 +40,7 @@ class UserForm
                             ->helperText('Leave blank to keep current password (when editing)'),
 
                         DateTimePicker::make('email_verified_at')
+
                             ->label('Email Verified At')
                             ->nullable()
                             ->helperText('Set to verify user email manually'),
@@ -53,6 +55,8 @@ class UserForm
                             ->preload()
                             ->searchable()
                             ->helperText('Assign roles to this user'),
+                        Toggle::make('is_admin')
+                            ->label('Active')
                     ]),
             ]);
     }

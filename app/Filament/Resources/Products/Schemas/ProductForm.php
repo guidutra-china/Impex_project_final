@@ -11,6 +11,8 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Notifications\Notification;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Group;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
@@ -22,137 +24,146 @@ class ProductForm
     {
         return $schema
             ->components([
-                // Main Product Information Section
-                Section::make('Basic Information')
+                Grid::make(3)
+                    ->columnSpan(3)
                     ->schema([
-                        Select::make('category_id')
-                            ->label('Category')
-                            ->relationship('category', 'name', fn ($query) => $query->active()->ordered())
-                            ->searchable()
-                            ->preload()
-                            ->required()
-                            ->live()
-                            ->afterStateUpdated(function ($state, Set $set, Get $get, ?Product $record) {
-                                // Only auto-populate features when creating a new product
-                                if ($record !== null) {
-                                    return;
-                                }
+                        // Main Product Information Section
+                        Section::make('Basic Information')
+                            ->columns(2)
+                            ->columnSpan(2)
+                            ->schema([
+                                Select::make('category_id')
+                                    ->label('Category')
+                                    ->relationship('category', 'name', fn($query) => $query->active()->ordered())
+                                    ->searchable()
+                                    ->preload()
+                                    ->required()
+                                    ->live()
+                                    ->afterStateUpdated(function ($state, Set $set, Get $get, ?Product $record) {
+                                        // Only auto-populate features when creating a new product
+                                        if ($record !== null) {
+                                            return;
+                                        }
 
-                                if (!$state) {
-                                    return;
-                                }
+                                        if (!$state) {
+                                            return;
+                                        }
 
-                                // Get category with feature templates
-                                $category = Category::with('categoryFeatures')->find($state);
+                                        // Get category with feature templates
+                                        $category = Category::with('categoryFeatures')->find($state);
 
-                                if (!$category || $category->categoryFeatures->isEmpty()) {
-                                    return;
-                                }
+                                        if (!$category || $category->categoryFeatures->isEmpty()) {
+                                            return;
+                                        }
 
-                                // Show notification
-                                Notification::make()
-                                    ->title('Features loaded')
-                                    ->body("Loaded {$category->categoryFeatures->count()} feature templates from {$category->name}")
-                                    ->success()
-                                    ->send();
-                            })
-                            ->helperText('Select a category to auto-populate feature templates')
-                            ->columnSpan(2),
+                                        // Show notification
+                                        Notification::make()
+                                            ->title('Features loaded')
+                                            ->body("Loaded {$category->categoryFeatures->count()} feature templates from {$category->name}")
+                                            ->success()
+                                            ->send();
+                                    })
+                                    ->helperText('Select a category to auto-populate feature templates')
+                                    ->columnSpan(1),
 
-                        FileUpload::make('avatar')
-                            ->label('Product Avatar')
-                            ->image()
-                            ->imageEditor()
-                            ->imageEditorAspectRatios([
-                                '1:1',
-                                '4:3',
-                                '16:9',
-                            ])
-                            ->directory('products/avatars')
-                            ->visibility('public')
-                            ->maxSize(2048)
-                            ->imagePreviewHeight('150')
-                            ->panelLayout('compact')
-                            ->removeUploadedFileButtonPosition('right')
-                            ->uploadButtonPosition('left')
-                            ->uploadProgressIndicatorPosition('left')
-                            ->helperText('Upload a main image for this product (max 2MB)')
-                            ->columnSpan(2),
+                                TextInput::make('name')
+                                    ->label('Product Name')
+                                    ->required()
+                                    ->maxLength(255)
+                                    ->columnSpan(1),
 
-                        TextInput::make('name')
-                            ->label('Product Name')
-                            ->required()
-                            ->maxLength(255)
-                            ->columnSpan(2),
 
-                        TextInput::make('sku')
-                            ->label('SKU')
+                                TextInput::make('sku')
+                                    ->label('SKU')
 //                            ->required()
-                            ->unique(ignoreRecord: true)
-                            ->maxLength(255),
+//                                    ->unique(ignoreRecord: true)
+                                    ->maxLength(255),
 
-                        Select::make('status')
-                            ->label('Status')
-                            ->options([
-                                'active' => 'Active',
-                                'inactive' => 'Inactive',
-                            ])
-                            ->default('active')
-                            ->required(),
+                                Select::make('status')
+                                    ->label('Status')
+                                    ->options([
+                                        'active' => 'Active',
+                                        'inactive' => 'Inactive',
+                                    ])
+                                    ->default('active')
+                                    ->required(),
 
-                        Select::make('currency_id')
-                            ->label('Currency')
-                            ->relationship('currency', 'code', fn ($query) => $query->where('is_active', true))
-                            ->searchable()
-                            ->preload()
-                            ->required()
-                            ->live()
-                            ->getOptionLabelFromRecordUsing(fn ($record) => "{$record->code} ({$record->symbol}) - {$record->name}")
-                            ->helperText('Select the currency for this product'),
+                                Select::make('currency_id')
+                                    ->label('Currency')
+                                    ->relationship('currency', 'code', fn($query) => $query->where('is_active', true))
+                                    ->searchable()
+                                    ->default('USD')
+                                    ->preload()
+                                    ->required()
+                                    ->live()
+                                    ->getOptionLabelFromRecordUsing(fn($record) => "{$record->code} ({$record->symbol}) - {$record->name}")
+                                    ->helperText('Select the currency for this product'),
 
-                        TextInput::make('price')
-                            ->label('Current Price')
-                            ->numeric()
-                            ->prefix(fn (Get $get) => \App\Models\Currency::find($get('currency_id'))?->symbol ?? '$')
-                            ->step(0.01)
-                            ->helperText(fn (?Product $record) => 
-                                $record && $record->bomItems()->count() > 0 
-                                    ? 'Auto-synced from Calculated Selling Price (product has BOM)'
-                                    : 'Manually enter price (product has no BOM)'
-                            )
-                            ->disabled(fn (?Product $record) => $record && $record->bomItems()->count() > 0)
-                            ->dehydrated(fn (?Product $record) => !$record || $record->bomItems()->count() === 0)
-                            ->dehydrateStateUsing(fn ($state) => $state ? (int) ($state * 100) : null)
-                            ->formatStateUsing(fn ($state, ?Product $record) => 
-                                // If product has BOM, show calculated_selling_price
-                                $record && $record->bomItems()->count() > 0
-                                    ? ($record->calculated_selling_price ? $record->calculated_selling_price / 100 : 0)
-                                    : ($state ? $state / 100 : null)
-                            )
-                            ->live(),
+                                TextInput::make('price')
+                                    ->label('Current Price')
+                                    ->numeric()
+                                    ->prefix(fn(Get $get) => \App\Models\Currency::find($get('currency_id'))?->symbol ?? '$')
+                                    ->step(0.01)
+                                    ->helperText(fn(?Product $record) => $record && $record->bomItems()->count() > 0
+                                        ? 'Auto-synced from Calculated Selling Price (product has BOM)'
+                                        : 'Manually enter price (product has no BOM)'
+                                    )
+                                    ->disabled(fn(?Product $record) => $record && $record->bomItems()->count() > 0)
+                                    ->dehydrated(fn(?Product $record) => !$record || $record->bomItems()->count() === 0)
+                                    ->dehydrateStateUsing(fn($state) => $state ? (int)( $state * 100 ) : null)
+                                    ->formatStateUsing(fn($state, ?Product $record) => // If product has BOM, show calculated_selling_price
+                                    $record && $record->bomItems()->count() > 0
+                                        ? ( $record->calculated_selling_price ? $record->calculated_selling_price / 100 : 0 )
+                                        : ( $state ? $state / 100 : null )
+                                    )
+                                    ->live(),
 
-                        TextInput::make('brand')
-                            ->label('Family')
-                            ->maxLength(255),
+                                TextInput::make('brand')
+                                    ->label('Family')
+                                    ->maxLength(255),
 
-                        TextInput::make('model_number')
-                            ->label('Model Number')
-                            ->maxLength(255),
+                                TextInput::make('model_number')
+                                    ->label('Model Number')
+                                    ->maxLength(255),
+                            ]),
 
 
+                Section::make('Pictures')
+                    ->columns(2)
+                    ->schema([
+                        FileUpload::make('avatar')
+                        ->label('Product Avatar')
+                        ->image()
+                        ->imageEditor()
+                        ->imageEditorAspectRatios([
+                            '1:1',
+                            '4:3',
+                            '16:9',
+                        ])
+                        ->directory('products/avatars')
+                        ->visibility('public')
+                        ->maxSize(2048)
+                        ->imagePreviewHeight('150')
+                        ->panelLayout('compact')
+                        ->removeUploadedFileButtonPosition('right')
+                        ->uploadButtonPosition('left')
+                        ->uploadProgressIndicatorPosition('left')
+                        ->helperText('Upload a main image for this product (max 2MB)')
+                        ->columnSpan(2),
 
                         TextEntry::make('created_at')
                             ->label('Created')
-                            ->state(fn (?Product $record): ?string => $record?->created_at?->diffForHumans() ?? 'Just now')
-                            ->visible(fn (?Product $record) => $record !== null),
+                            ->state(fn(?Product $record): ?string => $record?->created_at?->diffForHumans() ?? 'Just now')
+                            ->visible(fn(?Product $record) => $record !== null),
 
                         TextEntry::make('updated_at')
                             ->label('Last Modified')
-                            ->state(fn (?Product $record): ?string => $record?->updated_at?->diffForHumans() ?? 'Not modified')
-                            ->visible(fn (?Product $record) => $record !== null),
-                    ])
-                    ->columns(2)
-                    ->columnSpan(['lg' => 3]),
+                            ->state(fn(?Product $record): ?string => $record?->updated_at?->diffForHumans() ?? 'Not modified')
+                            ->visible(fn(?Product $record) => $record !== null),
+
+                ])
+
+            ]),
 
                 // Supplier & Customer Relationships Section
                 Section::make('Supplier & Customer Information')

@@ -16,7 +16,7 @@ return new class extends Migration
             
             // Basic Information
             $table->string('name');
-            $table->string('sku')->unique();
+            $table->string('sku')->nullable();
             $table->text('description')->nullable();
             $table->integer('price')->nullable()->comment('Price in cents');
             $table->enum('status', ['active', 'inactive'])->default('active');

@@ -6,8 +6,8 @@
     "license": "MIT",
     "require": {
         "php": "^8.2",
-        "ext-mysql_xdevapi": "*",
         "barryvdh/laravel-dompdf": "^3.1",
+        "bezhansalleh/filament-shield": "^4.0",
         "filament/filament": "^4.0",
         "laravel/framework": "^12.38",
         "laravel/tinker": "^2.10.1",

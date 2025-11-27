@@ -22,11 +22,11 @@ class SupplierResource extends Resource
 {
     protected static ?string $model = Supplier::class;
 
-    protected static UnitEnum|string|null $navigationGroup = 'Suppliers';
+    protected static UnitEnum|string|null $navigationGroup = 'Sales & Orders';
 
     protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-building-office-2';
 
-    protected static ?int $navigationSort = 1;
+    protected static ?int $navigationSort = 5;
 
     
 

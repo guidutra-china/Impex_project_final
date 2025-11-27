@@ -25,6 +25,9 @@ class User extends Authenticatable implements FilamentUser
         'name',
         'email',
         'password',
+        'is_admin',
+        'email_verified_at',
+//        'email_verified_at' => 'datetime',
     ];
 
     /**
@@ -35,6 +38,7 @@ class User extends Authenticatable implements FilamentUser
     protected $hidden = [
         'password',
         'remember_token',
+
     ];
 
     /**
@@ -45,7 +49,7 @@ class User extends Authenticatable implements FilamentUser
     protected function casts(): array
     {
         return [
-            'email_verified_at' => 'datetime',
+
             'password' => 'hashed',
         ];
     }

@@ -19,11 +19,11 @@ class SupplierPerformanceMetricResource extends Resource
 {
     protected static ?string $model = SupplierPerformanceMetric::class;
 
-    protected static UnitEnum|string|null $navigationGroup = 'Suppliers';
+    protected static UnitEnum|string|null $navigationGroup = 'Sales & Orders';
 
     protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-chart-bar';
 
-    protected static ?int $navigationSort = 3;
+    protected static ?int $navigationSort = 6;
 
     public static function form(Schema $schema): Schema
     {
