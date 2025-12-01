@@ -3,6 +3,8 @@
 namespace App\Providers\Filament;
 
 use App\Filament\Widgets\RfqStatsWidget;
+use App\Filament\Widgets\PurchaseOrderStatsWidget;
+use App\Filament\Widgets\FinancialOverviewWidget;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -72,6 +74,8 @@ class AdminPanelProvider extends PanelProvider
                 AccountWidget::class,
                 FilamentInfoWidget::class,
                 RfqStatsWidget::class,
+                PurchaseOrderStatsWidget::class,
+                FinancialOverviewWidget::class,
             ])
             ->middleware([
                 EncryptCookies::class,
