@@ -7,9 +7,9 @@ use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
+use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
-use Filament\Schemas\Schema;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
 use Illuminate\Support\Facades\Auth;
@@ -25,7 +25,7 @@ class EditProfile extends Page implements HasForms
 
     protected static ?string $navigationLabel = 'My Profile';
 
-    protected static ?string $title = 'My Profile';
+    protected static ?string $navigationLabel = 'My Profile';
 
     protected string $view = 'filament.pages.edit-profile';
 
@@ -43,10 +43,10 @@ class EditProfile extends Page implements HasForms
         ]);
     }
 
-    public static function configure(Schema $schema): Schema
+    public function form(Form $form): Form
     {
-        return $schema
-            ->components([
+        return $form
+            ->schema([
                 Tabs::make('Profile')
                     ->tabs([
                         Tabs\Tab::make('Personal Information')
@@ -267,9 +267,7 @@ class EditProfile extends Page implements HasForms
         return [
             Action::make('save')
                 ->label('Save Changes')
-                ->action('save')
-                ->color('primary')
-                ->icon('heroicon-o-check'),
+                ->submit('save'),
         ];
     }
 }

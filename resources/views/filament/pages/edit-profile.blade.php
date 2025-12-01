@@ -1,3 +1,12 @@
 <x-filament-panels::page>
-    {{-- Page content will be rendered automatically from configure() method --}}
+    <form wire:submit="save">
+        {{ $this->form }}
+
+        <x-filament-panels::form.actions
+            :actions="$this->getFormActions()"
+            :full-width="$this->hasFullWidthFormActions()"
+        />
+    </form>
+
+    <x-filament-actions::modals />
 </x-filament-panels::page>
