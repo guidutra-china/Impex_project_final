@@ -176,7 +176,7 @@ class EventResource extends Resource
                     ->query(fn (Builder $query): Builder => $query->where('start', '<', now())->where('is_completed', false)),
             ])
             ->actions([
-                Tables\Actions\Action::make('complete')
+                Action::make('complete')
                     ->label('Complete')
                     ->icon('heroicon-o-check-circle')
                     ->color('success')
