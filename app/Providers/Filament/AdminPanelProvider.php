@@ -36,6 +36,7 @@ class AdminPanelProvider extends PanelProvider
             ->passwordReset()
             ->emailverification()
             ->profile()
+            ->defaultAvatarProvider(\Filament\AvatarProviders\UiAvatarsProvider::class)
             ->sidebarCollapsibleOnDesktop()
             ->sidebarFullyCollapsibleOnDesktop()
             ->brandName('IMPEX')
