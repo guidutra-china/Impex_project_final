@@ -63,4 +63,17 @@ class User extends Authenticatable implements FilamentUser
         // Allow super_admin role or users with is_admin flag
         return $this->hasRole('super_admin') || $this->is_admin == 1;
     }
+
+    /**
+     * Get the user's avatar URL for Filament.
+     */
+    public function getFilamentAvatarUrl(): ?string
+    {
+        if ($this->avatar) {
+            return asset('storage/' . $this->avatar);
+        }
+
+        // Fallback to UI Avatars if no avatar uploaded
+        return 'https://ui-avatars.com/api/?name=' . urlencode($this->name) . '&color=7F9CF5&background=EBF4FF';
+    }
 }
