@@ -25,6 +25,8 @@ class EditProfile extends Page implements HasForms
 
     protected static ?string $navigationLabel = 'My Profile';
 
+    protected static bool $shouldRegisterNavigation = false;
+
     protected string $view = 'filament.pages.edit-profile';
 
     protected static ?int $navigationSort = 99;
