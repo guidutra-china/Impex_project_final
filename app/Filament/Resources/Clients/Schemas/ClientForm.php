@@ -18,6 +18,14 @@ class ClientForm
             ->components([
                 Section::make()
                     ->schema([
+                        Select::make('user_id')
+                            ->label('Responsible User')
+                            ->relationship('user', 'name')
+                            ->searchable()
+                            ->preload()
+                            ->required()
+                            ->helperText('User responsible for managing this client'),
+
                         TextInput::make('code')
                             ->label('Client Code (5 letters)')
                             ->length(5)

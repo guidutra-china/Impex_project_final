@@ -6,11 +6,13 @@ namespace App\Policies;
 
 use Illuminate\Foundation\Auth\User as AuthUser;
 use App\Models\Client;
+use App\Models\User;
+use App\Traits\HasClientOwnership;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 class ClientPolicy
 {
-    use HandlesAuthorization;
+    use HandlesAuthorization, HasClientOwnership;
     
     public function viewAny(AuthUser $authUser): bool
     {
@@ -19,7 +21,7 @@ class ClientPolicy
 
     public function view(AuthUser $authUser, Client $client): bool
     {
-        return $authUser->can('View:Client');
+        return $authUser->can('View:Client') && $this->canAccessRecord($authUser, $client);
     }
 
     public function create(AuthUser $authUser): bool
@@ -29,12 +31,12 @@ class ClientPolicy
 
     public function update(AuthUser $authUser, Client $client): bool
     {
-        return $authUser->can('Update:Client');
+        return $authUser->can('Update:Client') && $this->canAccessRecord($authUser, $client);
     }
 
     public function delete(AuthUser $authUser, Client $client): bool
     {
-        return $authUser->can('Delete:Client');
+        return $authUser->can('Delete:Client') && $this->canAccessRecord($authUser, $client);
     }
 
     public function restore(AuthUser $authUser, Client $client): bool

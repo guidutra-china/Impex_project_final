@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Models\Scopes\ClientOwnershipScope;
+
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -12,6 +14,12 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class SalesInvoice extends Model
 {
     use HasFactory, SoftDeletes;
+
+    
+    protected static function booted(): void
+    {
+        static::addGlobalScope(new ClientOwnershipScope());
+    }
 
     protected $fillable = [
         'invoice_number',

@@ -18,6 +18,13 @@ class ClientsTable
                     ->searchable()
                     ->sortable()
                     ->limit(30),
+                
+                TextColumn::make('user.name')
+                    ->label('Responsible')
+                    ->badge()
+                    ->color('info')
+                    ->searchable()
+                    ->sortable(),
                 TextColumn::make('address')
                     ->searchable(),
                 TextColumn::make('city')
@@ -52,7 +59,11 @@ class ClientsTable
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                \Filament\Tables\Filters\SelectFilter::make('user')
+                    ->relationship('user', 'name')
+                    ->label('Responsible User')
+                    ->multiple()
+                    ->preload(),
             ])
             ->recordActions([
                 EditAction::make(),

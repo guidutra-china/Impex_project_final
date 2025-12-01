@@ -2,14 +2,23 @@
 
 namespace App\Models;
 
+use App\Models\Scopes\ClientOwnershipScope;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Client extends Model
 {
     use HasFactory;
+
+    protected static function booted(): void
+    {
+        static::addGlobalScope(new ClientOwnershipScope());
+    }
+    
     protected $fillable = [
+        'user_id',
         'code',
         'name',
         'address',
@@ -22,6 +31,11 @@ class Client extends Model
         'tax_number',
     ];
 
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
     public function clientcontacts(): HasMany
     {
         return $this->hasMany(ClientContact::class);
@@ -31,6 +45,4 @@ class Client extends Model
     {
         return $this->hasMany(Product::class, 'customer_id');
     }
-
-
 }
