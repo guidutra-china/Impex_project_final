@@ -13,7 +13,13 @@ class PurchaseOrderStatsWidget extends BaseWidget
     
     public static function canView(): bool
     {
-        return auth()->user()->can('widget_PurchaseOrderStatsWidget');
+        // Check if user is authenticated
+        if (!auth()->check()) {
+            return false;
+        }
+        
+        // Check permission using Shield's naming convention
+        return auth()->user()->can('view_purchase_order_stats_widget');
     }
     
     protected function getStats(): array

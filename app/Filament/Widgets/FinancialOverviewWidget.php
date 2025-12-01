@@ -14,7 +14,13 @@ class FinancialOverviewWidget extends BaseWidget
     
     public static function canView(): bool
     {
-        return auth()->user()->can('widget_FinancialOverviewWidget');
+        // Check if user is authenticated
+        if (!auth()->check()) {
+            return false;
+        }
+        
+        // Check permission using Shield's naming convention
+        return auth()->user()->can('view_financial_overview_widget');
     }
     
     protected function getStats(): array
