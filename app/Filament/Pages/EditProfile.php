@@ -14,20 +14,22 @@ use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use BackedEnum;
+use UnitEnum;
 
 class EditProfile extends Page implements HasForms
 {
     use InteractsWithForms;
 
-    protected static $navigationIcon = 'heroicon-o-user-circle';
+    protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-user-circle';
 
-    protected static $navigationLabel = 'My Profile';
+    protected static ?string $navigationLabel = 'My Profile';
 
-    protected static $title = 'My Profile';
+    protected static string $title = 'My Profile';
 
-    protected static $view = 'filament.pages.edit-profile';
+    protected static string $view = 'filament.pages.edit-profile';
 
-    protected static $navigationSort = 99;
+    protected static ?int $navigationSort = 99;
 
     public ?array $data = [];
 
