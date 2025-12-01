@@ -31,6 +31,16 @@ class EditProfile extends Page implements HasForms
 
     public ?array $data = [];
 
+    public static function getLabel(): string
+    {
+        return 'Profile';
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return 'My Profile';
+    }
+
     public function mount(): void
     {
         $this->form->fill([
