@@ -4,7 +4,14 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\EventResource\Pages;
 use App\Models\Event;
-use Filament\Forms;
+use Filament\Forms\Components\Section;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\Toggle;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\ColorPicker;
+use Filament\Forms\Components\Hidden;
 use Filament\Schemas\Schema;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -35,18 +42,18 @@ class EventResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\Section::make('Event Details')
+                Section::make('Event Details')
                     ->schema([
-                        Forms\Components\TextInput::make('title')
+                        TextInput::make('title')
                             ->required()
                             ->maxLength(255)
                             ->columnSpanFull(),
 
-                        Forms\Components\Textarea::make('description')
+                        Textarea::make('description')
                             ->rows(3)
                             ->columnSpanFull(),
 
-                        Forms\Components\DateTimePicker::make('start')
+                        DateTimePicker::make('start')
                             ->label('Start Date & Time')
                             ->required()
                             ->seconds(false)
@@ -54,7 +61,7 @@ class EventResource extends Resource
                             ->displayFormat('M d, Y H:i')
                             ->columnSpan(1),
 
-                        Forms\Components\DateTimePicker::make('end')
+                        DateTimePicker::make('end')
                             ->label('End Date & Time')
                             ->seconds(false)
                             ->native(false)
@@ -62,12 +69,12 @@ class EventResource extends Resource
                             ->after('start')
                             ->columnSpan(1),
 
-                        Forms\Components\Toggle::make('all_day')
+                        Toggle::make('all_day')
                             ->label('All Day Event')
                             ->default(false)
                             ->columnSpanFull(),
 
-                        Forms\Components\Select::make('event_type')
+                        Select::make('event_type')
                             ->label('Event Type')
                             ->options(Event::getEventTypes())
                             ->required()
@@ -79,16 +86,16 @@ class EventResource extends Resource
                             })
                             ->columnSpan(1),
 
-                        Forms\Components\ColorPicker::make('color')
+                        ColorPicker::make('color')
                             ->label('Color')
                             ->columnSpan(1),
 
-                        Forms\Components\Toggle::make('is_completed')
+                        Toggle::make('is_completed')
                             ->label('Mark as Completed')
                             ->default(false)
                             ->columnSpanFull(),
 
-                        Forms\Components\Hidden::make('user_id')
+                        Hidden::make('user_id')
                             ->default(Auth::id()),
                     ])
                     ->columns(2),
