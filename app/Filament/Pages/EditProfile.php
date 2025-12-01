@@ -2,18 +2,42 @@
 
 namespace App\Filament\Pages;
 
+use Filament\Actions\Action;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Tabs;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Concerns\InteractsWithForms;
+use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Form;
 use Filament\Notifications\Notification;
-use Filament\Pages\Auth\EditProfile as BaseEditProfile;
+use Filament\Pages\SimplePage;
+use Illuminate\Contracts\Support\Htmlable;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
-class EditProfile extends BaseEditProfile
+class EditProfile extends SimplePage implements HasForms
 {
+    use InteractsWithForms;
+
     protected static string $view = 'filament.pages.edit-profile';
+
+    public ?array $data = [];
+
+    public function getTitle(): string | Htmlable
+    {
+        return 'My Profile';
+    }
+
+    public function mount(): void
+    {
+        $this->form->fill([
+            'name' => Auth::user()->name,
+            'email' => Auth::user()->email,
+            'phone' => Auth::user()->phone,
+            'avatar' => Auth::user()->avatar,
+        ]);
+    }
 
     public function form(Form $form): Form
     {
@@ -79,15 +103,15 @@ class EditProfile extends BaseEditProfile
                             ->icon('heroicon-o-lock-closed')
                             ->schema([
                                 Section::make('Change Password')
-                                    ->description('Update your password to keep your account secure.')
+                                    ->description('Update your password to keep your account secure. Leave blank to keep current password.')
                                     ->schema([
                                         TextInput::make('current_password')
                                             ->label('Current Password')
                                             ->password()
                                             ->revealable()
-                                            ->currentPassword()
                                             ->prefixIcon('heroicon-o-key')
                                             ->helperText('Enter your current password to confirm your identity.')
+                                            ->requiredWith('password')
                                             ->dehydrated(false)
                                             ->columnSpanFull(),
 
@@ -99,10 +123,10 @@ class EditProfile extends BaseEditProfile
                                                 'nullable',
                                                 'confirmed',
                                                 'min:12',
-                                                'regex:/[A-Z]/',      // At least one uppercase
-                                                'regex:/[a-z]/',      // At least one lowercase
-                                                'regex:/[0-9]/',      // At least one number
-                                                'regex:/[@$!%*#?&]/', // At least one special character
+                                                'regex:/[A-Z]/',
+                                                'regex:/[a-z]/',
+                                                'regex:/[0-9]/',
+                                                'regex:/[@$!%*#?&]/',
                                             ])
                                             ->prefixIcon('heroicon-o-lock-closed')
                                             ->helperText('Minimum 12 characters with uppercase, lowercase, number, and special character (@$!%*#?&).')
@@ -110,8 +134,7 @@ class EditProfile extends BaseEditProfile
                                                 'min' => 'Password must be at least 12 characters.',
                                                 'regex' => 'Password must contain uppercase, lowercase, number, and special character.',
                                             ])
-                                            ->dehydrateStateUsing(fn ($state) => filled($state) ? Hash::make($state) : null)
-                                            ->dehydrated(fn ($state) => filled($state))
+                                            ->dehydrated(false)
                                             ->columnSpanFull(),
 
                                         TextInput::make('password_confirmation')
@@ -133,7 +156,7 @@ class EditProfile extends BaseEditProfile
                                     ->schema([
                                         TextInput::make('status_display')
                                             ->label('Account Status')
-                                            ->default(fn () => ucfirst($this->getUser()->status ?? 'active'))
+                                            ->default(fn () => ucfirst(Auth::user()->status ?? 'active'))
                                             ->disabled()
                                             ->dehydrated(false)
                                             ->prefixIcon('heroicon-o-check-circle')
@@ -142,7 +165,7 @@ class EditProfile extends BaseEditProfile
 
                                         TextInput::make('roles_display')
                                             ->label('Assigned Roles')
-                                            ->default(fn () => $this->getUser()->roles->pluck('name')->join(', ') ?: 'No roles assigned')
+                                            ->default(fn () => Auth::user()->roles->pluck('name')->join(', ') ?: 'No roles assigned')
                                             ->disabled()
                                             ->dehydrated(false)
                                             ->prefixIcon('heroicon-o-shield-check')
@@ -151,7 +174,7 @@ class EditProfile extends BaseEditProfile
 
                                         TextInput::make('created_at_display')
                                             ->label('Member Since')
-                                            ->default(fn () => $this->getUser()->created_at?->format('F d, Y'))
+                                            ->default(fn () => Auth::user()->created_at?->format('F d, Y'))
                                             ->disabled()
                                             ->dehydrated(false)
                                             ->prefixIcon('heroicon-o-calendar')
@@ -159,8 +182,8 @@ class EditProfile extends BaseEditProfile
 
                                         TextInput::make('last_login_display')
                                             ->label('Last Login')
-                                            ->default(fn () => $this->getUser()->last_login_at 
-                                                ? $this->getUser()->last_login_at->format('F d, Y H:i') . ' (' . $this->getUser()->last_login_at->diffForHumans() . ')'
+                                            ->default(fn () => Auth::user()->last_login_at 
+                                                ? Auth::user()->last_login_at->format('F d, Y H:i') . ' (' . Auth::user()->last_login_at->diffForHumans() . ')'
                                                 : 'Never'
                                             )
                                             ->disabled()
@@ -172,15 +195,82 @@ class EditProfile extends BaseEditProfile
                             ]),
                     ])
                     ->columnSpanFull(),
-            ]);
+            ])
+            ->statePath('data');
     }
 
-    protected function afterSave(): void
+    public function save(): void
     {
+        $data = $this->form->getState();
+
+        $user = Auth::user();
+
+        // Validate current password if trying to change password
+        if (!empty($data['password'])) {
+            if (empty($data['current_password'])) {
+                Notification::make()
+                    ->title('Error')
+                    ->body('Current password is required to change your password.')
+                    ->danger()
+                    ->send();
+                return;
+            }
+
+            if (!Hash::check($data['current_password'], $user->password)) {
+                Notification::make()
+                    ->title('Error')
+                    ->body('Current password is incorrect.')
+                    ->danger()
+                    ->send();
+                return;
+            }
+
+            $user->password = Hash::make($data['password']);
+        }
+
+        // Update basic information
+        $user->name = $data['name'];
+        $user->email = $data['email'];
+        $user->phone = $data['phone'] ?? null;
+
+        // Update avatar if changed
+        if (isset($data['avatar']) && $data['avatar'] !== $user->avatar) {
+            $user->avatar = $data['avatar'];
+        }
+
+        $user->save();
+
+        // Clear password fields
+        $this->form->fill([
+            'name' => $user->name,
+            'email' => $user->email,
+            'phone' => $user->phone,
+            'avatar' => $user->avatar,
+            'current_password' => null,
+            'password' => null,
+            'password_confirmation' => null,
+        ]);
+
         Notification::make()
             ->title('Profile Updated')
             ->body('Your profile has been updated successfully.')
             ->success()
             ->send();
+    }
+
+    protected function getFormActions(): array
+    {
+        return [
+            Action::make('save')
+                ->label('Save Changes')
+                ->submit('save')
+                ->color('primary')
+                ->icon('heroicon-o-check'),
+        ];
+    }
+
+    public function hasLogo(): bool
+    {
+        return false;
     }
 }
