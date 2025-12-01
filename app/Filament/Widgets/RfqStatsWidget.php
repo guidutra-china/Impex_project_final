@@ -12,6 +12,11 @@ class RfqStatsWidget extends BaseWidget
 {
     protected static ?int $sort = 1;
     
+    public static function canView(): bool
+    {
+        return auth()->user()->can('widget_RfqStatsWidget');
+    }
+    
     protected function getStats(): array
     {
         $user = auth()->user();

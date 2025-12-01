@@ -11,6 +11,11 @@ class PurchaseOrderStatsWidget extends BaseWidget
 {
     protected static ?int $sort = 2;
     
+    public static function canView(): bool
+    {
+        return auth()->user()->can('widget_PurchaseOrderStatsWidget');
+    }
+    
     protected function getStats(): array
     {
         $user = auth()->user();

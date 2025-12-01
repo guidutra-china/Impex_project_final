@@ -12,6 +12,11 @@ class FinancialOverviewWidget extends BaseWidget
 {
     protected static ?int $sort = 3;
     
+    public static function canView(): bool
+    {
+        return auth()->user()->can('widget_FinancialOverviewWidget');
+    }
+    
     protected function getStats(): array
     {
         $user = auth()->user();
