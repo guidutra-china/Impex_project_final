@@ -91,8 +91,7 @@ class EditProfile extends Page implements HasForms
                                         TextInput::make('phone')
                                             ->label('Phone Number')
                                             ->tel()
-                                            ->mask('(999) 999-9999')
-                                            ->placeholder('(123) 456-7890')
+                                            ->placeholder('+1234567890')
                                             ->maxLength(20)
                                             ->prefixIcon('heroicon-o-phone')
                                             ->helperText('Optional: For multi-channel communication.')
@@ -158,7 +157,7 @@ class EditProfile extends Page implements HasForms
                                     ->schema([
                                         TextInput::make('status_display')
                                             ->label('Account Status')
-                                            ->default(fn () => ucfirst(Auth::user()->status ?? 'active'))
+                                            ->formatStateUsing(fn () => ucfirst(Auth::user()->status ?? 'active'))
                                             ->disabled()
                                             ->dehydrated(false)
                                             ->prefixIcon('heroicon-o-check-circle')
@@ -167,7 +166,7 @@ class EditProfile extends Page implements HasForms
 
                                         TextInput::make('roles_display')
                                             ->label('Assigned Roles')
-                                            ->default(fn () => Auth::user()->roles->pluck('name')->join(', ') ?: 'No roles assigned')
+                                            ->formatStateUsing(fn () => Auth::user()->roles->pluck('name')->join(', ') ?: 'No roles assigned')
                                             ->disabled()
                                             ->dehydrated(false)
                                             ->prefixIcon('heroicon-o-shield-check')
@@ -176,7 +175,7 @@ class EditProfile extends Page implements HasForms
 
                                         TextInput::make('created_at_display')
                                             ->label('Member Since')
-                                            ->default(fn () => Auth::user()->created_at?->format('F d, Y'))
+                                            ->formatStateUsing(fn () => Auth::user()->created_at?->format('F d, Y'))
                                             ->disabled()
                                             ->dehydrated(false)
                                             ->prefixIcon('heroicon-o-calendar')
@@ -184,7 +183,7 @@ class EditProfile extends Page implements HasForms
 
                                         TextInput::make('last_login_display')
                                             ->label('Last Login')
-                                            ->default(fn () => Auth::user()->last_login_at 
+                                            ->formatStateUsing(fn () => Auth::user()->last_login_at 
                                                 ? Auth::user()->last_login_at->format('F d, Y H:i') . ' (' . Auth::user()->last_login_at->diffForHumans() . ')'
                                                 : 'Never'
                                             )
