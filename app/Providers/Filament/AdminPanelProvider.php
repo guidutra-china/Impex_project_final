@@ -35,7 +35,7 @@ class AdminPanelProvider extends PanelProvider
             ->registration()
             ->passwordReset()
             ->emailverification()
-            ->profile(EditProfile::class)
+            ->profile()
             ->sidebarCollapsibleOnDesktop()
             ->sidebarFullyCollapsibleOnDesktop()
             ->brandName('IMPEX')

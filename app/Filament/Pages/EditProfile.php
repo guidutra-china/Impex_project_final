@@ -11,23 +11,27 @@ use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Form;
 use Filament\Notifications\Notification;
-use Filament\Pages\SimplePage;
-use Illuminate\Contracts\Support\Htmlable;
+use Filament\Pages\Page;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
-class EditProfile extends SimplePage implements HasForms
+class EditProfile extends Page implements HasForms
 {
     use InteractsWithForms;
 
-    protected string $view = 'filament.pages.edit-profile';
+    protected static ?string $navigationIcon = 'heroicon-o-user-circle';
+
+    protected static ?string $navigationLabel = 'My Profile';
+
+    protected static ?string $title = 'My Profile';
+
+    protected static string $view = 'filament.pages.edit-profile';
+
+    protected static ?int $navigationSort = 99;
+
+    protected static ?string $navigationGroup = 'Settings';
 
     public ?array $data = [];
-
-    public function getTitle(): string | Htmlable
-    {
-        return 'My Profile';
-    }
 
     public function mount(): void
     {
@@ -263,14 +267,9 @@ class EditProfile extends SimplePage implements HasForms
         return [
             Action::make('save')
                 ->label('Save Changes')
-                ->submit('save')
+                ->action('save')
                 ->color('primary')
                 ->icon('heroicon-o-check'),
         ];
-    }
-
-    public function hasLogo(): bool
-    {
-        return false;
     }
 }
