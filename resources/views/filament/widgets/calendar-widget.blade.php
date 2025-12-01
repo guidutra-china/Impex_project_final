@@ -12,6 +12,8 @@
             var calendarEl = document.getElementById('calendar');
             
             var events = @js($events);
+            console.log('Calendar Widget - Events loaded:', events);
+            console.log('Calendar Widget - Element found:', calendarEl);
             
             var calendar = new FullCalendar.Calendar(calendarEl, {
                 initialView: 'dayGridMonth',
@@ -79,6 +81,7 @@
             });
             
             calendar.render();
+            console.log('Calendar Widget - Rendered successfully');
             
             // Refresh calendar when Livewire updates
             Livewire.on('refreshCalendar', () => {

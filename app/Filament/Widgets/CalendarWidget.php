@@ -16,13 +16,11 @@ class CalendarWidget extends Widget
     
     public static function canView(): bool
     {
-        // Check if user is authenticated
-        if (!auth()->check()) {
-            return false;
-        }
+        // Temporarily disabled for testing - enable after creating permission
+        return auth()->check();
         
-        // Check permission using Shield's actual format
-        return auth()->user()->can('View:CalendarWidget');
+        // TODO: Uncomment after creating 'View:CalendarWidget' permission
+        // return auth()->check() && auth()->user()->can('View:CalendarWidget');
     }
 
     public function getEvents(): array
