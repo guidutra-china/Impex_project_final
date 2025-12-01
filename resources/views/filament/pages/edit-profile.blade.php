@@ -1,9 +1,3 @@
 <x-filament-panels::page>
-    <x-filament-panels::form wire:submit="save">
-        {{ $this->form }}
-
-        <x-filament-panels::form.actions
-            :actions="$this->getFormActions()"
-        />
-    </x-filament-panels::form>
+    {{-- Page content will be rendered automatically from configure() method --}}
 </x-filament-panels::page>
