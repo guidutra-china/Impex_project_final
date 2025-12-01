@@ -14,6 +14,13 @@ class CalendarWidget extends Widget
 
     protected static ?int $sort = 5;
     
+    public $events = [];
+    
+    public function mount(): void
+    {
+        $this->events = $this->getEvents();
+    }
+    
     public static function canView(): bool
     {
         // Temporarily disabled for testing - enable after creating permission
@@ -54,10 +61,5 @@ class CalendarWidget extends Widget
         })->toArray();
     }
 
-    public function getViewData(): array
-    {
-        return [
-            'events' => $this->getEvents(),
-        ];
-    }
+
 }
