@@ -21,12 +21,13 @@
                     right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek'
                 },
                 buttonText: {
-                    today: 'Today',
-                    month: 'Month',
-                    week: 'Week',
-                    day: 'Day',
-                    list: 'List'
+                    today: 'Hoje',
+                    month: 'Mês',
+                    week: 'Semana',
+                    day: 'Dia',
+                    list: 'Lista'
                 },
+                locale: 'pt-br',
                 events: events,
                 eventClick: function(info) {
                     // Show event details in modal or redirect to edit
@@ -41,7 +42,7 @@
                     message += '\nCompleted: ' + (props.completed ? 'Yes' : 'No');
                     
                     if (confirm(message + '\n\nEdit this event?')) {
-                        window.location.href = '/panel/events/' + event.id + '/edit';
+                        window.location.href = '/admin/events/' + event.id + '/edit';
                     }
                 },
                 eventDidMount: function(info) {

@@ -8,11 +8,22 @@ use Illuminate\Support\Facades\Auth;
 
 class CalendarWidget extends Widget
 {
-    protected string $view = 'filament.widgets.calendar-widget';
+    protected static string $view = 'filament.widgets.calendar-widget';
 
     protected int | string | array $columnSpan = 'full';
 
-    protected static ?int $sort = 1;
+    protected static ?int $sort = 5;
+    
+    public static function canView(): bool
+    {
+        // Check if user is authenticated
+        if (!auth()->check()) {
+            return false;
+        }
+        
+        // Check permission using Shield's actual format
+        return auth()->user()->can('View:CalendarWidget');
+    }
 
     public function getEvents(): array
     {
