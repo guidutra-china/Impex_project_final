@@ -32,7 +32,7 @@ class EventResource extends Resource
 
     protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-calendar';
 
-    protected static ?string $navigationLabel = 'Calendar';
+    protected static ?string $navigationLabel = 'Calendário';
 
     protected static UnitEnum|string|null $navigationGroup = 'Settings';
 
@@ -42,19 +42,21 @@ class EventResource extends Resource
     {
         return $form
             ->schema([
-                Section::make('Event Details')
+                Section::make('Detalhes do Evento')
                     ->schema([
                         TextInput::make('title')
+                            ->label('Título')
                             ->required()
                             ->maxLength(255)
                             ->columnSpanFull(),
 
                         Textarea::make('description')
+                            ->label('Descrição')
                             ->rows(3)
                             ->columnSpanFull(),
 
                         DateTimePicker::make('start')
-                            ->label('Start Date & Time')
+                            ->label('Data e Hora de Início')
                             ->required()
                             ->seconds(false)
                             ->native(false)
@@ -62,7 +64,7 @@ class EventResource extends Resource
                             ->columnSpan(1),
 
                         DateTimePicker::make('end')
-                            ->label('End Date & Time')
+                            ->label('Data e Hora de Término')
                             ->seconds(false)
                             ->native(false)
                             ->displayFormat('M d, Y H:i')
@@ -70,12 +72,12 @@ class EventResource extends Resource
                             ->columnSpan(1),
 
                         Toggle::make('all_day')
-                            ->label('All Day Event')
+                            ->label('Evento de Dia Inteiro')
                             ->default(false)
                             ->columnSpanFull(),
 
                         Select::make('event_type')
-                            ->label('Event Type')
+                            ->label('Tipo de Evento')
                             ->options(Event::getEventTypes())
                             ->required()
                             ->default('other')
@@ -87,11 +89,11 @@ class EventResource extends Resource
                             ->columnSpan(1),
 
                         ColorPicker::make('color')
-                            ->label('Color')
+                            ->label('Cor')
                             ->columnSpan(1),
 
                         Toggle::make('is_completed')
-                            ->label('Mark as Completed')
+                            ->label('Marcar como Concluído')
                             ->default(false)
                             ->columnSpanFull(),
 
@@ -107,12 +109,13 @@ class EventResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('title')
+                    ->label('Título')
                     ->searchable()
                     ->sortable()
                     ->weight('bold'),
 
                 Tables\Columns\TextColumn::make('event_type')
-                    ->label('Type')
+                    ->label('Tipo')
                     ->badge()
                     ->formatStateUsing(fn (string $state): string => Event::getEventTypes()[$state] ?? $state)
                     ->color(fn (string $state): string => match ($state) {
@@ -126,65 +129,65 @@ class EventResource extends Resource
                     }),
 
                 Tables\Columns\TextColumn::make('start')
-                    ->label('Start')
+                    ->label('Início')
                     ->dateTime('M d, Y H:i')
                     ->sortable(),
 
                 Tables\Columns\TextColumn::make('end')
-                    ->label('End')
+                    ->label('Término')
                     ->dateTime('M d, Y H:i')
                     ->sortable()
                     ->toggleable(),
 
                 Tables\Columns\IconColumn::make('all_day')
-                    ->label('All Day')
+                    ->label('Dia Inteiro')
                     ->boolean()
                     ->toggleable(),
 
                 Tables\Columns\IconColumn::make('is_completed')
-                    ->label('Completed')
+                    ->label('Concluído')
                     ->boolean()
                     ->sortable(),
 
                 Tables\Columns\IconColumn::make('is_automatic')
-                    ->label('Auto')
+                    ->label('Automático')
                     ->boolean()
                     ->toggleable()
-                    ->tooltip('Automatically created by system'),
+                    ->tooltip('Criado automaticamente pelo sistema'),
 
                 Tables\Columns\TextColumn::make('user.name')
-                    ->label('Owner')
+                    ->label('Proprietário')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('event_type')
-                    ->label('Type')
+                    ->label('Tipo')
                     ->options(Event::getEventTypes()),
 
                 Tables\Filters\TernaryFilter::make('is_completed')
-                    ->label('Completed')
-                    ->placeholder('All events')
-                    ->trueLabel('Completed only')
-                    ->falseLabel('Pending only'),
+                    ->label('Concluído')
+                    ->placeholder('Todos os eventos')
+                    ->trueLabel('Apenas concluídos')
+                    ->falseLabel('Apenas pendentes'),
 
                 Tables\Filters\TernaryFilter::make('is_automatic')
-                    ->label('Source')
-                    ->placeholder('All events')
-                    ->trueLabel('Automatic only')
-                    ->falseLabel('Manual only'),
+                    ->label('Origem')
+                    ->placeholder('Todos os eventos')
+                    ->trueLabel('Apenas automáticos')
+                    ->falseLabel('Apenas manuais'),
 
                 Tables\Filters\Filter::make('upcoming')
-                    ->label('Upcoming')
+                    ->label('Próximos')
                     ->query(fn (Builder $query): Builder => $query->where('start', '>=', now())),
 
                 Tables\Filters\Filter::make('overdue')
-                    ->label('Overdue')
+                    ->label('Atrasados')
                     ->query(fn (Builder $query): Builder => $query->where('start', '<', now())->where('is_completed', false)),
             ])
             ->actions([
                 Action::make('complete')
-                    ->label('Complete')
+                    ->label('Concluir')
                     ->icon('heroicon-o-check-circle')
                     ->color('success')
                     ->visible(fn (Event $record): bool => !$record->is_completed)
