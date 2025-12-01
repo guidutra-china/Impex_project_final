@@ -18,8 +18,8 @@ class PurchaseOrderStatsWidget extends BaseWidget
             return false;
         }
         
-        // Check permission using Shield's naming convention
-        return auth()->user()->can('view_purchase_order_stats_widget');
+        // Check permission using Shield's actual format (uses separator from config)
+        return auth()->user()->can('View:PurchaseOrderStatsWidget');
     }
     
     protected function getStats(): array
