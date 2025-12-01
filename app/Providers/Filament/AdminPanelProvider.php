@@ -35,8 +35,13 @@ class AdminPanelProvider extends PanelProvider
             ->registration()
             ->passwordReset()
             ->emailverification()
-            ->profile(EditProfile::class)
             ->defaultAvatarProvider(\Filament\AvatarProviders\UiAvatarsProvider::class)
+            ->userMenuItems([
+                'profile' => \Filament\Navigation\MenuItem::make()
+                    ->label('Profile')
+                    ->url(fn (): string => EditProfile::getUrl())
+                    ->icon('heroicon-o-user-circle'),
+            ])
             ->sidebarCollapsibleOnDesktop()
             ->sidebarFullyCollapsibleOnDesktop()
             ->brandName('IMPEX')
