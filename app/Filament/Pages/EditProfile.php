@@ -29,8 +29,6 @@ class EditProfile extends Page implements HasForms
 
     protected static $navigationSort = 99;
 
-    protected static $navigationGroup = 'Settings';
-
     public ?array $data = [];
 
     public function mount(): void
