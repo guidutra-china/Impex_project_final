@@ -4,14 +4,14 @@ namespace App\Filament\Pages;
 
 use Filament\Actions\Action;
 use Filament\Forms\Components\FileUpload;
-use Filament\Forms\Components\Section;
-use Filament\Forms\Components\Tabs;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
-use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
+use Filament\Schemas\Components\Form;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Tabs;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use BackedEnum;
@@ -25,7 +25,7 @@ class EditProfile extends Page implements HasForms
 
     protected static ?string $navigationLabel = 'My Profile';
 
-    protected static string $title = 'My Profile';
+    protected static ?string $title = 'My Profile';
 
     protected string $view = 'filament.pages.edit-profile';
 
