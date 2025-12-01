@@ -21,9 +21,11 @@ class ClientOwnershipScope implements Scope
             return;
         }
 
-        // Super Admin sees everything
-        if ($user->hasRole('super_admin')) {
-            return;
+        // Check if user has any role with can_see_all = true
+        $canSeeAll = $user->roles()->where('can_see_all', true)->exists();
+        
+        if ($canSeeAll) {
+            return; // User can see everything
         }
 
         // For Client model - filter by user_id

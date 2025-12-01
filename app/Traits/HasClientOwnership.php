@@ -7,11 +7,13 @@ use App\Models\User;
 trait HasClientOwnership
 {
     /**
-     * Check if user can see all records (Super Admin)
+     * Check if user can see all records
+     * Based on role's can_see_all flag
      */
     protected function canSeeAll(User $user): bool
     {
-        return $user->hasRole('super_admin');
+        // Check if user has any role with can_see_all = true
+        return $user->roles()->where('can_see_all', true)->exists();
     }
 
     /**
@@ -32,7 +34,7 @@ trait HasClientOwnership
      */
     protected function canAccessRecord(User $user, $record): bool
     {
-        // Super Admin can access everything
+        // Users with can_see_all role can access everything
         if ($this->canSeeAll($user)) {
             return true;
         }
@@ -54,8 +56,8 @@ trait HasClientOwnership
         }
 
         // For nested relationships (e.g., SupplierQuote -> Order -> Client)
-        if (method_exists($record, 'order') && $record->order && method_exists($record->order, 'client')) {
-            return $this->ownsClient($user, $record->order->client);
+        if (method_exists($record, 'order') && $record->order && method_exists($record->order, 'customer')) {
+            return $this->ownsClient($user, $record->order->customer);
         }
 
         // Default: deny access
