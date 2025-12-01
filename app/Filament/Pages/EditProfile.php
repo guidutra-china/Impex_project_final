@@ -84,7 +84,7 @@ class EditProfile extends Page implements HasForms
                                             ->required()
                                             ->maxLength(255)
                                             ->prefixIcon('heroicon-o-envelope')
-                                            ->unique('users', 'email', ignoreRecord: fn () => Auth::id())
+                                            ->rule(fn () => \Illuminate\Validation\Rule::unique('users', 'email')->ignore(Auth::id()))
                                             ->helperText('Your email address is used for login and notifications.')
                                             ->columnSpan(1),
 
