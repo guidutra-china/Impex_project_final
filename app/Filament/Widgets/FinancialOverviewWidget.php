@@ -120,38 +120,38 @@ class FinancialOverviewWidget extends BaseWidget
         $formattedCashFlow = 'R$ ' . number_format($cashFlow, 2, ',', '.');
         $formattedThisMonthSales = 'R$ ' . number_format($thisMonthSales, 2, ',', '.');
         
-        $scopeDescription = $canSeeAll ? 'Todos os clientes' : 'Seus clientes';
+        $scopeDescription = $canSeeAll ? 'All clients' : 'Your clients';
         
         return [
-            Stat::make('Contas a Receber', $formattedToReceive)
-                ->description("{$invoicesPending} invoices pendentes")
+            Stat::make('Accounts Receivable', $formattedToReceive)
+                ->description("{$invoicesPending} pending invoices")
                 ->descriptionIcon('heroicon-o-arrow-trending-up')
                 ->color('success')
                 ->chart($this->getReceivablesChart()),
             
-            Stat::make('Contas a Pagar', $formattedToPay)
-                ->description("{$posPending} POs ativas")
+            Stat::make('Accounts Payable', $formattedToPay)
+                ->description("{$posPending} active POs")
                 ->descriptionIcon('heroicon-o-arrow-trending-down')
                 ->color('danger'),
             
-            Stat::make('Fluxo de Caixa Projetado', $formattedCashFlow)
-                ->description('A receber - A pagar')
+            Stat::make('Projected Cash Flow', $formattedCashFlow)
+                ->description('Receivable - Payable')
                 ->descriptionIcon($cashFlow >= 0 ? 'heroicon-o-check-circle' : 'heroicon-o-exclamation-triangle')
                 ->color($cashFlow >= 0 ? 'success' : 'warning'),
             
-            Stat::make('Invoices Vencidas', $invoicesOverdue)
+            Stat::make('Overdue Invoices', $invoicesOverdue)
                 ->description('R$ ' . number_format($totalOverdue, 2, ',', '.'))
                 ->descriptionIcon('heroicon-o-exclamation-circle')
                 ->color($invoicesOverdue > 0 ? 'danger' : 'success'),
                 // ->url($invoicesOverdue > 0 ? route('filament.admin.resources.sales-invoices.sales-invoices.index') : null)
             
-            Stat::make('Vencem em 30 Dias', $invoicesDueSoon)
-                ->description('Invoices a vencer')
+            Stat::make('Due in 30 Days', $invoicesDueSoon)
+                ->description('Invoices due soon')
                 ->descriptionIcon('heroicon-o-calendar')
                 ->color($invoicesDueSoon > 0 ? 'warning' : 'gray'),
             
-            Stat::make('Vendas Este Mês', $formattedThisMonthSales)
-                ->description($salesTrend >= 0 ? "+{$salesTrend}% vs mês anterior" : "{$salesTrend}% vs mês anterior")
+            Stat::make('Sales This Month', $formattedThisMonthSales)
+                ->description($salesTrend >= 0 ? "+{$salesTrend}% vs last month" : "{$salesTrend}% vs last month")
                 ->descriptionIcon($salesTrend >= 0 ? 'heroicon-o-arrow-trending-up' : 'heroicon-o-arrow-trending-down')
                 ->color($salesTrend >= 0 ? 'success' : 'danger'),
         ];

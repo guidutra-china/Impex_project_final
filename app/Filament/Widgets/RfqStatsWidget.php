@@ -79,27 +79,27 @@ class RfqStatsWidget extends BaseWidget
             ? round((($thisMonthRfqs - $lastMonthRfqs) / $lastMonthRfqs) * 100, 1)
             : 0;
         
-        $scopeDescription = $canSeeAll ? 'Todas as RFQs' : 'Seus clientes';
+        $scopeDescription = $canSeeAll ? 'All RFQs' : 'Your clients';
         
         return [
-            Stat::make('RFQs Ativas', $activeRfqs)
-                ->description('Draft, Pendente, Enviadas, Cotadas')
+            Stat::make('Active RFQs', $activeRfqs)
+                ->description('Draft, Pending, Sent, Quoted')
                 ->descriptionIcon('heroicon-o-document-text')
                 ->color('info')
                 ->chart($this->getLastSevenDaysChart()),
             
-            Stat::make('Cotações Recebidas', $quotesReceived)
-                ->description("Tempo médio: {$avgResponseTime} dias")
+            Stat::make('Quotes Received', $quotesReceived)
+                ->description("Avg time: {$avgResponseTime} days")
                 ->descriptionIcon('heroicon-o-inbox-arrow-down')
                 ->color($avgResponseTime > 3 ? 'warning' : 'success'),
             
-            Stat::make('Taxa de Conversão', "{$conversionRate}%")
-                ->description("{$wonRfqs} RFQs ganhas de {$totalRfqs} total")
+            Stat::make('Conversion Rate', "{$conversionRate}%")
+                ->description("{$wonRfqs} RFQs won out of {$totalRfqs} total")
                 ->descriptionIcon('heroicon-o-check-circle')
                 ->color($conversionRate >= 30 ? 'success' : ($conversionRate >= 15 ? 'warning' : 'danger')),
             
-            Stat::make('RFQs Este Mês', $thisMonthRfqs)
-                ->description($trend >= 0 ? "+{$trend}% vs mês anterior" : "{$trend}% vs mês anterior")
+            Stat::make('RFQs This Month', $thisMonthRfqs)
+                ->description($trend >= 0 ? "+{$trend}% vs last month" : "{$trend}% vs last month")
                 ->descriptionIcon($trend >= 0 ? 'heroicon-o-arrow-trending-up' : 'heroicon-o-arrow-trending-down')
                 ->color($trend >= 0 ? 'success' : 'danger'),
         ];

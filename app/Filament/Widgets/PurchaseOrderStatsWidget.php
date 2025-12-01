@@ -81,38 +81,38 @@ class PurchaseOrderStatsWidget extends BaseWidget
             ->whereMonth('created_at', now()->month)
             ->count();
         
-        $scopeDescription = $canSeeAll ? 'Todas as POs' : 'Seus clientes';
+        $scopeDescription = $canSeeAll ? 'All POs' : 'Your clients';
         
         return [
-            Stat::make('POs Pendentes', $pendingPOs)
-                ->description('Draft + Aguardando Aprovação')
+            Stat::make('Pending POs', $pendingPOs)
+                ->description('Draft + Awaiting Approval')
                 ->descriptionIcon('heroicon-o-clock')
                 ->color('warning'),
                 // ->url(route('filament.admin.resources.purchase-orders.purchase-orders.index'))
             
-            Stat::make('POs Ativas', $activePOs)
-                ->description('Aprovadas, Enviadas, Confirmadas')
+            Stat::make('Active POs', $activePOs)
+                ->description('Approved, Sent, Confirmed')
                 ->descriptionIcon('heroicon-o-arrow-path')
                 ->color('info')
                 ->chart($this->getLastSevenDaysChart()),
             
-            Stat::make('Em Produção', $inProductionPOs)
-                ->description('Produtos sendo fabricados')
+            Stat::make('In Production', $inProductionPOs)
+                ->description('Products being manufactured')
                 ->descriptionIcon('heroicon-o-wrench-screwdriver')
                 ->color('primary'),
             
-            Stat::make('POs Atrasadas', $overduePOs)
-                ->description('Data de entrega passou')
+            Stat::make('Overdue POs', $overduePOs)
+                ->description('Delivery date passed')
                 ->descriptionIcon('heroicon-o-exclamation-triangle')
                 ->color($overduePOs > 0 ? 'danger' : 'success'),
                 // ->url($overduePOs > 0 ? route('filament.admin.resources.purchase-orders.purchase-orders.index') : null)
             
-            Stat::make('Valor em Aberto', $formattedValue)
-                ->description('POs ativas (moeda base)')
+            Stat::make('Open Value', $formattedValue)
+                ->description('Active POs (base currency)')
                 ->descriptionIcon('heroicon-o-currency-dollar')
                 ->color('success'),
             
-            Stat::make('POs Este Mês', $thisMonthPOs)
+            Stat::make('POs This Month', $thisMonthPOs)
                 ->description($scopeDescription)
                 ->descriptionIcon('heroicon-o-shopping-cart')
                 ->color('gray'),
