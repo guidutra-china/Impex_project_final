@@ -76,8 +76,8 @@ class PurchaseOrderStatsWidget extends BaseWidget
             Stat::make('POs Pendentes', $pendingPOs)
                 ->description('Draft + Aguardando Aprovação')
                 ->descriptionIcon('heroicon-o-clock')
-                ->color('warning')
-                // ->url(route('filament.admin.resources.purchase-orders.purchase-orders.index')),
+                ->color('warning'),
+                // ->url(route('filament.admin.resources.purchase-orders.purchase-orders.index'))
             
             Stat::make('POs Ativas', $activePOs)
                 ->description('Aprovadas, Enviadas, Confirmadas')
@@ -93,8 +93,8 @@ class PurchaseOrderStatsWidget extends BaseWidget
             Stat::make('POs Atrasadas', $overduePOs)
                 ->description('Data de entrega passou')
                 ->descriptionIcon('heroicon-o-exclamation-triangle')
-                ->color($overduePOs > 0 ? 'danger' : 'success')
-                // ->url($overduePOs > 0 ? route('filament.admin.resources.purchase-orders.purchase-orders.index') : null),
+                ->color($overduePOs > 0 ? 'danger' : 'success'),
+                // ->url($overduePOs > 0 ? route('filament.admin.resources.purchase-orders.purchase-orders.index') : null)
             
             Stat::make('Valor em Aberto', $formattedValue)
                 ->description('POs ativas (moeda base)')
