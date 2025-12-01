@@ -131,8 +131,8 @@ class FinancialOverviewWidget extends BaseWidget
             Stat::make('Invoices Vencidas', $invoicesOverdue)
                 ->description('R$ ' . number_format($totalOverdue, 2, ',', '.'))
                 ->descriptionIcon('heroicon-o-exclamation-circle')
-                ->color($invoicesOverdue > 0 ? 'danger' : 'success')
-                // ->url($invoicesOverdue > 0 ? route('filament.admin.resources.sales-invoices.sales-invoices.index') : null),
+                ->color($invoicesOverdue > 0 ? 'danger' : 'success'),
+                // ->url($invoicesOverdue > 0 ? route('filament.admin.resources.sales-invoices.sales-invoices.index') : null)
             
             Stat::make('Vencem em 30 Dias', $invoicesDueSoon)
                 ->description('Invoices a vencer')
