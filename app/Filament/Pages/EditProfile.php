@@ -9,7 +9,7 @@ use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
-use Filament\Schemas\Components\Form;
+use Filament\Schemas\Schema;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
 use Illuminate\Support\Facades\Auth;
@@ -43,10 +43,10 @@ class EditProfile extends Page implements HasForms
         ]);
     }
 
-    public function form(Form $form): Form
+    public static function configure(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 Tabs::make('Profile')
                     ->tabs([
                         Tabs\Tab::make('Personal Information')
