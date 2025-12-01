@@ -20,7 +20,7 @@ class EditProfile extends SimplePage implements HasForms
 {
     use InteractsWithForms;
 
-    protected static string $view = 'filament.pages.edit-profile';
+    protected string $view = 'filament.pages.edit-profile';
 
     public ?array $data = [];
 
