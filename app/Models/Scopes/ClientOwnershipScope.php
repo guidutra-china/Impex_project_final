@@ -32,44 +32,33 @@ class ClientOwnershipScope implements Scope
             return;
         }
 
-        // For models with direct client_id
-        if ($model->getTable() === 'orders' || 
-            $model->getTable() === 'purchase_orders' || 
-            $model->getTable() === 'sales_invoices') {
-            
+        // For Order (uses customer_id -> Client)
+        if ($model instanceof \App\Models\Order) {
+            $builder->whereHas('customer', function ($query) use ($user) {
+                $query->where('user_id', $user->id);
+            });
+            return;
+        }
+
+        // For PurchaseOrder (nested: PO -> Order -> Customer/Client)
+        if ($model instanceof \App\Models\PurchaseOrder) {
+            $builder->whereHas('order.customer', function ($query) use ($user) {
+                $query->where('user_id', $user->id);
+            });
+            return;
+        }
+
+        // For SalesInvoice (uses client_id -> Client)
+        if ($model instanceof \App\Models\SalesInvoice) {
             $builder->whereHas('client', function ($query) use ($user) {
                 $query->where('user_id', $user->id);
             });
             return;
         }
 
-        // For SupplierQuote (nested: SupplierQuote -> Order -> Client)
-        if ($model->getTable() === 'supplier_quotes') {
-            $builder->whereHas('order.client', function ($query) use ($user) {
-                $query->where('user_id', $user->id);
-            });
-            return;
-        }
-
-        // For OrderItems (nested: OrderItem -> Order -> Client)
-        if ($model->getTable() === 'order_items') {
-            $builder->whereHas('order.client', function ($query) use ($user) {
-                $query->where('user_id', $user->id);
-            });
-            return;
-        }
-
-        // For PurchaseOrderItems (nested: POItem -> PO -> Client)
-        if ($model->getTable() === 'purchase_order_items') {
-            $builder->whereHas('purchaseOrder.client', function ($query) use ($user) {
-                $query->where('user_id', $user->id);
-            });
-            return;
-        }
-
-        // For SalesInvoiceItems (nested: SIItem -> SI -> Client)
-        if ($model->getTable() === 'sales_invoice_items') {
-            $builder->whereHas('salesInvoice.client', function ($query) use ($user) {
+        // For SupplierQuote (nested: SupplierQuote -> Order -> Customer/Client)
+        if ($model instanceof \App\Models\SupplierQuote) {
+            $builder->whereHas('order.customer', function ($query) use ($user) {
                 $query->where('user_id', $user->id);
             });
             return;
