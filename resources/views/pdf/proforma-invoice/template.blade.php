@@ -59,6 +59,7 @@
         <td class="info-box" style="width: 48%; vertical-align: top; padding: 5px; border: 1px solid #ddd; background: #f9fafb;">
             <div class="info-box-title">Bill To:</div>
             <div class="info-box-content">
+                @if($model->customer)
                 <p><strong>{{ $model->customer->name }}</strong></p>
                 @if($model->customer->address)
                 <p>{{ $model->customer->address }}</p>
@@ -74,6 +75,9 @@
                 @endif
                 @if($model->customer->phone)
                 <p>Phone: {{ $model->customer->phone }}</p>
+                @endif
+                @else
+                <p>No customer assigned</p>
                 @endif
             </div>
         </td>

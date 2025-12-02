@@ -38,18 +38,22 @@
     <tr>
         <td class="info-box" style="width: 48%; vertical-align: top;">
             <h3>Customer Information</h3>
-            <p><strong>{{ $model->customer->name }}</strong></p>
-            @if($model->customer->address)
-                <p>{{ $model->customer->address }}</p>
-            @endif
-            @if($model->customer->city || $model->customer->state)
-                <p>{{ $model->customer->city }}@if($model->customer->city && $model->customer->state), @endif{{ $model->customer->state }}</p>
-            @endif
-            @if($model->customer->email)
-                <p>Email: {{ $model->customer->email }}</p>
-            @endif
-            @if($model->customer->phone)
-                <p>Phone: {{ $model->customer->phone }}</p>
+            @if($model->customer)
+                <p><strong>{{ $model->customer->name }}</strong></p>
+                @if($model->customer->address)
+                    <p>{{ $model->customer->address }}</p>
+                @endif
+                @if($model->customer->city || $model->customer->state)
+                    <p>{{ $model->customer->city }}@if($model->customer->city && $model->customer->state), @endif{{ $model->customer->state }}</p>
+                @endif
+                @if($model->customer->email)
+                    <p>Email: {{ $model->customer->email }}</p>
+                @endif
+                @if($model->customer->phone)
+                    <p>Phone: {{ $model->customer->phone }}</p>
+                @endif
+            @else
+                <p>No customer assigned</p>
             @endif
         </td>
         <td style="width: 4%;"></td>

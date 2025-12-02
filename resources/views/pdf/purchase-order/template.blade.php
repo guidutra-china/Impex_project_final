@@ -38,18 +38,22 @@
     <tr>
         <td class="info-box" style="width: 48%; vertical-align: top;">
             <h3>Supplier (Vendor)</h3>
-            <p><strong>{{ $model->supplier->name }}</strong></p>
-            @if($model->supplier->address)
-                <p>{{ $model->supplier->address }}</p>
-            @endif
-            @if($model->supplier->city || $model->supplier->state)
-                <p>{{ $model->supplier->city }}@if($model->supplier->city && $model->supplier->state), @endif{{ $model->supplier->state }}</p>
-            @endif
-            @if($model->supplier->email)
-                <p>Email: {{ $model->supplier->email }}</p>
-            @endif
-            @if($model->supplier->phone)
-                <p>Phone: {{ $model->supplier->phone }}</p>
+            @if($model->supplier)
+                <p><strong>{{ $model->supplier->name }}</strong></p>
+                @if($model->supplier->address)
+                    <p>{{ $model->supplier->address }}</p>
+                @endif
+                @if($model->supplier->city || $model->supplier->state)
+                    <p>{{ $model->supplier->city }}@if($model->supplier->city && $model->supplier->state), @endif{{ $model->supplier->state }}</p>
+                @endif
+                @if($model->supplier->email)
+                    <p>Email: {{ $model->supplier->email }}</p>
+                @endif
+                @if($model->supplier->phone)
+                    <p>Phone: {{ $model->supplier->phone }}</p>
+                @endif
+            @else
+                <p>No supplier assigned</p>
             @endif
         </td>
         <td style="width: 4%;"></td>
