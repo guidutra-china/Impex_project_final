@@ -15,12 +15,14 @@ use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use BackedEnum;
+use UnitEnum;
 
 class ProformaInvoiceResource extends Resource
 {
     protected static ?string $model = ProformaInvoice::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-document-text';
+    protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-document-text';
 
     protected static ?string $navigationLabel = 'Proforma Invoices';
 
@@ -28,7 +30,7 @@ class ProformaInvoiceResource extends Resource
 
     protected static ?string $pluralModelLabel = 'Proforma Invoices';
 
-    protected static ?string $navigationGroup = 'Sales';
+    protected static UnitEnum|string|null $navigationGroup = 'Sales';
 
     protected static ?int $navigationSort = 4;
 
