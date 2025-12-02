@@ -12,7 +12,7 @@ return new class extends Migration
             $table->enum('incoterm', [
                 'EXW', 'FCA', 'CPT', 'CIP', 'DAP', 'DPU', 'DDP',
                 'FAS', 'FOB', 'CFR', 'CIF'
-            ])->nullable()->after('payment_term_id')->comment('International Commercial Terms');
+            ])->nullable()->after('commission_type')->comment('International Commercial Terms');
             
             $table->string('incoterm_location')->nullable()->after('incoterm')->comment('Ex: Shanghai Port, New York, etc.');
         });
