@@ -2,19 +2,6 @@
     <x-filament-widgets::widget class="col-span-full">
         <x-filament::section>
             <div style="padding: 1rem; width: 100%;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                    <h3 style="font-size: 1.125rem; font-weight: 600;">Calendar</h3>
-                    <a href="{{ route('filament.admin.resources.events.create') }}" 
-                       class="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-md shadow-sm transition-colors"
-                       style="background-color: rgb(99 102 241); color: white; text-decoration: none;"
-                       onmouseover="this.style.backgroundColor='rgb(79 70 229)'"
-                       onmouseout="this.style.backgroundColor='rgb(99 102 241)'">
-                        <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                        </svg>
-                        New Event
-                    </a>
-                </div>
                 <div id="calendar-widget" style="min-height: 600px;"></div>
             </div>
         </x-filament::section>
@@ -40,8 +27,15 @@
             var events = {!! json_encode($events) !!};
             console.log('Events loaded:', events);
             
-            var calendar = new FullCalendar.Calendar(calendarEl, {
-                initialView: 'dayGridMonth',
+            // Add custom button to toolbar
+            const customButton = document.createElement('a');
+            customButton.href = '{{ route('filament.admin.resources.events.create') }}';
+            customButton.className = 'fc-button fc-button-primary';
+            customButton.style.cssText = 'margin-left: 0.5rem; padding: 0.4em 0.65em; font-size: 1em; line-height: 1.5; border-radius: 0.25em; cursor: pointer; background-color: rgb(99 102 241); border-color: rgb(99 102 241); color: white; text-decoration: none; display: inline-flex; align-items: center; justify-content: center;';
+            customButton.innerHTML = '<svg style="width: 1em; height: 1em;" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>';
+            customButton.title = 'New Event';
+            
+            const calendar = new FullCalendar.Calendar(calendarEl, {               initialView: 'dayGridMonth',
                 headerToolbar: {
                     left: 'prev,next today',
                     center: 'title',
@@ -103,6 +97,13 @@
             });
             
             calendar.render();
+            
+            // Insert custom button next to Today button
+            const todayButton = calendarEl.querySelector('.fc-today-button');
+            if (todayButton) {
+                todayButton.parentNode.insertBefore(customButton, todayButton.nextSibling);
+            }
+            
             console.log('Calendar rendered successfully!');
             
             // Listen for event creation to refresh calendar
