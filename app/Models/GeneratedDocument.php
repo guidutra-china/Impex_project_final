@@ -83,7 +83,7 @@ class GeneratedDocument extends Model
      */
     public function getFullPath(): string
     {
-        return Storage::path($this->file_path);
+        return storage_path('app/' . $this->file_path);
     }
 
     public function getUrl(): string
