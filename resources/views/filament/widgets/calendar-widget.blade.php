@@ -2,6 +2,39 @@
     <x-filament-widgets::widget class="col-span-full">
         <x-filament::section>
             <div style="padding: 1rem; width: 100%;">
+                {{-- Event Type Filters --}}
+                <div id="event-filters" style="margin-bottom: 1rem; padding: 0.75rem; background-color: #f9fafb; border-radius: 0.5rem; display: flex; flex-wrap: wrap; gap: 1rem; align-items: center;">
+                    <span style="font-weight: 600; font-size: 0.875rem; color: #374151;">Filter by type:</span>
+                    <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-size: 0.875rem;">
+                        <input type="checkbox" class="event-type-filter" data-type="payment" checked style="cursor: pointer;">
+                        <span style="color: #3b82f6;">●</span> Payment
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-size: 0.875rem;">
+                        <input type="checkbox" class="event-type-filter" data-type="shipment_arrival" checked style="cursor: pointer;">
+                        <span style="color: #10b981;">●</span> Shipment Arrival
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-size: 0.875rem;">
+                        <input type="checkbox" class="event-type-filter" data-type="document_submission" checked style="cursor: pointer;">
+                        <span style="color: #f59e0b;">●</span> Document Submission
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-size: 0.875rem;">
+                        <input type="checkbox" class="event-type-filter" data-type="meeting" checked style="cursor: pointer;">
+                        <span style="color: #8b5cf6;">●</span> Meeting
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-size: 0.875rem;">
+                        <input type="checkbox" class="event-type-filter" data-type="deadline" checked style="cursor: pointer;">
+                        <span style="color: #ef4444;">●</span> Deadline
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-size: 0.875rem;">
+                        <input type="checkbox" class="event-type-filter" data-type="reminder" checked style="cursor: pointer;">
+                        <span style="color: #06b6d4;">●</span> Reminder
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-size: 0.875rem;">
+                        <input type="checkbox" class="event-type-filter" data-type="other" checked style="cursor: pointer;">
+                        <span style="color: #6b7280;">●</span> Other
+                    </label>
+                </div>
+                
                 <div id="calendar-widget" style="min-height: 600px;"></div>
             </div>
         </x-filament::section>
@@ -35,7 +68,17 @@
             customButton.innerHTML = '<svg style="width: 1em; height: 1em;" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>';
             customButton.title = 'New Event';
             
-            const calendar = new FullCalendar.Calendar(calendarEl, {               initialView: 'dayGridMonth',
+            // Store all events for filtering
+            let allEvents = events;
+            let activeFilters = new Set(['payment', 'shipment_arrival', 'document_submission', 'meeting', 'deadline', 'reminder', 'other']);
+            
+            // Function to get filtered events
+            function getFilteredEvents() {
+                return allEvents.filter(event => activeFilters.has(event.extendedProps.type));
+            }
+            
+            const calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
                 headerToolbar: {
                     left: 'prev,next today',
                     center: 'title',
@@ -49,7 +92,7 @@
                     list: 'List'
                 },
                 locale: 'en',
-                events: events,
+                events: getFilteredEvents(),
                 eventClick: function(info) {
                     var event = info.event;
                     var props = event.extendedProps;
@@ -103,6 +146,22 @@
             if (todayButton) {
                 todayButton.parentNode.insertBefore(customButton, todayButton.nextSibling);
             }
+            
+            // Setup filter event listeners
+            document.querySelectorAll('.event-type-filter').forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    const type = this.dataset.type;
+                    if (this.checked) {
+                        activeFilters.add(type);
+                    } else {
+                        activeFilters.delete(type);
+                    }
+                    
+                    // Update calendar events
+                    calendar.removeAllEvents();
+                    calendar.addEventSource(getFilteredEvents());
+                });
+            });
             
             console.log('Calendar rendered successfully!');
             
