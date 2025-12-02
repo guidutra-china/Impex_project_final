@@ -6,7 +6,11 @@
             </x-slot>
             
             <x-slot name="headerEnd">
-                <x-filament-actions::actions :actions="$this->getCachedHeaderActions()" />
+                <div>
+                    @foreach ($this->getCachedHeaderActions() as $action)
+                        {{ $action }}
+                    @endforeach
+                </div>
             </x-slot>
             <div style="padding: 1rem; width: 100%;">
                 <div id="calendar-widget" style="min-height: 600px;"></div>
