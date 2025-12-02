@@ -45,8 +45,15 @@ class ExcelExportService
         
         // Save Excel
         $writer = new Xlsx($spreadsheet);
-        $tempPath = storage_path('app/' . $filePath);
-        $writer->save($tempPath);
+        $fullPath = storage_path('app/' . $filePath);
+        
+        // Ensure the full directory path exists (including nested directories)
+        $dirPath = dirname($fullPath);
+        if (!is_dir($dirPath)) {
+            mkdir($dirPath, 0755, true);
+        }
+        
+        $writer->save($fullPath);
         
         // Create document record
         return GeneratedDocument::createFromFile(
