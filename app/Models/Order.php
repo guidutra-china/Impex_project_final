@@ -31,6 +31,8 @@ class Order extends Model
         'commission_percent',
         'commission_type',
         'commission_percent_average',
+        'incoterm',
+        'incoterm_location',
         'customer_notes',
         'notes',
         'total_amount',

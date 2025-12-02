@@ -76,6 +76,31 @@ class ProformaInvoiceForm
                                     ->label('Payment Terms')
                                     ->columnSpan(1),
 
+                                Select::make('incoterm')
+                                    ->options([
+                                        'EXW' => 'EXW - Ex Works',
+                                        'FCA' => 'FCA - Free Carrier',
+                                        'CPT' => 'CPT - Carriage Paid To',
+                                        'CIP' => 'CIP - Carriage and Insurance Paid To',
+                                        'DAP' => 'DAP - Delivered at Place',
+                                        'DPU' => 'DPU - Delivered at Place Unloaded',
+                                        'DDP' => 'DDP - Delivered Duty Paid',
+                                        'FAS' => 'FAS - Free Alongside Ship',
+                                        'FOB' => 'FOB - Free on Board',
+                                        'CFR' => 'CFR - Cost and Freight',
+                                        'CIF' => 'CIF - Cost, Insurance and Freight',
+                                    ])
+                                    ->searchable()
+                                    ->label('INCOTERMS')
+                                    ->helperText('International Commercial Terms')
+                                    ->columnSpan(1),
+
+                                TextInput::make('incoterm_location')
+                                    ->label('INCOTERMS Location')
+                                    ->placeholder('e.g., Shanghai Port, New York')
+                                    ->helperText('Specific location for the INCOTERM')
+                                    ->columnSpan(1),
+
                                 DatePicker::make('due_date')
                                     ->label('Due Date')
                                     ->afterOrEqual('issue_date')

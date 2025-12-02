@@ -2,18 +2,42 @@
 
 @section('title', 'Proforma Invoice - ' . $model->proforma_number)
 
+@php
+    $companySettings = \App\Models\CompanySetting::current();
+@endphp
+
 @section('content')
 <!-- Header -->
 <div class="header">
     <div class="header-row">
         <div class="header-col left">
-            <div class="company-name">{{ config('app.name') }}</div>
+            @if($companySettings && $companySettings->logo_full_path)
+            <img src="{{ $companySettings->logo_full_path }}" style="max-height: 60px; margin-bottom: 10px;" alt="Company Logo">
+            @endif
+            <div class="company-name">{{ $companySettings->company_name ?? config('app.name') }}</div>
             <div class="company-info">
-                {{-- Add company address and contact info here --}}
-                <p>Your Company Address</p>
-                <p>City, State, ZIP</p>
-                <p>Email: info@company.com</p>
-                <p>Phone: +1 234 567 8900</p>
+                @if($companySettings)
+                    @if($companySettings->address)
+                    <p>{{ $companySettings->address }}</p>
+                    @endif
+                    @if($companySettings->city || $companySettings->state || $companySettings->zip_code)
+                    <p>{{ $companySettings->city }}@if($companySettings->state), {{ $companySettings->state }}@endif @if($companySettings->zip_code) {{ $companySettings->zip_code }}@endif</p>
+                    @endif
+                    @if($companySettings->country)
+                    <p>{{ $companySettings->country }}</p>
+                    @endif
+                    @if($companySettings->email)
+                    <p>Email: {{ $companySettings->email }}</p>
+                    @endif
+                    @if($companySettings->phone)
+                    <p>Phone: {{ $companySettings->phone }}</p>
+                    @endif
+                    @if($companySettings->website)
+                    <p>{{ $companySettings->website }}</p>
+                    @endif
+                @else
+                    <p>Company information not configured</p>
+                @endif
             </div>
         </div>
         <div class="header-col right">
@@ -61,6 +85,9 @@
                 @endif
                 @if($model->paymentTerm)
                 <p><strong>Payment Terms:</strong> {{ $model->paymentTerm->name }}</p>
+                @endif
+                @if($model->incoterm)
+                <p><strong>INCOTERMS:</strong> {{ $model->incoterm }}@if($model->incoterm_location) - {{ $model->incoterm_location }}@endif</p>
                 @endif
                 <p><strong>Currency:</strong> {{ $model->currency->code ?? 'USD' }}</p>
                 @if($model->exchange_rate != 1.0)
@@ -139,6 +166,32 @@
         @endif
     </div>
 </div>
+
+<!-- Bank Information -->
+@if($companySettings && ($companySettings->bank_name || $companySettings->bank_account_number))
+<div class="info-section" style="margin-top: 30px;">
+    <div class="info-box" style="width: 100%; background: #f0f9ff; border-color: #0ea5e9;">
+        <div class="info-box-title" style="color: #0369a1;">Bank Information for Payment:</div>
+        <div class="info-box-content">
+            @if($companySettings->bank_name)
+            <p><strong>Bank Name:</strong> {{ $companySettings->bank_name }}</p>
+            @endif
+            @if($companySettings->bank_account_number)
+            <p><strong>Account Number:</strong> {{ $companySettings->bank_account_number }}</p>
+            @endif
+            @if($companySettings->bank_routing_number)
+            <p><strong>Routing Number:</strong> {{ $companySettings->bank_routing_number }}</p>
+            @endif
+            @if($companySettings->bank_swift_code)
+            <p><strong>SWIFT Code:</strong> {{ $companySettings->bank_swift_code }}</p>
+            @endif
+            @if($companySettings->tax_id)
+            <p><strong>Tax ID:</strong> {{ $companySettings->tax_id }}</p>
+            @endif
+        </div>
+    </div>
+</div>
+@endif
 
 <!-- Notes -->
 @if($model->customer_notes)

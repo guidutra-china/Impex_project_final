@@ -134,6 +134,32 @@ class OrderForm
                                     ->default('embedded')
                                     ->helperText('How commission is displayed to customer')
                                     ->columnSpan(1),
+
+                                // INCOTERMS
+                                Select::make('incoterm')
+                                    ->options([
+                                        'EXW' => 'EXW - Ex Works',
+                                        'FCA' => 'FCA - Free Carrier',
+                                        'CPT' => 'CPT - Carriage Paid To',
+                                        'CIP' => 'CIP - Carriage and Insurance Paid To',
+                                        'DAP' => 'DAP - Delivered at Place',
+                                        'DPU' => 'DPU - Delivered at Place Unloaded',
+                                        'DDP' => 'DDP - Delivered Duty Paid',
+                                        'FAS' => 'FAS - Free Alongside Ship',
+                                        'FOB' => 'FOB - Free on Board',
+                                        'CFR' => 'CFR - Cost and Freight',
+                                        'CIF' => 'CIF - Cost, Insurance and Freight',
+                                    ])
+                                    ->searchable()
+                                    ->label('INCOTERMS')
+                                    ->helperText('International Commercial Terms')
+                                    ->columnSpan(1),
+
+                                TextInput::make('incoterm_location')
+                                    ->label('INCOTERMS Location')
+                                    ->placeholder('e.g., Shanghai Port, New York')
+                                    ->helperText('Specific location for the INCOTERM')
+                                    ->columnSpan(1),
                             ])
                             ->columns([
                                 'default' => 1,  // 1 coluna em mobile

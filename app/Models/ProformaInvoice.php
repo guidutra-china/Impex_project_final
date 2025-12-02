@@ -23,6 +23,8 @@ class ProformaInvoice extends Model
         'customer_id',
         'currency_id',
         'payment_term_id',
+        'incoterm',
+        'incoterm_location',
         'subtotal',
         'tax',
         'total',
