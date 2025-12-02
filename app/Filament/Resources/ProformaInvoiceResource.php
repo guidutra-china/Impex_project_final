@@ -4,7 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\ProformaInvoiceResource\Pages;
 use App\Filament\Resources\ProformaInvoiceResource\RelationManagers;
-use App\Filament\Resources\ProformaInvoiceResource\Schemas\ProformaInvoiceForm;
+use App\Filament\Resources\ProformaInvoice\Schemas\ProformaInvoiceForm;
 use App\Models\ProformaInvoice;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;

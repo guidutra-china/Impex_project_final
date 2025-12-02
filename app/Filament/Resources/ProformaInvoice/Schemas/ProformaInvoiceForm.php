@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Resources\ProformaInvoiceResource\Schemas;
+namespace App\Filament\Resources\ProformaInvoice\Schemas;
 
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Placeholder;

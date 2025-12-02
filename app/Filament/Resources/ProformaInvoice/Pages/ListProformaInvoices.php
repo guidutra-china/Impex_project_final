@@ -1,19 +1,19 @@
 <?php
 
-namespace App\Filament\Resources\ProformaInvoiceResource\Pages;
+namespace App\Filament\Resources\ProformaInvoice\Pages;
 
 use App\Filament\Resources\ProformaInvoiceResource;
 use Filament\Actions;
-use Filament\Resources\Pages\ViewRecord;
+use Filament\Resources\Pages\ListRecords;
 
-class ViewProformaInvoice extends ViewRecord
+class ListProformaInvoices extends ListRecords
 {
     protected static string $resource = ProformaInvoiceResource::class;
 
     protected function getHeaderActions(): array
     {
         return [
-            Actions\EditAction::make(),
+            Actions\CreateAction::make(),
         ];
     }
 }
