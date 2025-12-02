@@ -35,13 +35,13 @@
                     right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek'
                 },
                 buttonText: {
-                    today: 'Hoje',
-                    month: 'Mês',
-                    week: 'Semana',
-                    day: 'Dia',
-                    list: 'Lista'
+                    today: 'Today',
+                    month: 'Month',
+                    week: 'Week',
+                    day: 'Day',
+                    list: 'List'
                 },
-                locale: 'pt-br',
+                locale: 'en',
                 events: events,
                 eventClick: function(info) {
                     var event = info.event;
@@ -51,10 +51,10 @@
                     if (props.description) {
                         message += '\n\n' + props.description;
                     }
-                    message += '\n\nTipo: ' + props.type;
-                    message += '\nConcluído: ' + (props.completed ? 'Sim' : 'Não');
+                    message += '\n\nType: ' + props.type;
+                    message += '\nCompleted: ' + (props.completed ? 'Yes' : 'No');
                     
-                    if (confirm(message + '\n\nEditar este evento?')) {
+                    if (confirm(message + '\n\nEdit this event?')) {
                         window.location.href = '/admin/events/' + event.id + '/edit';
                     }
                 },

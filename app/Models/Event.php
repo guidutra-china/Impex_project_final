@@ -50,13 +50,13 @@ class Event extends Model
     public static function getEventTypes(): array
     {
         return [
-            self::TYPE_PAYMENT => 'Pagamento',
-            self::TYPE_SHIPMENT => 'Chegada de Remessa',
-            self::TYPE_DOCUMENT => 'Envio de Documento',
-            self::TYPE_MEETING => 'Reunião',
-            self::TYPE_DEADLINE => 'Prazo',
-            self::TYPE_REMINDER => 'Lembrete',
-            self::TYPE_OTHER => 'Outro',
+            self::TYPE_PAYMENT => 'Payment',
+            self::TYPE_SHIPMENT => 'Shipment Arrival',
+            self::TYPE_DOCUMENT => 'Document Submission',
+            self::TYPE_MEETING => 'Meeting',
+            self::TYPE_DEADLINE => 'Deadline',
+            self::TYPE_REMINDER => 'Reminder',
+            self::TYPE_OTHER => 'Other',
         ];
     }
 
