@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Resources\ProformaInvoices\Pages;
+namespace App\Filament\Resources\ProformaInvoiceResource\Pages;
 
 use App\Filament\Resources\ProformaInvoiceResource;
 use Filament\Resources\Pages\CreateRecord;

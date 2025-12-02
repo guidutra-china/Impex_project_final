@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Resources\ProformaInvoices\RelationManagers;
+namespace App\Filament\Resources\ProformaInvoiceResource\RelationManagers;
 
 use App\Models\QuoteItem;
 use App\Models\SupplierQuote;
