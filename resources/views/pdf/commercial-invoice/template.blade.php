@@ -55,7 +55,7 @@
         <td style="width: 4%;"></td>
         <td class="info-box" style="width: 48%; vertical-align: top;">
             <h3>Invoice Details</h3>
-            <p><strong>Invoice Date:</strong> {{ $model->invoice_date->format('M d, Y') }}</p>
+            <p><strong>Invoice Date:</strong> {{ $model->invoice_date ? $model->invoice_date->format('M d, Y') : 'N/A' }}</p>
             <p><strong>Due Date:</strong> {{ $model->due_date ? $model->due_date->format('M d, Y') : 'Upon Receipt' }}</p>
             @if($model->payment_term)
                 <p><strong>Payment Terms:</strong> {{ $model->payment_term->name }}</p>

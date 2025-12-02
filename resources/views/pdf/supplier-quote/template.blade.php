@@ -59,7 +59,7 @@
         <td class="info-box" style="width: 48%; vertical-align: top;">
             <h3>Quote Details</h3>
             <p><strong>RFQ #:</strong> {{ $model->order->order_number }}</p>
-            <p><strong>Quote Date:</strong> {{ $model->quote_date->format('M d, Y') }}</p>
+            <p><strong>Quote Date:</strong> {{ $model->quote_date ? $model->quote_date->format('M d, Y') : 'N/A' }}</p>
             <p><strong>Valid Until:</strong> {{ $model->valid_until ? $model->valid_until->format('M d, Y') : 'N/A' }}</p>
             <p><strong>Currency:</strong> {{ $model->currency->code ?? 'USD' }}</p>
             @if($model->payment_term)

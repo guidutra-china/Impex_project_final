@@ -55,7 +55,7 @@
         <td style="width: 4%;"></td>
         <td class="info-box" style="width: 48%; vertical-align: top;">
             <h3>Purchase Order Details</h3>
-            <p><strong>PO Date:</strong> {{ $model->po_date->format('M d, Y') }}</p>
+            <p><strong>PO Date:</strong> {{ $model->po_date ? $model->po_date->format('M d, Y') : 'N/A' }}</p>
             <p><strong>Expected Delivery:</strong> {{ $model->expected_delivery_date ? $model->expected_delivery_date->format('M d, Y') : 'TBD' }}</p>
             <p><strong>Currency:</strong> {{ $model->currency->code ?? 'USD' }}</p>
             @if($model->payment_term)
