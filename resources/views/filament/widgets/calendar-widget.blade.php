@@ -1,7 +1,7 @@
-<div>
-    <x-filament-widgets::widget>
+<div class="col-span-full">
+    <x-filament-widgets::widget class="col-span-full">
         <x-filament::section>
-            <div style="padding: 1rem;">
+            <div style="padding: 1rem; width: 100%;">
                 <div id="calendar-widget" style="min-height: 600px;"></div>
             </div>
         </x-filament::section>
