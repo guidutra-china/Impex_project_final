@@ -104,22 +104,37 @@ class OrdersTable
                     ->icon('heroicon-o-document-arrow-down')
                     ->color('gray')
                     ->action(function ($record) {
-                        $pdfService = app(PdfExportService::class);
-                        $document = $pdfService->generate(
-                            $record,
-                            'rfq',
-                            'pdf.rfq.template'
-                        );
-                        
-                        Notification::make()
-                            ->success()
-                            ->title('RFQ PDF generated successfully')
-                            ->send();
-                        
-                        return response()->download(
-                            storage_path('app/' . $document->file_path),
-                            $document->filename
-                        );
+                        try {
+                            $pdfService = app(PdfExportService::class);
+                            $document = $pdfService->generate(
+                                $record,
+                                'rfq',
+                                'pdf.rfq.template'
+                            );
+                            
+                            Notification::make()
+                                ->success()
+                                ->title('RFQ PDF generated successfully')
+                                ->send();
+                            
+                            return response()->download(
+                                storage_path('app/' . $document->file_path),
+                                $document->filename
+                            );
+                        } catch (\Exception $e) {
+                            Notification::make()
+                                ->danger()
+                                ->title('PDF Generation Failed')
+                                ->body($e->getMessage())
+                                ->send();
+                            
+                            \Log::error('RFQ PDF generation failed', [
+                                'error' => $e->getMessage(),
+                                'trace' => $e->getTraceAsString(),
+                            ]);
+                            
+                            throw $e;
+                        }
                     }),
                 
                 Action::make('view_comparison')
