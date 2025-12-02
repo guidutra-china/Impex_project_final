@@ -123,8 +123,8 @@ class ProformaInvoiceTable
                             ->title('PDF generated successfully')
                             ->send();
                         
-                        return Storage::download(
-                            $document->file_path,
+                        return response()->download(
+                            storage_path('app/' . $document->file_path),
                             $document->filename
                         );
                     }),
@@ -146,8 +146,8 @@ class ProformaInvoiceTable
                             ->title('Excel generated successfully')
                             ->send();
                         
-                        return Storage::download(
-                            $document->file_path,
+                        return response()->download(
+                            storage_path('app/' . $document->file_path),
                             $document->filename
                         );
                     }),
