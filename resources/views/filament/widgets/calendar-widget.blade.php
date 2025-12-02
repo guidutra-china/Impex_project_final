@@ -2,37 +2,15 @@
     <x-filament-widgets::widget class="col-span-full">
         <x-filament::section>
             <div style="padding: 1rem; width: 100%;">
-                {{-- Event Type Filters --}}
+                {{-- Event Type Filters - Dynamically generated from Model --}}
                 <div id="event-filters" style="margin-bottom: 1rem; padding: 0.75rem; background-color: #f9fafb; border-radius: 0.5rem; display: flex; flex-wrap: wrap; gap: 1rem; align-items: center;">
                     <span style="font-weight: 600; font-size: 0.875rem; color: #374151;">Filter by type:</span>
-                    <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-size: 0.875rem;">
-                        <input type="checkbox" class="event-type-filter" data-type="payment" checked style="cursor: pointer;">
-                        <span style="color: #3b82f6;">●</span> Payment
-                    </label>
-                    <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-size: 0.875rem;">
-                        <input type="checkbox" class="event-type-filter" data-type="shipment_arrival" checked style="cursor: pointer;">
-                        <span style="color: #10b981;">●</span> Shipment Arrival
-                    </label>
-                    <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-size: 0.875rem;">
-                        <input type="checkbox" class="event-type-filter" data-type="document_submission" checked style="cursor: pointer;">
-                        <span style="color: #f59e0b;">●</span> Document Submission
-                    </label>
-                    <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-size: 0.875rem;">
-                        <input type="checkbox" class="event-type-filter" data-type="meeting" checked style="cursor: pointer;">
-                        <span style="color: #8b5cf6;">●</span> Meeting
-                    </label>
-                    <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-size: 0.875rem;">
-                        <input type="checkbox" class="event-type-filter" data-type="deadline" checked style="cursor: pointer;">
-                        <span style="color: #ef4444;">●</span> Deadline
-                    </label>
-                    <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-size: 0.875rem;">
-                        <input type="checkbox" class="event-type-filter" data-type="reminder" checked style="cursor: pointer;">
-                        <span style="color: #06b6d4;">●</span> Reminder
-                    </label>
-                    <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-size: 0.875rem;">
-                        <input type="checkbox" class="event-type-filter" data-type="other" checked style="cursor: pointer;">
-                        <span style="color: #6b7280;">●</span> Other
-                    </label>
+                    @foreach($eventTypes as $typeKey => $typeName)
+                        <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-size: 0.875rem;">
+                            <input type="checkbox" class="event-type-filter" data-type="{{ $typeKey }}" checked style="cursor: pointer;">
+                            <span style="color: {{ $eventColors[$typeKey] ?? '#6b7280' }};">●</span> {{ $typeName }}
+                        </label>
+                    @endforeach
                 </div>
                 
                 <div id="calendar-widget" style="min-height: 600px;"></div>
@@ -70,7 +48,8 @@
             
             // Store all events for filtering
             let allEvents = events;
-            let activeFilters = new Set(['payment', 'shipment_arrival', 'document_submission', 'meeting', 'deadline', 'reminder', 'other']);
+            // Initialize with all event types from Model
+            let activeFilters = new Set({!! json_encode(array_keys($eventTypes)) !!});
             
             // Function to get filtered events
             function getFilteredEvents() {

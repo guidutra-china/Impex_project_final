@@ -30,6 +30,8 @@ class CalendarWidget extends Widget
     {
         return [
             'events' => $this->getEvents(),
+            'eventTypes' => Event::getEventTypes(),
+            'eventColors' => Event::getEventColors(),
         ];
     }
 
