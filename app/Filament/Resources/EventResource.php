@@ -37,6 +37,12 @@ class EventResource extends Resource
     protected static UnitEnum|string|null $navigationGroup = 'Settings';
 
     protected static ?int $navigationSort = 10;
+    
+    public static function shouldRegisterNavigation(): bool
+    {
+        // Only show in navigation for super_admin role
+        return auth()->user()?->hasRole('super_admin') ?? false;
+    }
 
     public static function form(Schema $form): Schema
     {
@@ -123,6 +129,11 @@ class EventResource extends Resource
                     ->sortable()
                     ->weight('bold'),
 
+                Tables\Columns\TextColumn::make('user.name')
+                    ->label('User')
+                    ->searchable()
+                    ->sortable(),
+
                 Tables\Columns\TextColumn::make('event_type')
                     ->label('Type')
                     ->badge()
@@ -163,11 +174,6 @@ class EventResource extends Resource
                     ->boolean()
                     ->toggleable()
                     ->tooltip('Created automatically by the system'),
-
-                Tables\Columns\TextColumn::make('user.name')
-                    ->label('Owner')
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('event_type')
