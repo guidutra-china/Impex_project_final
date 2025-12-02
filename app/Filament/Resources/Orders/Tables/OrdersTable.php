@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Orders\Tables;
 use App\Models\Order;
 use App\Models\Supplier;
 use App\Models\SupplierQuote;
+use App\Services\Export\PdfExportService;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
@@ -18,6 +19,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Storage;
 
 class OrdersTable
 {
@@ -96,6 +98,30 @@ class OrdersTable
             ])
             ->actions([
                 EditAction::make(),
+                
+                Action::make('export_pdf')
+                    ->label('PDF')
+                    ->icon('heroicon-o-document-arrow-down')
+                    ->color('gray')
+                    ->action(function ($record) {
+                        $pdfService = app(PdfExportService::class);
+                        $document = $pdfService->generate(
+                            $record,
+                            'rfq',
+                            'pdf.rfq.template'
+                        );
+                        
+                        Notification::make()
+                            ->success()
+                            ->title('RFQ PDF generated successfully')
+                            ->send();
+                        
+                        return Storage::download(
+                            $document->file_path,
+                            $document->filename
+                        );
+                    }),
+                
                 Action::make('view_comparison')
                     ->label('Compare Quotes')
                     ->icon('heroicon-o-chart-bar')

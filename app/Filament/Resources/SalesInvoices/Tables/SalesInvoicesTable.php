@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources\SalesInvoices\Tables;
 
+use App\Services\Export\ExcelExportService;
+use App\Services\Export\PdfExportService;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
@@ -10,10 +12,12 @@ use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Notifications\Notification;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Support\Facades\Storage;
 
 class SalesInvoicesTable
 {
@@ -182,6 +186,48 @@ class SalesInvoicesTable
             ])
             ->actions([
                 EditAction::make(),
+                
+                Action::make('export_pdf')
+                    ->label('PDF')
+                    ->icon('heroicon-o-document-arrow-down')
+                    ->color('gray')
+                    ->action(function ($record) {
+                        $pdfService = app(PdfExportService::class);
+                        $document = $pdfService->generate(
+                            $record,
+                            'commercial_invoice',
+                            'pdf.commercial-invoice.template'
+                        );
+                        
+                        Notification::make()
+                            ->success()
+                            ->title('Commercial Invoice PDF generated successfully')
+                            ->send();
+                        
+                        return Storage::download(
+                            $document->file_path,
+                            $document->filename
+                        );
+                    }),
+                
+                Action::make('export_excel')
+                    ->label('Excel')
+                    ->icon('heroicon-o-table-cells')
+                    ->color('success')
+                    ->action(function ($record) {
+                        $excelService = app(ExcelExportService::class);
+                        $document = $excelService->generateCommercialInvoice($record);
+                        
+                        Notification::make()
+                            ->success()
+                            ->title('Commercial Invoice Excel generated successfully')
+                            ->send();
+                        
+                        return Storage::download(
+                            $document->file_path,
+                            $document->filename
+                        );
+                    }),
 
                 Action::make('mark_as_paid')
                     ->label('Mark as Paid')

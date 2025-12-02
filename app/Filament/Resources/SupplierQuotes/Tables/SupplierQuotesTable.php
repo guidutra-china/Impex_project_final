@@ -2,10 +2,12 @@
 
 namespace App\Filament\Resources\SupplierQuotes\Tables;
 
+use App\Services\Export\PdfExportService;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Notifications\Notification;
 use Filament\Tables;
 use Filament\Tables\Columns\BadgeColumn;
 use Filament\Tables\Columns\IconColumn;
@@ -13,6 +15,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
+use Illuminate\Support\Facades\Storage;
 
 class SupplierQuotesTable
 {
@@ -91,6 +94,32 @@ class SupplierQuotesTable
             ])
             ->actions([
                 EditAction::make(),
+                
+                Action::make('export_pdf')
+                    ->label('PDF')
+                    ->icon('heroicon-o-document-arrow-down')
+                    ->color('gray')
+                    ->action(function ($record) {
+                        $pdfService = app(PdfExportService::class);
+                        $document = $pdfService->generate(
+                            $record,
+                            'supplier_quote',
+                            'pdf.supplier-quote.template',
+                            [],
+                            ['revision_number' => $record->revision_number]
+                        );
+                        
+                        Notification::make()
+                            ->success()
+                            ->title('Supplier Quote PDF generated successfully')
+                            ->send();
+                        
+                        return Storage::download(
+                            $document->file_path,
+                            $document->filename
+                        );
+                    }),
+                
                 Action::make('calculate_commission')
                     ->label('Recalculate')
                     ->icon('heroicon-o-calculator')

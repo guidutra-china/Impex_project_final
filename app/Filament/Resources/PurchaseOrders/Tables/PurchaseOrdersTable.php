@@ -2,16 +2,20 @@
 
 namespace App\Filament\Resources\PurchaseOrders\Tables;
 
+use App\Services\Export\PdfExportService;
+use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreBulkAction;
+use Filament\Notifications\Notification;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
+use Illuminate\Support\Facades\Storage;
 
 class PurchaseOrdersTable
 {
@@ -195,6 +199,29 @@ class PurchaseOrdersTable
             ])
             ->recordActions([
                 EditAction::make(),
+                
+                Action::make('export_pdf')
+                    ->label('PDF')
+                    ->icon('heroicon-o-document-arrow-down')
+                    ->color('gray')
+                    ->action(function ($record) {
+                        $pdfService = app(PdfExportService::class);
+                        $document = $pdfService->generate(
+                            $record,
+                            'purchase_order',
+                            'pdf.purchase-order.template'
+                        );
+                        
+                        Notification::make()
+                            ->success()
+                            ->title('Purchase Order PDF generated successfully')
+                            ->send();
+                        
+                        return Storage::download(
+                            $document->file_path,
+                            $document->filename
+                        );
+                    }),
                 
                 // Status Transition Actions
                 \Filament\Actions\Action::make('send_to_supplier')
