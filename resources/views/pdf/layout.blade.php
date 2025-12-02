@@ -31,11 +31,9 @@
         
         .header-row {
             width: 100%;
-            overflow: hidden;
         }
         
         .header-col {
-            float: left;
             vertical-align: top;
         }
         
@@ -79,19 +77,14 @@
         .info-row {
             width: 100%;
             margin-bottom: 20px;
-            overflow: hidden;
         }
         
         .info-box {
-            float: left;
+            vertical-align: top;
             width: 48%;
             padding: 10px;
             border: 1px solid #ddd;
             background: #f9fafb;
-        }
-        
-        .info-box + .info-box {
-            margin-left: 4%;
         }
         
         .info-box-title {
@@ -166,21 +159,16 @@
         .totals-row {
             width: 100%;
             padding: 5px 0;
-            overflow: hidden;
         }
         
         .totals-label {
-            float: left;
             text-align: right;
             padding-right: 10px;
-            width: 60%;
         }
         
         .totals-value {
-            float: left;
             text-align: right;
             font-weight: bold;
-            width: 40%;
         }
         
         .totals-row.grand-total {

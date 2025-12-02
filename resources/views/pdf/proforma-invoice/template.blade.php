@@ -9,8 +9,9 @@
 @section('content')
 <!-- Header -->
 <div class="header">
-    <div class="header-row">
-        <div class="header-col left">
+    <table class="header-row" cellpadding="0" cellspacing="0" style="width: 100%;">
+        <tr>
+        <td class="header-col left" style="width: 50%; vertical-align: top;">
             @if($companySettings && $companySettings->logo_full_path)
             <img src="{{ $companySettings->logo_full_path }}" style="max-height: 60px; margin-bottom: 10px;" alt="Company Logo">
             @endif
@@ -38,22 +39,24 @@
                 @else
                     <p>Company information not configured</p>
                 @endif
-            </div>
-        </div>
-        <div class="header-col right">
+            @endif
+        </td>
+        <td class="header-col right" style="width: 50%; vertical-align: top; text-align: right;">
             <div class="document-title">PROFORMA INVOICE</div>
             <div class="document-number">{{ $model->proforma_number }}</div>
             @if($model->revision_number > 1)
             <div style="color: #dc2626; font-weight: bold;">Revision {{ $model->revision_number }}</div>
             @endif
-        </div>
-    </div>
+        </td>
+        </tr>
+    </table>
 </div>
 
 <!-- Customer and Invoice Info -->
 <div class="info-section">
-    <div class="info-row">
-        <div class="info-box">
+    <table class="info-row" cellpadding="0" cellspacing="0" style="width: 100%;">
+        <tr>
+        <td class="info-box" style="width: 48%; vertical-align: top; padding: 10px; border: 1px solid #ddd; background: #f9fafb;">
             <div class="info-box-title">Bill To:</div>
             <div class="info-box-content">
                 <p><strong>{{ $model->customer->name }}</strong></p>
@@ -73,9 +76,9 @@
                 <p>Phone: {{ $model->customer->phone }}</p>
                 @endif
             </div>
-        </div>
-        
-        <div class="info-box">
+        </td>
+        <td style="width: 4%;"></td>
+        <td class="info-box" style="width: 48%; vertical-align: top; padding: 10px; border: 1px solid #ddd; background: #f9fafb;">
             <div class="info-box-title">Invoice Details:</div>
             <div class="info-box-content">
                 <p><strong>Issue Date:</strong> {{ $model->issue_date->format('M d, Y') }}</p>
@@ -95,8 +98,9 @@
                 @endif
                 <p><strong>Status:</strong> <span style="color: {{ $model->status === 'approved' ? '#16a34a' : '#6b7280' }};">{{ strtoupper($model->status) }}</span></p>
             </div>
-        </div>
-    </div>
+        </td>
+        </tr>
+    </table>
 </div>
 
 <!-- Items Table -->
@@ -134,43 +138,43 @@
 
 <!-- Totals -->
 <div class="clearfix">
-    <div class="totals-section">
-        <div class="totals-row">
-            <div class="totals-label">Subtotal:</div>
-            <div class="totals-value">{{ $model->currency->symbol ?? '$' }}{{ number_format($model->subtotal, 2) }}</div>
-        </div>
+    <table class="totals-section" cellpadding="0" cellspacing="0" style="float: right; width: 40%;">
+        <tr class="totals-row">
+            <td class="totals-label" style="text-align: right; padding: 5px 10px 5px 0;">Subtotal:</td>
+            <td class="totals-value" style="text-align: right; font-weight: bold; padding: 5px 0;">{{ $model->currency->symbol ?? '$' }}{{ number_format($model->subtotal, 2) }}</td>
+        </tr>
         
         @if($model->tax > 0)
-        <div class="totals-row">
-            <div class="totals-label">Tax:</div>
-            <div class="totals-value">{{ $model->currency->symbol ?? '$' }}{{ number_format($model->tax, 2) }}</div>
-        </div>
+        <tr class="totals-row">
+            <td class="totals-label" style="text-align: right; padding: 5px 10px 5px 0;">Tax:</td>
+            <td class="totals-value" style="text-align: right; font-weight: bold; padding: 5px 0;">{{ $model->currency->symbol ?? '$' }}{{ number_format($model->tax, 2) }}</td>
+        </tr>
         @endif
         
-        <div class="totals-row grand-total">
-            <div class="totals-label">TOTAL:</div>
-            <div class="totals-value">{{ $model->currency->symbol ?? '$' }}{{ number_format($model->total, 2) }}</div>
-        </div>
+        <tr class="totals-row grand-total" style="border-top: 2px solid #333;">
+            <td class="totals-label" style="text-align: right; padding: 8px 10px 5px 0; font-size: 12pt;">TOTAL:</td>
+            <td class="totals-value" style="text-align: right; font-weight: bold; padding: 8px 0 5px 0; font-size: 12pt;">{{ $model->currency->symbol ?? '$' }}{{ number_format($model->total, 2) }}</td>
+        </tr>
         
         @if($model->deposit_required)
-        <div class="totals-row" style="margin-top: 10px; color: #dc2626;">
-            <div class="totals-label">Deposit Required ({{ $model->deposit_percent }}%):</div>
-            <div class="totals-value">{{ $model->currency->symbol ?? '$' }}{{ number_format($model->deposit_amount, 2) }}</div>
-        </div>
+        <tr class="totals-row" style="color: #dc2626;">
+            <td class="totals-label" style="text-align: right; padding: 10px 10px 5px 0;">Deposit Required ({{ $model->deposit_percent }}%):</td>
+            <td class="totals-value" style="text-align: right; font-weight: bold; padding: 10px 0 5px 0;">{{ $model->currency->symbol ?? '$' }}{{ number_format($model->deposit_amount, 2) }}</td>
+        </tr>
         @if($model->deposit_received)
-        <div class="totals-row" style="color: #16a34a;">
-            <div class="totals-label">✓ Deposit Received:</div>
-            <div class="totals-value">{{ $model->deposit_received_at->format('M d, Y') }}</div>
-        </div>
+        <tr class="totals-row" style="color: #16a34a;">
+            <td class="totals-label" style="text-align: right; padding: 5px 10px 5px 0;">✓ Deposit Received:</td>
+            <td class="totals-value" style="text-align: right; font-weight: bold; padding: 5px 0;">{{ $model->deposit_received_at->format('M d, Y') }}</td>
+        </tr>
         @endif
         @endif
-    </div>
+    </table>
 </div>
 
 <!-- Bank Information -->
 @if($companySettings && ($companySettings->bank_name || $companySettings->bank_account_number))
-<div class="info-section" style="margin-top: 30px;">
-    <div class="info-box" style="width: 100%; background: #f0f9ff; border-color: #0ea5e9;">
+<div class="info-section" style="margin-top: 30px; clear: both;">
+    <div class="info-box" style="width: 60%; background: #f0f9ff; border: 1px solid #0ea5e9; padding: 10px;">
         <div class="info-box-title" style="color: #0369a1;">Bank Information for Payment:</div>
         <div class="info-box-content">
             @if($companySettings->bank_name)
