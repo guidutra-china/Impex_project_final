@@ -14,13 +14,6 @@ class CalendarWidget extends Widget
 
     protected static ?int $sort = 5;
     
-    public $events = [];
-    
-    public function mount(): void
-    {
-        $this->events = $this->getEvents();
-    }
-    
     public static function canView(): bool
     {
         // Temporarily disabled for testing - enable after creating permission
@@ -30,7 +23,7 @@ class CalendarWidget extends Widget
         // return auth()->check() && auth()->user()->can('View:CalendarWidget');
     }
 
-    public function getEvents(): array
+    protected function getEvents(): array
     {
         $user = Auth::user();
         $canSeeAll = $user->roles()->where('can_see_all', true)->exists() || $user->hasRole('super_admin');

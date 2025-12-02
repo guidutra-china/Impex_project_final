@@ -10,7 +10,7 @@
         <div 
             x-data="{ 
                 calendar: null,
-                events: @js($events),
+                events: @js($this->getEvents()),
                 calendarId: '{{ $calendarId }}'
             }"
             x-init="
