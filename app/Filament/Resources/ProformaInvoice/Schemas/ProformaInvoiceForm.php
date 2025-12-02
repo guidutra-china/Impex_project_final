@@ -171,7 +171,7 @@ class ProformaInvoiceForm
                                 Placeholder::make('subtotal_display')
                                     ->label('Subtotal')
                                     ->content(fn ($record) => $record 
-                                        ? money($record->subtotal, $record->currency?->code ?? 'USD')
+                                        ? ($record->currency?->code ?? 'USD') . ' ' . number_format($record->subtotal, 2)
                                         : '$0.00'
                                     )
                                     ->columnSpan(1),
@@ -192,7 +192,7 @@ class ProformaInvoiceForm
                                 Placeholder::make('total_display')
                                     ->label('Total')
                                     ->content(fn ($record) => $record 
-                                        ? money($record->total, $record->currency?->code ?? 'USD')
+                                        ? ($record->currency?->code ?? 'USD') . ' ' . number_format($record->total, 2)
                                         : '$0.00'
                                     )
                                     ->columnSpan(1),
