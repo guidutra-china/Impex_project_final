@@ -5,7 +5,6 @@ namespace App\Filament\Widgets;
 use App\Models\Event;
 use Filament\Widgets\Widget;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Contracts\View\View;
 
 class CalendarWidget extends Widget
 {
@@ -15,16 +14,19 @@ class CalendarWidget extends Widget
 
     protected static ?int $sort = 5;
     
+    // Disable lazy loading to avoid Livewire issues
+    protected static bool $isLazy = false;
+    
     public static function canView(): bool
     {
         // Temporarily disabled for testing - enable after creating permission
         return auth()->check();
         
         // TODO: Uncomment after creating 'View:CalendarWidget' permission
-        // return auth()->check() && auth()->user()->can('View:CalendarWidget');
+        // return auth()->user()->can('View:CalendarWidget');
     }
 
-    protected function getViewData(): array
+    public function getViewData(): array
     {
         return [
             'events' => $this->getEvents(),
@@ -34,6 +36,11 @@ class CalendarWidget extends Widget
     protected function getEvents(): array
     {
         $user = Auth::user();
+        
+        if (!$user) {
+            return [];
+        }
+        
         $canSeeAll = $user->roles()->where('can_see_all', true)->exists() || $user->hasRole('super_admin');
 
         $query = Event::query();
