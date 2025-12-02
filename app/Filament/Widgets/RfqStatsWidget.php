@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\DB;
 
 class RfqStatsWidget extends BaseWidget
 {
-    protected static ?int $sort = 1;
+    protected static ?int $sort = 2;
     
     public static function canView(): bool
     {

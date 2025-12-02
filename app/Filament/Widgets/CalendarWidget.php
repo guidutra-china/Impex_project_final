@@ -12,7 +12,7 @@ class CalendarWidget extends Widget
 
     protected int | string | array $columnSpan = 'full';
 
-    protected static ?int $sort = 5;
+    protected static ?int $sort = 1;
     
     // Disable lazy loading to avoid Livewire issues
     protected static bool $isLazy = false;
