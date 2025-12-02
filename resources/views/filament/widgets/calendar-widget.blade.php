@@ -6,11 +6,14 @@
             </x-slot>
             
             <x-slot name="headerEnd">
-                <div>
-                    @foreach ($this->getCachedHeaderActions() as $action)
-                        {{ $action }}
-                    @endforeach
-                </div>
+                <a href="{{ route('filament.admin.resources.events.create') }}" 
+                   class="fi-btn fi-btn-color-primary fi-btn-size-md inline-flex items-center gap-1.5 px-3 py-2 text-sm font-semibold rounded-lg shadow-sm transition-colors"
+                   style="background-color: rgb(99 102 241); color: white;">
+                    <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                    </svg>
+                    New Event
+                </a>
             </x-slot>
             <div style="padding: 1rem; width: 100%;">
                 <div id="calendar-widget" style="min-height: 600px;"></div>
