@@ -111,8 +111,8 @@ class EditProformaInvoice extends EditRecord
                     
                     $this->notify('success', 'PDF generated successfully');
                     
-                    return response()->download(
-                        $document->getFullPath(),
+                    return \Illuminate\Support\Facades\Storage::download(
+                        $document->file_path,
                         $document->filename
                     );
                 }),
@@ -131,8 +131,8 @@ class EditProformaInvoice extends EditRecord
                     
                     $this->notify('success', 'Excel generated successfully');
                     
-                    return response()->download(
-                        $document->getFullPath(),
+                    return \Illuminate\Support\Facades\Storage::download(
+                        $document->file_path,
                         $document->filename
                     );
                 }),
