@@ -3,6 +3,8 @@
 namespace App\Filament\Resources\ProformaInvoice\Pages;
 
 use App\Filament\Resources\ProformaInvoice\ProformaInvoiceResource;
+use App\Services\Export\PdfExportService;
+use App\Services\Export\ExcelExportService;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 
@@ -91,6 +93,48 @@ class EditProformaInvoice extends EditRecord
                     ]);
                     
                     $this->notify('success', 'Deposit marked as received');
+                }),
+
+            Actions\Action::make('export_pdf')
+                ->label('Export PDF')
+                ->icon('heroicon-o-document-arrow-down')
+                ->color('gray')
+                ->action(function ($record) {
+                    $pdfService = app(PdfExportService::class);
+                    $document = $pdfService->generate(
+                        $record,
+                        'proforma_invoice',
+                        'pdf.proforma-invoice.template',
+                        [],
+                        ['revision_number' => $record->revision_number]
+                    );
+                    
+                    $this->notify('success', 'PDF generated successfully');
+                    
+                    return response()->download(
+                        $document->getFullPath(),
+                        $document->filename
+                    );
+                }),
+
+            Actions\Action::make('export_excel')
+                ->label('Export Excel')
+                ->icon('heroicon-o-table-cells')
+                ->color('success')
+                ->action(function ($record) {
+                    $excelService = app(ExcelExportService::class);
+                    $document = $excelService->generate(
+                        $record,
+                        'proforma_invoice',
+                        ['revision_number' => $record->revision_number]
+                    );
+                    
+                    $this->notify('success', 'Excel generated successfully');
+                    
+                    return response()->download(
+                        $document->getFullPath(),
+                        $document->filename
+                    );
                 }),
         ];
     }
