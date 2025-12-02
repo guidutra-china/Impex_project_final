@@ -2,7 +2,7 @@
     $calendarId = 'calendar-' . $this->getId();
 @endphp
 
-<link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/main.min.css' rel='stylesheet' />
+
 <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js'></script>
 
 <x-filament-widgets::widget>
