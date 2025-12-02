@@ -39,7 +39,7 @@
                 @else
                     <p>Company information not configured</p>
                 @endif
-            @endif
+            </div>
         </td>
         <td class="header-col right" style="width: 50%; vertical-align: top; text-align: right;">
             <div class="document-title">PROFORMA INVOICE</div>
