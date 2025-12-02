@@ -50,19 +50,49 @@ class PdfExportService
         // Save PDF
         try {
             $pdfContent = $pdf->output();
+            
+            if (empty($pdfContent)) {
+                throw new \Exception("PDF content is empty - template rendering may have failed");
+            }
+            
             Storage::put($filePath, $pdfContent);
             
-            // Verify file was created
+            // Verify file was created and has content
             if (!Storage::exists($filePath)) {
                 throw new \Exception("PDF file was not created at: {$filePath}");
             }
+            
+            if (!file_exists($fullPath)) {
+                throw new \Exception("PDF file does not exist at full path: {$fullPath}");
+            }
+            
+            $fileSize = filesize($fullPath);
+            if ($fileSize === 0) {
+                throw new \Exception("PDF file was created but is empty (0 bytes)");
+            }
+            
+            \Log::info('PDF generated successfully', [
+                'file_path' => $filePath,
+                'file_size' => $fileSize,
+                'document_type' => $documentType,
+            ]);
+            
         } catch (\Exception $e) {
             \Log::error('PDF generation failed', [
                 'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
                 'file_path' => $filePath,
                 'full_path' => $fullPath,
+                'document_type' => $documentType,
+                'view' => $view,
             ]);
-            throw $e;
+            
+            // Clean up partial file if it exists
+            if (Storage::exists($filePath)) {
+                Storage::delete($filePath);
+            }
+            
+            throw new \Exception("PDF generation failed: " . $e->getMessage(), 0, $e);
         }
         
         // Create document record
