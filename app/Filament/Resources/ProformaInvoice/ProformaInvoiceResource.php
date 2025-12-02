@@ -4,16 +4,21 @@ namespace App\Filament\Resources\ProformaInvoice;
 
 use App\Filament\Resources\ProformaInvoice\Schemas\ProformaInvoiceForm;
 use App\Models\ProformaInvoice;
+use App\Services\Export\ExcelExportService;
+use App\Services\Export\PdfExportService;
 use BackedEnum;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
+use Filament\Tables\Actions\Action;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Support\Facades\Storage;
 use UnitEnum;
 
 class ProformaInvoiceResource extends Resource
@@ -123,6 +128,54 @@ class ProformaInvoiceResource extends Resource
             ->actions([
                 ViewAction::make(),
                 EditAction::make(),
+                
+                Action::make('export_pdf')
+                    ->label('PDF')
+                    ->icon('heroicon-o-document-arrow-down')
+                    ->color('gray')
+                    ->action(function ($record) {
+                        $pdfService = app(PdfExportService::class);
+                        $document = $pdfService->generate(
+                            $record,
+                            'proforma_invoice',
+                            'pdf.proforma-invoice.template',
+                            [],
+                            ['revision_number' => $record->revision_number]
+                        );
+                        
+                        Notification::make()
+                            ->success()
+                            ->title('PDF generated successfully')
+                            ->send();
+                        
+                        return Storage::download(
+                            $document->file_path,
+                            $document->filename
+                        );
+                    }),
+
+                Action::make('export_excel')
+                    ->label('Excel')
+                    ->icon('heroicon-o-table-cells')
+                    ->color('success')
+                    ->action(function ($record) {
+                        $excelService = app(ExcelExportService::class);
+                        $document = $excelService->generate(
+                            $record,
+                            'proforma_invoice',
+                            ['revision_number' => $record->revision_number]
+                        );
+                        
+                        Notification::make()
+                            ->success()
+                            ->title('Excel generated successfully')
+                            ->send();
+                        
+                        return Storage::download(
+                            $document->file_path,
+                            $document->filename
+                        );
+                    }),
             ])
             ->bulkActions([
                 BulkActionGroup::make([
