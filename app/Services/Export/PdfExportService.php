@@ -40,6 +40,13 @@ class PdfExportService
         // Ensure directory exists
         Storage::makeDirectory($directory);
         
+        // Also ensure the full path exists using mkdir
+        $fullPath = storage_path('app/' . $filePath);
+        $dirPath = dirname($fullPath);
+        if (!is_dir($dirPath)) {
+            mkdir($dirPath, 0755, true);
+        }
+        
         // Save PDF
         Storage::put($filePath, $pdf->output());
         
