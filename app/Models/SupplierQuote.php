@@ -254,57 +254,40 @@ class SupplierQuote extends Model
         $order = $this->order;
         
         // Safety checks
-        if (!$order || !isset($order->commission_percent)) {
+        if (!$order) {
             return;
         }
-        
-        $commissionPercent = $order->commission_percent / 100;
-        $commissionType = $this->commission_type ?? $order->commission_type;
 
         $totalBefore = 0;
         $totalAfter = 0;
+        $totalCommission = 0;
 
         // Only process if there are items
         if (!$this->items()->exists()) {
             return;
         }
 
+        // Each item now has its own commission percent and type
+        // These are already calculated in QuoteItem::saving()
+        // Just sum up the totals
         foreach ($this->items as $item) {
             $totalBefore += $item->total_price_before_commission;
-
-            if ($commissionType === 'embedded') {
-                // Commission is embedded - calculate commission on total, then distribute to unit price
-                $itemTotalBefore = $item->total_price_before_commission;
-                $itemTotalAfter = (int) ($itemTotalBefore * (1 + $commissionPercent));
-                $unitAfter = (int) ($itemTotalAfter / $item->quantity);
-                
-                $item->update([
-                    'unit_price_after_commission' => $unitAfter,
-                    'total_price_after_commission' => $itemTotalAfter,
-                ]);
-                $totalAfter += $itemTotalAfter;
-            } else {
-                // Separate commission - prices stay the same
-                $item->update([
-                    'unit_price_after_commission' => $item->unit_price_before_commission,
-                    'total_price_after_commission' => $item->total_price_before_commission,
-                ]);
-                $totalAfter += $item->total_price_before_commission;
-            }
+            $totalAfter += $item->total_price_after_commission;
         }
 
-        if ($commissionType === 'separate') {
-            $commissionAmount = (int) ($totalBefore * $commissionPercent);
-            $totalAfter += $commissionAmount;
-        } else {
-            $commissionAmount = $totalAfter - $totalBefore;
-        }
+        // Calculate total commission amount
+        $totalCommission = $totalAfter - $totalBefore;
+        
+        // Determine predominant commission type (most common among items)
+        $embeddedCount = $this->items->where('commission_type', 'embedded')->count();
+        $separateCount = $this->items->where('commission_type', 'separate')->count();
+        $predominantType = $embeddedCount >= $separateCount ? 'embedded' : 'separate';
 
         $this->update([
             'total_price_before_commission' => $totalBefore,
             'total_price_after_commission' => $totalAfter,
-            'commission_amount' => $commissionAmount,
-            'commission_type' => $commissionType,
+            'commission_amount' => $totalCommission,
+            'commission_type' => $predominantType,
         ]);
     }
 

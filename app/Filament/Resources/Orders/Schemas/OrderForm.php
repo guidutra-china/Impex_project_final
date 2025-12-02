@@ -76,9 +76,9 @@ class OrderForm
                                     ->default('pending')
                                     ->columnSpan(1),
 
-                                // Coluna 2 - Commission %
+                                // Coluna 2 - Default Commission %
                                 TextInput::make('commission_percent')
-                                    ->label('Commission %')
+                                    ->label('Default Commission %')
                                     ->required()
                                     ->numeric()
                                     ->default(5.00)
@@ -86,7 +86,18 @@ class OrderForm
                                     ->maxValue(99.99)
                                     ->step(0.01)
                                     ->suffix('%')
+                                    ->helperText('Default commission for new items')
                                     ->columnSpan(1),
+
+                                // Display average commission (read-only)
+                                Placeholder::make('commission_percent_average')
+                                    ->label('Average Commission')
+                                    ->content(fn ($record) => $record && $record->commission_percent_average 
+                                        ? number_format($record->commission_percent_average, 2) . '%' 
+                                        : 'Not calculated yet')
+                                    ->helperText('Weighted average across all items')
+                                    ->columnSpan(1)
+                                    ->hidden(fn ($record) => !$record),
 
                                 // Coluna 1 - Tags for Suppliers
                                 Select::make('tags')

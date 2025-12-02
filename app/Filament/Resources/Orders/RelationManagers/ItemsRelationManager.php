@@ -64,9 +64,32 @@ class ItemsRelationManager extends RelationManager
 
                 TextInput::make('requested_unit_price')
                     ->label('Target Price (Optional)')
-                    ->helperText('Target price per unit in cents')
+                    ->helperText('Target price per unit')
                     ->numeric()
                     ->minValue(0)
+                    ->prefix('$')
+                    ->columnSpan(1),
+
+                TextInput::make('commission_percent')
+                    ->label('Commission %')
+                    ->required()
+                    ->numeric()
+                    ->default(fn () => $this->getOwnerRecord()->commission_percent ?? 5.00)
+                    ->minValue(0)
+                    ->maxValue(99.99)
+                    ->step(0.01)
+                    ->suffix('%')
+                    ->helperText('Commission for this product')
+                    ->columnSpan(1),
+
+                Select::make('commission_type')
+                    ->options([
+                        'embedded' => 'Embedded (included in price)',
+                        'separate' => 'Separate (added to invoice)',
+                    ])
+                    ->required()
+                    ->default(fn () => $this->getOwnerRecord()->commission_type ?? 'embedded')
+                    ->helperText('How commission is applied')
                     ->columnSpan(1),
 
                 Textarea::make('notes')
@@ -96,6 +119,22 @@ class ItemsRelationManager extends RelationManager
                     ->label('Target Price')
                     ->money(fn () => $this->getOwnerRecord()->currency?->code ?? 'USD')
                     ->placeholder('Not set'),
+
+                TextColumn::make('commission_percent')
+                    ->label('Commission')
+                    ->suffix('%')
+                    ->alignCenter(),
+
+                TextColumn::make('commission_type')
+                    ->label('Type')
+                    ->badge()
+                    ->color(fn (string $state): string => match ($state) {
+                        'embedded' => 'success',
+                        'separate' => 'warning',
+                        default => 'gray',
+                    })
+                    ->formatStateUsing(fn (string $state): string => ucfirst($state))
+                    ->alignCenter(),
 
                 TextColumn::make('notes')
                     ->limit(50)

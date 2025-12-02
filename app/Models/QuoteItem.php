@@ -24,6 +24,8 @@ class QuoteItem extends Model
         'supplier_part_number',
         'supplier_notes',
         'notes',
+        'commission_percent',
+        'commission_type',
     ];
 
     protected $casts = [
@@ -34,6 +36,7 @@ class QuoteItem extends Model
         'total_price_after_commission' => 'integer',
         'converted_price_cents' => 'integer',
         'delivery_days' => 'integer',
+        'commission_percent' => 'decimal:2',
     ];
 
     /**
@@ -45,9 +48,14 @@ class QuoteItem extends Model
 
         // Auto-calculate commission and totals
         static::saving(function ($item) {
-            // Get commission from supplier quote's order
-            $commissionPercent = $item->supplierQuote->order->commission_percent ?? 0;
-            $commissionType = $item->supplierQuote->order->commission_type ?? 'embedded';
+            // Get commission from ORDER ITEM (per-product commission)
+            $orderItem = $item->orderItem;
+            $commissionPercent = $orderItem ? $orderItem->commission_percent : 0;
+            $commissionType = $orderItem ? $orderItem->commission_type : 'embedded';
+            
+            // Store commission info for reference
+            $item->commission_percent = $commissionPercent;
+            $item->commission_type = $commissionType;
             
             // Calculate totals first
             $item->total_price_before_commission = $item->unit_price_before_commission * $item->quantity;

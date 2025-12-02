@@ -15,11 +15,14 @@ class OrderItem extends Model
         'product_id',
         'quantity',
         'requested_unit_price',
+        'commission_percent',
+        'commission_type',
         'notes',
     ];
 
     protected $casts = [
         'quantity' => 'integer',
+        'commission_percent' => 'decimal:2',
     ];
 
     /**
@@ -49,4 +52,30 @@ class OrderItem extends Model
         return $this->belongsTo(Product::class);
     }
 
+    /**
+     * Boot the model
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        // When order item is saved, update order's average commission
+        static::saved(function ($item) {
+            $item->order->updateCommissionAverage();
+        });
+
+        static::deleted(function ($item) {
+            $item->order->updateCommissionAverage();
+        });
+
+        // Set default commission from order if not specified
+        static::creating(function ($item) {
+            if ($item->commission_percent === null && $item->order) {
+                $item->commission_percent = $item->order->commission_percent ?? 0;
+            }
+            if ($item->commission_type === null && $item->order) {
+                $item->commission_type = $item->order->commission_type ?? 'embedded';
+            }
+        });
+    }
 }

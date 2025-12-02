@@ -30,6 +30,7 @@ class Order extends Model
         'status',
         'commission_percent',
         'commission_type',
+        'commission_percent_average',
         'customer_notes',
         'notes',
         'total_amount',
@@ -40,6 +41,7 @@ class Order extends Model
 
     protected $casts = [
         'commission_percent' => 'decimal:2',
+        'commission_percent_average' => 'decimal:2',
         'total_amount' => 'integer',
     ];
 
@@ -305,5 +307,30 @@ class Order extends Model
     public function getMatchingSuppliersCount(): int
     {
         return $this->matchingSuppliers()->count();
+    }
+
+    /**
+     * Update the average commission percentage based on order items
+     */
+    public function updateCommissionAverage(): void
+    {
+        $items = $this->items;
+        
+        if ($items->isEmpty()) {
+            $this->commission_percent_average = null;
+            $this->save();
+            return;
+        }
+        
+        // Calculate weighted average based on quantity
+        $totalQuantity = $items->sum('quantity');
+        $weightedSum = 0;
+        
+        foreach ($items as $item) {
+            $weightedSum += ($item->commission_percent ?? 0) * $item->quantity;
+        }
+        
+        $this->commission_percent_average = $totalQuantity > 0 ? $weightedSum / $totalQuantity : 0;
+        $this->save();
     }
 }
