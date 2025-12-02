@@ -273,14 +273,18 @@ class SupplierQuote extends Model
             $totalBefore += $item->total_price_before_commission;
 
             if ($commissionType === 'embedded') {
-                $unitAfter = (int)($item->unit_price_before_commission * (1 + $commissionPercent));
+                // Commission is embedded - calculate commission on total, then distribute to unit price
+                $itemTotalBefore = $item->total_price_before_commission;
+                $itemTotalAfter = (int) ($itemTotalBefore * (1 + $commissionPercent));
+                $unitAfter = (int) ($itemTotalAfter / $item->quantity);
+                
                 $item->update([
                     'unit_price_after_commission' => $unitAfter,
-                    'total_price_after_commission' => $unitAfter * $item->quantity,
+                    'total_price_after_commission' => $itemTotalAfter,
                 ]);
-                $totalAfter += $unitAfter * $item->quantity;
+                $totalAfter += $itemTotalAfter;
             } else {
-                // Separate commission - prices stay same
+                // Separate commission - prices stay the same
                 $item->update([
                     'unit_price_after_commission' => $item->unit_price_before_commission,
                     'total_price_after_commission' => $item->total_price_before_commission,
@@ -290,7 +294,7 @@ class SupplierQuote extends Model
         }
 
         if ($commissionType === 'separate') {
-            $commissionAmount = (int)($totalBefore * $commissionPercent);
+            $commissionAmount = (int) ($totalBefore * $commissionPercent);
             $totalAfter += $commissionAmount;
         } else {
             $commissionAmount = $totalAfter - $totalBefore;

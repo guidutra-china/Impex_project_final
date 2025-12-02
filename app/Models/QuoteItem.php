@@ -49,19 +49,20 @@ class QuoteItem extends Model
             $commissionPercent = $item->supplierQuote->order->commission_percent ?? 0;
             $commissionType = $item->supplierQuote->order->commission_type ?? 'embedded';
             
+            // Calculate totals first
+            $item->total_price_before_commission = $item->unit_price_before_commission * $item->quantity;
+            
             // Calculate unit price after commission
             if ($commissionType === 'embedded') {
-                // Commission is embedded in the price
-                $item->unit_price_after_commission = $item->unit_price_before_commission;
-            } else {
-                // Commission is added on top
+                // Commission is embedded - calculate on total, then distribute to unit price
                 $commissionMultiplier = 1 + ($commissionPercent / 100);
-                $item->unit_price_after_commission = (int) round($item->unit_price_before_commission * $commissionMultiplier);
+                $item->total_price_after_commission = (int) ($item->total_price_before_commission * $commissionMultiplier);
+                $item->unit_price_after_commission = (int) ($item->total_price_after_commission / $item->quantity);
+            } else {
+                // Separate commission - prices stay the same
+                $item->unit_price_after_commission = $item->unit_price_before_commission;
+                $item->total_price_after_commission = $item->total_price_before_commission;
             }
-            
-            // Calculate totals
-            $item->total_price_before_commission = $item->unit_price_before_commission * $item->quantity;
-            $item->total_price_after_commission = $item->unit_price_after_commission * $item->quantity;
         });
     }
 
