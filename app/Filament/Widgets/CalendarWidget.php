@@ -5,10 +5,11 @@ namespace App\Filament\Widgets;
 use App\Models\Event;
 use Filament\Widgets\Widget;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Contracts\View\View;
 
 class CalendarWidget extends Widget
 {
-    protected string $view = 'filament.widgets.calendar-widget';
+    protected static string $view = 'filament.widgets.calendar-widget';
 
     protected int | string | array $columnSpan = 'full';
 
@@ -21,6 +22,13 @@ class CalendarWidget extends Widget
         
         // TODO: Uncomment after creating 'View:CalendarWidget' permission
         // return auth()->check() && auth()->user()->can('View:CalendarWidget');
+    }
+
+    protected function getViewData(): array
+    {
+        return [
+            'events' => $this->getEvents(),
+        ];
     }
 
     protected function getEvents(): array
@@ -53,6 +61,4 @@ class CalendarWidget extends Widget
             ];
         })->toArray();
     }
-
-
 }
