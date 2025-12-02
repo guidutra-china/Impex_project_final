@@ -55,7 +55,7 @@
         <td style="width: 4%;"></td>
         <td class="info-box" style="width: 48%; vertical-align: top;">
             <h3>RFQ Details</h3>
-            <p><strong>Date:</strong> {{ $model->order_date->format('M d, Y') }}</p>
+            <p><strong>Date:</strong> {{ $model->order_date ? $model->order_date->format('M d, Y') : 'N/A' }}</p>
             <p><strong>Valid Until:</strong> {{ $model->valid_until ? $model->valid_until->format('M d, Y') : 'N/A' }}</p>
             <p><strong>Currency:</strong> {{ $model->currency->code ?? 'USD' }}</p>
             @if($model->incoterm)
