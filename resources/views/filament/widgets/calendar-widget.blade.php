@@ -1,6 +1,13 @@
 <div class="col-span-full">
     <x-filament-widgets::widget class="col-span-full">
         <x-filament::section>
+            <x-slot name="heading">
+                Calendar
+            </x-slot>
+            
+            <x-slot name="headerEnd">
+                {{ $this->createEventAction }}
+            </x-slot>
             <div style="padding: 1rem; width: 100%;">
                 <div id="calendar-widget" style="min-height: 600px;"></div>
             </div>
@@ -91,9 +98,22 @@
             
             calendar.render();
             console.log('Calendar rendered successfully!');
+            
+            // Listen for event creation to refresh calendar
+            window.addEventListener('eventCreated', function() {
+                calendar.refetchEvents();
+                location.reload(); // Reload to show new event
+            });
         }
         
         initCalendar();
+    });
+    
+    // Livewire event listener
+    document.addEventListener('livewire:init', () => {
+        Livewire.on('eventCreated', () => {
+            setTimeout(() => location.reload(), 500);
+        });
     });
     </script>
 
