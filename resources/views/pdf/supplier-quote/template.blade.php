@@ -130,7 +130,7 @@
                 @if($model->order->commission_type === 'separate')
                 <tr>
                     <td style="text-align: right; padding: 5px;"><strong>Commission:</strong></td>
-                    <td style="text-align: right; padding: 5px;">{{ $model->currency->symbol ?? '$' }}{{ number_format($model->commission_amount, 2) }}</td>
+                    <td style="text-align: right; padding: 5px;">{{ $model->currency->symbol ?? '$' }}{{ number_format($model->commission_amount_dollars, 2) }}</td>
                 </tr>
                 @endif
                 @if($model->tax)

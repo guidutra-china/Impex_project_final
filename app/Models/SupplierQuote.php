@@ -314,4 +314,28 @@ class SupplierQuote extends Model
     {
         return $query->where('status', $status);
     }
+
+    /**
+     * Get subtotal (price before commission) in dollars
+     */
+    public function getSubtotalAttribute(): float
+    {
+        return $this->total_price_before_commission / 100;
+    }
+
+    /**
+     * Get total (price after commission) in dollars
+     */
+    public function getTotalAttribute(): float
+    {
+        return $this->total_price_after_commission / 100;
+    }
+
+    /**
+     * Get commission amount in dollars
+     */
+    public function getCommissionAmountDollarsAttribute(): float
+    {
+        return $this->commission_amount / 100;
+    }
 }

@@ -98,8 +98,8 @@
                 @endif
             </td>
             <td style="text-align: center;">{{ number_format($item->quantity) }} {{ $item->product->unit ?? 'pcs' }}</td>
-            <td style="text-align: right;">{{ $model->currency->symbol ?? '$' }}{{ number_format($item->unit_price, 2) }}</td>
-            <td style="text-align: right;">{{ $model->currency->symbol ?? '$' }}{{ number_format($item->total_price, 2) }}</td>
+            <td style="text-align: right;">{{ $model->currency->symbol ?? '$' }}{{ number_format($item->unit_cost, 2) }}</td>
+            <td style="text-align: right;">{{ $model->currency->symbol ?? '$' }}{{ number_format($item->total_cost, 2) }}</td>
         </tr>
         @endforeach
     </tbody>
