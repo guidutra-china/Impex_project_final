@@ -13,8 +13,8 @@
         
         body {
             font-family: 'DejaVu Sans', Arial, sans-serif;
-            font-size: 10pt;
-            line-height: 1.4;
+            font-size: 9pt;
+            line-height: 1.2;
             color: #333;
         }
         
@@ -24,7 +24,7 @@
         
         /* Header */
         .header {
-            margin-bottom: 30px;
+            margin-bottom: 10px;
             border-bottom: 2px solid #333;
             padding-bottom: 15px;
         }
@@ -47,18 +47,18 @@
         }
         
         .company-name {
-            font-size: 18pt;
+            font-size: 16pt;
             font-weight: bold;
             margin-bottom: 5px;
         }
         
         .company-info {
-            font-size: 9pt;
+            font-size: 8pt;
             color: #666;
         }
         
         .document-title {
-            font-size: 20pt;
+            font-size: 15pt;
             font-weight: bold;
             color: #2563eb;
             margin-bottom: 5px;
@@ -82,20 +82,20 @@
         .info-box {
             vertical-align: top;
             width: 48%;
-            padding: 10px;
+            padding: 5px;
             border: 1px solid #ddd;
             background: #f9fafb;
         }
         
         .info-box-title {
             font-weight: bold;
-            font-size: 11pt;
-            margin-bottom: 8px;
+            font-size: 9pt;
+            margin-bottom: 6px;
             color: #1f2937;
         }
         
         .info-box-content {
-            font-size: 9pt;
+            font-size: 8pt;
         }
         
         .info-box-content p {
@@ -106,7 +106,7 @@
         table {
             width: 100%;
             border-collapse: collapse;
-            margin: 20px 0;
+            margin: 15px 0;
         }
         
         table thead {
@@ -151,7 +151,7 @@
         
         /* Totals */
         .totals-section {
-            margin: 20px 0;
+            margin: 18px 0;
             float: right;
             width: 40%;
         }
@@ -180,8 +180,8 @@
         
         /* Footer */
         .footer {
-            margin-top: 40px;
-            padding-top: 15px;
+            margin-top: 30px;
+            padding-top: 12px;
             border-top: 1px solid #ddd;
             font-size: 8pt;
             color: #666;

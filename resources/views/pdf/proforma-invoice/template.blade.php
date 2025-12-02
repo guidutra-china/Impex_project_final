@@ -56,7 +56,7 @@
 <div class="info-section">
     <table class="info-row" cellpadding="0" cellspacing="0" style="width: 100%;">
         <tr>
-        <td class="info-box" style="width: 48%; vertical-align: top; padding: 10px; border: 1px solid #ddd; background: #f9fafb;">
+        <td class="info-box" style="width: 48%; vertical-align: top; padding: 5px; border: 1px solid #ddd; background: #f9fafb;">
             <div class="info-box-title">Bill To:</div>
             <div class="info-box-content">
                 <p><strong>{{ $model->customer->name }}</strong></p>
@@ -78,7 +78,7 @@
             </div>
         </td>
         <td style="width: 4%;"></td>
-        <td class="info-box" style="width: 48%; vertical-align: top; padding: 10px; border: 1px solid #ddd; background: #f9fafb;">
+        <td class="info-box" style="width: 48%; vertical-align: top; padding: 5px; border: 1px solid #ddd; background: #f9fafb;">
             <div class="info-box-title">Invoice Details:</div>
             <div class="info-box-content">
                 <p><strong>Issue Date:</strong> {{ $model->issue_date->format('M d, Y') }}</p>
@@ -177,6 +177,9 @@
     <div class="info-box" style="width: 60%; background: #f0f9ff; border: 1px solid #0ea5e9; padding: 10px;">
         <div class="info-box-title" style="color: #0369a1;">Bank Information for Payment:</div>
         <div class="info-box-content">
+            @if($companySettings->company_name)
+                <p><strong>Beneficiary:</strong> {{ $companySettings->company_name }}</p>
+            @endif
             @if($companySettings->bank_name)
             <p><strong>Bank Name:</strong> {{ $companySettings->bank_name }}</p>
             @endif
