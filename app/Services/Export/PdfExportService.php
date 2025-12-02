@@ -55,7 +55,33 @@ class PdfExportService
                 throw new \Exception("PDF content is empty - template rendering may have failed");
             }
             
-            Storage::put($filePath, $pdfContent);
+            \Log::info('PDF content generated', [
+                'content_length' => strlen($pdfContent),
+                'file_path' => $filePath,
+                'full_path' => $fullPath,
+            ]);
+            
+            // Ensure directory exists
+            $directory = dirname($fullPath);
+            if (!is_dir($directory)) {
+                \Log::info('Creating directory', ['directory' => $directory]);
+                mkdir($directory, 0755, true);
+            }
+            
+            // Try Storage::put first
+            $putResult = Storage::put($filePath, $pdfContent);
+            
+            \Log::info('Storage::put result', [
+                'result' => $putResult,
+                'exists_after_put' => Storage::exists($filePath),
+            ]);
+            
+            // If Storage::put failed, try direct file_put_contents
+            if (!file_exists($fullPath)) {
+                \Log::warning('Storage::put did not create file, trying file_put_contents');
+                $bytes = file_put_contents($fullPath, $pdfContent);
+                \Log::info('file_put_contents result', ['bytes_written' => $bytes]);
+            }
             
             // Verify file was created and has content
             if (!Storage::exists($filePath)) {
