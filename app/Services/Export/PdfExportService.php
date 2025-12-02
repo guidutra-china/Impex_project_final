@@ -48,7 +48,22 @@ class PdfExportService
         }
         
         // Save PDF
-        Storage::put($filePath, $pdf->output());
+        try {
+            $pdfContent = $pdf->output();
+            Storage::put($filePath, $pdfContent);
+            
+            // Verify file was created
+            if (!Storage::exists($filePath)) {
+                throw new \Exception("PDF file was not created at: {$filePath}");
+            }
+        } catch (\Exception $e) {
+            \Log::error('PDF generation failed', [
+                'error' => $e->getMessage(),
+                'file_path' => $filePath,
+                'full_path' => $fullPath,
+            ]);
+            throw $e;
+        }
         
         // Create document record
         return GeneratedDocument::createFromFile(
