@@ -14,6 +14,14 @@ class Dashboard extends BaseDashboard
     protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-home';
 
     protected string $view = 'filament.pages.dashboard';
+    
+    /**
+     * Allow all authenticated users to access the dashboard.
+     */
+    public static function canAccess(): bool
+    {
+        return auth()->check();
+    }
 
     /**
      * Get the widgets that should be displayed on the dashboard.
