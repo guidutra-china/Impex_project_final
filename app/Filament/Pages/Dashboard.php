@@ -7,10 +7,11 @@ use App\Filament\Widgets\RfqStatsWidget;
 use App\Filament\Widgets\PurchaseOrderStatsWidget;
 use App\Filament\Widgets\FinancialOverviewWidget;
 use Filament\Pages\Dashboard as BaseDashboard;
+use BackedEnum;
 
 class Dashboard extends BaseDashboard
 {
-    protected static ?string $navigationIcon = 'heroicon-o-home';
+    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-home';
 
     protected static string $view = 'filament.pages.dashboard';
 
