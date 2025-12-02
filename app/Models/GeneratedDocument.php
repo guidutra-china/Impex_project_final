@@ -154,7 +154,10 @@ class GeneratedDocument extends Model
         array $options = []
     ): self {
         $filename = $options['filename'] ?? basename($filePath);
-        $fileSize = Storage::exists($filePath) ? Storage::size($filePath) : null;
+        
+        // Get file size using direct filesystem access
+        $fullPath = storage_path('app/' . $filePath);
+        $fileSize = file_exists($fullPath) ? filesize($fullPath) : null;
 
         // Get next version number
         $version = static::forDocument(get_class($documentable), $documentable->id)
