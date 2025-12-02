@@ -18,6 +18,11 @@ class PurchaseOrderStatsWidget extends BaseWidget
             return false;
         }
         
+        // Allow panel_user role to view dashboard
+        if (auth()->user()->hasRole('panel_user')) {
+            return true;
+        }
+        
         // Check permission using Shield's actual format (uses separator from config)
         return auth()->user()->can('View:PurchaseOrderStatsWidget');
     }
