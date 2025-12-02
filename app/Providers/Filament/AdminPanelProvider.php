@@ -63,8 +63,6 @@ class AdminPanelProvider extends PanelProvider
             ->pages([
                 Dashboard::class,
             ])
-            ->databaseNotifications()
-            ->databaseNotificationsPolling('30s')
             ->navigationGroups([
                 'Sales & Orders',
                 'Purchasing & Inventory',
