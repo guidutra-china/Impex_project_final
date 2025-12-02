@@ -155,7 +155,7 @@
 </table>
 
 {{-- Bank Information --}}
-@if($company && ($companySettings->bank_name || $companySettings->bank_account_number))
+@if($companySettings && ($companySettings->bank_name || $companySettings->bank_account_number))
 <div style="background-color: #e3f2fd; padding: 15px; margin-bottom: 20px; border-radius: 5px; width: 60%;">
     <h3 style="margin-top: 0; color: #1976d2;">Bank Information for Payment</h3>
     <table style="width: 100%;">
