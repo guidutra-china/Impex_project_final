@@ -15,6 +15,42 @@ class ProformaInvoice extends Model
     protected static function booted(): void
     {
         static::addGlobalScope(new ClientOwnershipScope());
+        
+        // Auto-increment revision on update
+        static::updating(function ($model) {
+            // Fields that should trigger revision increment
+            $importantFields = [
+                'customer_id',
+                'currency_id',
+                'payment_term_id',
+                'incoterm',
+                'incoterm_location',
+                'subtotal',
+                'tax',
+                'total',
+                'issue_date',
+                'valid_until',
+                'due_date',
+                'deposit_required',
+                'deposit_amount',
+                'deposit_percent',
+                'terms_and_conditions',
+            ];
+            
+            // Check if any important field was changed
+            $hasImportantChanges = false;
+            foreach ($importantFields as $field) {
+                if ($model->isDirty($field)) {
+                    $hasImportantChanges = true;
+                    break;
+                }
+            }
+            
+            // Increment revision if important fields changed
+            if ($hasImportantChanges && !$model->isDirty('revision_number')) {
+                $model->revision_number = ($model->revision_number ?? 1) + 1;
+            }
+        });
     }
 
     protected $fillable = [

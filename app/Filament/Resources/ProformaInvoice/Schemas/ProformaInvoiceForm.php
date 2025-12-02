@@ -2,17 +2,22 @@
 
 namespace App\Filament\Resources\ProformaInvoice\Schemas;
 
+use App\Services\Export\ExcelExportService;
+use App\Services\Export\PdfExportService;
+use Filament\Forms\Components\Actions\Action;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Notifications\Notification;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
+use Illuminate\Support\Facades\Storage;
 
 class ProformaInvoiceForm
 {
@@ -35,8 +40,9 @@ class ProformaInvoiceForm
                                     ->label('Revision')
                                     ->numeric()
                                     ->default(1)
-                                    ->minValue(1)
-                                    ->required()
+                                    ->disabled()
+                                    ->dehydrated(true)
+                                    ->helperText('Auto-increments when important fields are changed')
                                     ->columnSpan(1),
 
                                 Select::make('customer_id')
@@ -252,6 +258,72 @@ class ProformaInvoiceForm
                     ])
                     ->collapsible()
                     ->collapsed()
+                    ->columnSpanFull(),
+
+                Section::make('Export Documents')
+                    ->schema([
+                        Grid::make()
+                            ->schema([
+                                Placeholder::make('export_actions')
+                                    ->label('')
+                                    ->content(fn ($record) => $record ? 'Click the buttons below to generate and download documents' : 'Save the proforma first to enable export')
+                                    ->columnSpanFull(),
+                            ])
+                            ->columns(2),
+                    ])
+                    ->headerActions([
+                        Action::make('export_pdf')
+                            ->label('Export PDF')
+                            ->icon('heroicon-o-document-arrow-down')
+                            ->color('gray')
+                            ->visible(fn ($record) => $record !== null)
+                            ->action(function ($record) {
+                                $pdfService = app(PdfExportService::class);
+                                $document = $pdfService->generate(
+                                    $record,
+                                    'proforma_invoice',
+                                    'pdf.proforma-invoice.template',
+                                    [],
+                                    ['revision_number' => $record->revision_number]
+                                );
+                                
+                                Notification::make()
+                                    ->success()
+                                    ->title('PDF generated successfully')
+                                    ->send();
+                                
+                                return Storage::download(
+                                    $document->file_path,
+                                    $document->filename
+                                );
+                            }),
+
+                        Action::make('export_excel')
+                            ->label('Export Excel')
+                            ->icon('heroicon-o-table-cells')
+                            ->color('success')
+                            ->visible(fn ($record) => $record !== null)
+                            ->action(function ($record) {
+                                $excelService = app(ExcelExportService::class);
+                                $document = $excelService->generate(
+                                    $record,
+                                    'proforma_invoice',
+                                    ['revision_number' => $record->revision_number]
+                                );
+                                
+                                Notification::make()
+                                    ->success()
+                                    ->title('Excel generated successfully')
+                                    ->send();
+                                
+                                return Storage::download(
+                                    $document->file_path,
+                                    $document->filename
+                                );
+                            }),
+                    ])
+                    ->visible(fn ($record) => $record !== null)
+                    ->collapsible()
                     ->columnSpanFull(),
             ]);
     }
