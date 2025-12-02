@@ -9,8 +9,8 @@
 <table class="header-row" style="width: 100%; margin-bottom: 30px;">
     <tr>
         <td class="header-col left" style="width: 50%; vertical-align: top;">
-            @if($company && $companySettings->logo)
-                <img src="{{ storage_path('app/public/' . $companySettings->logo) }}" style="max-height: 60px; margin-bottom: 10px;">
+            @if($companySettings && $companySettings->logo_full_path)
+                <img src="{{ $companySettings->logo_full_path }}" style="max-height: 60px; margin-bottom: 10px;" alt="Company Logo">
             @endif
             <div class="company-name">{{ $companySettings->company_name ?? config('app.name') }}</div>
             <div class="company-info">
