@@ -5,11 +5,11 @@
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
                     <h3 style="font-size: 1.125rem; font-weight: 600;">Calendar</h3>
                     <a href="{{ route('filament.admin.resources.events.create') }}" 
-                       class="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-semibold rounded-lg shadow-sm transition-colors"
+                       class="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-md shadow-sm transition-colors"
                        style="background-color: rgb(99 102 241); color: white; text-decoration: none;"
                        onmouseover="this.style.backgroundColor='rgb(79 70 229)'"
                        onmouseout="this.style.backgroundColor='rgb(99 102 241)'">
-                        <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                         </svg>
                         New Event
@@ -68,7 +68,7 @@
                     message += '\nCompleted: ' + (props.completed ? 'Yes' : 'No');
                     
                     if (confirm(message + '\n\nEdit this event?')) {
-                        window.location.href = '/admin/events/' + event.id + '/edit';
+                        window.location.href = '/panel/events/' + event.id + '/edit';
                     }
                 },
                 eventDidMount: function(info) {

@@ -16,4 +16,9 @@ class EditEvent extends EditRecord
             Actions\DeleteAction::make(),
         ];
     }
+    
+    protected function getRedirectUrl(): string
+    {
+        return '/panel'; // Redirect to dashboard after editing event
+    }
 }
