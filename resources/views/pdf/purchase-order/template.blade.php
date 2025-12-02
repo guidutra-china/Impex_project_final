@@ -2,26 +2,26 @@
 
 @section('content')
 @php
-    $company = \App\Models\CompanySetting::first();
+    $companySettings = \App\Models\CompanySetting::current();
 @endphp
 
 {{-- Header --}}
 <table class="header-row" style="width: 100%; margin-bottom: 30px;">
     <tr>
         <td class="header-col left" style="width: 50%; vertical-align: top;">
-            @if($company && $company->logo)
-                <img src="{{ storage_path('app/public/' . $company->logo) }}" style="max-width: 150px; margin-bottom: 10px;">
+            @if($company && $companySettings->logo)
+                <img src="{{ storage_path('app/public/' . $companySettings->logo) }}" style="max-height: 60px; margin-bottom: 10px;">
             @endif
-            <div class="company-name">{{ $company->company_name ?? config('app.name') }}</div>
+            <div class="company-name">{{ $companySettings->company_name ?? config('app.name') }}</div>
             <div class="company-info">
-                @if($company)
-                    <p>{{ $company->address }}</p>
-                    <p>{{ $company->city }}, {{ $company->state }} {{ $company->postal_code }}</p>
-                    <p>{{ $company->country }}</p>
-                    <p>Email: {{ $company->email }}</p>
-                    <p>Phone: {{ $company->phone }}</p>
-                    @if($company->website)
-                        <p>Website: {{ $company->website }}</p>
+                @if($companySettings)
+                    <p>{{ $companySettings->address }}</p>
+                    <p>{{ $companySettings->city }}, {{ $companySettings->state }} {{ $companySettings->postal_code }}</p>
+                    <p>{{ $companySettings->country }}</p>
+                    <p>Email: {{ $companySettings->email }}</p>
+                    <p>Phone: {{ $companySettings->phone }}</p>
+                    @if($companySettings->website)
+                        <p>Website: {{ $companySettings->website }}</p>
                     @endif
                 @endif
             </div>

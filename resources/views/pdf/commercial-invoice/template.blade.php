@@ -2,26 +2,26 @@
 
 @section('content')
 @php
-    $company = \App\Models\CompanySetting::first();
+    $companySettings = \App\Models\CompanySetting::current();
 @endphp
 
 {{-- Header --}}
 <table class="header-row" style="width: 100%; margin-bottom: 30px;">
     <tr>
         <td class="header-col left" style="width: 50%; vertical-align: top;">
-            @if($company && $company->logo)
-                <img src="{{ storage_path('app/public/' . $company->logo) }}" style="max-width: 150px; margin-bottom: 10px;">
+            @if($company && $companySettings->logo)
+                <img src="{{ storage_path('app/public/' . $companySettings->logo) }}" style="max-height: 60px; margin-bottom: 10px;">
             @endif
-            <div class="company-name">{{ $company->company_name ?? config('app.name') }}</div>
+            <div class="company-name">{{ $companySettings->company_name ?? config('app.name') }}</div>
             <div class="company-info">
-                @if($company)
-                    <p>{{ $company->address }}</p>
-                    <p>{{ $company->city }}, {{ $company->state }} {{ $company->postal_code }}</p>
-                    <p>{{ $company->country }}</p>
-                    <p>Email: {{ $company->email }}</p>
-                    <p>Phone: {{ $company->phone }}</p>
-                    @if($company->website)
-                        <p>Website: {{ $company->website }}</p>
+                @if($companySettings)
+                    <p>{{ $companySettings->address }}</p>
+                    <p>{{ $companySettings->city }}, {{ $companySettings->state }} {{ $companySettings->postal_code }}</p>
+                    <p>{{ $companySettings->country }}</p>
+                    <p>Email: {{ $companySettings->email }}</p>
+                    <p>Phone: {{ $companySettings->phone }}</p>
+                    @if($companySettings->website)
+                        <p>Website: {{ $companySettings->website }}</p>
                     @endif
                 @endif
             </div>
@@ -155,38 +155,38 @@
 </table>
 
 {{-- Bank Information --}}
-@if($company && ($company->bank_name || $company->bank_account_number))
+@if($company && ($companySettings->bank_name || $companySettings->bank_account_number))
 <div style="background-color: #e3f2fd; padding: 15px; margin-bottom: 20px; border-radius: 5px; width: 60%;">
     <h3 style="margin-top: 0; color: #1976d2;">Bank Information for Payment</h3>
     <table style="width: 100%;">
-        @if($company->bank_name)
+        @if($companySettings->bank_name)
         <tr>
             <td style="padding: 3px 0; width: 40%;"><strong>Bank Name:</strong></td>
-            <td style="padding: 3px 0;">{{ $company->bank_name }}</td>
+            <td style="padding: 3px 0;">{{ $companySettings->bank_name }}</td>
         </tr>
         @endif
-        @if($company->bank_account_number)
+        @if($companySettings->bank_account_number)
         <tr>
             <td style="padding: 3px 0;"><strong>Account Number:</strong></td>
-            <td style="padding: 3px 0;">{{ $company->bank_account_number }}</td>
+            <td style="padding: 3px 0;">{{ $companySettings->bank_account_number }}</td>
         </tr>
         @endif
-        @if($company->bank_routing_number)
+        @if($companySettings->bank_routing_number)
         <tr>
             <td style="padding: 3px 0;"><strong>Routing Number:</strong></td>
-            <td style="padding: 3px 0;">{{ $company->bank_routing_number }}</td>
+            <td style="padding: 3px 0;">{{ $companySettings->bank_routing_number }}</td>
         </tr>
         @endif
-        @if($company->bank_swift_code)
+        @if($companySettings->bank_swift_code)
         <tr>
             <td style="padding: 3px 0;"><strong>SWIFT Code:</strong></td>
-            <td style="padding: 3px 0;">{{ $company->bank_swift_code }}</td>
+            <td style="padding: 3px 0;">{{ $companySettings->bank_swift_code }}</td>
         </tr>
         @endif
-        @if($company->tax_id)
+        @if($companySettings->tax_id)
         <tr>
             <td style="padding: 3px 0;"><strong>Tax ID:</strong></td>
-            <td style="padding: 3px 0;">{{ $company->tax_id }}</td>
+            <td style="padding: 3px 0;">{{ $companySettings->tax_id }}</td>
         </tr>
         @endif
     </table>
