@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Auth;
 
 class CalendarWidget extends Widget
 {
-    protected static string $view = 'filament.widgets.calendar-widget';
+    protected string $view = 'filament.widgets.calendar-widget';
 
     protected int | string | array $columnSpan = 'full';
 
