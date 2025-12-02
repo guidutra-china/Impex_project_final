@@ -1,21 +1,20 @@
 <div class="col-span-full">
     <x-filament-widgets::widget class="col-span-full">
         <x-filament::section>
-            <x-slot name="heading">
-                Calendar
-            </x-slot>
-            
-            <x-slot name="headerEnd">
-                <a href="{{ route('filament.admin.resources.events.create') }}" 
-                   class="fi-btn fi-btn-color-primary fi-btn-size-md inline-flex items-center gap-1.5 px-3 py-2 text-sm font-semibold rounded-lg shadow-sm transition-colors"
-                   style="background-color: rgb(99 102 241); color: white;">
-                    <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                    </svg>
-                    New Event
-                </a>
-            </x-slot>
             <div style="padding: 1rem; width: 100%;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <h3 style="font-size: 1.125rem; font-weight: 600;">Calendar</h3>
+                    <a href="{{ route('filament.admin.resources.events.create') }}" 
+                       class="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-semibold rounded-lg shadow-sm transition-colors"
+                       style="background-color: rgb(99 102 241); color: white; text-decoration: none;"
+                       onmouseover="this.style.backgroundColor='rgb(79 70 229)'"
+                       onmouseout="this.style.backgroundColor='rgb(99 102 241)'">
+                        <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                        </svg>
+                        New Event
+                    </a>
+                </div>
                 <div id="calendar-widget" style="min-height: 600px;"></div>
             </div>
         </x-filament::section>
