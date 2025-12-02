@@ -1,21 +1,19 @@
 <?php
 
-namespace App\Filament\Resources;
+namespace App\Filament\Resources\ProformaInvoice;
 
-use App\Filament\Resources\ProformaInvoice\Pages;
-use App\Filament\Resources\ProformaInvoice\RelationManagers;
 use App\Filament\Resources\ProformaInvoice\Schemas\ProformaInvoiceForm;
 use App\Models\ProformaInvoice;
+use BackedEnum;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Tables\Actions\BulkActionGroup;
-use Filament\Tables\Actions\DeleteBulkAction;
-use Filament\Tables\Actions\EditAction;
-use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
-use BackedEnum;
 use UnitEnum;
 
 class ProformaInvoiceResource extends Resource

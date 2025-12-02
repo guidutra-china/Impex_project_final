@@ -2,7 +2,7 @@
 
 namespace App\Filament\Resources\ProformaInvoice\Pages;
 
-use App\Filament\Resources\ProformaInvoiceResource;
+use App\Filament\Resources\ProformaInvoice\ProformaInvoiceResource;
 use Filament\Resources\Pages\CreateRecord;
 
 class CreateProformaInvoice extends CreateRecord

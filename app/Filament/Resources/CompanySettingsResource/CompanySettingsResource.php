@@ -1,12 +1,10 @@
 <?php
 
-namespace App\Filament\Resources;
+namespace App\Filament\Resources\CompanySettingsResource;
 
-use App\Filament\Resources\CompanySettingsResource\Pages;
 use App\Models\CompanySetting;
 use BackedEnum;
 use Filament\Resources\Resource;
-use Filament\Support\Icons\Heroicon;
 use UnitEnum;
 
 class CompanySettingsResource extends Resource

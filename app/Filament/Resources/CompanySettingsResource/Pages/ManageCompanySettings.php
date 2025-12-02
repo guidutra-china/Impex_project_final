@@ -3,13 +3,13 @@
 namespace App\Filament\Resources\CompanySettingsResource\Pages;
 
 use App\Filament\Resources\CompanySettings\Schemas\CompanySettingsForm;
-use App\Filament\Resources\CompanySettingsResource;
+use App\Filament\Resources\CompanySettingsResource\CompanySettingsResource;
 use App\Models\CompanySetting;
 use Filament\Actions\Action;
-use Filament\Resources\Pages\Page;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Notifications\Notification;
+use Filament\Resources\Pages\Page;
 use Filament\Schemas\Schema;
 
 class ManageCompanySettings extends Page implements HasForms
