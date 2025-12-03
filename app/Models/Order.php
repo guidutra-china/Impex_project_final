@@ -154,9 +154,14 @@ class Order extends Model
      */
     public function generateOrderNumber(): string
     {
-        // Get client code
-        $client = $this->customer ?? Client::find($this->customer_id);
-        $clientCode = $client && $client->code ? $client->code : 'XXX';
+        // Get client code - must exist
+        $client = $this->customer ?? Client::withoutGlobalScopes()->find($this->customer_id);
+        
+        if (!$client || !$client->code) {
+            throw new \Exception('Cannot generate order number: Client not found or has no code');
+        }
+        
+        $clientCode = $client->code;
         
         // Get 2-digit year
         $year = now()->format('y');
