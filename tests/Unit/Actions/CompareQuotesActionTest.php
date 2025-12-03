@@ -26,8 +26,8 @@ class CompareQuotesActionTest extends TestCase
      */
     public function test_execute_calls_service_compare_method(): void
     {
-        // Mock the Order instead of creating a real one
-        $order = \Mockery::mock(Order::class);
+        // Create a partial mock that allows real behavior for some methods
+        $order = \Mockery::mock(Order::class)->makePartial();
         $order->id = 1;
 
         $expectedResult = [
@@ -57,8 +57,8 @@ class CompareQuotesActionTest extends TestCase
         $this->expectException(\Exception::class);
         $this->expectExceptionMessage('Order does not exist');
 
-        // Create a mock Order that doesn't exist
-        $order = \Mockery::mock(Order::class);
+        // Create a partial mock
+        $order = \Mockery::mock(Order::class)->makePartial();
         $order->exists = false;
 
         $this->action->handle($order);
@@ -69,7 +69,7 @@ class CompareQuotesActionTest extends TestCase
      */
     public function test_handle_returns_empty_array_when_no_quotes(): void
     {
-        $order = \Mockery::mock(Order::class);
+        $order = \Mockery::mock(Order::class)->makePartial();
         $order->exists = true;
         $order->id = 1;
 
@@ -89,7 +89,7 @@ class CompareQuotesActionTest extends TestCase
      */
     public function test_get_cheapest_quote_returns_overall_quote(): void
     {
-        $order = \Mockery::mock(Order::class);
+        $order = \Mockery::mock(Order::class)->makePartial();
         $order->id = 1;
 
         $expectedResult = [
@@ -115,7 +115,7 @@ class CompareQuotesActionTest extends TestCase
      */
     public function test_get_cheapest_quote_returns_null_when_no_overall(): void
     {
-        $order = \Mockery::mock(Order::class);
+        $order = \Mockery::mock(Order::class)->makePartial();
         $order->id = 1;
 
         $this->mockService
@@ -133,7 +133,7 @@ class CompareQuotesActionTest extends TestCase
      */
     public function test_get_ranked_quotes_returns_sorted_array(): void
     {
-        $order = \Mockery::mock(Order::class);
+        $order = \Mockery::mock(Order::class)->makePartial();
         $order->id = 1;
 
         $expectedResult = [
@@ -169,7 +169,7 @@ class CompareQuotesActionTest extends TestCase
      */
     public function test_handle_calls_execute_when_validation_passes(): void
     {
-        $order = \Mockery::mock(Order::class);
+        $order = \Mockery::mock(Order::class)->makePartial();
         $order->exists = true;
         $order->id = 1;
 
