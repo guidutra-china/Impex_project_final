@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources\Suppliers\RelationManagers;
 
+use App\Repositories\SupplierRepository;
+use App\Repositories\DocumentRepository;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Hidden;
@@ -22,6 +24,7 @@ use Filament\Actions\Action;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Storage;
 use BackedEnum;
+
 class PhotosRelationManager extends RelationManager
 {
     protected static string $relationship = 'files';
@@ -30,10 +33,22 @@ class PhotosRelationManager extends RelationManager
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedPhoto;
 
+    protected SupplierRepository $supplierRepository;
+    protected DocumentRepository $documentRepository;
+
+    public function __construct()
+    {
+        parent::__construct();
+        $this->supplierRepository = app(SupplierRepository::class);
+        $this->documentRepository = app(DocumentRepository::class);
+    }
+
     public function table(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(fn (Builder $query) => $query->where('file_type', 'photo'))
+            ->query(
+                $this->documentRepository->getSupplierPhotosQuery($this->getOwnerRecord()->id)
+            )
             ->recordTitleAttribute('original_filename')
             ->columns([
                 ImageColumn::make('file_path')
