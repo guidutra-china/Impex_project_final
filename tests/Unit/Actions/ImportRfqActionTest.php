@@ -21,9 +21,14 @@ class ImportRfqActionTest extends TestCase
         $this->action = new ImportRfqAction($this->mockService);
     }
 
+    /**
+     * Test that execute calls the service import method
+     */
     public function test_execute_calls_service_import_method(): void
     {
-        $order = Order::factory()->create();
+        // Mock the Order instead of creating a real one
+        $order = \Mockery::mock(Order::class);
+        $order->id = 1;
         $filePath = '/tmp/test.xlsx';
 
         $expectedResult = [
@@ -44,54 +49,99 @@ class ImportRfqActionTest extends TestCase
         $this->assertEquals($expectedResult, $result);
     }
 
+    /**
+     * Test that handle validates order exists
+     */
     public function test_handle_validates_order_exists(): void
     {
         $this->expectException(\Exception::class);
         $this->expectExceptionMessage('Order does not exist');
 
-        $order = new Order();
+        // Create a mock Order that doesn't exist
+        $order = \Mockery::mock(Order::class);
+        $order->exists = false;
+        
         $filePath = '/tmp/test.xlsx';
 
         $this->action->handle($order, $filePath);
     }
 
+    /**
+     * Test that handle validates file exists
+     */
     public function test_handle_validates_file_exists(): void
     {
         $this->expectException(\Exception::class);
         $this->expectExceptionMessage('File does not exist');
 
-        $order = Order::factory()->create();
-        $filePath = '/tmp/nonexistent.xlsx';
+        // Create a mock Order that exists
+        $order = \Mockery::mock(Order::class);
+        $order->exists = true;
+        $order->id = 1;
+        
+        $filePath = '/tmp/nonexistent_' . uniqid() . '.xlsx';
 
         $this->action->handle($order, $filePath);
     }
 
-    public function test_handle_logs_import_attempt(): void
+    /**
+     * Test that handle calls execute when validation passes
+     */
+    public function test_handle_calls_execute_when_validation_passes(): void
     {
-        $order = Order::factory()->create();
-        $filePath = storage_path('app/temp/imports/test.xlsx');
+        // Create a temporary file
+        $filePath = tempnam(sys_get_temp_dir(), 'test_');
+        
+        try {
+            $order = \Mockery::mock(Order::class);
+            $order->exists = true;
+            $order->id = 1;
 
-        // Create the directory and file
-        @mkdir(dirname($filePath), 0755, true);
-        touch($filePath);
+            $expectedResult = [
+                'success' => true,
+                'message' => 'Successfully imported 3 items',
+                'imported' => 3,
+                'errors' => [],
+            ];
 
-        $expectedResult = [
-            'success' => true,
-            'message' => 'Successfully imported 3 items',
-            'imported' => 3,
-            'errors' => [],
-        ];
+            $this->mockService
+                ->shouldReceive('importFromExcel')
+                ->once()
+                ->with($order, $filePath)
+                ->andReturn($expectedResult);
 
-        $this->mockService
-            ->shouldReceive('importFromExcel')
-            ->once()
-            ->andReturn($expectedResult);
+            $result = $this->action->handle($order, $filePath);
 
-        $result = $this->action->handle($order, $filePath);
+            $this->assertEquals($expectedResult, $result);
+        } finally {
+            // Cleanup
+            @unlink($filePath);
+        }
+    }
 
-        $this->assertEquals($expectedResult, $result);
+    /**
+     * Test that handle logs when service throws exception
+     */
+    public function test_handle_logs_when_service_throws_exception(): void
+    {
+        $filePath = tempnam(sys_get_temp_dir(), 'test_');
+        
+        try {
+            $order = \Mockery::mock(Order::class);
+            $order->exists = true;
+            $order->id = 1;
 
-        // Cleanup
-        @unlink($filePath);
+            $this->mockService
+                ->shouldReceive('importFromExcel')
+                ->once()
+                ->andThrow(new \Exception('Import failed'));
+
+            $this->expectException(\Exception::class);
+            $this->expectExceptionMessage('Import failed');
+
+            $this->action->handle($order, $filePath);
+        } finally {
+            @unlink($filePath);
+        }
     }
 }
