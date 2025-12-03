@@ -11,6 +11,8 @@ use App\Repositories\SupplierRepository;
 use App\Repositories\FinancialTransactionRepository;
 use App\Repositories\ProformaInvoiceRepository;
 use App\Repositories\SupplierQuoteRepository;
+use App\Repositories\SalesInvoiceRepository;
+use App\Repositories\PurchaseOrderRepository;
 use Illuminate\Support\ServiceProvider;
 
 /**
@@ -52,6 +54,14 @@ class RepositoryServiceProvider extends ServiceProvider
 
         $this->app->singleton(SupplierQuoteRepository::class, function ($app) {
             return new SupplierQuoteRepository();
+        });
+
+        $this->app->singleton(SalesInvoiceRepository::class, function ($app) {
+            return new SalesInvoiceRepository();
+        });
+
+        $this->app->singleton(PurchaseOrderRepository::class, function ($app) {
+            return new PurchaseOrderRepository();
         });
     }
 
