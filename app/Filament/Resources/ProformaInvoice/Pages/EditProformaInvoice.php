@@ -111,4 +111,11 @@ class EditProformaInvoice extends EditRecord
             ->{$type}()
             ->send();
     }
+
+    protected function getFooterWidgets(): array
+    {
+        return [
+            \App\Filament\Widgets\RelatedDocumentsWidget::class,
+        ];
+    }
 }

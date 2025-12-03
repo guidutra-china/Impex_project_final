@@ -102,4 +102,11 @@ class EditSupplierQuote extends EditRecord
         
         return $data;
     }
+
+    protected function getFooterWidgets(): array
+    {
+        return [
+            \App\Filament\Widgets\RelatedDocumentsWidget::class,
+        ];
+    }
 }
