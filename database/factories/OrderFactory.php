@@ -16,9 +16,9 @@ class OrderFactory extends Factory
         return [
             'customer_id' => Client::factory(),
             'currency_id' => Currency::factory(),
-            'status' => $this->faker->randomElement(['draft', 'pending', 'confirmed', 'completed']),
+            'status' => $this->faker->randomElement(['pending', 'processing', 'quoted', 'completed', 'cancelled']),
             'commission_percent' => $this->faker->randomFloat(2, 0, 10),
-            'commission_type' => $this->faker->randomElement(['percentage', 'fixed']),
+            'commission_type' => $this->faker->randomElement(['embedded', 'separate']),
             'incoterm' => $this->faker->randomElement(['FOB', 'CIF', 'DDP', 'EXW']),
             'incoterm_location' => $this->faker->city(),
             'customer_notes' => $this->faker->sentence(),
@@ -40,12 +40,22 @@ class OrderFactory extends Factory
     }
 
     /**
-     * State for confirmed orders
+     * State for processing orders
      */
-    public function confirmed(): static
+    public function processing(): static
     {
         return $this->state(fn (array $attributes) => [
-            'status' => 'confirmed',
+            'status' => 'processing',
+        ]);
+    }
+
+    /**
+     * State for quoted orders
+     */
+    public function quoted(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'status' => 'quoted',
         ]);
     }
 
@@ -56,6 +66,16 @@ class OrderFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'status' => 'completed',
+        ]);
+    }
+
+    /**
+     * State for cancelled orders
+     */
+    public function cancelled(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'status' => 'cancelled',
         ]);
     }
 }
