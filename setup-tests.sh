@@ -29,6 +29,14 @@ else
     echo "✅ .env.testing already exists"
 fi
 
+# Generate APP_KEY if not present
+if ! grep -q "APP_KEY=base64:" .env.testing; then
+    echo "🔑 Generating APP_KEY..."
+    php artisan key:generate --env=testing
+else
+    echo "✅ APP_KEY already configured"
+fi
+
 # Clear test cache
 echo "🧹 Clearing cache..."
 php artisan config:clear --env=testing
