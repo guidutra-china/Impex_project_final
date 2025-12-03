@@ -73,10 +73,10 @@ class CompareQuotesActionTest extends TestCase
         $order->exists = true;
         $order->id = 1;
 
-        // Mock the supplierQuotes relationship
-        $quoteMock = \Mockery::mock();
-        $quoteMock->shouldReceive('count')->andReturn(0);
-        $order->shouldReceive('supplierQuotes')->andReturn($quoteMock);
+        // Mock the supplierQuotes relationship as a HasMany relation
+        $relationMock = \Mockery::mock(\Illuminate\Database\Eloquent\Relations\HasMany::class);
+        $relationMock->shouldReceive('count')->andReturn(0);
+        $order->shouldReceive('supplierQuotes')->andReturn($relationMock);
 
         $result = $this->action->handle($order);
 
@@ -173,10 +173,10 @@ class CompareQuotesActionTest extends TestCase
         $order->exists = true;
         $order->id = 1;
 
-        // Mock the supplierQuotes relationship
-        $quoteMock = \Mockery::mock();
-        $quoteMock->shouldReceive('count')->andReturn(2);
-        $order->shouldReceive('supplierQuotes')->andReturn($quoteMock);
+        // Mock the supplierQuotes relationship as a HasMany relation
+        $relationMock = \Mockery::mock(\Illuminate\Database\Eloquent\Relations\HasMany::class);
+        $relationMock->shouldReceive('count')->andReturn(2);
+        $order->shouldReceive('supplierQuotes')->andReturn($relationMock);
 
         $expectedResult = [
             'by_product' => [],
