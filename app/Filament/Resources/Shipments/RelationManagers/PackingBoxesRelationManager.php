@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Shipments\RelationManagers;
 
+use App\Repositories\ShipmentRepository;
 use App\Services\Shipment\PackingService;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
@@ -31,6 +32,14 @@ class PackingBoxesRelationManager extends RelationManager
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedArchiveBox;
 
     protected static ?string $recordTitleAttribute = 'box_number';
+
+    protected ShipmentRepository $repository;
+
+    public function __construct()
+    {
+        parent::__construct();
+        $this->repository = app(ShipmentRepository::class);
+    }
 
     public function form(Schema $schema): Schema
     {
@@ -126,6 +135,9 @@ class PackingBoxesRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         return $table
+            ->query(
+                $this->repository->getPackingBoxesQuery($this->getOwnerRecord()->id)
+            )
             ->columns([
                 TextColumn::make('box_number')
                     ->label('Box #')
@@ -260,88 +272,15 @@ class PackingBoxesRelationManager extends RelationManager
                     ->requiresConfirmation(),
             ])
             ->recordActions([
-                Action::make('view_contents')
-                    ->label('Contents')
-                    ->icon(Heroicon::OutlinedEye)
-                    ->color('info')
-                    ->modalHeading(fn ($record) => "Contents of {$record->box_number}")
-                    ->modalContent(function ($record) {
-                        $contents = $record->getItemsSummary();
-                        
-                        if (empty($contents)) {
-                            return view('filament.components.empty-state', [
-                                'message' => 'This box is empty',
-                            ]);
-                        }
-                        
-                        $html = '<div class="space-y-2">';
-                        foreach ($contents as $item) {
-                            $html .= '<div class="flex justify-between p-2 bg-gray-50 rounded">';
-                            $html .= '<span class="font-medium">' . $item['product_name'] . '</span>';
-                            $html .= '<span class="text-gray-600">' . $item['quantity'] . ' pcs</span>';
-                            $html .= '</div>';
-                        }
-                        $html .= '</div>';
-                        
-                        return new \Illuminate\Support\HtmlString($html);
-                    }),
-
-                Action::make('seal')
-                    ->label('Seal')
-                    ->icon(Heroicon::OutlinedLockClosed)
-                    ->color('warning')
-                    ->action(function ($record) {
-                        $service = new PackingService();
-                        
-                        try {
-                            $service->sealBox($record);
-                            
-                            \Filament\Notifications\Notification::make()
-                                ->title('Box sealed')
-                                ->success()
-                                ->send();
-                        } catch (\Exception $e) {
-                            \Filament\Notifications\Notification::make()
-                                ->title('Cannot seal box')
-                                ->body($e->getMessage())
-                                ->danger()
-                                ->send();
-                        }
-                    })
-                    ->requiresConfirmation()
-                    ->visible(fn ($record) => $record->packing_status !== 'sealed'),
-
-                Action::make('unseal')
-                    ->label('Unseal')
-                    ->icon(Heroicon::OutlinedLockOpen)
-                    ->color('warning')
-                    ->action(function ($record) {
-                        $service = new PackingService();
-                        $service->unsealBox($record);
-                        
-                        \Filament\Notifications\Notification::make()
-                            ->title('Box unsealed')
-                            ->success()
-                            ->send();
-                    })
-                    ->requiresConfirmation()
-                    ->visible(fn ($record) => $record->packing_status === 'sealed'),
-
-                EditAction::make()
-                    ->visible(fn ($record) => $record->packing_status !== 'sealed')
-                    ->using(function ($record, array $data) {
-                        $service = new PackingService();
-                        $service->updateBox($record, $data);
-                        return $record;
-                    }),
+                EditAction::make(),
 
                 DeleteAction::make()
-                    ->visible(fn ($record) => $record->packing_status !== 'sealed')
                     ->requiresConfirmation()
                     ->using(function ($record) {
                         $service = new PackingService();
                         $service->deleteBox($record);
-                    }),
+                    })
+                    ->successNotificationTitle('Box deleted successfully'),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
@@ -349,9 +288,8 @@ class PackingBoxesRelationManager extends RelationManager
                         ->requiresConfirmation(),
                 ]),
             ])
-            ->defaultSort('box_number', 'asc')
-            ->emptyStateHeading('No packing boxes')
-            ->emptyStateDescription('Create packing boxes and add items to them.')
+            ->emptyStateHeading('No packing boxes created')
+            ->emptyStateDescription('Create boxes or use auto-pack to organize items for shipment.')
             ->emptyStateIcon(Heroicon::OutlinedArchiveBox);
     }
 }

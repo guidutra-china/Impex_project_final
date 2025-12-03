@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources\Shipments\RelationManagers;
 
+use App\Repositories\ShipmentRepository;
+use App\Repositories\SalesInvoiceRepository;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\AttachAction;
 use Filament\Actions\DetachAction;
@@ -23,9 +25,22 @@ class InvoicesRelationManager extends RelationManager
 
     protected static ?string $recordTitleAttribute = 'invoice_number';
 
+    protected ShipmentRepository $shipmentRepository;
+    protected SalesInvoiceRepository $salesInvoiceRepository;
+
+    public function __construct()
+    {
+        parent::__construct();
+        $this->shipmentRepository = app(ShipmentRepository::class);
+        $this->salesInvoiceRepository = app(SalesInvoiceRepository::class);
+    }
+
     public function table(Table $table): Table
     {
         return $table
+            ->query(
+                $this->shipmentRepository->getInvoicesQuery($this->getOwnerRecord()->id)
+            )
             ->columns([
                 TextColumn::make('invoice_number')
                     ->label('Invoice #')
