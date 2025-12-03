@@ -4,6 +4,8 @@ namespace App\Filament\Resources\ProformaInvoice\RelationManagers;
 
 use App\Models\QuoteItem;
 use App\Models\SupplierQuote;
+use App\Repositories\ProformaInvoiceRepository;
+use App\Repositories\SupplierQuoteRepository;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
@@ -25,6 +27,16 @@ class ItemsRelationManager extends RelationManager
 
     protected static ?string $title = 'Proforma Items';
 
+    protected ProformaInvoiceRepository $proformaRepository;
+    protected SupplierQuoteRepository $quoteRepository;
+
+    public function __construct()
+    {
+        parent::__construct();
+        $this->proformaRepository = app(ProformaInvoiceRepository::class);
+        $this->quoteRepository = app(SupplierQuoteRepository::class);
+    }
+
     public function form(Schema $schema): Schema
     {
         return $schema
@@ -32,17 +44,7 @@ class ItemsRelationManager extends RelationManager
                 Select::make('supplier_quote_id')
                     ->label('Source Supplier Quote')
                     ->options(function () {
-                        return SupplierQuote::with('supplier', 'order')
-                            ->get()
-                            ->mapWithKeys(function ($quote) {
-                                $label = sprintf(
-                                    '%s - %s (RFQ: %s)',
-                                    $quote->quote_number,
-                                    $quote->supplier?->name ?? 'Unknown',
-                                    $quote->order?->order_number ?? 'N/A'
-                                );
-                                return [$quote->id => $label];
-                            });
+                        return $this->quoteRepository->getSelectOptions();
                     })
                     ->searchable()
                     ->preload()
@@ -208,6 +210,9 @@ class ItemsRelationManager extends RelationManager
     {
         return $table
             ->recordTitleAttribute('product.name')
+            ->query(
+                $this->proformaRepository->getItemsQuery($this->getOwnerRecord()->id)
+            )
             ->columns([
                 TextColumn::make('product.code')
                     ->label('Code')

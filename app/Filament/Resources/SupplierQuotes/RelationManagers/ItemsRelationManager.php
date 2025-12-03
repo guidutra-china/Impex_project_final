@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\SupplierQuotes\RelationManagers;
 
 use App\Models\OrderItem;
+use App\Repositories\SupplierQuoteRepository;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -23,6 +24,14 @@ class ItemsRelationManager extends RelationManager
     protected static ?string $title = 'Quote Items';
 
     protected static ?string $recordTitleAttribute = 'product.name';
+
+    protected SupplierQuoteRepository $repository;
+
+    public function __construct()
+    {
+        parent::__construct();
+        $this->repository = app(SupplierQuoteRepository::class);
+    }
 
     public function form(Schema $schema): Schema
     {
@@ -115,6 +124,9 @@ class ItemsRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         return $table
+            ->query(
+                $this->repository->getItemsQuery($this->getOwnerRecord()->id)
+            )
             ->columns([
                 TextColumn::make('orderItem.product.name')
                     ->label('Product')
