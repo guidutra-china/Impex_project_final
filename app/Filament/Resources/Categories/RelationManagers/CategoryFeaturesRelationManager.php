@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Categories\RelationManagers;
 
+use App\Repositories\CategoryRepository;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
@@ -27,9 +28,20 @@ class CategoryFeaturesRelationManager extends RelationManager
 
     protected static ?string $recordTitleAttribute = 'feature_name';
 
+    protected CategoryRepository $repository;
+
+    public function __construct()
+    {
+        parent::__construct();
+        $this->repository = app(CategoryRepository::class);
+    }
+
     public function table(Table $table): Table
     {
         return $table
+            ->query(
+                $this->repository->getFeaturesQuery($this->getOwnerRecord()->id)
+            )
             ->columns([
                 TextColumn::make('feature_name')
                     ->label('Feature Name')

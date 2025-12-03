@@ -11,6 +11,7 @@ use App\Filament\Resources\Orders\Schemas\OrderForm;
 use App\Filament\Resources\Orders\Tables\OrdersTable;
 use App\Filament\Resources\Orders\RelationManagers\ItemsRelationManager;
 use App\Models\Order;
+use App\Repositories\OrderRepository;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
