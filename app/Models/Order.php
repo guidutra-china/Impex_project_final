@@ -134,6 +134,14 @@ class Order extends Model
     }
 
     /**
+     * Get the purchase orders for this RFQ
+     */
+    public function purchaseOrders(): HasMany
+    {
+        return $this->hasMany(PurchaseOrder::class, 'order_id');
+    }
+
+    /**
      * Generate order number
      *
      * @return string
