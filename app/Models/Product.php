@@ -2,18 +2,20 @@
 
 namespace App\Models;
 
+use App\Services\Product\ProductDuplicator;
+use App\Services\Product\ProductFormatter;
+use App\Traits\HasProductCosts;
+use App\Traits\HasProductDimensions;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 
 class Product extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, HasProductCosts, HasProductDimensions;
 
     protected $fillable = [
         // Basic Information
@@ -241,51 +243,6 @@ class Product extends Model
     }
 
     /**
-     * Calculate total BOM material cost
-     */
-    public function calculateBomMaterialCost(): int
-    {
-        return $this->bomItems()->sum('total_cost');
-    }
-
-    /**
-     * Calculate total manufacturing cost
-     */
-    public function calculateManufacturingCost(): void
-    {
-        // Calculate BOM material cost
-        $this->bom_material_cost = $this->calculateBomMaterialCost();
-
-        // Calculate total manufacturing cost
-        $this->total_manufacturing_cost = $this->bom_material_cost
-            + $this->direct_labor_cost
-            + $this->direct_overhead_cost;
-
-        // Calculate selling price with markup
-        if ($this->markup_percentage > 0) {
-            $markupMultiplier = 1 + ($this->markup_percentage / 100);
-            $this->calculated_selling_price = (int) round($this->total_manufacturing_cost * $markupMultiplier);
-        } else {
-            $this->calculated_selling_price = $this->total_manufacturing_cost;
-        }
-
-        // Auto-sync price with calculated_selling_price if product has BOM
-        if ($this->bomItems()->count() > 0) {
-            $this->price = $this->calculated_selling_price;
-        }
-
-        $this->saveQuietly(); // Save without triggering events
-    }
-
-    /**
-     * Calculate and update all costs (alias for calculateManufacturingCost)
-     */
-    public function calculateAndUpdateCosts(): void
-    {
-        $this->calculateManufacturingCost();
-    }
-
-    /**
      * Duplicate this product with all related data
      * 
      * @param array $options Options for duplication
@@ -298,174 +255,7 @@ class Product extends Model
      */
     public function duplicate(array $options = []): Product
     {
-        // Default options - duplicate everything by default
-        $defaultOptions = [
-            'bom_items' => true,
-            'features' => true,
-            'tags' => true,
-            'avatar' => true,
-        ];
-
-        // Merge user options with defaults
-        $options = array_merge($defaultOptions, $options);
-
-        return DB::transaction(function () use ($options) {
-            // Load relationships that need to be duplicated based on options
-            $relationships = [];
-            if ($options['bom_items']) {
-                $relationships[] = 'bomItems';
-            }
-            if ($options['features']) {
-                $relationships[] = 'features';
-            }
-            if ($options['tags']) {
-                $relationships[] = 'tags';
-            }
-
-            if (!empty($relationships)) {
-                $this->load($relationships);
-            }
-
-            // Prepare the data for the new product
-            $newProductData = $this->toArray();
-            
-            // Remove fields that should not be duplicated
-            unset(
-                $newProductData['id'],
-                $newProductData['created_at'],
-                $newProductData['updated_at'],
-                $newProductData['deleted_at']
-            );
-
-            // Modify the name to indicate it's a copy
-            $newProductData['name'] = $this->name . ' (Copy)';
-            
-            // Generate a temporary SKU (original SKU + timestamp)
-            // User can change it later to a proper SKU
-            $newProductData['sku'] = $this->sku . '-COPY-' . time();
-
-            // Duplicate avatar if option is enabled and exists
-            if ($options['avatar'] && $this->avatar) {
-                $newProductData['avatar'] = $this->duplicateAvatar();
-            } else {
-                $newProductData['avatar'] = null;
-            }
-
-            // Create the new product
-            $newProduct = static::create($newProductData);
-
-            // Duplicate BOM items if option is enabled
-            if ($options['bom_items'] && $this->bomItems->isNotEmpty()) {
-                foreach ($this->bomItems as $bomItem) {
-                    BomItem::create([
-                        'product_id' => $newProduct->id,
-                        'component_product_id' => $bomItem->component_product_id,
-                        'quantity' => $bomItem->quantity,
-                        'unit_of_measure' => $bomItem->unit_of_measure,
-                        'waste_factor' => $bomItem->waste_factor,
-                        'actual_quantity' => $bomItem->actual_quantity,
-                        'unit_cost' => $bomItem->unit_cost,
-                        'total_cost' => $bomItem->total_cost,
-                        'sort_order' => $bomItem->sort_order,
-                        'notes' => $bomItem->notes,
-                        'is_optional' => $bomItem->is_optional,
-                    ]);
-                }
-            }
-
-            // Duplicate features if option is enabled
-            if ($options['features'] && $this->features->isNotEmpty()) {
-                foreach ($this->features as $feature) {
-                    ProductFeature::create([
-                        'product_id' => $newProduct->id,
-                        'feature_name' => $feature->feature_name,
-                        'feature_value' => $feature->feature_value,
-                        'sort_order' => $feature->sort_order,
-                    ]);
-                }
-            }
-
-            // Duplicate tags if option is enabled (many-to-many relationship)
-            if ($options['tags'] && $this->tags->isNotEmpty()) {
-                $newProduct->tags()->attach($this->tags->pluck('id'));
-            }
-
-            // Recalculate costs for the new product
-            $newProduct->refresh();
-            $newProduct->calculateManufacturingCost();
-
-            return $newProduct;
-        });
-    }
-
-    /**
-     * Duplicate the avatar file
-     * 
-     * @return string|null The path to the duplicated avatar
-     */
-    protected function duplicateAvatar(): ?string
-    {
-        if (!$this->avatar || !Storage::disk('public')->exists($this->avatar)) {
-            return null;
-        }
-
-        try {
-            // Generate new filename
-            $extension = pathinfo($this->avatar, PATHINFO_EXTENSION);
-            $newFilename = 'products/avatars/' . uniqid() . '.' . $extension;
-
-            // Copy the file
-            Storage::disk('public')->copy($this->avatar, $newFilename);
-
-            return $newFilename;
-        } catch (\Exception $e) {
-            // If duplication fails, return null (product will be created without avatar)
-            \Log::warning('Failed to duplicate product avatar', [
-                'original_avatar' => $this->avatar,
-                'error' => $e->getMessage(),
-            ]);
-            return null;
-        }
-    }
-
-    /**
-     * Get BOM material cost in dollars
-     */
-    public function getBomMaterialCostDollarsAttribute(): float
-    {
-        return $this->bom_material_cost / 100;
-    }
-
-    /**
-     * Get direct labor cost in dollars
-     */
-    public function getDirectLaborCostDollarsAttribute(): float
-    {
-        return $this->direct_labor_cost / 100;
-    }
-
-    /**
-     * Get direct overhead cost in dollars
-     */
-    public function getDirectOverheadCostDollarsAttribute(): float
-    {
-        return $this->direct_overhead_cost / 100;
-    }
-
-    /**
-     * Get total manufacturing cost in dollars
-     */
-    public function getTotalManufacturingCostDollarsAttribute(): float
-    {
-        return $this->total_manufacturing_cost / 100;
-    }
-
-    /**
-     * Get calculated selling price in dollars
-     */
-    public function getCalculatedSellingPriceDollarsAttribute(): float
-    {
-        return $this->calculated_selling_price / 100;
+        return app(ProductDuplicator::class)->duplicate($this, $options);
     }
 
     /**
@@ -473,46 +263,6 @@ class Product extends Model
      */
     public function getFormattedPriceAttribute(): string
     {
-        if ($this->price === null) {
-            return '-';
-        }
-        return '$' . number_format($this->price / 100, 2);
-    }
-
-    /**
-     * Calculate product CBM (cubic meters)
-     */
-    public function getProductCbmAttribute(): ?float
-    {
-        if ($this->product_length && $this->product_width && $this->product_height) {
-            return round(($this->product_length * $this->product_width * $this->product_height) / 1000000, 4);
-        }
-        return null;
-    }
-
-    /**
-     * Calculate inner box CBM
-     */
-    public function getInnerBoxCbmAttribute(): ?float
-    {
-        if ($this->inner_box_length && $this->inner_box_width && $this->inner_box_height) {
-            return round(($this->inner_box_length * $this->inner_box_width * $this->inner_box_height) / 1000000, 4);
-        }
-        return null;
-    }
-
-    /**
-     * Auto-calculate carton CBM if dimensions are provided
-     */
-    protected static function booted()
-    {
-        static::saving(function ($product) {
-            if ($product->carton_length && $product->carton_width && $product->carton_height) {
-                $product->carton_cbm = round(
-                    ($product->carton_length * $product->carton_width * $product->carton_height) / 1000000,
-                    4
-                );
-            }
-        });
+        return app(ProductFormatter::class)->formatPrice($this->price);
     }
 }
