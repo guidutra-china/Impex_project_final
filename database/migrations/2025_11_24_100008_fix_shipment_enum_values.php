@@ -12,6 +12,12 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // Only run this migration on MySQL databases
+        // SQLite doesn't support MODIFY COLUMN for enums
+        if (DB::getDriverName() !== 'mysql') {
+            return;
+        }
+
         // Fix shipment_type enum
         DB::statement("ALTER TABLE `shipments` MODIFY COLUMN `shipment_type` ENUM('outbound', 'inbound') DEFAULT 'outbound'");
         
@@ -41,6 +47,11 @@ return new class extends Migration
      */
     public function down(): void
     {
+        // Only run this migration on MySQL databases
+        if (DB::getDriverName() !== 'mysql') {
+            return;
+        }
+
         // Revert to original values
         DB::statement("ALTER TABLE `shipments` MODIFY COLUMN `shipment_type` ENUM('outgoing', 'incoming') DEFAULT 'outgoing'");
         
