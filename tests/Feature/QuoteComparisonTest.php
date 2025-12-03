@@ -76,7 +76,7 @@ class QuoteComparisonTest extends TestCase
                 'order_id' => $order->id,
                 'supplier_id' => $supplier->id,
                 'currency_id' => $this->currency->id,
-                'status' => 'pending',
+                'status' => 'draft'
             ]);
             
             // Add quote item with price
