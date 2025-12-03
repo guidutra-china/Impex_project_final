@@ -265,9 +265,124 @@ class ExcelExportService
      */
     protected function generateCommercialInvoice($sheet, $model): void
     {
-        // Similar structure to Proforma Invoice
-        // Will be implemented when we adjust Commercial Invoice
-        $this->generateProformaInvoice($sheet, $model);
+        $row = 1;
+        
+        // Add company header with logo
+        $this->addCompanyHeader($sheet, 'COMMERCIAL INVOICE', $row);
+        $row++;
+        
+        // Invoice Info
+        $sheet->setCellValue('A' . $row, 'Invoice Number:');
+        $sheet->setCellValue('B' . $row, $model->invoice_number);
+        $sheet->setCellValue('E' . $row, 'Invoice Date:');
+        $sheet->setCellValue('F' . $row, $model->invoice_date ? $model->invoice_date->format('Y-m-d') : date('Y-m-d'));
+        $row++;
+        
+        $sheet->setCellValue('A' . $row, 'Revision:');
+        $sheet->setCellValue('B' . $row, $model->revision_number ?? 1);
+        if ($model->shipment_date) {
+            $sheet->setCellValue('E' . $row, 'Shipment Date:');
+            $sheet->setCellValue('F' . $row, $model->shipment_date->format('Y-m-d'));
+        }
+        $row++;
+        
+        $sheet->setCellValue('A' . $row, 'Status:');
+        $sheet->setCellValue('B' . $row, strtoupper($model->status));
+        $sheet->setCellValue('E' . $row, 'Currency:');
+        $sheet->setCellValue('F' . $row, $model->currency->code ?? 'USD');
+        $row += 2;
+        
+        // Customer Info
+        $sheet->setCellValue('A' . $row, 'BILL TO:');
+        $sheet->getStyle('A' . $row)->getFont()->setBold(true);
+        $row++;
+        
+        if ($model->client) {
+            $sheet->setCellValue('A' . $row, $model->client->name);
+            $row++;
+            if ($model->client->address) {
+                $sheet->setCellValue('A' . $row, $model->client->address);
+                $row++;
+            }
+        }
+        $row++;
+        
+        // Items Header
+        $headers = ['#', 'Code', 'Description', 'Quantity', 'Unit Price', 'Total'];
+        $col = 'A';
+        foreach ($headers as $header) {
+            $sheet->setCellValue($col . $row, $header);
+            $sheet->getStyle($col . $row)->getFont()->setBold(true);
+            $sheet->getStyle($col . $row)->getFill()
+                ->setFillType(Fill::FILL_SOLID)
+                ->getStartColor()->setARGB('FF1F2937');
+            $sheet->getStyle($col . $row)->getFont()->getColor()->setARGB('FFFFFFFF');
+            $col++;
+        }
+        $headerRow = $row;
+        $row++;
+        
+        // Items
+        $itemStartRow = $row;
+        foreach ($model->items as $index => $item) {
+            $sheet->setCellValue('A' . $row, $index + 1);
+            $sheet->setCellValue('B' . $row, $item->product_code ?? 'N/A');
+            $sheet->setCellValue('C' . $row, $item->product_name ?? $item->description);
+            $sheet->setCellValue('D' . $row, $item->quantity);
+            $sheet->setCellValue('E' . $row, $item->unit_price);
+            $sheet->setCellValue('F' . $row, $item->total_price);
+            
+            // Format currency
+            $sheet->getStyle('E' . $row)->getNumberFormat()
+                ->setFormatCode('#,##0.00');
+            $sheet->getStyle('F' . $row)->getNumberFormat()
+                ->setFormatCode('#,##0.00');
+            
+            $row++;
+        }
+        $itemEndRow = $row - 1;
+        
+        // Totals
+        $row++;
+        $sheet->setCellValue('E' . $row, 'Subtotal:');
+        $sheet->setCellValue('F' . $row, $model->subtotal);
+        $sheet->getStyle('E' . $row)->getFont()->setBold(true);
+        $sheet->getStyle('F' . $row)->getNumberFormat()->setFormatCode('#,##0.00');
+        $row++;
+        
+        if ($model->commission > 0) {
+            $sheet->setCellValue('E' . $row, 'Commission:');
+            $sheet->setCellValue('F' . $row, $model->commission);
+            $sheet->getStyle('F' . $row)->getNumberFormat()->setFormatCode('#,##0.00');
+            $row++;
+        }
+        
+        if ($model->tax > 0) {
+            $sheet->setCellValue('E' . $row, 'Tax:');
+            $sheet->setCellValue('F' . $row, $model->tax);
+            $sheet->getStyle('F' . $row)->getNumberFormat()->setFormatCode('#,##0.00');
+            $row++;
+        }
+        
+        $sheet->setCellValue('E' . $row, 'TOTAL:');
+        $sheet->setCellValue('F' . $row, $model->total);
+        $sheet->getStyle('E' . $row . ':F' . $row)->getFont()->setBold(true)->setSize(12);
+        $sheet->getStyle('F' . $row)->getNumberFormat()->setFormatCode('#,##0.00');
+        $sheet->getStyle('E' . $row . ':F' . $row)->getFill()
+            ->setFillType(Fill::FILL_SOLID)
+            ->getStartColor()->setARGB('FFF3F4F6');
+        
+        // Borders
+        $sheet->getStyle('A' . $headerRow . ':F' . $itemEndRow)->getBorders()
+            ->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+        
+        // Column widths
+        $sheet->getColumnDimension('A')->setWidth(5);
+        $sheet->getColumnDimension('B')->setWidth(12);
+        $sheet->getColumnDimension('C')->setWidth(40);
+        $sheet->getColumnDimension('D')->setWidth(12);
+        $sheet->getColumnDimension('E')->setWidth(15);
+        $sheet->getColumnDimension('F')->setWidth(15);
     }
 
     /**
