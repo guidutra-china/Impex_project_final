@@ -97,7 +97,7 @@ class TestHelpers
         $order = Order::factory()->create(array_merge([
             'customer_id' => $client->id,
             'currency_id' => $currency->id,
-            'status' => 'pending',
+            'status' => 'draft',
         ], $orderAttributes));
 
         for ($i = 0; $i < $itemCount; $i++) {
@@ -136,7 +136,7 @@ class TestHelpers
             'order_id' => $order->id,
             'supplier_id' => $supplier->id,
             'currency_id' => $currency->id,
-            'status' => 'pending',
+            'status' => 'draft',
         ], $attributes));
     }
 

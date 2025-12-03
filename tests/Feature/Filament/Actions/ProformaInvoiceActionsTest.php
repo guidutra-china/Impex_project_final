@@ -21,7 +21,7 @@ class ProformaInvoiceActionsTest extends TestCase
         $this->user = User::factory()->create();
         $this->client = Client::factory()->for($this->user)->create();
         $this->order = Order::factory()->for($this->client)->create();
-        $this->invoice = ProformaInvoice::factory()->for($this->order)->create(['status' => 'pending']);
+        $this->invoice = ProformaInvoice::factory()->for($this->order)->create(['status' => 'draft']);
         $this->actingAs($this->user);
     }
 
@@ -34,14 +34,14 @@ class ProformaInvoiceActionsTest extends TestCase
         
         $this->assertDatabaseHas('proforma_invoices', [
             'id' => $this->invoice->id,
-            'status' => 'approved',
+            'status' => 'sent',
         ]);
     }
 
     /** @test */
     public function it_cannot_approve_already_approved_invoice()
     {
-        $this->invoice->update(['status' => 'approved']);
+        $this->invoice->update(['status' => 'sent']);
         
         $response = $this->post("/admin/proforma-invoices/{$this->invoice->id}/approve");
         
@@ -78,7 +78,7 @@ class ProformaInvoiceActionsTest extends TestCase
     /** @test */
     public function it_can_mark_invoice_as_sent()
     {
-        $this->invoice->update(['status' => 'approved']);
+        $this->invoice->update(['status' => 'sent']);
         
         $response = $this->post("/admin/proforma-invoices/{$this->invoice->id}/mark-sent");
         
@@ -153,7 +153,7 @@ class ProformaInvoiceActionsTest extends TestCase
     {
         // draft -> approved
         $this->post("/admin/proforma-invoices/{$this->invoice->id}/approve");
-        $this->assertDatabaseHas('proforma_invoices', ['id' => $this->invoice->id, 'status' => 'approved']);
+        $this->assertDatabaseHas('proforma_invoices', ['id' => $this->invoice->id, 'status' => 'sent']);
         
         // approved -> sent
         $this->post("/admin/proforma-invoices/{$this->invoice->id}/mark-sent");

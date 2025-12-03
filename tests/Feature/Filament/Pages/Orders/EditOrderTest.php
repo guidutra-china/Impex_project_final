@@ -119,7 +119,7 @@ class EditOrderTest extends TestCase
     /** @test */
     public function it_can_transition_status_from_draft_to_confirmed()
     {
-        $this->order->update(['status' => 'pending']);
+        $this->order->update(['status' => 'draft']);
         
         $data = ['status' => 'processing'];
         

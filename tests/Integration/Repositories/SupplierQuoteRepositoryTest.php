@@ -75,7 +75,7 @@ class SupplierQuoteRepositoryTest extends TestCase
             'order_id' => $this->order->id,
             'supplier_id' => $this->supplier->id,
             'quote_number' => 'SQ-' . now()->timestamp,
-            'status' => 'pending',
+            'status' => 'draft',
             'total_price' => 100000,
             'currency_id' => 1,
             'exchange_rate' => 1.0,
@@ -99,7 +99,7 @@ class SupplierQuoteRepositoryTest extends TestCase
             ->create();
         
         $updated = $this->repository->update($quote->id, [
-            'status' => 'approved',
+            'status' => 'sent',
             'total_price' => 150000,
         ]);
         
@@ -130,11 +130,11 @@ class SupplierQuoteRepositoryTest extends TestCase
         SupplierQuote::factory(2)
             ->for($this->order)
             ->for($this->supplier)
-            ->create(['status' => 'pending']);
+            ->create(['status' => 'draft']);
         SupplierQuote::factory(1)
             ->for($this->order)
             ->for($this->supplier)
-            ->create(['status' => 'approved']);
+            ->create(['status' => 'sent']);
         
         $pending = $this->repository->getByStatus('pending');
         
@@ -221,7 +221,7 @@ class SupplierQuoteRepositoryTest extends TestCase
         $quote = SupplierQuote::factory()
             ->for($this->order)
             ->for($this->supplier)
-            ->create(['status' => 'pending']);
+            ->create(['status' => 'draft']);
         
         $result = $this->repository->approve($quote->id);
         
@@ -235,7 +235,7 @@ class SupplierQuoteRepositoryTest extends TestCase
         $quote = SupplierQuote::factory()
             ->for($this->order)
             ->for($this->supplier)
-            ->create(['status' => 'pending']);
+            ->create(['status' => 'draft']);
         
         $result = $this->repository->reject($quote->id);
         
@@ -403,7 +403,7 @@ class SupplierQuoteRepositoryTest extends TestCase
         SupplierQuote::factory(3)
             ->for($this->order)
             ->for($this->supplier)
-            ->create(['status' => 'pending']);
+            ->create(['status' => 'draft']);
         
         $count = $this->repository->countByStatus('pending');
         

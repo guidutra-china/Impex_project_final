@@ -133,7 +133,7 @@ class ClientRepositoryTest extends TestCase
         $client = Client::factory()->for($this->user)->create();
         $client->orders()->create([
             'currency_id' => 1,
-            'status' => 'pending',
+            'status' => 'draft',
             'commission_percent' => 5.0,
             'commission_type' => 'embedded',
             'incoterm' => 'FOB',

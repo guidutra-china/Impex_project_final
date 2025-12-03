@@ -60,7 +60,7 @@ class OrderRepositoryTest extends TestCase
         $data = [
             'customer_id' => $this->client->id,
             'currency_id' => 1,
-            'status' => 'pending',
+            'status' => 'draft',
             'commission_percent' => 5.0,
             'commission_type' => 'embedded',
             'incoterm' => 'FOB',
@@ -106,7 +106,7 @@ class OrderRepositoryTest extends TestCase
     /** @test */
     public function it_can_get_pending_orders_by_customer()
     {
-        Order::factory(2)->for($this->client)->create(['status' => 'pending']);
+        Order::factory(2)->for($this->client)->create(['status' => 'draft']);
         Order::factory(1)->for($this->client)->create(['status' => 'completed']);
         
         $pending = $this->repository->getPendingOrdersByCustomer($this->client->id);
@@ -119,7 +119,7 @@ class OrderRepositoryTest extends TestCase
     public function it_can_get_completed_orders()
     {
         Order::factory(2)->for($this->client)->create(['status' => 'completed']);
-        Order::factory(1)->for($this->client)->create(['status' => 'pending']);
+        Order::factory(1)->for($this->client)->create(['status' => 'draft']);
         
         $completed = $this->repository->getCompletedOrders();
         
@@ -130,7 +130,7 @@ class OrderRepositoryTest extends TestCase
     /** @test */
     public function it_can_get_orders_by_status()
     {
-        Order::factory(3)->for($this->client)->create(['status' => 'pending']);
+        Order::factory(3)->for($this->client)->create(['status' => 'draft']);
         
         $drafts = $this->repository->getOrdersByStatus('draft');
         
@@ -151,7 +151,7 @@ class OrderRepositoryTest extends TestCase
     /** @test */
     public function it_can_count_orders_by_status()
     {
-        Order::factory(3)->for($this->client)->create(['status' => 'pending']);
+        Order::factory(3)->for($this->client)->create(['status' => 'draft']);
         
         $count = $this->repository->countByStatus('pending');
         

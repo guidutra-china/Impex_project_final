@@ -86,7 +86,7 @@ class WidgetsTest extends TestCase
     /** @test */
     public function financial_overview_widget_displays_receivables()
     {
-        SalesInvoice::factory(3)->for($this->user)->create(['status' => 'pending']);
+        SalesInvoice::factory(3)->for($this->user)->create(['status' => 'draft']);
         
         $response = $this->get('/admin/dashboard');
         
@@ -96,7 +96,7 @@ class WidgetsTest extends TestCase
     /** @test */
     public function financial_overview_widget_displays_payables()
     {
-        PurchaseOrder::factory(3)->for($this->user)->create(['status' => 'pending']);
+        PurchaseOrder::factory(3)->for($this->user)->create(['status' => 'draft']);
         
         $response = $this->get('/admin/dashboard');
         
@@ -106,8 +106,8 @@ class WidgetsTest extends TestCase
     /** @test */
     public function financial_overview_widget_calculates_totals()
     {
-        SalesInvoice::factory()->for($this->user)->create(['status' => 'pending', 'total' => 100000]);
-        SalesInvoice::factory()->for($this->user)->create(['status' => 'pending', 'total' => 50000]);
+        SalesInvoice::factory()->for($this->user)->create(['status' => 'draft', 'total' => 100000]);
+        SalesInvoice::factory()->for($this->user)->create(['status' => 'draft', 'total' => 50000]);
         
         $response = $this->get('/admin/dashboard');
         
@@ -218,7 +218,7 @@ class WidgetsTest extends TestCase
     /** @test */
     public function purchase_order_stats_widget_displays_po_by_status()
     {
-        PurchaseOrder::factory(3)->for($this->user)->create(['status' => 'pending']);
+        PurchaseOrder::factory(3)->for($this->user)->create(['status' => 'draft']);
         PurchaseOrder::factory(2)->for($this->user)->create(['status' => 'completed']);
         
         $response = $this->get('/admin/dashboard');

@@ -65,7 +65,7 @@ class ProformaInvoiceRepositoryTest extends TestCase
         $data = [
             'order_id' => $this->order->id,
             'proforma_number' => 'PI-' . now()->timestamp,
-            'status' => 'pending',
+            'status' => 'draft',
             'total_amount' => 100000,
             'currency_id' => 1,
             'issue_date' => now(),
@@ -85,7 +85,7 @@ class ProformaInvoiceRepositoryTest extends TestCase
         $invoice = ProformaInvoice::factory()->for($this->order)->create();
         
         $updated = $this->repository->update($invoice->id, [
-            'status' => 'approved',
+            'status' => 'sent',
             'total_amount' => 150000,
         ]);
         
@@ -110,8 +110,8 @@ class ProformaInvoiceRepositoryTest extends TestCase
     /** @test */
     public function it_can_get_proforma_invoices_by_status()
     {
-        ProformaInvoice::factory(2)->for($this->order)->create(['status' => 'pending']);
-        ProformaInvoice::factory(1)->for($this->order)->create(['status' => 'approved']);
+        ProformaInvoice::factory(2)->for($this->order)->create(['status' => 'draft']);
+        ProformaInvoice::factory(1)->for($this->order)->create(['status' => 'sent']);
         
         $drafts = $this->repository->getByStatus('draft');
         
@@ -147,7 +147,7 @@ class ProformaInvoiceRepositoryTest extends TestCase
     {
         $invoice = ProformaInvoice::factory()
             ->for($this->order)
-            ->create(['status' => 'pending']);
+            ->create(['status' => 'draft']);
         
         $result = $this->repository->approve($invoice->id);
         
@@ -160,7 +160,7 @@ class ProformaInvoiceRepositoryTest extends TestCase
     {
         $invoice = ProformaInvoice::factory()
             ->for($this->order)
-            ->create(['status' => 'pending']);
+            ->create(['status' => 'draft']);
         
         $result = $this->repository->reject($invoice->id);
         
@@ -173,7 +173,7 @@ class ProformaInvoiceRepositoryTest extends TestCase
     {
         $invoice = ProformaInvoice::factory()
             ->for($this->order)
-            ->create(['status' => 'approved']);
+            ->create(['status' => 'draft']);
         
         $result = $this->repository->markAsSent($invoice->id);
         
@@ -297,7 +297,7 @@ class ProformaInvoiceRepositoryTest extends TestCase
     /** @test */
     public function it_can_count_invoices_by_status()
     {
-        ProformaInvoice::factory(3)->for($this->order)->create(['status' => 'pending']);
+        ProformaInvoice::factory(3)->for($this->order)->create(['status' => 'draft']);
         
         $count = $this->repository->countByStatus('draft');
         
@@ -308,7 +308,7 @@ class ProformaInvoiceRepositoryTest extends TestCase
     public function it_can_get_total_amount_by_status()
     {
         ProformaInvoice::factory(2)->for($this->order)->create([
-            'status' => 'approved',
+            'status' => 'sent',
             'total_amount' => 100000,
         ]);
         

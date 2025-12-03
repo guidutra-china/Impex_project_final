@@ -76,7 +76,7 @@ class QuoteComparisonTest extends TestCase
                 'order_id' => $order->id,
                 'supplier_id' => $supplier->id,
                 'currency_id' => $this->currency->id,
-                'status' => 'pending',
+                'status' => 'draft',
             ]);
             
             // Add quote item with price
@@ -402,7 +402,7 @@ class QuoteComparisonTest extends TestCase
             'rate' => 1.10,
             'inverse_rate' => 1 / 1.10,
             'date' => today(),
-            'status' => 'approved',
+            'status' => 'sent',
         ]);
 
         $order = Order::factory()->create([

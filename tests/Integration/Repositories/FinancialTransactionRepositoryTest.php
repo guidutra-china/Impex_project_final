@@ -67,7 +67,7 @@ class FinancialTransactionRepositoryTest extends TestCase
             'description' => 'Test Transaction',
             'amount' => 100000, // em centavos
             'currency_id' => 1,
-            'status' => 'pending',
+            'status' => 'draft',
             'due_date' => now()->addDays(30),
             'created_by' => $this->user->id,
         ];
@@ -110,7 +110,7 @@ class FinancialTransactionRepositoryTest extends TestCase
     /** @test */
     public function it_can_get_transactions_by_status()
     {
-        FinancialTransaction::factory(2)->for($this->project)->create(['status' => 'pending']);
+        FinancialTransaction::factory(2)->for($this->project)->create(['status' => 'draft']);
         FinancialTransaction::factory(1)->for($this->project)->create(['status' => 'paid']);
         
         $pending = $this->repository->getByStatus('pending');
@@ -160,7 +160,7 @@ class FinancialTransactionRepositoryTest extends TestCase
     public function it_can_get_total_by_status()
     {
         FinancialTransaction::factory(2)->for($this->project)->create([
-            'status' => 'pending',
+            'status' => 'draft',
             'amount' => 100000,
         ]);
         
@@ -185,7 +185,7 @@ class FinancialTransactionRepositoryTest extends TestCase
     /** @test */
     public function it_can_count_by_status()
     {
-        FinancialTransaction::factory(3)->for($this->project)->create(['status' => 'pending']);
+        FinancialTransaction::factory(3)->for($this->project)->create(['status' => 'draft']);
         
         $count = $this->repository->countByStatus('pending');
         
@@ -199,7 +199,7 @@ class FinancialTransactionRepositoryTest extends TestCase
     {
         $transaction = FinancialTransaction::factory()
             ->for($this->project)
-            ->create(['status' => 'pending', 'amount' => 100000]);
+            ->create(['status' => 'draft', 'amount' => 100000]);
         
         $result = $this->repository->markAsPaid($transaction->id);
         
@@ -225,7 +225,7 @@ class FinancialTransactionRepositoryTest extends TestCase
     {
         $transaction = FinancialTransaction::factory()
             ->for($this->project)
-            ->create(['status' => 'pending']);
+            ->create(['status' => 'draft']);
         
         $result = $this->repository->markAsCancelled($transaction->id);
         
@@ -280,7 +280,7 @@ class FinancialTransactionRepositoryTest extends TestCase
     /** @test */
     public function it_can_chain_query_methods()
     {
-        FinancialTransaction::factory(3)->for($this->project)->create(['status' => 'pending']);
+        FinancialTransaction::factory(3)->for($this->project)->create(['status' => 'draft']);
         
         $query = $this->repository->getQuery()
             ->where('status', 'pending')
@@ -340,7 +340,7 @@ class FinancialTransactionRepositoryTest extends TestCase
     {
         FinancialTransaction::factory(2)->for($this->project)->create([
             'type' => 'payable',
-            'status' => 'pending',
+            'status' => 'draft',
         ]);
         FinancialTransaction::factory(1)->for($this->project)->create([
             'type' => 'payable',
