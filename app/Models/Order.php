@@ -266,11 +266,11 @@ class Order extends Model
     }
 
     /**
-     * Get total project expenses amount in cents
+     * Get total project expenses amount in cents (base currency USD)
      */
     public function getTotalProjectExpensesAttribute(): int
     {
-        return $this->projectExpenses()->sum('amount');
+        return $this->projectExpenses()->sum('amount_base_currency');
     }
 
     /**
