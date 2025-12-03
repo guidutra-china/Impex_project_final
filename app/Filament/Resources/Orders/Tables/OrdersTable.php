@@ -9,6 +9,8 @@ use App\Services\Export\PdfExportService;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\BulkAction;
+use Illuminate\Support\Collection;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -360,6 +362,60 @@ class OrdersTable
             ])
             ->bulkActions([
                 BulkActionGroup::make([
+                    BulkAction::make('export_excel')
+                        ->label('Export to Excel')
+                        ->icon('heroicon-o-table-cells')
+                        ->color('success')
+                        ->action(function (Collection $records) {
+                            $excelService = app(\App\Services\Export\ExcelExportService::class);
+                            
+                            // Create a temporary collection export
+                            $filename = 'rfqs_export_' . now()->format('Y-m-d_His') . '.xlsx';
+                            $path = storage_path('app/temp/' . $filename);
+                            
+                            // Ensure temp directory exists
+                            if (!file_exists(storage_path('app/temp'))) {
+                                mkdir(storage_path('app/temp'), 0755, true);
+                            }
+                            
+                            // Create Excel file with filtered records
+                            $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+                            $sheet = $spreadsheet->getActiveSheet();
+                            
+                            // Headers
+                            $sheet->setCellValue('A1', 'RFQ Number');
+                            $sheet->setCellValue('B1', 'Customer Ref');
+                            $sheet->setCellValue('C1', 'Customer');
+                            $sheet->setCellValue('D1', 'Status');
+                            $sheet->setCellValue('E1', 'Currency');
+                            $sheet->setCellValue('F1', 'Created At');
+                            
+                            // Data
+                            $row = 2;
+                            foreach ($records as $record) {
+                                $sheet->setCellValue('A' . $row, $record->order_number);
+                                $sheet->setCellValue('B' . $row, $record->customer_nr_rfq ?? 'N/A');
+                                $sheet->setCellValue('C' . $row, $record->customer?->name ?? 'N/A');
+                                $sheet->setCellValue('D' . $row, ucfirst($record->status));
+                                $sheet->setCellValue('E' . $row, $record->currency?->code ?? 'N/A');
+                                $sheet->setCellValue('F' . $row, $record->created_at->format('Y-m-d H:i'));
+                                $row++;
+                            }
+                            
+                            // Auto-size columns
+                            foreach (range('A', 'F') as $col) {
+                                $sheet->getColumnDimension($col)->setAutoSize(true);
+                            }
+                            
+                            // Save file
+                            $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+                            $writer->save($path);
+                            
+                            // Download
+                            return response()->download($path, $filename)->deleteFileAfterSend(true);
+                        })
+                        ->deselectRecordsAfterCompletion(),
+                    
                     DeleteBulkAction::make(),
                 ]),
             ])
