@@ -17,12 +17,16 @@ use Filament\Tables;
 use Filament\Tables\Columns\BadgeColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\Filter;
 use Filament\Tables\Table;
+use App\Filament\Traits\HasAdvancedFilters;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 
 class OrdersTable
 {
+    use HasAdvancedFilters;
     public static function configure(Table $table): Table
     {
         return $table
@@ -86,16 +90,42 @@ class OrdersTable
                         'quoted' => 'Quoted',
                         'completed' => 'Completed',
                         'cancelled' => 'Cancelled',
-                    ]),
+                    ])
+                    ->multiple()
+                    ->label('Status'),
 
                 SelectFilter::make('customer_id')
                     ->relationship('customer', 'name')
+                    ->searchable()
+                    ->preload()
+                    ->multiple()
                     ->label('Customer'),
 
                 SelectFilter::make('currency_id')
                     ->relationship('currency', 'code')
+                    ->searchable()
+                    ->preload()
                     ->label('Currency'),
+
+                self::getDateRangeFilter('created_at', 'Created Date'),
+                
+                self::getDateRangeFilter('updated_at', 'Updated Date'),
+                
+                self::getTextSearchFilter('order_number', 'RFQ Number'),
+                
+                self::getTextSearchFilter('customer_nr_rfq', 'Customer Reference'),
+                
+                Filter::make('has_quotes')
+                    ->label('Has Quotes')
+                    ->query(fn (Builder $query): Builder => $query->has('supplierQuotes'))
+                    ->toggle(),
+                
+                Filter::make('no_quotes')
+                    ->label('No Quotes Yet')
+                    ->query(fn (Builder $query): Builder => $query->doesntHave('supplierQuotes'))
+                    ->toggle(),
             ])
+            ->filtersLayout(Tables\Enums\FiltersLayout::AboveContentCollapsible)
             ->actions([
                 EditAction::make(),
                 
