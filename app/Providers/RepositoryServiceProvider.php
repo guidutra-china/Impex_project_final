@@ -16,6 +16,8 @@ use App\Repositories\PurchaseOrderRepository;
 use App\Repositories\DocumentRepository;
 use App\Repositories\RFQRepository;
 use App\Repositories\EventRepository;
+use App\Repositories\ShipmentRepository;
+use App\Repositories\CategoryRepository;
 use Illuminate\Support\ServiceProvider;
 
 /**
@@ -77,6 +79,14 @@ class RepositoryServiceProvider extends ServiceProvider
 
         $this->app->singleton(EventRepository::class, function ($app) {
             return new EventRepository();
+        });
+
+        $this->app->singleton(ShipmentRepository::class, function ($app) {
+            return new ShipmentRepository();
+        });
+
+        $this->app->singleton(CategoryRepository::class, function ($app) {
+            return new CategoryRepository();
         });
     }
 
