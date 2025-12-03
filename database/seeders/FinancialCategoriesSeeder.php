@@ -261,9 +261,9 @@ class FinancialCategoriesSeeder extends Seeder
         // === RFQ/PROJECT EXPENSES ===
         
         $rfqExpenses = FinancialCategory::create([
-            'name' => 'Despesas de RFQ/Projeto',
+            'name' => 'RFQ/Project Expenses',
             'code' => 'RFQ-EXPENSES',
-            'description' => 'Despesas específicas de RFQs e projetos de importação/exportação',
+            'description' => 'Specific expenses for RFQs and import/export projects',
             'type' => 'expense',
             'is_system' => true,
             'is_active' => true,
@@ -271,9 +271,9 @@ class FinancialCategoriesSeeder extends Seeder
         ]);
 
         FinancialCategory::create([
-            'name' => 'Testes e Certificações',
+            'name' => 'Tests and Certifications',
             'code' => 'RFQ-EXP-TESTS',
-            'description' => 'Testes de qualidade, certificações, laudos técnicos',
+            'description' => 'Quality tests, certifications, technical reports',
             'type' => 'expense',
             'parent_id' => $rfqExpenses->id,
             'is_active' => true,
@@ -281,9 +281,9 @@ class FinancialCategoriesSeeder extends Seeder
         ]);
 
         FinancialCategory::create([
-            'name' => 'Viagens de Negócios',
+            'name' => 'Business Travel',
             'code' => 'RFQ-EXP-TRAVEL',
-            'description' => 'Visitas a fornecedores, feiras, inspeções de fábrica',
+            'description' => 'Supplier visits, trade shows, factory inspections',
             'type' => 'expense',
             'parent_id' => $rfqExpenses->id,
             'is_active' => true,
@@ -291,9 +291,9 @@ class FinancialCategoriesSeeder extends Seeder
         ]);
 
         FinancialCategory::create([
-            'name' => 'Serviços de Terceiros',
+            'name' => 'Third-Party Services',
             'code' => 'RFQ-EXP-THIRD-PARTY',
-            'description' => 'Despachantes, consultores, tradutores, advogados',
+            'description' => 'Customs brokers, consultants, translators, lawyers',
             'type' => 'expense',
             'parent_id' => $rfqExpenses->id,
             'is_active' => true,
@@ -301,9 +301,9 @@ class FinancialCategoriesSeeder extends Seeder
         ]);
 
         FinancialCategory::create([
-            'name' => 'Custos Bancários',
+            'name' => 'Bank Costs',
             'code' => 'RFQ-EXP-BANK',
-            'description' => 'Transferências internacionais, cartas de crédito, câmbio',
+            'description' => 'International transfers, letters of credit, foreign exchange',
             'type' => 'expense',
             'parent_id' => $rfqExpenses->id,
             'is_active' => true,
@@ -311,9 +311,9 @@ class FinancialCategoriesSeeder extends Seeder
         ]);
 
         FinancialCategory::create([
-            'name' => 'Amostras',
+            'name' => 'Samples',
             'code' => 'RFQ-EXP-SAMPLES',
-            'description' => 'Envio de amostras, protótipos',
+            'description' => 'Sample shipping, prototypes',
             'type' => 'expense',
             'parent_id' => $rfqExpenses->id,
             'is_active' => true,
@@ -321,9 +321,9 @@ class FinancialCategoriesSeeder extends Seeder
         ]);
 
         FinancialCategory::create([
-            'name' => 'Documentação',
+            'name' => 'Documentation',
             'code' => 'RFQ-EXP-DOCS',
-            'description' => 'Legalização, apostilamento, certificados de origem',
+            'description' => 'Legalization, apostille, certificates of origin',
             'type' => 'expense',
             'parent_id' => $rfqExpenses->id,
             'is_active' => true,
@@ -331,9 +331,9 @@ class FinancialCategoriesSeeder extends Seeder
         ]);
 
         FinancialCategory::create([
-            'name' => 'Armazenagem Temporária',
+            'name' => 'Temporary Storage',
             'code' => 'RFQ-EXP-STORAGE',
-            'description' => 'Armazém antes de envio final',
+            'description' => 'Warehouse before final shipment',
             'type' => 'expense',
             'parent_id' => $rfqExpenses->id,
             'is_active' => true,
@@ -341,9 +341,9 @@ class FinancialCategoriesSeeder extends Seeder
         ]);
 
         FinancialCategory::create([
-            'name' => 'Seguros Específicos',
+            'name' => 'Specific Insurance',
             'code' => 'RFQ-EXP-INSURANCE',
-            'description' => 'Seguros específicos do RFQ/projeto',
+            'description' => 'RFQ/project specific insurance',
             'type' => 'expense',
             'parent_id' => $rfqExpenses->id,
             'is_active' => true,
