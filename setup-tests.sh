@@ -2,6 +2,7 @@
 
 # Setup Tests Script
 # This script prepares the environment for running tests
+# Compatible with macOS and Linux
 
 set -e
 
@@ -11,9 +12,19 @@ echo "🧪 Setting up test environment..."
 if [ ! -f .env.testing ]; then
     echo "📋 Creating .env.testing..."
     cp .env.example .env.testing
-    sed -i 's/APP_ENV=local/APP_ENV=testing/' .env.testing
-    sed -i 's/DB_CONNECTION=mysql/DB_CONNECTION=sqlite/' .env.testing
-    sed -i 's/DB_DATABASE=.*/DB_DATABASE=:memory:/' .env.testing
+    
+    # Use different sed syntax for macOS and Linux
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        # macOS
+        sed -i '' 's/APP_ENV=local/APP_ENV=testing/' .env.testing
+        sed -i '' 's/DB_CONNECTION=mysql/DB_CONNECTION=sqlite/' .env.testing
+        sed -i '' 's/DB_DATABASE=.*/DB_DATABASE=:memory:/' .env.testing
+    else
+        # Linux
+        sed -i 's/APP_ENV=local/APP_ENV=testing/' .env.testing
+        sed -i 's/DB_CONNECTION=mysql/DB_CONNECTION=sqlite/' .env.testing
+        sed -i 's/DB_DATABASE=.*/DB_DATABASE=:memory:/' .env.testing
+    fi
 else
     echo "✅ .env.testing already exists"
 fi

@@ -39,7 +39,7 @@ class TestHelpers
     /**
      * Create a test client with a user
      */
-    public static function createTestClient(User $user = null, array $attributes = []): Client
+    public static function createTestClient(?User $user = null, array $attributes = []): Client
     {
         if (!$user) {
             $user = self::createTestUser();
@@ -80,8 +80,8 @@ class TestHelpers
      * Create a complete RFQ (Order) with items
      */
     public static function createTestRFQWithItems(
-        Client $client = null,
-        Currency $currency = null,
+        ?Client $client = null,
+        ?Currency $currency = null,
         int $itemCount = 2,
         array $orderAttributes = [],
         array $itemAttributes = []
@@ -115,9 +115,9 @@ class TestHelpers
      * Create a supplier quote for an order
      */
     public static function createTestSupplierQuote(
-        Order $order = null,
-        Supplier $supplier = null,
-        Currency $currency = null,
+        ?Order $order = null,
+        ?Supplier $supplier = null,
+        ?Currency $currency = null,
         array $attributes = []
     ): SupplierQuote {
         if (!$order) {
@@ -144,9 +144,9 @@ class TestHelpers
      * Create multiple supplier quotes for comparison
      */
     public static function createTestQuotesForComparison(
-        Order $order = null,
+        ?Order $order = null,
         int $supplierCount = 3,
-        Currency $currency = null
+        ?Currency $currency = null
     ): array {
         if (!$order) {
             $order = self::createTestRFQWithItems();
@@ -169,7 +169,7 @@ class TestHelpers
     /**
      * Authenticate a user for testing
      */
-    public static function authenticateAs(User $user = null): User
+    public static function authenticateAs(?User $user = null): User
     {
         if (!$user) {
             $user = self::createTestUser();
