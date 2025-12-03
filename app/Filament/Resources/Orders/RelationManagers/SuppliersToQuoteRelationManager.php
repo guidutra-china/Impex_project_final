@@ -384,9 +384,9 @@ class SuppliersToQuoteRelationManager extends RelationManager
                                                 'supplier' => $supplier,
                                                 'contact' => $contact,
                                                 'order' => $owner,
-                                            ], function ($message) use ($contact, $filePath, $supplier) {
+                                            ], function ($message) use ($contact, $filePath, $supplier, $owner) {
                                                 $message->to($contact->email)
-                                                    ->subject("RFQ Request from {$owner->company?->name ?? 'Our Company'}")
+                                                    ->subject("RFQ Request from {" . ($owner->company ? $owner->company->name : 'Our Company') . "}")
                                                     ->attach($filePath);
                                             });
 
