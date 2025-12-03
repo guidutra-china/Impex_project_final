@@ -19,8 +19,6 @@ class DocumentHistoryResource extends Resource
 
     protected static ?string $pluralModelLabel = 'Document History';
 
-    protected static ?string $navigationGroup = 'Documents';
-
     protected static ?int $navigationSort = 1;
 
     public static function table(Table $table): Table
