@@ -3,6 +3,9 @@
 namespace App\Models;
 
 use App\Models\Scopes\ClientOwnershipScope;
+use App\Services\Order\OrderNumberGenerator;
+use App\Services\Order\OrderCalculator;
+use App\Traits\HasRFQManagement;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -15,7 +18,7 @@ use Illuminate\Support\Collection;
 
 class Order extends Model
 {
-    use SoftDeletes, HasFactory;
+    use SoftDeletes, HasFactory, HasRFQManagement;
 
     protected static function booted(): void
     {
@@ -58,7 +61,9 @@ class Order extends Model
         // Auto-generate order number
         static::creating(function ($order) {
             if (!$order->order_number) {
-                $order->order_number = $order->generateOrderNumber();
+                $generator = app(OrderNumberGenerator::class);
+                $client = $order->customer ?? Client::withoutGlobalScopes()->find($order->customer_id);
+                $order->order_number = $generator->generate($client);
             }
         });
     }
@@ -143,50 +148,6 @@ class Order extends Model
     }
 
     /**
-     * Generate order number
-     *
-     * @return string
-     */
-    /**
-     * Generate order number (RFQ number)
-     * Format: [CLIENT_CODE]-[YY]-[NNNN]
-     * Example: AMA-25-0001
-     */
-    public function generateOrderNumber(): string
-    {
-        // Get client code - must exist
-        $client = $this->customer ?? Client::withoutGlobalScopes()->find($this->customer_id);
-        
-        if (!$client || !$client->code) {
-            throw new \Exception('Cannot generate order number: Client not found or has no code');
-        }
-        
-        $clientCode = $client->code;
-        
-        // Get 2-digit year
-        $year = now()->format('y');
-        
-        // Find next sequential number for this client
-        $sequentialNumber = 1;
-        $orderNumber = "";
-        
-        // Loop until we find an order number that doesn't exist
-        do {
-            $orderNumber = "{$clientCode}-{$year}-" . str_pad($sequentialNumber, 4, '0', STR_PAD_LEFT);
-            
-            $exists = Order::withTrashed()
-                ->where('order_number', $orderNumber)
-                ->exists();
-            
-            if ($exists) {
-                $sequentialNumber++;
-            }
-        } while ($exists);
-        
-        return $orderNumber;
-    }
-
-    /**
      * Get the cheapest quote for this order
      */
     public function getCheapestQuote()
@@ -199,14 +160,13 @@ class Order extends Model
 
     /**
      * Update total amount with cheapest quote
+     *
+     * @deprecated Use OrderCalculator::updateTotalAmountWithCheapestQuote() instead
      */
     public function updateTotalAmount()
     {
-        $cheapest = $this->getCheapestQuote();
-        if ($cheapest) {
-            $this->total_amount = $cheapest->total_price_after_commission;
-            $this->save();
-        }
+        $calculator = app(OrderCalculator::class);
+        $calculator->updateTotalAmountWithCheapestQuote($this);
     }
 
     /**
@@ -273,50 +233,47 @@ class Order extends Model
 
     /**
      * Get total project expenses amount in cents (base currency USD)
+     *
+     * @deprecated Use OrderCalculator::getProjectExpenses() instead
      */
     public function getTotalProjectExpensesAttribute(): int
     {
-        return $this->projectExpenses()->sum('amount_base_currency');
+        $calculator = app(OrderCalculator::class);
+        return $calculator->getProjectExpenses($this);
     }
 
     /**
      * Get total project expenses in dollars
+     *
+     * @deprecated Use OrderCalculator::getProjectExpensesDollars() instead
      */
     public function getTotalProjectExpensesDollarsAttribute(): float
     {
-        return $this->total_project_expenses / 100;
+        $calculator = app(OrderCalculator::class);
+        return $calculator->getProjectExpensesDollars($this);
     }
 
     /**
      * Get real margin considering project expenses
      * Formula: Revenue - Purchase Costs - Project Expenses
+     *
+     * @deprecated Use OrderCalculator::calculateRealMargin() instead
      */
     public function getRealMarginAttribute(): float
     {
-        // Revenue from selected quote or total amount
-        $revenue = $this->selectedQuote ? $this->selectedQuote->total_price_after_commission : ($this->total_amount ?? 0);
-        
-        // Purchase costs from purchase orders
-        $purchaseCosts = $this->purchaseOrders()->sum('total');
-        
-        // Project expenses
-        $projectExpenses = $this->total_project_expenses;
-        
-        return ($revenue - $purchaseCosts - $projectExpenses) / 100;
+        $calculator = app(OrderCalculator::class);
+        return $calculator->calculateRealMargin($this);
     }
 
     /**
      * Get real margin percentage
+     *
+     * @deprecated Use OrderCalculator::calculateRealMarginPercentage() instead
      */
     public function getRealMarginPercentAttribute(): float
     {
-        $revenue = $this->selectedQuote ? $this->selectedQuote->total_price_after_commission : ($this->total_amount ?? 0);
-        
-        if ($revenue == 0) {
-            return 0;
-        }
-        
-        return ($this->real_margin / ($revenue / 100)) * 100;
+        $calculator = app(OrderCalculator::class);
+        return $calculator->calculateRealMarginPercentage($this);
     }
 
     /**
@@ -334,85 +291,18 @@ class Order extends Model
     }
 
     /**
-     * Check if RFQ has been sent to a specific supplier
-     */
-    public function isSentToSupplier(int $supplierId): bool
-    {
-        return $this->supplierStatuses()
-            ->where('supplier_id', $supplierId)
-            ->where('sent', true)
-            ->exists();
-    }
-
-    /**
-     * Get send status for a specific supplier
-     */
-    public function getSupplierStatus(int $supplierId): ?RFQSupplierStatus
-    {
-        return $this->supplierStatuses()
-            ->where('supplier_id', $supplierId)
-            ->first();
-    }
-
-    /**
-     * Mark RFQ as sent to a supplier
-     */
-    public function markSentToSupplier(int $supplierId, string $method = 'email'): RFQSupplierStatus
-    {
-        $status = RFQSupplierStatus::updateOrCreate(
-            [
-                'order_id' => $this->id,
-                'supplier_id' => $supplierId,
-            ],
-            [
-                'sent' => true,
-                'sent_at' => now(),
-                'sent_method' => $method,
-                'sent_by' => auth()->id(),
-            ]
-        );
-
-        return $status;
-    }
-
-    /**
-     * Get count of suppliers this RFQ has been sent to
-     */
-    public function getSentSuppliersCount(): int
-    {
-        return $this->supplierStatuses()->where('sent', true)->count();
-    }
-
-    /**
-     * Get count of matching suppliers for this RFQ
-     */
-    public function getMatchingSuppliersCount(): int
-    {
-        return $this->matchingSuppliers()->count();
-    }
-
-    /**
      * Update the average commission percentage based on order items
+     *
+     * @deprecated Use OrderCalculator::calculateCommissionAverage() instead
      */
     public function updateCommissionAverage(): void
     {
-        $items = $this->items;
-        
-        if ($items->isEmpty()) {
-            $this->commission_percent_average = null;
+        $calculator = app(OrderCalculator::class);
+        $average = $calculator->calculateCommissionAverage($this);
+
+        if ($average !== null) {
+            $this->commission_percent_average = $average;
             $this->save();
-            return;
         }
-        
-        // Calculate weighted average based on quantity
-        $totalQuantity = $items->sum('quantity');
-        $weightedSum = 0;
-        
-        foreach ($items as $item) {
-            $weightedSum += ($item->commission_percent ?? 0) * $item->quantity;
-        }
-        
-        $this->commission_percent_average = $totalQuantity > 0 ? $weightedSum / $totalQuantity : 0;
-        $this->save();
     }
 }
