@@ -223,6 +223,28 @@ class PurchaseOrdersTable
                         );
                     }),
                 
+                Action::make('export_excel')
+                    ->label('Excel')
+                    ->icon('heroicon-o-table-cells')
+                    ->color('success')
+                    ->action(function ($record) {
+                        $excelService = app(\App\Services\Export\ExcelExportService::class);
+                        $document = $excelService->generate(
+                            $record,
+                            'purchase_order'
+                        );
+                        
+                        Notification::make()
+                            ->success()
+                            ->title('Purchase Order Excel generated successfully')
+                            ->send();
+                        
+                        return response()->download(
+                            storage_path('app/' . $document->file_path),
+                            $document->filename
+                        );
+                    }),
+                
                 // Status Transition Actions
                 \Filament\Actions\Action::make('send_to_supplier')
                     ->label('Send to Supplier')

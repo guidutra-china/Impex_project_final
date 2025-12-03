@@ -120,6 +120,29 @@ class SupplierQuotesTable
                         );
                     }),
                 
+                Action::make('export_excel')
+                    ->label('Excel')
+                    ->icon('heroicon-o-table-cells')
+                    ->color('success')
+                    ->action(function ($record) {
+                        $excelService = app(\App\Services\Export\ExcelExportService::class);
+                        $document = $excelService->generate(
+                            $record,
+                            'supplier_quote',
+                            ['revision_number' => $record->revision_number]
+                        );
+                        
+                        Notification::make()
+                            ->success()
+                            ->title('Supplier Quote Excel generated successfully')
+                            ->send();
+                        
+                        return response()->download(
+                            storage_path('app/' . $document->file_path),
+                            $document->filename
+                        );
+                    }),
+                
                 Action::make('calculate_commission')
                     ->label('Recalculate')
                     ->icon('heroicon-o-calculator')

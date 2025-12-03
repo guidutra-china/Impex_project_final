@@ -215,8 +215,11 @@ class SalesInvoicesTable
                     ->icon('heroicon-o-table-cells')
                     ->color('success')
                     ->action(function ($record) {
-                        $excelService = app(ExcelExportService::class);
-                        $document = $excelService->generateCommercialInvoice($record);
+                        $excelService = app(\App\Services\Export\ExcelExportService::class);
+                        $document = $excelService->generate(
+                            $record,
+                            'commercial_invoice'
+                        );
                         
                         Notification::make()
                             ->success()
