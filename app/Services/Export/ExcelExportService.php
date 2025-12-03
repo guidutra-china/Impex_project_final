@@ -135,10 +135,10 @@ class ExcelExportService
         
         // Document title on the right
         $titleRow = $row;
-        $sheet->setCellValue('F' . $titleRow, $documentTitle);
-        $sheet->mergeCells('F' . $titleRow . ':G' . $titleRow);
-        $sheet->getStyle('F' . $titleRow)->getFont()->setBold(true)->setSize(16);
-        $sheet->getStyle('F' . $titleRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+        $sheet->setCellValue('E' . $titleRow, $documentTitle);
+        $sheet->mergeCells('E' . $titleRow . ':F' . $titleRow);
+        $sheet->getStyle('E' . $titleRow)->getFont()->setBold(true)->setSize(16);
+        $sheet->getStyle('E' . $titleRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
         
         // Move row pointer past the header
         $row = max($infoRow, $titleRow + 2) + 1;
@@ -251,7 +251,7 @@ class ExcelExportService
             ->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
         
         // Column widths
-        $sheet->getColumnDimension('A')->setWidth(5);
+        $sheet->getColumnDimension('A')->setWidth(25);
         $sheet->getColumnDimension('B')->setWidth(12);
         $sheet->getColumnDimension('C')->setWidth(40);
         $sheet->getColumnDimension('D')->setWidth(12);
@@ -326,11 +326,11 @@ class ExcelExportService
         $itemStartRow = $row;
         foreach ($model->items as $index => $item) {
             $sheet->setCellValue('A' . $row, $index + 1);
-            $sheet->setCellValue('B' . $row, $item->product_code ?? 'N/A');
-            $sheet->setCellValue('C' . $row, $item->product_name ?? $item->description);
+            $sheet->setCellValue('B' . $row, $item->product_sku ?? 'N/A');
+            $sheet->setCellValue('C' . $row, $item->product_name ?? $item->description ?? 'N/A');
             $sheet->setCellValue('D' . $row, $item->quantity);
             $sheet->setCellValue('E' . $row, $item->unit_price);
-            $sheet->setCellValue('F' . $row, $item->total_price);
+            $sheet->setCellValue('F' . $row, $item->total);
             
             // Format currency
             $sheet->getStyle('E' . $row)->getNumberFormat()
@@ -377,7 +377,7 @@ class ExcelExportService
             ->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
         
         // Column widths
-        $sheet->getColumnDimension('A')->setWidth(5);
+        $sheet->getColumnDimension('A')->setWidth(25);
         $sheet->getColumnDimension('B')->setWidth(12);
         $sheet->getColumnDimension('C')->setWidth(40);
         $sheet->getColumnDimension('D')->setWidth(12);
@@ -462,7 +462,7 @@ class ExcelExportService
             ->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
         
         // Column widths
-        $sheet->getColumnDimension('A')->setWidth(5);
+        $sheet->getColumnDimension('A')->setWidth(25);
         $sheet->getColumnDimension('B')->setWidth(40);
         $sheet->getColumnDimension('C')->setWidth(12);
         $sheet->getColumnDimension('D')->setWidth(15);
@@ -551,7 +551,7 @@ class ExcelExportService
             ->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
         
         // Column widths
-        $sheet->getColumnDimension('A')->setWidth(5);
+        $sheet->getColumnDimension('A')->setWidth(25);
         $sheet->getColumnDimension('B')->setWidth(40);
         $sheet->getColumnDimension('C')->setWidth(12);
         $sheet->getColumnDimension('D')->setWidth(15);
@@ -559,7 +559,7 @@ class ExcelExportService
     }
 
     /**
-     * Generate Purchase Order Excel
+     * Generate Proforma Invoice Excel
      */
     protected function generatePurchaseOrder($sheet, $model): void
     {
