@@ -397,10 +397,12 @@ class QuoteComparisonTest extends TestCase
         
         // Create exchange rate for EUR to USD
         \App\Models\ExchangeRate::create([
-            'from_currency_id' => $eur->id,
-            'to_currency_id' => $usd->id,
+            'base_currency_id' => $usd->id,
+            'target_currency_id' => $eur->id,
             'rate' => 1.10,
+            'inverse_rate' => 1 / 1.10,
             'date' => today(),
+            'status' => 'approved',
         ]);
 
         $order = Order::factory()->create([
