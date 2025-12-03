@@ -240,6 +240,72 @@ class Order extends Model
     }
 
     /**
+     * Get all financial transactions linked to this RFQ via transactable
+     */
+    public function financialTransactions(): \Illuminate\Database\Eloquent\Relations\MorphMany
+    {
+        return $this->morphMany(FinancialTransaction::class, 'transactable');
+    }
+
+    /**
+     * Get all project expenses (transactions with this RFQ as project)
+     * This includes expenses not directly linked via transactable
+     */
+    public function projectExpenses(): HasMany
+    {
+        return $this->hasMany(FinancialTransaction::class, 'project_id')
+            ->where('type', 'payable');
+    }
+
+    /**
+     * Get total project expenses amount in cents
+     */
+    public function getTotalProjectExpensesAttribute(): int
+    {
+        return $this->projectExpenses()->sum('amount');
+    }
+
+    /**
+     * Get total project expenses in dollars
+     */
+    public function getTotalProjectExpensesDollarsAttribute(): float
+    {
+        return $this->total_project_expenses / 100;
+    }
+
+    /**
+     * Get real margin considering project expenses
+     * Formula: Revenue - Purchase Costs - Project Expenses
+     */
+    public function getRealMarginAttribute(): float
+    {
+        // Revenue from selected quote or total amount
+        $revenue = $this->selectedQuote ? $this->selectedQuote->total_price_after_commission : ($this->total_amount ?? 0);
+        
+        // Purchase costs from purchase orders
+        $purchaseCosts = $this->purchaseOrders()->sum('total');
+        
+        // Project expenses
+        $projectExpenses = $this->total_project_expenses;
+        
+        return ($revenue - $purchaseCosts - $projectExpenses) / 100;
+    }
+
+    /**
+     * Get real margin percentage
+     */
+    public function getRealMarginPercentAttribute(): float
+    {
+        $revenue = $this->selectedQuote ? $this->selectedQuote->total_price_after_commission : ($this->total_amount ?? 0);
+        
+        if ($revenue == 0) {
+            return 0;
+        }
+        
+        return ($this->real_margin / ($revenue / 100)) * 100;
+    }
+
+    /**
      * Get suppliers that match this RFQ's category
      */
     public function matchingSuppliers(): Collection

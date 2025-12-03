@@ -28,6 +28,7 @@ class FinancialTransaction extends Model
         'financial_category_id',
         'transactable_id',
         'transactable_type',
+        'project_id',
         'supplier_id',
         'client_id',
         'notes',
@@ -110,6 +111,14 @@ class FinancialTransaction extends Model
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    /**
+     * Get the project/RFQ this transaction belongs to
+     */
+    public function project(): BelongsTo
+    {
+        return $this->belongsTo(Order::class, 'project_id');
     }
 
     /**

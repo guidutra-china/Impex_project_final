@@ -258,6 +258,98 @@ class FinancialCategoriesSeeder extends Seeder
             'sort_order' => 602,
         ]);
 
+        // === RFQ/PROJECT EXPENSES ===
+        
+        $rfqExpenses = FinancialCategory::create([
+            'name' => 'Despesas de RFQ/Projeto',
+            'code' => 'RFQ-EXPENSES',
+            'description' => 'Despesas específicas de RFQs e projetos de importação/exportação',
+            'type' => 'expense',
+            'is_system' => true,
+            'is_active' => true,
+            'sort_order' => 250,
+        ]);
+
+        FinancialCategory::create([
+            'name' => 'Testes e Certificações',
+            'code' => 'RFQ-EXP-TESTS',
+            'description' => 'Testes de qualidade, certificações, laudos técnicos',
+            'type' => 'expense',
+            'parent_id' => $rfqExpenses->id,
+            'is_active' => true,
+            'sort_order' => 251,
+        ]);
+
+        FinancialCategory::create([
+            'name' => 'Viagens de Negócios',
+            'code' => 'RFQ-EXP-TRAVEL',
+            'description' => 'Visitas a fornecedores, feiras, inspeções de fábrica',
+            'type' => 'expense',
+            'parent_id' => $rfqExpenses->id,
+            'is_active' => true,
+            'sort_order' => 252,
+        ]);
+
+        FinancialCategory::create([
+            'name' => 'Serviços de Terceiros',
+            'code' => 'RFQ-EXP-THIRD-PARTY',
+            'description' => 'Despachantes, consultores, tradutores, advogados',
+            'type' => 'expense',
+            'parent_id' => $rfqExpenses->id,
+            'is_active' => true,
+            'sort_order' => 253,
+        ]);
+
+        FinancialCategory::create([
+            'name' => 'Custos Bancários',
+            'code' => 'RFQ-EXP-BANK',
+            'description' => 'Transferências internacionais, cartas de crédito, câmbio',
+            'type' => 'expense',
+            'parent_id' => $rfqExpenses->id,
+            'is_active' => true,
+            'sort_order' => 254,
+        ]);
+
+        FinancialCategory::create([
+            'name' => 'Amostras',
+            'code' => 'RFQ-EXP-SAMPLES',
+            'description' => 'Envio de amostras, protótipos',
+            'type' => 'expense',
+            'parent_id' => $rfqExpenses->id,
+            'is_active' => true,
+            'sort_order' => 255,
+        ]);
+
+        FinancialCategory::create([
+            'name' => 'Documentação',
+            'code' => 'RFQ-EXP-DOCS',
+            'description' => 'Legalização, apostilamento, certificados de origem',
+            'type' => 'expense',
+            'parent_id' => $rfqExpenses->id,
+            'is_active' => true,
+            'sort_order' => 256,
+        ]);
+
+        FinancialCategory::create([
+            'name' => 'Armazenagem Temporária',
+            'code' => 'RFQ-EXP-STORAGE',
+            'description' => 'Armazém antes de envio final',
+            'type' => 'expense',
+            'parent_id' => $rfqExpenses->id,
+            'is_active' => true,
+            'sort_order' => 257,
+        ]);
+
+        FinancialCategory::create([
+            'name' => 'Seguros Específicos',
+            'code' => 'RFQ-EXP-INSURANCE',
+            'description' => 'Seguros específicos do RFQ/projeto',
+            'type' => 'expense',
+            'parent_id' => $rfqExpenses->id,
+            'is_active' => true,
+            'sort_order' => 258,
+        ]);
+
         $this->command->info('✅ Financial categories seeded successfully!');
         $this->command->info('   - ' . FinancialCategory::whereNull('parent_id')->count() . ' root categories');
         $this->command->info('   - ' . FinancialCategory::whereNotNull('parent_id')->count() . ' sub-categories');
