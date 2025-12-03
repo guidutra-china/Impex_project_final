@@ -7,6 +7,7 @@ use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 use Filament\Tables\Actions\BulkActionGroup;
 use Filament\Tables\Actions\DeleteBulkAction;
+use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\Filter;
@@ -222,7 +223,7 @@ class DocumentHistoryTable
                     ->openUrlInNewTab()
                     ->visible(fn (GeneratedDocument $record): bool => $record->documentable_id !== null),
                 
-                \Filament\Tables\Actions\DeleteAction::make()
+                DeleteAction::make()
                     ->label('Delete')
                     ->requiresConfirmation()
                     ->modalHeading('Delete Document')

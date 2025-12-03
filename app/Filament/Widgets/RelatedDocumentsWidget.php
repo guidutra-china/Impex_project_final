@@ -6,6 +6,7 @@ use App\Models\GeneratedDocument;
 use Filament\Notifications\Notification;
 use Filament\Tables;
 use Filament\Tables\Actions\Action;
+use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget as BaseWidget;
@@ -123,7 +124,7 @@ class RelatedDocumentsWidget extends BaseWidget
                         );
                     }),
                 
-                Tables\Actions\DeleteAction::make()
+                DeleteAction::make()
                     ->label('Delete')
                     ->requiresConfirmation()
                     ->modalHeading('Delete Document')
