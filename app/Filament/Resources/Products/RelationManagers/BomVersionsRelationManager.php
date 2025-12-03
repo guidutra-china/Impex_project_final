@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Products\RelationManagers;
 
 use App\Models\BomVersion;
+use App\Repositories\ProductRepository;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
@@ -26,9 +27,20 @@ class BomVersionsRelationManager extends RelationManager
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedDocumentDuplicate;
 
+    protected ProductRepository $repository;
+
+    public function __construct()
+    {
+        parent::__construct();
+        $this->repository = app(ProductRepository::class);
+    }
+
     public function table(Table $table): Table
     {
         return $table
+            ->query(
+                $this->repository->getBomVersionsQuery($this->getOwnerRecord()->id)
+            )
             ->recordTitleAttribute('version_display')
             ->columns([
                 TextColumn::make('version_number')
