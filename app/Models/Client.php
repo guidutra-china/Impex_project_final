@@ -16,6 +16,18 @@ class Client extends Model
     {
         static::addGlobalScope(new ClientOwnershipScope());
     }
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        // Ensure every client has a valid code
+        static::creating(function ($client) {
+            if (empty($client->code) || strlen($client->code) < 2) {
+                throw new \Exception('Client must have a valid code of at least 2 characters. Got: ' . ($client->code ?? 'null'));
+            }
+        });
+    }
     
     protected $fillable = [
         'user_id',
