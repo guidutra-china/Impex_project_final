@@ -21,11 +21,11 @@ class WarehouseResource extends Resource
 {
     protected static ?string $model = Warehouse::class;
 
-    protected static UnitEnum|string|null $navigationGroup = 'Purchasing & Inventory';
+    protected static UnitEnum|string|null $navigationGroup = 'Logistics & Shipping';
 
     protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-building-storefront';
 
-    protected static ?int $navigationSort = 5;
+    protected static ?int $navigationSort = 20;
 
     public static function form(Schema $schema): Schema
     {

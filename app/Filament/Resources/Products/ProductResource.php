@@ -26,11 +26,11 @@ class ProductResource extends Resource
 {
     protected static ?string $model = Product::class;
 
-    protected static UnitEnum|string|null $navigationGroup = 'Purchasing & Inventory';
+    protected static UnitEnum|string|null $navigationGroup = 'Inventory';
 
     protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-cube';
 
-    protected static ?int $navigationSort = 2;
+    protected static ?int $navigationSort = 10;
 
     
 

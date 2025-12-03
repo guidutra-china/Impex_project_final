@@ -23,7 +23,7 @@ class PaymentMethodResource extends Resource
 
     protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-wallet';
 
-    protected static ?int $navigationSort = 6;
+    protected static ?int $navigationSort = 60;
 
     
 

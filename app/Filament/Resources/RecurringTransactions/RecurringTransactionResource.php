@@ -26,7 +26,7 @@ class RecurringTransactionResource extends Resource
 
     
 
-    protected static ?int $navigationSort = 3;
+    protected static ?int $navigationSort = 30;
 
     public static function form(Schema $schema): Schema
     {

@@ -19,11 +19,11 @@ class ClientContactResource extends Resource
 {
     protected static ?string $model = ClientContact::class;
 
-    protected static UnitEnum|string|null $navigationGroup = 'Sales & Orders';
+    protected static UnitEnum|string|null $navigationGroup = 'Contacts';
 
     protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-user';
 
-    protected static ?int $navigationSort = 5;
+    protected static ?int $navigationSort = 20;
 
     protected static bool $shouldRegisterNavigation = false;
 

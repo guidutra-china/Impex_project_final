@@ -21,11 +21,11 @@ class QualityInspectionResource extends Resource
 {
     protected static ?string $model = QualityInspection::class;
 
-    protected static UnitEnum|string|null $navigationGroup = 'Purchasing & Inventory';
+    protected static UnitEnum|string|null $navigationGroup = 'Purchasing';
 
     protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-shield-check';
 
-    protected static ?int $navigationSort = 6;
+    protected static ?int $navigationSort = 20;
 
     public static function form(Schema $schema): Schema
     {

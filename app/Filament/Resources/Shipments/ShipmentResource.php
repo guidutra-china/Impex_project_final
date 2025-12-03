@@ -25,11 +25,11 @@ class ShipmentResource extends Resource
 {
     protected static ?string $model = Shipment::class;
 
-    protected static UnitEnum|string|null $navigationGroup = 'Logistics';
+    protected static UnitEnum|string|null $navigationGroup = 'Logistics & Shipping';
 
     protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-truck';
 
-    protected static ?int $navigationSort = 1;
+    protected static ?int $navigationSort = 10;
 
     public static function form(Schema $schema): Schema
     {

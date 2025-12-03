@@ -21,11 +21,11 @@ class DocumentResource extends Resource
 {
     protected static ?string $model = Document::class;
 
-    protected static UnitEnum|string|null $navigationGroup = 'Logistics';
+    protected static UnitEnum|string|null $navigationGroup = 'Documents';
 
     protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-document';
 
-    protected static ?int $navigationSort = 2;
+    protected static ?int $navigationSort = 20;
 
     public static function form(Schema $schema): Schema
     {

@@ -20,11 +20,11 @@ class SupplierQuoteResource extends Resource
 {
     protected static ?string $model = SupplierQuote::class;
 
-    protected static UnitEnum|string|null $navigationGroup = 'Sales & Orders';
+    protected static UnitEnum|string|null $navigationGroup = 'Sales & Quotations';
 
     protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-document-text';
 
-    protected static ?int $navigationSort = 2;
+    protected static ?int $navigationSort = 20;
 
     
 

@@ -23,9 +23,9 @@ class ProformaInvoiceResource extends Resource
 
     protected static ?string $pluralModelLabel = 'Proforma Invoices';
 
-    protected static UnitEnum|string|null $navigationGroup = 'Sales';
+    protected static UnitEnum|string|null $navigationGroup = 'Sales & Quotations';
 
-    protected static ?int $navigationSort = 4;
+    protected static ?int $navigationSort = 30;
 
     public static function form(Schema $schema): Schema
     {

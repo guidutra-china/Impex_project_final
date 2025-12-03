@@ -11,11 +11,11 @@ class CompanySettingsResource extends Resource
 {
     protected static ?string $model = CompanySetting::class;
 
-    protected static UnitEnum|string|null $navigationGroup = 'Configuration';
+    protected static UnitEnum|string|null $navigationGroup = 'Settings';
 
     protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-cog-6-tooth';
 
-    protected static ?int $navigationSort = 3;
+    protected static ?int $navigationSort = 10;
 
     protected static ?string $navigationLabel = 'Company Settings';
 
