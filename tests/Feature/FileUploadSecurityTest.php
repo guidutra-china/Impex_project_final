@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Services\FileUploadService;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 /**
@@ -18,6 +19,10 @@ class FileUploadSecurityTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        
+        // Mock the private storage disk
+        Storage::fake('private');
+        
         $this->uploadService = app(FileUploadService::class);
     }
 

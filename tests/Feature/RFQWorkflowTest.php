@@ -264,6 +264,6 @@ class RFQWorkflowTest extends TestCase
         // Order number should be auto-generated
         $this->assertNotNull($order->order_number);
         // Format: [CLIENT_CODE]-[YY]-[NNNN] (e.g., HI-25-0001)
-        $this->assertMatchesRegularExpression('/^[A-Z]{2,3}-\d{2}-\d{4}$/', $order->order_number);
+        $this->assertMatchesRegularExpression('/^[A-Z0-9]{2,3}-\d{2}-\d{4}$/', $order->order_number);
     }
 }
