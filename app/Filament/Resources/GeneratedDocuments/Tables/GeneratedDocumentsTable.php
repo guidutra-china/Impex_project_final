@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Resources\DocumentHistory\Tables;
+namespace App\Filament\Resources\GeneratedDocuments\Tables;
 
 use App\Models\GeneratedDocument;
 use Filament\Actions\Action;
@@ -14,7 +14,7 @@ use Filament\Tables\Filters\Filter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 
-class DocumentHistoryTable
+class GeneratedDocumentsTable
 {
     public static function configure(Table $table): Table
     {

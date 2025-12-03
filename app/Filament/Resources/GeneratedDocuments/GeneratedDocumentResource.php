@@ -1,15 +1,15 @@
 <?php
 
-namespace App\Filament\Resources;
+namespace App\Filament\Resources\GeneratedDocuments;
 
-use App\Filament\Resources\DocumentHistory\Tables\DocumentHistoryTable;
+use App\Filament\Resources\GeneratedDocuments\Tables\GeneratedDocumentsTable;
 use App\Models\GeneratedDocument;
 use Filament\Resources\Resource;
 use Filament\Tables\Table;
 use BackedEnum;
 use UnitEnum;
 
-class DocumentHistoryResource extends Resource
+class GeneratedDocumentResource extends Resource
 {
     protected static ?string $model = GeneratedDocument::class;
 
@@ -25,13 +25,13 @@ class DocumentHistoryResource extends Resource
 
     public static function table(Table $table): Table
     {
-        return DocumentHistoryTable::configure($table);
+        return GeneratedDocumentsTable::configure($table);
     }
 
     public static function getPages(): array
     {
         return [
-            'index' => \App\Filament\Resources\DocumentHistoryResource\Pages\ListDocumentHistory::route('/'),
+            'index' => \App\Filament\Resources\GeneratedDocuments\Pages\ListGeneratedDocuments::route('/'),
         ];
     }
 

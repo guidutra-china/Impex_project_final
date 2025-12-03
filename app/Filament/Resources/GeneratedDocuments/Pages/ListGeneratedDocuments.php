@@ -1,14 +1,14 @@
 <?php
 
-namespace App\Filament\Resources\DocumentHistoryResource\Pages;
+namespace App\Filament\Resources\GeneratedDocuments\Pages;
 
-use App\Filament\Resources\DocumentHistoryResource;
+use App\Filament\Resources\GeneratedDocuments\GeneratedDocumentResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 
-class ListDocumentHistory extends ListRecords
+class ListGeneratedDocuments extends ListRecords
 {
-    protected static string $resource = DocumentHistoryResource::class;
+    protected static string $resource = GeneratedDocumentResource::class;
 
     protected function getHeaderActions(): array
     {
@@ -35,7 +35,7 @@ class ListDocumentHistory extends ListRecords
     protected function getHeaderWidgets(): array
     {
         return [
-            \App\Filament\Resources\DocumentHistoryResource\Widgets\DocumentHistoryStatsWidget::class,
+            \App\Filament\Resources\GeneratedDocuments\Widgets\GeneratedDocumentsStatsWidget::class,
         ];
     }
 }

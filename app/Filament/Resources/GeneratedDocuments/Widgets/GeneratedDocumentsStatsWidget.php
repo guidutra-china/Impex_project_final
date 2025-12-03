@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Filament\Resources\DocumentHistoryResource\Widgets;
+namespace App\Filament\Resources\GeneratedDocuments\Widgets;
 
 use App\Models\GeneratedDocument;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 
-class DocumentHistoryStatsWidget extends BaseWidget
+class GeneratedDocumentsStatsWidget extends BaseWidget
 {
     protected function getStats(): array
     {
