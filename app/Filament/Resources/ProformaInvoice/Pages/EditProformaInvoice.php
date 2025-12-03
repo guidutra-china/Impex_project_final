@@ -3,14 +3,24 @@
 namespace App\Filament\Resources\ProformaInvoice\Pages;
 
 use App\Filament\Resources\ProformaInvoice\ProformaInvoiceResource;
+use App\Repositories\ProformaInvoiceRepository;
 use App\Services\Export\PdfExportService;
 use App\Services\Export\ExcelExportService;
 use Filament\Actions;
+use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
 
 class EditProformaInvoice extends EditRecord
 {
     protected static string $resource = ProformaInvoiceResource::class;
+
+    protected ProformaInvoiceRepository $proformaRepository;
+
+    public function __construct()
+    {
+        parent::__construct();
+        $this->proformaRepository = app(ProformaInvoiceRepository::class);
+    }
 
     protected function getHeaderActions(): array
     {
@@ -25,13 +35,7 @@ class EditProformaInvoice extends EditRecord
                 ->requiresConfirmation()
                 ->visible(fn ($record) => $record->canApprove())
                 ->action(function ($record) {
-                    $record->update([
-                        'status' => 'approved',
-                        'approved_at' => now(),
-                        'approved_by' => auth()->id(),
-                    ]);
-                    
-                    $this->notify('success', 'Proforma Invoice approved successfully');
+                    $this->handleApprove($record);
                 }),
 
             Actions\Action::make('reject')
@@ -47,13 +51,7 @@ class EditProformaInvoice extends EditRecord
                         ->rows(3),
                 ])
                 ->action(function ($record, array $data) {
-                    $record->update([
-                        'status' => 'rejected',
-                        'rejected_at' => now(),
-                        'rejection_reason' => $data['rejection_reason'],
-                    ]);
-                    
-                    $this->notify('success', 'Proforma Invoice rejected');
+                    $this->handleReject($record, $data);
                 }),
 
             Actions\Action::make('mark_sent')
@@ -63,12 +61,7 @@ class EditProformaInvoice extends EditRecord
                 ->requiresConfirmation()
                 ->visible(fn ($record) => $record->status === 'draft')
                 ->action(function ($record) {
-                    $record->update([
-                        'status' => 'sent',
-                        'sent_at' => now(),
-                    ]);
-                    
-                    $this->notify('success', 'Proforma Invoice marked as sent');
+                    $this->handleMarkSent($record);
                 }),
 
             Actions\Action::make('mark_deposit_received')
@@ -85,14 +78,7 @@ class EditProformaInvoice extends EditRecord
                         ->label('Payment Reference'),
                 ])
                 ->action(function ($record, array $data) {
-                    $record->update([
-                        'deposit_received' => true,
-                        'deposit_received_at' => now(),
-                        'deposit_payment_method' => $data['deposit_payment_method'],
-                        'deposit_payment_reference' => $data['deposit_payment_reference'] ?? null,
-                    ]);
-                    
-                    $this->notify('success', 'Deposit marked as received');
+                    $this->handleMarkDepositReceived($record, $data);
                 }),
         ];
     }
@@ -100,16 +86,8 @@ class EditProformaInvoice extends EditRecord
     protected function mutateFormDataBeforeSave(array $data): array
     {
         $data['updated_by'] = auth()->id();
-
+        
         return $data;
-    }
-
-    private function notify(string $type, string $message): void
-    {
-        \Filament\Notifications\Notification::make()
-            ->title($message)
-            ->{$type}()
-            ->send();
     }
 
     protected function getFooterWidgets(): array
@@ -117,5 +95,140 @@ class EditProformaInvoice extends EditRecord
         return [
             \App\Filament\Widgets\RelatedDocumentsWidget::class,
         ];
+    }
+
+    /**
+     * Manipula a aprovação de Proforma Invoice
+     * 
+     * @param $record Registro da Proforma Invoice
+     */
+    protected function handleApprove($record): void
+    {
+        try {
+            $this->proformaRepository->approve($record->id, auth()->id());
+            
+            Notification::make()
+                ->success()
+                ->title('Proforma Invoice approved')
+                ->body('The proforma invoice has been approved successfully.')
+                ->send();
+
+            // Refresh the record
+            $this->record->refresh();
+        } catch (\Exception $e) {
+            Notification::make()
+                ->danger()
+                ->title('Error approving Proforma Invoice')
+                ->body($e->getMessage())
+                ->send();
+
+            \Log::error('Erro ao aprovar Proforma Invoice', [
+                'id' => $record->id,
+                'error' => $e->getMessage(),
+            ]);
+        }
+    }
+
+    /**
+     * Manipula a rejeição de Proforma Invoice
+     * 
+     * @param $record Registro da Proforma Invoice
+     * @param array $data Dados da rejeição
+     */
+    protected function handleReject($record, array $data): void
+    {
+        try {
+            $this->proformaRepository->reject($record->id, $data['rejection_reason']);
+            
+            Notification::make()
+                ->success()
+                ->title('Proforma Invoice rejected')
+                ->body('The proforma invoice has been rejected.')
+                ->send();
+
+            // Refresh the record
+            $this->record->refresh();
+        } catch (\Exception $e) {
+            Notification::make()
+                ->danger()
+                ->title('Error rejecting Proforma Invoice')
+                ->body($e->getMessage())
+                ->send();
+
+            \Log::error('Erro ao rejeitar Proforma Invoice', [
+                'id' => $record->id,
+                'reason' => $data['rejection_reason'],
+                'error' => $e->getMessage(),
+            ]);
+        }
+    }
+
+    /**
+     * Manipula marcar como enviada
+     * 
+     * @param $record Registro da Proforma Invoice
+     */
+    protected function handleMarkSent($record): void
+    {
+        try {
+            $this->proformaRepository->markAsSent($record->id);
+            
+            Notification::make()
+                ->success()
+                ->title('Proforma Invoice marked as sent')
+                ->body('The proforma invoice has been marked as sent.')
+                ->send();
+
+            // Refresh the record
+            $this->record->refresh();
+        } catch (\Exception $e) {
+            Notification::make()
+                ->danger()
+                ->title('Error marking as sent')
+                ->body($e->getMessage())
+                ->send();
+
+            \Log::error('Erro ao marcar Proforma Invoice como enviada', [
+                'id' => $record->id,
+                'error' => $e->getMessage(),
+            ]);
+        }
+    }
+
+    /**
+     * Manipula marcar depósito como recebido
+     * 
+     * @param $record Registro da Proforma Invoice
+     * @param array $data Dados do depósito
+     */
+    protected function handleMarkDepositReceived($record, array $data): void
+    {
+        try {
+            $this->proformaRepository->markDepositReceived($record->id, [
+                'deposit_payment_method' => $data['deposit_payment_method'],
+                'deposit_payment_reference' => $data['deposit_payment_reference'] ?? null,
+            ]);
+            
+            Notification::make()
+                ->success()
+                ->title('Deposit marked as received')
+                ->body('The deposit has been marked as received.')
+                ->send();
+
+            // Refresh the record
+            $this->record->refresh();
+        } catch (\Exception $e) {
+            Notification::make()
+                ->danger()
+                ->title('Error marking deposit as received')
+                ->body($e->getMessage())
+                ->send();
+
+            \Log::error('Erro ao marcar depósito como recebido', [
+                'id' => $record->id,
+                'data' => $data,
+                'error' => $e->getMessage(),
+            ]);
+        }
     }
 }

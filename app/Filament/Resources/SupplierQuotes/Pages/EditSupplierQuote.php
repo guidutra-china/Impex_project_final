@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\SupplierQuotes\Pages;
 
 use App\Filament\Resources\SupplierQuotes\SupplierQuoteResource;
+use App\Repositories\SupplierQuoteRepository;
 use App\Services\SupplierQuoteImportService;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
@@ -13,6 +14,14 @@ use Filament\Resources\Pages\EditRecord;
 class EditSupplierQuote extends EditRecord
 {
     protected static string $resource = SupplierQuoteResource::class;
+
+    protected SupplierQuoteRepository $quoteRepository;
+
+    public function __construct()
+    {
+        parent::__construct();
+        $this->quoteRepository = app(SupplierQuoteRepository::class);
+    }
 
     protected function getHeaderActions(): array
     {
@@ -32,64 +41,14 @@ class EditSupplierQuote extends EditRecord
                         ->directory('temp/imports'),
                 ])
                 ->action(function (array $data, SupplierQuoteImportService $importService) {
-                    $filePath = storage_path('app/' . $data['excel_file']);
-                    
-                    try {
-                        $result = $importService->importFromExcel($this->record, $filePath);
-                    } catch (\App\Exceptions\RFQImportException $e) {
-                        Notification::make()
-                            ->danger()
-                            ->title('Import Failed')
-                            ->body($e->getMessage())
-                            ->send();
-                        return;
-                    }
-                    
-                    // Clean up uploaded file
-                    try {
-                        if (file_exists($filePath)) {
-                            unlink($filePath);
-                        }
-                    } catch (\Exception $e) {
-                        \Log::warning('Failed to delete temporary import file', [
-                            'file' => basename($filePath),
-                            'error' => $e->getMessage(),
-                        ]);
-                    }
-                    
-                    if ($result['success']) {
-                        Notification::make()
-                            ->success()
-                            ->title('Import Successful')
-                            ->body($result['message'])
-                            ->send();
-                        
-                        // Show errors if any
-                        if (!empty($result['errors'])) {
-                            Notification::make()
-                                ->warning()
-                                ->title('Import Warnings')
-                                ->body(implode("\n", array_slice($result['errors'], 0, 5)))
-                                ->send();
-                        }
-                        
-                        // Refresh the page to show new items
-                        redirect()->to(static::getResource()::getUrl('edit', ['record' => $this->record]));
-                    } else {
-                        Notification::make()
-                            ->danger()
-                            ->title('Import Failed')
-                            ->body($result['message'])
-                            ->send();
-                    }
+                    $this->handleImportExcel($data, $importService);
                 }),
             DeleteAction::make(),
             Action::make('recalculate')
                 ->label('Recalculate All')
                 ->icon('heroicon-o-calculator')
                 ->action(function () {
-                    $this->record->lockExchangeRate();
-                    $this->record->calculateCommission();
+                    $this->handleRecalculate();
                 })
                 ->requiresConfirmation()
                 ->color('warning'),
@@ -108,5 +67,95 @@ class EditSupplierQuote extends EditRecord
         return [
             \App\Filament\Widgets\RelatedDocumentsWidget::class,
         ];
+    }
+
+    /**
+     * Manipula a importação de Excel
+     * 
+     * @param array $data Dados do formulário
+     * @param SupplierQuoteImportService $importService Serviço de importação
+     */
+    protected function handleImportExcel(array $data, SupplierQuoteImportService $importService): void
+    {
+        $filePath = storage_path('app/' . $data['excel_file']);
+
+        try {
+            $result = $importService->importFromExcel($this->record, $filePath);
+        } catch (\App\Exceptions\RFQImportException $e) {
+            Notification::make()
+                ->danger()
+                ->title('Import Failed')
+                ->body($e->getMessage())
+                ->send();
+            return;
+        }
+
+        // Clean up uploaded file
+        try {
+            if (file_exists($filePath)) {
+                unlink($filePath);
+            }
+        } catch (\Exception $e) {
+            \Log::warning('Failed to delete temporary import file', [
+                'file' => basename($filePath),
+                'error' => $e->getMessage(),
+            ]);
+        }
+
+        if ($result['success']) {
+            Notification::make()
+                ->success()
+                ->title('Import Successful')
+                ->body($result['message'])
+                ->send();
+
+            // Show errors if any
+            if (!empty($result['errors'])) {
+                Notification::make()
+                    ->warning()
+                    ->title('Import Warnings')
+                    ->body(implode("\n", array_slice($result['errors'], 0, 5)))
+                    ->send();
+            }
+
+            // Refresh the page to show new items
+            redirect()->to(static::getResource()::getUrl('edit', ['record' => $this->record]));
+        } else {
+            Notification::make()
+                ->danger()
+                ->title('Import Failed')
+                ->body($result['message'])
+                ->send();
+        }
+    }
+
+    /**
+     * Manipula o recalcular de todos os valores
+     */
+    protected function handleRecalculate(): void
+    {
+        try {
+            $this->quoteRepository->recalculateAll($this->record->id);
+
+            Notification::make()
+                ->success()
+                ->title('Recalculation Complete')
+                ->body('All values have been recalculated successfully.')
+                ->send();
+
+            // Refresh the record
+            $this->record->refresh();
+        } catch (\Exception $e) {
+            Notification::make()
+                ->danger()
+                ->title('Error Recalculating')
+                ->body($e->getMessage())
+                ->send();
+
+            \Log::error('Erro ao recalcular cotação', [
+                'id' => $this->record->id,
+                'error' => $e->getMessage(),
+            ]);
+        }
     }
 }
