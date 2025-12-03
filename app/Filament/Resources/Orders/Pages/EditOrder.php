@@ -4,8 +4,8 @@ namespace App\Filament\Resources\Orders\Pages;
 
 use App\Filament\Resources\Orders\OrderResource;
 use App\Models\FinancialCategory;
-use App\Models\FinancialTransaction;
 use App\Repositories\OrderRepository;
+use App\Repositories\FinancialTransactionRepository;
 use App\Services\RFQExcelService;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
@@ -22,11 +22,13 @@ class EditOrder extends EditRecord
     protected static string $resource = OrderResource::class;
 
     protected OrderRepository $orderRepository;
+    protected FinancialTransactionRepository $financialTransactionRepository;
 
     public function __construct()
     {
         parent::__construct();
         $this->orderRepository = app(OrderRepository::class);
+        $this->financialTransactionRepository = app(FinancialTransactionRepository::class);
     }
 
     protected function getHeaderActions(): array
@@ -122,48 +124,7 @@ class EditOrder extends EditRecord
                         ->helperText('Optional additional information'),
                 ])
                 ->action(function (array $data) {
-                    $order = $this->record;
-                    
-                    try {
-                        $amountInCents = (int)($data['amount'] * 100);
-                        $exchangeRate = $data['exchange_rate'] ?? 1.0;
-                        $amountInBaseCurrency = (int)($data['amount'] * $exchangeRate * 100);
-                        
-                        FinancialTransaction::create([
-                            'project_id' => $order->id,
-                            'transactable_id' => $order->id,
-                            'transactable_type' => get_class($order),
-                            'type' => 'payable',
-                            'status' => 'pending',
-                            'financial_category_id' => $data['financial_category_id'],
-                            'amount' => $amountInCents,
-                            'paid_amount' => 0,
-                            'currency_id' => $data['currency_id'],
-                            'exchange_rate_to_base' => $exchangeRate,
-                            'amount_base_currency' => $amountInBaseCurrency,
-                            'transaction_date' => $data['transaction_date'],
-                            'due_date' => $data['due_date'],
-                            'description' => $data['description'],
-                            'notes' => $data['notes'] ?? null,
-                            'created_by' => auth()->id(),
-                        ]);
-                        
-                        Notification::make()
-                            ->title('Project expense added successfully')
-                            ->success()
-                            ->body('The expense has been linked to this RFQ.')
-                            ->send();
-                        
-                        // Refresh the page to show the new expense in the widget
-                        $this->redirect($this->getResource()::getUrl('edit', ['record' => $order->id]));
-                        
-                    } catch (\Exception $e) {
-                        Notification::make()
-                            ->title('Error adding expense')
-                            ->danger()
-                            ->body($e->getMessage())
-                            ->send();
-                    }
+                    $this->handleAddProjectExpense($data);
                 }),
             
             DeleteAction::make(),
@@ -219,5 +180,62 @@ class EditOrder extends EditRecord
             \App\Filament\Widgets\ProjectExpensesWidget::class,
             \App\Filament\Widgets\RelatedDocumentsWidget::class,
         ];
+    }
+
+    /**
+     * Manipula a adição de despesa de projeto
+     * 
+     * @param array $data Dados da despesa
+     */
+    protected function handleAddProjectExpense(array $data): void
+    {
+        $order = $this->record;
+
+        try {
+            $amountInCents = (int)($data['amount'] * 100);
+            $exchangeRate = $data['exchange_rate'] ?? 1.0;
+            $amountInBaseCurrency = (int)($data['amount'] * $exchangeRate * 100);
+
+            // Usar repository para criar transação
+            $this->financialTransactionRepository->create([
+                'project_id' => $order->id,
+                'transactable_id' => $order->id,
+                'transactable_type' => get_class($order),
+                'type' => 'payable',
+                'status' => 'pending',
+                'financial_category_id' => $data['financial_category_id'],
+                'amount' => $amountInCents,
+                'paid_amount' => 0,
+                'currency_id' => $data['currency_id'],
+                'exchange_rate_to_base' => $exchangeRate,
+                'amount_base_currency' => $amountInBaseCurrency,
+                'transaction_date' => $data['transaction_date'],
+                'due_date' => $data['due_date'],
+                'description' => $data['description'],
+                'notes' => $data['notes'] ?? null,
+                'created_by' => auth()->id(),
+            ]);
+
+            Notification::make()
+                ->title('Project expense added successfully')
+                ->success()
+                ->body('The expense has been linked to this RFQ.')
+                ->send();
+
+            // Refresh the page to show the new expense in the widget
+            $this->redirect($this->getResource()::getUrl('edit', ['record' => $order->id]));
+        } catch (\Exception $e) {
+            Notification::make()
+                ->title('Error adding expense')
+                ->danger()
+                ->body($e->getMessage())
+                ->send();
+
+            \Log::error('Erro ao adicionar despesa de projeto', [
+                'order_id' => $order->id,
+                'data' => $data,
+                'error' => $e->getMessage(),
+            ]);
+        }
     }
 }
