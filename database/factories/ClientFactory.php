@@ -13,10 +13,16 @@ class ClientFactory extends Factory
     {
         $companyName = $this->faker->company();
         
-        // Generate unique 2-letter code
-        do {
-            $code = strtoupper($this->faker->bothify('??'));
-        } while (Client::where('code', $code)->exists());
+        // Generate unique 2-3 letter code with timestamp to ensure uniqueness
+        $code = strtoupper(substr($companyName, 0, 1) . substr($companyName, -1) . $this->faker->randomDigit());
+        $code = substr($code, 0, 3); // Ensure max 3 characters
+        
+        // Ensure code is unique
+        $attempts = 0;
+        while (Client::where('code', $code)->exists() && $attempts < 10) {
+            $code = strtoupper($this->faker->bothify('???'));
+            $attempts++;
+        }
         
         return [
             'name' => $companyName,
