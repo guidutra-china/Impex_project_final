@@ -2,14 +2,21 @@
 
 namespace App\Filament\Widgets;
 
-use App\Models\PurchaseOrder;
+use App\Repositories\PurchaseOrderRepository;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
-use Illuminate\Support\Facades\DB;
 
 class PurchaseOrderStatsWidget extends BaseWidget
 {
     protected static ?int $sort = 2;
+
+    protected PurchaseOrderRepository $repository;
+
+    public function __construct()
+    {
+        parent::__construct();
+        $this->repository = app(PurchaseOrderRepository::class);
+    }
     
     public static function canView(): bool
     {
@@ -34,54 +41,37 @@ class PurchaseOrderStatsWidget extends BaseWidget
         // Check if user can see all clients
         $canSeeAll = $user->roles()->where('can_see_all', true)->exists();
         
-        // Base query respects ClientOwnershipScope automatically
-        $query = PurchaseOrder::query();
-        
         // Count by status
-        $statusCounts = (clone $query)
-            ->select('status', DB::raw('count(*) as count'))
-            ->groupBy('status')
-            ->pluck('count', 'status')
-            ->toArray();
+        $pendingPOs = $this->repository->countByStatus('draft') + 
+                      $this->repository->countByStatus('pending_approval');
         
-        // Draft + Pending Approval
-        $pendingPOs = ($statusCounts['draft'] ?? 0) + ($statusCounts['pending_approval'] ?? 0);
-        
-        // Approved + Sent + Confirmed
-        $activePOs = ($statusCounts['approved'] ?? 0) 
-            + ($statusCounts['sent'] ?? 0) 
-            + ($statusCounts['confirmed'] ?? 0)
-            + ($statusCounts['partially_received'] ?? 0);
+        // Active POs
+        $activePOs = $this->repository->countActive();
         
         // In Production
-        $inProductionPOs = $statusCounts['in_production'] ?? 0;
+        $inProductionPOs = $this->repository->countByStatus('in_production');
         
         // Completed
-        $completedPOs = $statusCounts['completed'] ?? 0;
+        $completedPOs = $this->repository->countByStatus('completed');
         
         // Cancelled
-        $cancelledPOs = $statusCounts['cancelled'] ?? 0;
+        $cancelledPOs = $this->repository->countByStatus('cancelled');
         
         // Overdue POs (expected_delivery_date passed and not received)
-        $overduePOs = (clone $query)
+        $overduePOs = $this->repository->getModel()
             ->where('expected_delivery_date', '<', now())
             ->whereNull('actual_delivery_date')
             ->whereIn('status', ['sent', 'confirmed', 'in_production'])
             ->count();
         
         // Total value of active POs (in base currency)
-        $totalValueActive = (clone $query)
-            ->whereIn('status', ['approved', 'sent', 'confirmed', 'in_production', 'partially_received'])
-            ->sum(DB::raw('COALESCE(total_base_currency, 0)'));
-        
-        // Convert from cents to currency
-        $totalValueActive = $totalValueActive / 100;
+        $totalValueActive = $this->repository->getTotalActive() / 100; // Convert from cents
         
         // Format currency
         $formattedValue = 'R$ ' . number_format($totalValueActive, 2, ',', '.');
         
         // POs created this month
-        $thisMonthPOs = (clone $query)
+        $thisMonthPOs = $this->repository->getModel()
             ->whereYear('created_at', now()->year)
             ->whereMonth('created_at', now()->month)
             ->count();
@@ -93,7 +83,6 @@ class PurchaseOrderStatsWidget extends BaseWidget
                 ->description('Draft + Awaiting Approval')
                 ->descriptionIcon('heroicon-o-clock')
                 ->color('warning'),
-                // ->url(route('filament.admin.resources.purchase-orders.purchase-orders.index'))
             
             Stat::make('Active POs', $activePOs)
                 ->description('Approved, Sent, Confirmed')
@@ -110,7 +99,6 @@ class PurchaseOrderStatsWidget extends BaseWidget
                 ->description('Delivery date passed')
                 ->descriptionIcon('heroicon-o-exclamation-triangle')
                 ->color($overduePOs > 0 ? 'danger' : 'success'),
-                // ->url($overduePOs > 0 ? route('filament.admin.resources.purchase-orders.purchase-orders.index') : null)
             
             Stat::make('Open Value', $formattedValue)
                 ->description('Active POs (base currency)')
@@ -133,7 +121,9 @@ class PurchaseOrderStatsWidget extends BaseWidget
         
         for ($i = 6; $i >= 0; $i--) {
             $date = now()->subDays($i)->toDateString();
-            $count = PurchaseOrder::whereDate('created_at', $date)->count();
+            $count = $this->repository->getModel()
+                ->whereDate('created_at', $date)
+                ->count();
             $data[] = $count;
         }
         

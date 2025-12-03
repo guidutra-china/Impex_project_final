@@ -2,15 +2,24 @@
 
 namespace App\Filament\Widgets;
 
-use App\Models\Order;
-use App\Models\SupplierQuote;
+use App\Repositories\RFQRepository;
+use App\Repositories\SupplierQuoteRepository;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
-use Illuminate\Support\Facades\DB;
 
 class RfqStatsWidget extends BaseWidget
 {
     protected static ?int $sort = 2;
+
+    protected RFQRepository $rfqRepository;
+    protected SupplierQuoteRepository $quoteRepository;
+
+    public function __construct()
+    {
+        parent::__construct();
+        $this->rfqRepository = app(RFQRepository::class);
+        $this->quoteRepository = app(SupplierQuoteRepository::class);
+    }
     
     public static function canView(): bool
     {
@@ -35,46 +44,32 @@ class RfqStatsWidget extends BaseWidget
         // Check if user can see all clients
         $canSeeAll = $user->roles()->where('can_see_all', true)->exists();
         
-        // Base query respects ClientOwnershipScope automatically
-        $query = Order::query();
-        
         // Total RFQs
-        $totalRfqs = (clone $query)->count();
+        $totalRfqs = $this->rfqRepository->count();
         
         // Active RFQs (draft, pending, sent, quoted)
-        $activeRfqs = (clone $query)
-            ->whereIn('status', ['draft', 'pending', 'sent', 'quoted'])
-            ->count();
+        $activeRfqs = $this->rfqRepository->countOpen();
         
         // RFQs won (converted to orders)
-        $wonRfqs = (clone $query)
-            ->where('status', 'won')
-            ->count();
+        $wonRfqs = $this->rfqRepository->countByStatus('approved');
         
         // Conversion rate
         $conversionRate = $totalRfqs > 0 ? round(($wonRfqs / $totalRfqs) * 100, 1) : 0;
         
-        // Quotes received (respecting ownership)
-        $quotesReceived = SupplierQuote::query()
-            ->where('status', 'sent')
-            ->count();
+        // Quotes received
+        $quotesReceived = $this->quoteRepository->countByStatus('sent');
         
         // Average response time
-        $avgResponseTime = SupplierQuote::where('status', 'sent')
-            ->whereNotNull('created_at')
-            ->selectRaw('AVG(DATEDIFF(updated_at, created_at)) as avg_days')
-            ->value('avg_days');
-        
-        $avgResponseTime = $avgResponseTime ? round($avgResponseTime, 1) : 0;
+        $avgResponseTime = $this->calculateAverageResponseTime();
         
         // RFQs created this month
-        $thisMonthRfqs = (clone $query)
+        $thisMonthRfqs = $this->rfqRepository->getModel()
             ->whereYear('created_at', now()->year)
             ->whereMonth('created_at', now()->month)
             ->count();
         
         // RFQs created last month
-        $lastMonthRfqs = (clone $query)
+        $lastMonthRfqs = $this->rfqRepository->getModel()
             ->whereYear('created_at', now()->subMonth()->year)
             ->whereMonth('created_at', now()->subMonth()->month)
             ->count();
@@ -119,10 +114,26 @@ class RfqStatsWidget extends BaseWidget
         
         for ($i = 6; $i >= 0; $i--) {
             $date = now()->subDays($i)->toDateString();
-            $count = Order::whereDate('created_at', $date)->count();
+            $count = $this->rfqRepository->getModel()
+                ->whereDate('created_at', $date)
+                ->count();
             $data[] = $count;
         }
         
         return $data;
+    }
+
+    /**
+     * Calcula o tempo médio de resposta de cotações
+     */
+    protected function calculateAverageResponseTime(): float
+    {
+        $avgResponseTime = $this->quoteRepository->getModel()
+            ->where('status', 'sent')
+            ->whereNotNull('created_at')
+            ->selectRaw('AVG(DATEDIFF(updated_at, created_at)) as avg_days')
+            ->value('avg_days');
+        
+        return $avgResponseTime ? round($avgResponseTime, 1) : 0;
     }
 }

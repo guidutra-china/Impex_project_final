@@ -3,6 +3,7 @@
 namespace App\Filament\Widgets;
 
 use App\Models\Event;
+use App\Repositories\EventRepository;
 use Filament\Widgets\Widget;
 use Illuminate\Support\Facades\Auth;
 
@@ -16,6 +17,14 @@ class CalendarWidget extends Widget
     
     // Disable lazy loading to avoid Livewire issues
     protected static bool $isLazy = false;
+
+    protected EventRepository $repository;
+
+    public function __construct()
+    {
+        parent::__construct();
+        $this->repository = app(EventRepository::class);
+    }
     
     public static function canView(): bool
     {
@@ -45,13 +54,16 @@ class CalendarWidget extends Widget
         
         $canSeeAll = $user->roles()->where('can_see_all', true)->exists() || $user->hasRole('super_admin');
 
-        $query = Event::query();
-
-        if (!$canSeeAll) {
-            $query->where('user_id', $user->id);
+        // Get events using repository
+        if ($canSeeAll) {
+            $events = $this->repository->getRecent(1000);
+        } else {
+            $events = $this->repository->getModel()
+                ->where('user_id', $user->id)
+                ->get();
         }
 
-        return $query->get()->map(function (Event $event) {
+        return $events->map(function (Event $event) {
             return [
                 'id' => $event->id,
                 'title' => $event->title,
