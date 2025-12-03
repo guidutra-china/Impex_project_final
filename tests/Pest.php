@@ -41,7 +41,60 @@ expect()->extend('toBeOne', function () {
 |
 */
 
-function something()
-{
-    // ..
+use Tests\Helpers\TestHelpers;
+
+// Test data creation helpers
+function createTestUser(array $attributes = [], array $roles = []) {
+    return TestHelpers::createTestUser($attributes, $roles);
+}
+
+function createTestClient($user = null, array $attributes = []) {
+    return TestHelpers::createTestClient($user, $attributes);
+}
+
+function createTestProduct(array $attributes = []) {
+    return TestHelpers::createTestProduct($attributes);
+}
+
+function createTestSupplier(array $attributes = []) {
+    return TestHelpers::createTestSupplier($attributes);
+}
+
+function createTestCurrency(array $attributes = []) {
+    return TestHelpers::createTestCurrency($attributes);
+}
+
+function createTestRFQWithItems(
+    $client = null,
+    $currency = null,
+    int $itemCount = 2,
+    array $orderAttributes = [],
+    array $itemAttributes = []
+) {
+    return TestHelpers::createTestRFQWithItems($client, $currency, $itemCount, $orderAttributes, $itemAttributes);
+}
+
+function createTestSupplierQuote(
+    $order = null,
+    $supplier = null,
+    $currency = null,
+    array $attributes = []
+) {
+    return TestHelpers::createTestSupplierQuote($order, $supplier, $currency, $attributes);
+}
+
+function createTestQuotesForComparison(
+    $order = null,
+    int $supplierCount = 3,
+    $currency = null
+) {
+    return TestHelpers::createTestQuotesForComparison($order, $supplierCount, $currency);
+}
+
+function authenticateAs($user = null) {
+    return TestHelpers::authenticateAs($user);
+}
+
+function createCompleteRFQScenario() {
+    return TestHelpers::createCompleteRFQScenario();
 }

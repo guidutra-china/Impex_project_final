@@ -1,0 +1,39 @@
+#!/bin/bash
+
+# Setup Tests Script
+# This script prepares the environment for running tests
+
+set -e
+
+echo "🧪 Setting up test environment..."
+
+# Check if .env.testing exists, if not create it
+if [ ! -f .env.testing ]; then
+    echo "📋 Creating .env.testing..."
+    cp .env.example .env.testing
+    sed -i 's/APP_ENV=local/APP_ENV=testing/' .env.testing
+    sed -i 's/DB_CONNECTION=mysql/DB_CONNECTION=sqlite/' .env.testing
+    sed -i 's/DB_DATABASE=.*/DB_DATABASE=:memory:/' .env.testing
+else
+    echo "✅ .env.testing already exists"
+fi
+
+# Clear test cache
+echo "🧹 Clearing cache..."
+php artisan config:clear --env=testing
+php artisan cache:clear --env=testing
+
+# Run migrations for testing database
+echo "📊 Running migrations for test database..."
+php artisan migrate --env=testing --force
+
+# Seed the database with test data
+echo "🌱 Seeding test database..."
+php artisan db:seed --env=testing --force
+
+echo ""
+echo "✅ Test environment setup complete!"
+echo ""
+echo "Run tests with: php artisan test"
+echo "Run specific test: php artisan test tests/Feature/YourTest.php"
+echo "Run with coverage: php artisan test --coverage"
