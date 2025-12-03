@@ -1,0 +1,16 @@
+# Code owners for Impex Project
+# These users will be automatically requested for review when someone opens a pull request
+
+# Global owners
+* @guidutra-china
+
+# Specific paths
+/app/Repositories/ @guidutra-china
+/app/Filament/ @guidutra-china
+/tests/ @guidutra-china
+/database/ @guidutra-china
+/.github/workflows/ @guidutra-china
+
+# Documentation
+/docs/ @guidutra-china
+/*.md @guidutra-china
