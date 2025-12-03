@@ -71,6 +71,16 @@ class FinancialTransactionsTable
                     ->label('Category')
                     ->searchable()
                     ->toggleable(),
+                
+                TextColumn::make('project.order_number')
+                    ->label('RFQ/Project')
+                    ->searchable()
+                    ->sortable()
+                    ->toggleable()
+                    ->url(fn ($record) => $record->project_id ? route('filament.admin.resources.orders.edit', ['record' => $record->project_id]) : null)
+                    ->color('primary')
+                    ->icon('heroicon-o-document-text')
+                    ->placeholder('—'),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('type')

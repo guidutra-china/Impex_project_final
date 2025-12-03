@@ -79,6 +79,10 @@ class EditOrder extends EditRecord
                     $order = $this->record;
                     
                     try {
+                        $amountInCents = (int)($data['amount'] * 100);
+                        $exchangeRate = $data['exchange_rate'] ?? 1.0;
+                        $amountInBaseCurrency = (int)($data['amount'] * $exchangeRate * 100);
+                        
                         FinancialTransaction::create([
                             'project_id' => $order->id,
                             'transactable_id' => $order->id,
@@ -86,11 +90,11 @@ class EditOrder extends EditRecord
                             'type' => 'payable',
                             'status' => 'pending',
                             'financial_category_id' => $data['financial_category_id'],
-                            'amount' => (int)($data['amount'] * 100), // Convert to cents
+                            'amount' => $amountInCents,
                             'paid_amount' => 0,
-                            'currency_id' => $order->currency_id,
-                            'exchange_rate_to_base' => 1.0, // TODO: Get actual exchange rate
-                            'amount_base_currency' => (int)($data['amount'] * 100),
+                            'currency_id' => $data['currency_id'],
+                            'exchange_rate_to_base' => $exchangeRate,
+                            'amount_base_currency' => $amountInBaseCurrency,
                             'transaction_date' => $data['transaction_date'],
                             'due_date' => $data['due_date'],
                             'description' => $data['description'],
