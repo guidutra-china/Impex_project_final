@@ -387,10 +387,21 @@ class QuoteComparisonTest extends TestCase
     public function test_quote_comparison_with_currency_conversion(): void
     {
         // Ensure USD is set as base currency
-        Currency::where('code', 'USD')->update(['is_base' => true]);
+        $usd = Currency::where('code', 'USD')->first();
+        if ($usd) {
+            $usd->update(['is_base' => true]);
+        }
         
         $eur = Currency::where('code', 'EUR')->first() 
             ?? createTestCurrency(['code' => 'EUR', 'is_base' => false]);
+        
+        // Create exchange rate for EUR to USD
+        \App\Models\ExchangeRate::create([
+            'from_currency_id' => $eur->id,
+            'to_currency_id' => $usd->id,
+            'rate' => 1.10,
+            'date' => today(),
+        ]);
 
         $order = Order::factory()->create([
             'customer_id' => $this->client->id,
