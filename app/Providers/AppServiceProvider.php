@@ -19,6 +19,9 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(FileUploadService::class, function ($app) {
             return new FileUploadService();
         });
+
+        // Register the ActionServiceProvider
+        $this->app->register(ActionServiceProvider::class);
     }
 
     /**
