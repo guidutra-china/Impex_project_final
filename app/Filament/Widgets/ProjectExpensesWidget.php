@@ -55,7 +55,7 @@ class ProjectExpensesWidget extends BaseWidget
                     ->copyMessage('Transaction number copied')
                     ->copyMessageDuration(1500),
                 
-                TextColumn::make('category.full_name')
+                TextColumn::make('category.name')
                     ->label('Category')
                     ->searchable()
                     ->sortable()

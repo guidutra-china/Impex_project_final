@@ -46,16 +46,36 @@ class EditOrder extends EditRecord
                         ->required()
                         ->searchable()
                         ->preload()
+                        ->reactive()
+                        ->afterStateUpdated(function ($state, callable $set) {
+                            if (!$state) return;
+                            
+                            // Get base currency (USD)
+                            $baseCurrency = \App\Models\Currency::where('is_base', true)->first();
+                            if (!$baseCurrency) return;
+                            
+                            // If selected currency is base currency, rate is 1
+                            if ($state == $baseCurrency->id) {
+                                $set('exchange_rate', 1.0000);
+                                return;
+                            }
+                            
+                            // Get latest exchange rate
+                            $rate = \App\Models\ExchangeRate::getConversionRate($state, $baseCurrency->id);
+                            if ($rate) {
+                                $set('exchange_rate', number_format($rate, 4, '.', ''));
+                            }
+                        })
                         ->helperText('Currency of the expense'),
                     
                     TextInput::make('exchange_rate')
-                        ->label('Exchange Rate')
+                        ->label('Exchange Rate to USD')
                         ->numeric()
                         ->default(1.00)
                         ->required()
                         ->minValue(0.0001)
                         ->step(0.0001)
-                        ->helperText('Exchange rate to USD (1 if already in USD)'),
+                        ->helperText('Automatically loaded from Exchange Rates (editable)'),
                     
                     TextInput::make('amount')
                         ->label('Amount')
