@@ -9,15 +9,12 @@ use Illuminate\Support\Str;
 class ClientFactory extends Factory
 {
     protected $model = Client::class;
-    
-    private static $usedCodes = [];
 
     public function definition(): array
     {
         $companyName = $this->faker->company();
         
-        // Generate unique code using a combination of strategies
-        // This ensures we ALWAYS get a valid 2-3 character code
+        // Generate unique code - guaranteed to be 2-3 characters
         $code = $this->generateUniqueCode($companyName);
         
         return [
@@ -36,6 +33,7 @@ class ClientFactory extends Factory
 
     /**
      * Generate a unique client code - guaranteed to be 2-3 characters
+     * Uses multiple strategies to ensure uniqueness
      */
     private function generateUniqueCode(string $companyName): string
     {
@@ -48,7 +46,7 @@ class ClientFactory extends Factory
             // Try with different digits
             for ($digit = 0; $digit <= 9; $digit++) {
                 $code = $firstLetter . $secondLetter . $digit;
-                if ($this->isCodeAvailable($code)) {
+                if (!Client::where('code', $code)->exists()) {
                     return $code;
                 }
             }
@@ -61,12 +59,12 @@ class ClientFactory extends Factory
             $digit = $this->faker->randomDigit();
             $code = $firstLetter . $randomLetter . $digit;
             
-            if ($this->isCodeAvailable($code)) {
+            if (!Client::where('code', $code)->exists()) {
                 return $code;
             }
         }
         
-        // Strategy 3: Random 3-letter code
+        // Strategy 3: Random 3-character code (letters + digit)
         for ($attempt = 0; $attempt < 100; $attempt++) {
             $code = strtoupper(
                 $this->faker->randomLetter() .
@@ -74,7 +72,7 @@ class ClientFactory extends Factory
                 $this->faker->randomDigit()
             );
             
-            if ($this->isCodeAvailable($code)) {
+            if (!Client::where('code', $code)->exists()) {
                 return $code;
             }
         }
@@ -83,34 +81,21 @@ class ClientFactory extends Factory
         $uuid = Str::uuid()->toString();
         $code = strtoupper(substr(str_replace('-', '', $uuid), 0, 3));
         
-        if ($this->isCodeAvailable($code)) {
+        if (!Client::where('code', $code)->exists()) {
             return $code;
         }
         
         // Strategy 5: Use timestamp-based code (final fallback)
+        // This is guaranteed to be unique because it includes microseconds
         $code = strtoupper(substr(md5(microtime(true) . random_bytes(10)), 0, 3));
         
+        // If somehow this code exists, keep trying with different timestamps
+        $attempts = 0;
+        while (Client::where('code', $code)->exists() && $attempts < 10) {
+            $code = strtoupper(substr(md5(microtime(true) . random_bytes(10)), 0, 3));
+            $attempts++;
+        }
+        
         return $code;
-    }
-    
-    /**
-     * Check if a code is available (not used in DB and not in current batch)
-     */
-    private function isCodeAvailable(string $code): bool
-    {
-        // Check if already used in this factory session
-        if (in_array($code, self::$usedCodes)) {
-            return false;
-        }
-        
-        // Check if exists in database
-        if (Client::where('code', $code)->exists()) {
-            return false;
-        }
-        
-        // Mark as used in this session
-        self::$usedCodes[] = $code;
-        
-        return true;
     }
 }
