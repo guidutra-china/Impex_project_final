@@ -39,14 +39,31 @@ class EditOrder extends EditRecord
                         ->required()
                         ->helperText('Select the type of expense for this RFQ'),
                     
+                    Select::make('currency_id')
+                        ->label('Currency')
+                        ->relationship('currency', 'code')
+                        ->default(fn() => $this->record->currency_id)
+                        ->required()
+                        ->searchable()
+                        ->preload()
+                        ->helperText('Currency of the expense'),
+                    
+                    TextInput::make('exchange_rate')
+                        ->label('Exchange Rate')
+                        ->numeric()
+                        ->default(1.00)
+                        ->required()
+                        ->minValue(0.0001)
+                        ->step(0.0001)
+                        ->helperText('Exchange rate to USD (1 if already in USD)'),
+                    
                     TextInput::make('amount')
                         ->label('Amount')
                         ->numeric()
-                        ->prefix('$')
                         ->required()
                         ->minValue(0.01)
                         ->step(0.01)
-                        ->helperText('Enter amount in dollars'),
+                        ->helperText('Enter amount in the selected currency'),
                     
                     DatePicker::make('transaction_date')
                         ->label('Transaction Date')
