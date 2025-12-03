@@ -24,11 +24,11 @@ class OrderCalculatorTest extends TestCase
     public function test_calculate_commission_average_returns_correct_value(): void
     {
         // Create mock items with commission percentages
-        $item1 = Mockery::mock(OrderItem::class);
+        $item1 = Mockery::mock(OrderItem::class)->makePartial();
         $item1->quantity = 10;
         $item1->commission_percent = 5.0;
 
-        $item2 = Mockery::mock(OrderItem::class);
+        $item2 = Mockery::mock(OrderItem::class)->makePartial();
         $item2->quantity = 20;
         $item2->commission_percent = 10.0;
 
