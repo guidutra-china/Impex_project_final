@@ -13,15 +13,35 @@ class ClientFactory extends Factory
     {
         $companyName = $this->faker->company();
         
-        // Generate unique 2-3 letter code with timestamp to ensure uniqueness
-        $code = strtoupper(substr($companyName, 0, 1) . substr($companyName, -1) . $this->faker->randomDigit());
-        $code = substr($code, 0, 3); // Ensure max 3 characters
-        
-        // Ensure code is unique
+        // Generate unique 2-3 letter code
         $attempts = 0;
-        while (Client::where('code', $code)->exists() && $attempts < 10) {
-            $code = strtoupper($this->faker->bothify('???'));
+        $code = null;
+        
+        while ($attempts < 20) {
+            // Try different strategies to generate unique codes
+            if ($attempts < 5) {
+                // First try: use company name initials + random digit
+                $words = explode(' ', $companyName);
+                $firstLetter = strtoupper(substr($words[0] ?? 'A', 0, 1));
+                $secondLetter = isset($words[1]) ? strtoupper(substr($words[1], 0, 1)) : strtoupper(substr($companyName, 1, 1));
+                $digit = $this->faker->randomDigit();
+                $code = $firstLetter . $secondLetter . $digit;
+            } else {
+                // Fallback: random 3-letter code
+                $code = strtoupper($this->faker->bothify('???'));
+            }
+            
+            // Ensure code is not empty and is unique
+            if (!empty($code) && !Client::where('code', $code)->exists()) {
+                break;
+            }
+            
             $attempts++;
+        }
+        
+        // If we still don't have a code, use a timestamp-based one
+        if (empty($code) || Client::where('code', $code)->exists()) {
+            $code = strtoupper(substr(md5(microtime()), 0, 3));
         }
         
         return [

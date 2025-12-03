@@ -386,8 +386,11 @@ class QuoteComparisonTest extends TestCase
      */
     public function test_quote_comparison_with_currency_conversion(): void
     {
+        // Ensure USD is set as base currency
+        Currency::where('code', 'USD')->update(['is_base' => true]);
+        
         $eur = Currency::where('code', 'EUR')->first() 
-            ?? createTestCurrency(['code' => 'EUR']);
+            ?? createTestCurrency(['code' => 'EUR', 'is_base' => false]);
 
         $order = Order::factory()->create([
             'customer_id' => $this->client->id,
