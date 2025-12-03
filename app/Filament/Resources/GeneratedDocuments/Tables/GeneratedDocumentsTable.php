@@ -218,7 +218,7 @@ class GeneratedDocumentsTable
                             return null;
                         }
                         
-                        return route("filament.panel.resources.{$resourceName}.edit", ['record' => $id]);
+                        return route("filament.admin.resources.{$resourceName}.edit", ['record' => $id]);
                     })
                     ->openUrlInNewTab()
                     ->visible(fn (GeneratedDocument $record): bool => $record->documentable_id !== null),
