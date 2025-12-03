@@ -114,8 +114,8 @@ class OrderCalculatorTest extends TestCase
         // Create mock order
         $order = Mockery::mock(Order::class)->makePartial();
 
-        // Mock the projectExpenses relationship
-        $expensesMock = Mockery::mock();
+        // Mock the projectExpenses relationship as HasMany
+        $expensesMock = Mockery::mock('Illuminate\Database\Eloquent\Relations\HasMany');
         $expensesMock->shouldReceive('sum')->with('amount_base_currency')->andReturn(50000);
         $order->shouldReceive('projectExpenses')->andReturn($expensesMock);
 
@@ -132,8 +132,8 @@ class OrderCalculatorTest extends TestCase
         // Create mock order
         $order = Mockery::mock(Order::class)->makePartial();
 
-        // Mock the projectExpenses relationship
-        $expensesMock = Mockery::mock();
+        // Mock the projectExpenses relationship as HasMany
+        $expensesMock = Mockery::mock('Illuminate\Database\Eloquent\Relations\HasMany');
         $expensesMock->shouldReceive('sum')->with('amount_base_currency')->andReturn(10000);
         $order->shouldReceive('projectExpenses')->andReturn($expensesMock);
 
@@ -150,8 +150,8 @@ class OrderCalculatorTest extends TestCase
         // Create mock order
         $order = Mockery::mock(Order::class)->makePartial();
 
-        // Mock the purchaseOrders relationship
-        $purchaseOrdersMock = Mockery::mock();
+        // Mock the purchaseOrders relationship as HasMany
+        $purchaseOrdersMock = Mockery::mock('Illuminate\Database\Eloquent\Relations\HasMany');
         $purchaseOrdersMock->shouldReceive('sum')->with('total')->andReturn(30000);
         $order->shouldReceive('purchaseOrders')->andReturn($purchaseOrdersMock);
 
@@ -170,12 +170,12 @@ class OrderCalculatorTest extends TestCase
         $order->total_amount = 100000;
         $order->selectedQuote = null;
 
-        // Mock relationships
-        $purchaseOrdersMock = Mockery::mock();
+        // Mock relationships as HasMany
+        $purchaseOrdersMock = Mockery::mock('Illuminate\Database\Eloquent\Relations\HasMany');
         $purchaseOrdersMock->shouldReceive('sum')->with('total')->andReturn(30000);
         $order->shouldReceive('purchaseOrders')->andReturn($purchaseOrdersMock);
 
-        $expensesMock = Mockery::mock();
+        $expensesMock = Mockery::mock('Illuminate\Database\Eloquent\Relations\HasMany');
         $expensesMock->shouldReceive('sum')->with('amount_base_currency')->andReturn(10000);
         $order->shouldReceive('projectExpenses')->andReturn($expensesMock);
 
@@ -195,12 +195,12 @@ class OrderCalculatorTest extends TestCase
         $order->total_amount = 100000;
         $order->selectedQuote = null;
 
-        // Mock relationships
-        $purchaseOrdersMock = Mockery::mock();
+        // Mock relationships as HasMany
+        $purchaseOrdersMock = Mockery::mock('Illuminate\Database\Eloquent\Relations\HasMany');
         $purchaseOrdersMock->shouldReceive('sum')->with('total')->andReturn(30000);
         $order->shouldReceive('purchaseOrders')->andReturn($purchaseOrdersMock);
 
-        $expensesMock = Mockery::mock();
+        $expensesMock = Mockery::mock('Illuminate\Database\Eloquent\Relations\HasMany');
         $expensesMock->shouldReceive('sum')->with('amount_base_currency')->andReturn(10000);
         $order->shouldReceive('projectExpenses')->andReturn($expensesMock);
 
