@@ -24,12 +24,14 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Create admin user
-        User::factory()->create([
-            'name' => 'Admin User',
-            'email' => 'admin@impex.com',
-            'password' => bcrypt('12345678'),
-        ]);
+        // Create admin user using firstOrCreate to avoid duplicate entry errors
+        User::firstOrCreate(
+            ['email' => 'admin@impex.com'],
+            [
+                'name' => 'Admin User',
+                'password' => bcrypt('12345678'),
+            ]
+        );
 
         $this->command->info('✓ Created admin user');
 

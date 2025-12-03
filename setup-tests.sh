@@ -38,9 +38,9 @@ php artisan cache:clear --env=testing
 echo "📊 Running migrations for test database..."
 php artisan migrate --env=testing --force
 
-# Seed the database with test data
+# Seed the database with minimal test data
 echo "🌱 Seeding test database..."
-php artisan db:seed --env=testing --force
+php artisan db:seed --seeder=TestDatabaseSeeder --env=testing --force
 
 echo ""
 echo "✅ Test environment setup complete!"
