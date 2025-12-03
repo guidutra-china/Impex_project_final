@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Clients\RelationManagers;
 
 use App\Filament\Resources\ClientContacts\Schemas\ClientContactForm;
 use App\Filament\Resources\ClientContacts\Tables\ClientContactsTable;
+use App\Repositories\ClientRepository;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
@@ -17,6 +18,14 @@ class ClientcontactsRelationManager extends RelationManager
 {
     protected static string $relationship = 'clientcontacts';
 
+    protected ClientRepository $repository;
+
+    public function __construct()
+    {
+        parent::__construct();
+        $this->repository = app(ClientRepository::class);
+    }
+
     public function form(Schema $schema): Schema
     {
         return ClientContactForm::configure($schema);
@@ -25,6 +34,9 @@ class ClientcontactsRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         return ClientContactsTable::configure($table)
+            ->query(
+                $this->repository->getContactsQuery($this->getOwnerRecord()->id)
+            )
             ->headerActions([
                 CreateAction::make(),
             ])
@@ -39,4 +51,3 @@ class ClientcontactsRelationManager extends RelationManager
             ]);
     }
 }
-

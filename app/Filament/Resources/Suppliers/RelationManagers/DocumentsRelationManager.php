@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources\Suppliers\RelationManagers;
 
+use App\Repositories\SupplierRepository;
+use App\Repositories\DocumentRepository;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Hidden;
@@ -29,11 +31,22 @@ class DocumentsRelationManager extends RelationManager
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedDocument;
 
+    protected SupplierRepository $supplierRepository;
+    protected DocumentRepository $documentRepository;
+
+    public function __construct()
+    {
+        parent::__construct();
+        $this->supplierRepository = app(SupplierRepository::class);
+        $this->documentRepository = app(DocumentRepository::class);
+    }
 
     public function table(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(fn (Builder $query) => $query->where('file_type', 'document'))
+            ->query(
+                $this->documentRepository->getSupplierDocumentsQuery($this->getOwnerRecord()->id)
+            )
             ->recordTitleAttribute('original_filename')
             ->columns([
                 TextColumn::make('original_filename')

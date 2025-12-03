@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources\Products\RelationManagers;
 
+use App\Repositories\ProductRepository;
+use App\Repositories\DocumentRepository;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
@@ -30,10 +32,22 @@ class DocumentsRelationManager extends RelationManager
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedDocumentText;
 
+    protected ProductRepository $productRepository;
+    protected DocumentRepository $documentRepository;
+
+    public function __construct()
+    {
+        parent::__construct();
+        $this->productRepository = app(ProductRepository::class);
+        $this->documentRepository = app(DocumentRepository::class);
+    }
+
     public function table(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(fn (Builder $query) => $query->where('file_type', 'document'))
+            ->query(
+                $this->documentRepository->getProductDocumentsQuery($this->getOwnerRecord()->id)
+            )
             ->recordTitleAttribute('original_filename')
             ->columns([
                 TextColumn::make('original_filename')
