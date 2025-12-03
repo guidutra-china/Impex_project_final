@@ -402,7 +402,7 @@ class QuoteComparisonTest extends TestCase
             'rate' => 1.10,
             'inverse_rate' => 1 / 1.10,
             'date' => today(),
-            'status' => 'sent',
+            'status' => 'approved',
         ]);
 
         $order = Order::factory()->create([
