@@ -71,7 +71,7 @@ jobs:
       
       - name: Create test database
         run: |
-          MYSQL_PWD=root mysql -h 127.0.0.1 -u root -e "CREATE DATABASE IF NOT EXISTS impex_test;"
+          mysql -h 127.0.0.1 -u root -proot -e "CREATE DATABASE IF NOT EXISTS impex_test;" || true
       
       - name: Run migrations
         run: php artisan migrate --env=testing --force
