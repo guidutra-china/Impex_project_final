@@ -9,13 +9,30 @@ use Illuminate\Support\Facades\Log;
 /**
  * UploadFileAction
  * 
- * Handles secure file uploads with validation and storage.
- * This action encapsulates the logic for validating and storing files
- * in the appropriate location with security checks.
+ * Business logic action for secure file uploads.
+ * This action encapsulates the core business logic for file validation
+ * and storage, separate from UI concerns. It can be used in multiple contexts:
+ * - Filament Resources (via Action::make())
+ * - Controllers
+ * - Jobs/Queues
+ * - API endpoints
+ * - Livewire Components
+ * 
+ * Filament V4 Pattern:
+ * Actions in Filament V4 are primarily UI-centric, but this class
+ * represents the underlying business logic that can be invoked from
+ * Filament Actions or other contexts.
  * 
  * @example
- * $action = new UploadFileAction(new FileUploadService());
- * $result = $action->execute($file, 'documents', 'test');
+ * // In a Filament Resource or Component:
+ * $action = app(UploadFileAction::class);
+ * $result = $action->execute($file, 'documents', 'prefix');
+ * 
+ * // Or via Filament Action:
+ * Action::make('upload')
+ *     ->action(fn (UploadFileAction $action, UploadedFile $file) =>
+ *         $action->execute($file, 'documents')
+ *     )
  */
 class UploadFileAction
 {
@@ -28,7 +45,10 @@ class UploadFileAction
     }
 
     /**
-     * Execute the file upload action
+     * Execute the file upload
+     * 
+     * This is the main entry point for the action. It validates and stores
+     * the file in the appropriate location.
      * 
      * @param UploadedFile $file The file to upload
      * @param string $category The category/folder for the file
@@ -41,7 +61,11 @@ class UploadFileAction
     }
 
     /**
-     * Handle the file upload with validation and logging
+     * Execute with validation
+     * 
+     * Use this method when you want to perform validation before upload.
+     * This is useful when called from Filament Actions where you might have
+     * additional context.
      * 
      * @param UploadedFile $file
      * @param string $category
@@ -65,7 +89,6 @@ class UploadFileAction
             ];
         }
 
-        // Log the upload attempt
         Log::info('Starting file upload', [
             'filename' => $file->getClientOriginalName(),
             'category' => $category,
@@ -108,6 +131,8 @@ class UploadFileAction
     /**
      * Delete a file
      * 
+     * Convenience method to delete a previously uploaded file.
+     * 
      * @param string $path The file path to delete
      * @return bool Success status
      */
@@ -118,6 +143,8 @@ class UploadFileAction
 
     /**
      * Validate a file before upload
+     * 
+     * Convenience method to validate a file without uploading it.
      * 
      * @param UploadedFile $file
      * @param string $category
@@ -131,9 +158,6 @@ class UploadFileAction
                 'error' => 'File is not valid: ' . $file->getErrorMessage(),
             ];
         }
-
-        // Additional validation can be added here
-        // For example, checking file size, MIME type, etc.
 
         return [
             'success' => true,

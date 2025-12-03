@@ -9,13 +9,30 @@ use Illuminate\Support\Facades\Log;
 /**
  * CompareQuotesAction
  * 
- * Handles the comparison of supplier quotes for an order.
- * This action encapsulates the logic for analyzing and comparing multiple quotes
- * to help identify the best supplier option.
+ * Business logic action for comparing supplier quotes for an order.
+ * This action encapsulates the core business logic for quote comparison,
+ * separate from UI concerns. It can be used in multiple contexts:
+ * - Filament Resources (via Action::make())
+ * - Controllers
+ * - Jobs/Queues
+ * - API endpoints
+ * - Livewire Components
+ * 
+ * Filament V4 Pattern:
+ * Actions in Filament V4 are primarily UI-centric, but this class
+ * represents the underlying business logic that can be invoked from
+ * Filament Actions or other contexts.
  * 
  * @example
- * $action = new CompareQuotesAction(new QuoteComparisonService());
+ * // In a Filament Resource or Component:
+ * $action = app(CompareQuotesAction::class);
  * $comparison = $action->execute($order);
+ * 
+ * // Or via Filament Action:
+ * Action::make('compare')
+ *     ->action(fn (CompareQuotesAction $action, Order $order) =>
+ *         $action->execute($order)
+ *     )
  */
 class CompareQuotesAction
 {
@@ -28,18 +45,33 @@ class CompareQuotesAction
     }
 
     /**
-     * Execute the quote comparison action
+     * Execute the quote comparison
+     * 
+     * This is the main entry point for the action. It analyzes and compares
+     * all supplier quotes for the given order.
      * 
      * @param Order $order The order to compare quotes for
      * @return array Comparison results with detailed analysis
      */
     public function execute(Order $order): array
     {
-        return $this->comparisonService->compareQuotes($order);
+        try {
+            return $this->comparisonService->compareQuotes($order);
+        } catch (\Exception $e) {
+            Log::error('Quote comparison failed', [
+                'order_id' => $order->id,
+                'error' => $e->getMessage(),
+            ]);
+            throw $e;
+        }
     }
 
     /**
-     * Handle the quote comparison with validation and logging
+     * Execute with validation
+     * 
+     * Use this method when you want to perform validation before comparison.
+     * This is useful when called from Filament Actions where you might have
+     * additional context.
      * 
      * @param Order $order
      * @param array $options Additional options for the comparison
@@ -61,34 +93,19 @@ class CompareQuotesAction
             return [];
         }
 
-        // Log the comparison attempt
         Log::info('Starting quote comparison', [
             'order_id' => $order->id,
             'quote_count' => $quoteCount,
             'options' => $options,
         ]);
 
-        try {
-            $result = $this->execute($order);
-
-            Log::info('Quote comparison completed', [
-                'order_id' => $order->id,
-                'by_product_count' => count($result['by_product'] ?? []),
-                'has_overall' => isset($result['overall']),
-            ]);
-
-            return $result;
-        } catch (\Exception $e) {
-            Log::error('Quote comparison failed', [
-                'order_id' => $order->id,
-                'error' => $e->getMessage(),
-            ]);
-            throw $e;
-        }
+        return $this->execute($order);
     }
 
     /**
      * Get the cheapest quote for an order
+     * 
+     * Convenience method to get the best price option.
      * 
      * @param Order $order
      * @return array|null The cheapest quote details or null if no quotes exist
@@ -96,16 +113,13 @@ class CompareQuotesAction
     public function getCheapestQuote(Order $order): ?array
     {
         $comparison = $this->execute($order);
-
-        if (empty($comparison['overall'])) {
-            return null;
-        }
-
-        return $comparison['overall'];
+        return $comparison['overall'] ?? null;
     }
 
     /**
      * Get quotes ranked by price
+     * 
+     * Convenience method to get all quotes sorted by price.
      * 
      * @param Order $order
      * @return array Quotes ranked from cheapest to most expensive

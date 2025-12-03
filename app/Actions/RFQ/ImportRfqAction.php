@@ -3,25 +3,36 @@
 namespace App\Actions\RFQ;
 
 use App\Models\Order;
-use App\Models\Product;
-use App\Models\OrderItem;
-use App\Exceptions\RFQImportException;
-use App\Exceptions\InvalidRowException;
-use App\Exceptions\ProductCreationException;
 use App\Services\RFQImportService;
-use Illuminate\Support\Facades\DB;
+use App\Exceptions\RFQImportException;
 use Illuminate\Support\Facades\Log;
 
 /**
  * ImportRfqAction
  * 
- * Handles the import of products and prices from Excel files into an RFQ (Order).
- * This action encapsulates the entire import workflow, including validation, processing,
- * and error handling.
+ * Business logic action for importing RFQ items from Excel files.
+ * This action encapsulates the core business logic for RFQ import,
+ * separate from UI concerns. It can be used in multiple contexts:
+ * - Filament Resources (via Action::make())
+ * - Controllers
+ * - Jobs/Queues
+ * - API endpoints
+ * 
+ * Filament V4 Pattern:
+ * Actions in Filament V4 are primarily UI-centric, but this class
+ * represents the underlying business logic that can be invoked from
+ * Filament Actions or other contexts.
  * 
  * @example
- * $action = new ImportRfqAction(new RFQImportService());
+ * // In a Filament Resource or Component:
+ * $action = app(ImportRfqAction::class);
  * $result = $action->execute($order, $filePath);
+ * 
+ * // Or via Filament Action:
+ * Action::make('import')
+ *     ->action(fn (ImportRfqAction $action, Order $order, string $filePath) =>
+ *         $action->execute($order, $filePath)
+ *     )
  */
 class ImportRfqAction
 {
@@ -34,7 +45,10 @@ class ImportRfqAction
     }
 
     /**
-     * Execute the import action
+     * Execute the RFQ import
+     * 
+     * This is the main entry point for the action. It performs the import
+     * and returns the result.
      * 
      * @param Order $order The order to import items into
      * @param string $filePath The path to the Excel file
@@ -43,14 +57,23 @@ class ImportRfqAction
      */
     public function execute(Order $order, string $filePath): array
     {
-        return $this->importService->importFromExcel($order, $filePath);
+        try {
+            return $this->importService->importFromExcel($order, $filePath);
+        } catch (RFQImportException $e) {
+            Log::error('RFQ import failed', [
+                'order_id' => $order->id,
+                'error' => $e->getMessage(),
+            ]);
+            throw $e;
+        }
     }
 
     /**
-     * Handle the import with additional validation
+     * Execute with additional validation
      * 
-     * This method can be used when you want to perform additional validation
-     * before calling the service.
+     * Use this method when you want to perform additional validation
+     * before calling the service. This is useful when called from
+     * Filament Actions where you might have additional context.
      * 
      * @param Order $order
      * @param string $filePath
@@ -60,39 +83,22 @@ class ImportRfqAction
      */
     public function handle(Order $order, string $filePath, array $options = []): array
     {
-        // Validate that the order exists and is in a valid state for import
+        // Validate that the order exists and is in a valid state
         if (!$order->exists) {
             throw new RFQImportException('Order does not exist');
         }
 
-        // Validate file path
+        // Validate file exists
         if (!file_exists($filePath)) {
             throw new RFQImportException('File does not exist: ' . $filePath);
         }
 
-        // Log the import attempt
         Log::info('Starting RFQ import', [
             'order_id' => $order->id,
             'file' => basename($filePath),
             'options' => $options,
         ]);
 
-        try {
-            $result = $this->execute($order, $filePath);
-
-            Log::info('RFQ import completed', [
-                'order_id' => $order->id,
-                'imported' => $result['imported'] ?? 0,
-                'errors' => count($result['errors'] ?? []),
-            ]);
-
-            return $result;
-        } catch (RFQImportException $e) {
-            Log::error('RFQ import failed', [
-                'order_id' => $order->id,
-                'error' => $e->getMessage(),
-            ]);
-            throw $e;
-        }
+        return $this->execute($order, $filePath);
     }
 }

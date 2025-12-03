@@ -9,13 +9,30 @@ use Illuminate\Support\Facades\Log;
 /**
  * ImportSupplierQuotesAction
  * 
- * Handles the import of supplier quotes from Excel files.
- * This action encapsulates the logic for validating, processing, and storing
- * supplier quotes for an order.
+ * Business logic action for importing supplier quotes from Excel files.
+ * This action encapsulates the core business logic for quote import,
+ * separate from UI concerns. It can be used in multiple contexts:
+ * - Filament Resources (via Action::make())
+ * - Controllers
+ * - Jobs/Queues
+ * - API endpoints
+ * - Livewire Components
+ * 
+ * Filament V4 Pattern:
+ * Actions in Filament V4 are primarily UI-centric, but this class
+ * represents the underlying business logic that can be invoked from
+ * Filament Actions or other contexts.
  * 
  * @example
- * $action = new ImportSupplierQuotesAction(new SupplierQuoteImportService());
+ * // In a Filament Resource or Component:
+ * $action = app(ImportSupplierQuotesAction::class);
  * $result = $action->execute($order, $filePath);
+ * 
+ * // Or via Filament Action:
+ * Action::make('importQuotes')
+ *     ->action(fn (ImportSupplierQuotesAction $action, Order $order, string $filePath) =>
+ *         $action->execute($order, $filePath)
+ *     )
  */
 class ImportSupplierQuotesAction
 {
@@ -28,7 +45,10 @@ class ImportSupplierQuotesAction
     }
 
     /**
-     * Execute the supplier quote import action
+     * Execute the supplier quote import
+     * 
+     * This is the main entry point for the action. It imports supplier quotes
+     * from an Excel file into the order.
      * 
      * @param Order $order The order to import quotes for
      * @param string $filePath The path to the Excel file
@@ -36,11 +56,23 @@ class ImportSupplierQuotesAction
      */
     public function execute(Order $order, string $filePath): array
     {
-        return $this->importService->importFromExcel($order, $filePath);
+        try {
+            return $this->importService->importFromExcel($order, $filePath);
+        } catch (\Exception $e) {
+            Log::error('Supplier quote import failed', [
+                'order_id' => $order->id,
+                'error' => $e->getMessage(),
+            ]);
+            throw $e;
+        }
     }
 
     /**
-     * Handle the supplier quote import with validation and logging
+     * Execute with validation
+     * 
+     * Use this method when you want to perform validation before import.
+     * This is useful when called from Filament Actions where you might have
+     * additional context.
      * 
      * @param Order $order
      * @param string $filePath
@@ -59,34 +91,19 @@ class ImportSupplierQuotesAction
             throw new \Exception('File does not exist: ' . $filePath);
         }
 
-        // Log the import attempt
         Log::info('Starting supplier quote import', [
             'order_id' => $order->id,
             'file' => basename($filePath),
             'options' => $options,
         ]);
 
-        try {
-            $result = $this->execute($order, $filePath);
-
-            Log::info('Supplier quote import completed', [
-                'order_id' => $order->id,
-                'imported' => $result['imported'] ?? 0,
-                'errors' => count($result['errors'] ?? []),
-            ]);
-
-            return $result;
-        } catch (\Exception $e) {
-            Log::error('Supplier quote import failed', [
-                'order_id' => $order->id,
-                'error' => $e->getMessage(),
-            ]);
-            throw $e;
-        }
+        return $this->execute($order, $filePath);
     }
 
     /**
      * Get the status of quotes for an order
+     * 
+     * Convenience method to get information about the quotes for an order.
      * 
      * @param Order $order
      * @return array Status information about quotes
