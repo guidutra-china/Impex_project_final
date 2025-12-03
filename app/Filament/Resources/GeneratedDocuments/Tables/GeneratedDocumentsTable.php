@@ -195,30 +195,40 @@ class GeneratedDocumentsTable
                         );
                     }),
                 
-                Action::make('view_related')
+Action::make('view_related')
                     ->label('View Related')
                     ->icon('heroicon-o-arrow-top-right-on-square')
                     ->color('primary')
                     ->url(function (GeneratedDocument $record): ?string {
-                        $type = $record->documentable_type;
-                        $id = $record->documentable_id;
-                        
-                        // Map model types to Filament resource routes
-                        $routeMap = [
-                            'App\\Models\\Order' => 'orders',
-                            'App\\Models\\SupplierQuote' => 'supplier-quotes',
-                            'App\\Models\\PurchaseOrder' => 'purchase-orders',
-                            'App\\Models\\ProformaInvoice' => 'proforma-invoices',
-                            'App\\Models\\SalesInvoice' => 'sales-invoices',
-                        ];
-                        
-                        $resourceName = $routeMap[$type] ?? null;
-                        
-                        if (!$resourceName) {
+                        if (!$record->documentable_id || !$record->documentable_type) {
                             return null;
                         }
                         
-                        return route("filament.admin.resources.{$resourceName}.edit", ['record' => $id]);
+                        // Map model types to Filament resource classes
+                        $resourceMap = [
+                            'App\\Models\\Order' => \App\Filament\Resources\Orders\OrderResource::class,
+                            'App\\Models\\SupplierQuote' => \App\Filament\Resources\SupplierQuotes\SupplierQuoteResource::class,
+                            'App\\Models\\PurchaseOrder' => \App\Filament\Resources\PurchaseOrders\PurchaseOrderResource::class,
+                            'App\\Models\\ProformaInvoice' => \App\Filament\Resources\ProformaInvoice\ProformaInvoiceResource::class,
+                            'App\\Models\\SalesInvoice' => \App\Filament\Resources\SalesInvoices\SalesInvoiceResource::class,
+                        ];
+                        
+                        $resourceClass = $resourceMap[$record->documentable_type] ?? null;
+                        
+                        if (!$resourceClass || !class_exists($resourceClass)) {
+                            return null;
+                        }
+                        
+                        try {
+                            return $resourceClass::getUrl('edit', ['record' => $record->documentable_id]);
+                        } catch (\Exception $e) {
+                            \Log::error('Failed to generate URL for related document', [
+                                'resource' => $resourceClass,
+                                'record_id' => $record->documentable_id,
+                                'error' => $e->getMessage(),
+                            ]);
+                            return null;
+                        }
                     })
                     ->openUrlInNewTab()
                     ->visible(fn (GeneratedDocument $record): bool => $record->documentable_id !== null),
