@@ -62,7 +62,7 @@ class OrderRepositoryTest extends TestCase
             'currency_id' => 1,
             'status' => 'pending',
             'commission_percent' => 5.0,
-            'commission_type' => 'percentage',
+            'commission_type' => 'embedded',
             'incoterm' => 'FOB',
             'incoterm_location' => 'Shanghai',
             'total_amount' => 10000,
@@ -130,7 +130,7 @@ class OrderRepositoryTest extends TestCase
     /** @test */
     public function it_can_get_orders_by_status()
     {
-        Order::factory(3)->for($this->client)->create(['status' => 'draft']);
+        Order::factory(3)->for($this->client)->create(['status' => 'pending']);
         
         $drafts = $this->repository->getOrdersByStatus('draft');
         

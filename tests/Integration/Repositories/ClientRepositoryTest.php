@@ -135,7 +135,7 @@ class ClientRepositoryTest extends TestCase
             'currency_id' => 1,
             'status' => 'pending',
             'commission_percent' => 5.0,
-            'commission_type' => 'percentage',
+            'commission_type' => 'embedded',
             'incoterm' => 'FOB',
             'incoterm_location' => 'Shanghai',
             'total_amount' => 10000,

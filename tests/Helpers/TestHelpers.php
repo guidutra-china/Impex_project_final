@@ -136,7 +136,7 @@ class TestHelpers
             'order_id' => $order->id,
             'supplier_id' => $supplier->id,
             'currency_id' => $currency->id,
-            'status' => 'draft',
+            'status' => 'pending',
         ], $attributes));
     }
 

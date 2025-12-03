@@ -57,8 +57,8 @@ class ListOrdersTest extends TestCase
     /** @test */
     public function it_can_filter_orders_by_status()
     {
-        Order::factory(2)->for($this->client)->create(['status' => 'draft']);
-        Order::factory(1)->for($this->client)->create(['status' => 'confirmed']);
+        Order::factory(2)->for($this->client)->create(['status' => 'pending']);
+        Order::factory(1)->for($this->client)->create(['status' => 'processing']);
         
         $response = $this->get('/admin/orders?status=draft');
         

@@ -21,7 +21,7 @@ class ProformaInvoiceActionsTest extends TestCase
         $this->user = User::factory()->create();
         $this->client = Client::factory()->for($this->user)->create();
         $this->order = Order::factory()->for($this->client)->create();
-        $this->invoice = ProformaInvoice::factory()->for($this->order)->create(['status' => 'draft']);
+        $this->invoice = ProformaInvoice::factory()->for($this->order)->create(['status' => 'pending']);
         $this->actingAs($this->user);
     }
 

@@ -95,8 +95,8 @@ class PerformanceTest extends TestCase
     /** @test */
     public function can_filter_orders_in_large_dataset()
     {
-        Order::factory(300)->for($this->client)->create(['status' => 'draft']);
-        Order::factory(200)->for($this->client)->create(['status' => 'confirmed']);
+        Order::factory(300)->for($this->client)->create(['status' => 'pending']);
+        Order::factory(200)->for($this->client)->create(['status' => 'processing']);
         
         $startTime = microtime(true);
         $response = $this->get('/admin/orders?status=confirmed');
@@ -149,11 +149,11 @@ class PerformanceTest extends TestCase
     /** @test */
     public function can_update_order_status_in_batch()
     {
-        $orders = Order::factory(50)->for($this->client)->create(['status' => 'draft']);
+        $orders = Order::factory(50)->for($this->client)->create(['status' => 'pending']);
         
         $startTime = microtime(true);
         
-        Order::whereIn('id', $orders->pluck('id'))->update(['status' => 'confirmed']);
+        Order::whereIn('id', $orders->pluck('id'))->update(['status' => 'processing']);
         
         $endTime = microtime(true);
         

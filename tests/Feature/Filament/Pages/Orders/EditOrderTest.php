@@ -56,7 +56,7 @@ class EditOrderTest extends TestCase
     {
         $data = [
             'order_number' => 'ORD-UPDATED-' . now()->timestamp,
-            'status' => 'confirmed',
+            'status' => 'processing',
         ];
         
         $response = $this->put("/admin/orders/{$this->order->id}", $data);
@@ -64,7 +64,7 @@ class EditOrderTest extends TestCase
         $this->assertDatabaseHas('orders', [
             'id' => $this->order->id,
             'order_number' => $data['order_number'],
-            'status' => 'confirmed',
+            'status' => 'processing',
         ]);
     }
 
@@ -119,22 +119,22 @@ class EditOrderTest extends TestCase
     /** @test */
     public function it_can_transition_status_from_draft_to_confirmed()
     {
-        $this->order->update(['status' => 'draft']);
+        $this->order->update(['status' => 'pending']);
         
-        $data = ['status' => 'confirmed'];
+        $data = ['status' => 'processing'];
         
         $response = $this->put("/admin/orders/{$this->order->id}", $data);
         
         $this->assertDatabaseHas('orders', [
             'id' => $this->order->id,
-            'status' => 'confirmed',
+            'status' => 'processing',
         ]);
     }
 
     /** @test */
     public function it_can_transition_status_from_confirmed_to_shipped()
     {
-        $this->order->update(['status' => 'confirmed']);
+        $this->order->update(['status' => 'processing']);
         
         $data = ['status' => 'shipped'];
         
@@ -242,7 +242,7 @@ class EditOrderTest extends TestCase
     /** @test */
     public function it_shows_success_notification_after_update()
     {
-        $data = ['status' => 'confirmed'];
+        $data = ['status' => 'processing'];
         
         $response = $this->put("/admin/orders/{$this->order->id}", $data);
         
@@ -254,7 +254,7 @@ class EditOrderTest extends TestCase
     /** @test */
     public function it_stays_on_edit_page_after_update()
     {
-        $data = ['status' => 'confirmed'];
+        $data = ['status' => 'processing'];
         
         $response = $this->put("/admin/orders/{$this->order->id}", $data);
         

@@ -96,7 +96,7 @@ class RFQWorkflowTest extends TestCase
             'order_id' => $order->id,
             'supplier_id' => $supplier->id,
             'currency_id' => $this->currency->id,
-            'status' => 'draft',
+            'status' => 'pending',
         ]);
 
         $this->assertNotNull($quote->id);
@@ -158,7 +158,7 @@ class RFQWorkflowTest extends TestCase
 
         $this->assertEquals('pending', $order->status);
 
-        $order->update(['status' => 'confirmed']);
+        $order->update(['status' => 'processing']);
         $this->assertEquals('confirmed', $order->fresh()->status);
 
         $order->update(['status' => 'completed']);
@@ -196,7 +196,7 @@ class RFQWorkflowTest extends TestCase
             'customer_id' => $this->client->id,
             'currency_id' => $this->currency->id,
             'commission_percent' => 5.00,
-            'commission_type' => 'percentage',
+            'commission_type' => 'embedded',
         ]);
 
         $this->assertEquals(5.00, $order->commission_percent);

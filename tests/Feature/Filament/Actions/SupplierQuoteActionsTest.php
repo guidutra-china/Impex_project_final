@@ -27,7 +27,7 @@ class SupplierQuoteActionsTest extends TestCase
         $this->quote = SupplierQuote::factory()
             ->for($this->order)
             ->for($this->supplier)
-            ->create(['status' => 'draft']);
+            ->create(['status' => 'pending']);
         $this->actingAs($this->user);
     }
 
@@ -196,7 +196,7 @@ class SupplierQuoteActionsTest extends TestCase
         $quote2 = SupplierQuote::factory()
             ->for($this->order)
             ->for($this->supplier)
-            ->create(['status' => 'draft']);
+            ->create(['status' => 'pending']);
         
         $response = $this->get("/admin/supplier-quotes/compare?quotes[]={$this->quote->id}&quotes[]={$quote2->id}");
         

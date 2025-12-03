@@ -50,7 +50,7 @@ class CreateOrderTest extends TestCase
             'order_number' => 'ORD-' . now()->timestamp,
             'customer_id' => $this->client->id,
             'currency_id' => $this->currency->id,
-            'status' => 'draft',
+            'status' => 'pending',
             'order_date' => now()->format('Y-m-d'),
             'expected_delivery_date' => now()->addDays(30)->format('Y-m-d'),
         ];
@@ -139,7 +139,7 @@ class CreateOrderTest extends TestCase
         
         $this->assertDatabaseHas('orders', [
             'order_number' => $data['order_number'],
-            'status' => 'draft',
+            'status' => 'pending',
         ]);
     }
 

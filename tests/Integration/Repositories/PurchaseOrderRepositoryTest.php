@@ -62,7 +62,7 @@ class PurchaseOrderRepositoryTest extends TestCase
         $data = [
             'supplier_id' => $this->supplier->id,
             'po_number' => 'PO-' . now()->timestamp,
-            'status' => 'draft',
+            'status' => 'pending',
             'total_amount' => 100000,
             'currency_id' => 1,
             'po_date' => now(),
@@ -83,7 +83,7 @@ class PurchaseOrderRepositoryTest extends TestCase
         $po = PurchaseOrder::factory()->for($this->supplier)->create();
         
         $updated = $this->repository->update($po->id, [
-            'status' => 'confirmed',
+            'status' => 'processing',
             'total_amount' => 150000,
         ]);
         
@@ -108,8 +108,8 @@ class PurchaseOrderRepositoryTest extends TestCase
     /** @test */
     public function it_can_get_purchase_orders_by_status()
     {
-        PurchaseOrder::factory(2)->for($this->supplier)->create(['status' => 'draft']);
-        PurchaseOrder::factory(1)->for($this->supplier)->create(['status' => 'confirmed']);
+        PurchaseOrder::factory(2)->for($this->supplier)->create(['status' => 'pending']);
+        PurchaseOrder::factory(1)->for($this->supplier)->create(['status' => 'processing']);
         
         $drafts = $this->repository->getByStatus('draft');
         
@@ -134,7 +134,7 @@ class PurchaseOrderRepositoryTest extends TestCase
     public function it_can_get_total_active_amount()
     {
         PurchaseOrder::factory(2)->for($this->supplier)->create([
-            'status' => 'confirmed',
+            'status' => 'processing',
             'total_amount' => 100000,
         ]);
         
@@ -159,7 +159,7 @@ class PurchaseOrderRepositoryTest extends TestCase
     /** @test */
     public function it_can_count_active_purchase_orders()
     {
-        PurchaseOrder::factory(3)->for($this->supplier)->create(['status' => 'confirmed']);
+        PurchaseOrder::factory(3)->for($this->supplier)->create(['status' => 'processing']);
         
         $count = $this->repository->countActive();
         
@@ -237,7 +237,7 @@ class PurchaseOrderRepositoryTest extends TestCase
     /** @test */
     public function it_can_count_orders_by_status()
     {
-        PurchaseOrder::factory(3)->for($this->supplier)->create(['status' => 'draft']);
+        PurchaseOrder::factory(3)->for($this->supplier)->create(['status' => 'pending']);
         
         $count = $this->repository->countByStatus('draft');
         
@@ -248,7 +248,7 @@ class PurchaseOrderRepositoryTest extends TestCase
     public function it_can_get_total_amount_by_status()
     {
         PurchaseOrder::factory(2)->for($this->supplier)->create([
-            'status' => 'confirmed',
+            'status' => 'processing',
             'total_amount' => 100000,
         ]);
         
@@ -297,7 +297,7 @@ class PurchaseOrderRepositoryTest extends TestCase
     public function it_can_get_pending_delivery_orders()
     {
         PurchaseOrder::factory(2)->for($this->supplier)->create([
-            'status' => 'confirmed',
+            'status' => 'processing',
             'expected_delivery_date' => now()->addDays(10),
         ]);
         
@@ -314,7 +314,7 @@ class PurchaseOrderRepositoryTest extends TestCase
     public function it_can_get_overdue_delivery_orders()
     {
         PurchaseOrder::factory(2)->for($this->supplier)->create([
-            'status' => 'confirmed',
+            'status' => 'processing',
             'expected_delivery_date' => now()->subDays(5),
         ]);
         
@@ -328,7 +328,7 @@ class PurchaseOrderRepositoryTest extends TestCase
     {
         $po = PurchaseOrder::factory()
             ->for($this->supplier)
-            ->create(['status' => 'draft']);
+            ->create(['status' => 'pending']);
         
         $result = $this->repository->approve($po->id);
         
@@ -341,7 +341,7 @@ class PurchaseOrderRepositoryTest extends TestCase
     {
         $po = PurchaseOrder::factory()
             ->for($this->supplier)
-            ->create(['status' => 'draft']);
+            ->create(['status' => 'pending']);
         
         $result = $this->repository->reject($po->id);
         

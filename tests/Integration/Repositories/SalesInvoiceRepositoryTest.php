@@ -65,7 +65,7 @@ class SalesInvoiceRepositoryTest extends TestCase
         $data = [
             'order_id' => $this->order->id,
             'invoice_number' => 'SI-' . now()->timestamp,
-            'status' => 'draft',
+            'status' => 'pending',
             'total_amount' => 100000,
             'currency_id' => 1,
             'invoice_date' => now(),
@@ -111,7 +111,7 @@ class SalesInvoiceRepositoryTest extends TestCase
     /** @test */
     public function it_can_get_sales_invoices_by_status()
     {
-        SalesInvoice::factory(2)->for($this->order)->create(['status' => 'draft']);
+        SalesInvoice::factory(2)->for($this->order)->create(['status' => 'pending']);
         SalesInvoice::factory(1)->for($this->order)->create(['status' => 'sent']);
         
         $drafts = $this->repository->getByStatus('draft');
@@ -262,7 +262,7 @@ class SalesInvoiceRepositoryTest extends TestCase
     /** @test */
     public function it_can_count_invoices_by_status()
     {
-        SalesInvoice::factory(3)->for($this->order)->create(['status' => 'draft']);
+        SalesInvoice::factory(3)->for($this->order)->create(['status' => 'pending']);
         
         $count = $this->repository->countByStatus('draft');
         

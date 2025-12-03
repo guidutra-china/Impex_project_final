@@ -61,7 +61,7 @@ class RFQRepositoryTest extends TestCase
         $data = [
             'product_id' => $this->product->id,
             'rfq_number' => 'RFQ-' . now()->timestamp,
-            'status' => 'draft',
+            'status' => 'pending',
             'quantity' => 100,
             'created_by' => $this->user->id,
         ];
@@ -104,7 +104,7 @@ class RFQRepositoryTest extends TestCase
     /** @test */
     public function it_can_get_rfqs_by_status()
     {
-        RFQ::factory(2)->for($this->product)->create(['status' => 'draft']);
+        RFQ::factory(2)->for($this->product)->create(['status' => 'pending']);
         RFQ::factory(1)->for($this->product)->create(['status' => 'sent']);
         
         $drafts = $this->repository->getByStatus('draft');
@@ -182,7 +182,7 @@ class RFQRepositoryTest extends TestCase
     /** @test */
     public function it_can_count_rfqs_by_status()
     {
-        RFQ::factory(3)->for($this->product)->create(['status' => 'draft']);
+        RFQ::factory(3)->for($this->product)->create(['status' => 'pending']);
         
         $count = $this->repository->countByStatus('draft');
         
@@ -224,7 +224,7 @@ class RFQRepositoryTest extends TestCase
     public function it_can_get_total_quantity_by_status()
     {
         RFQ::factory(2)->for($this->product)->create([
-            'status' => 'draft',
+            'status' => 'pending',
             'quantity' => 100,
         ]);
         
