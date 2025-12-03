@@ -6,6 +6,8 @@ use App\Models\Order;
 use App\Models\Supplier;
 use App\Models\SupplierQuote;
 use App\Models\RFQSupplierStatus;
+use App\Repositories\OrderRepository;
+use App\Repositories\SupplierRepository;
 use App\Services\RFQExcelService;
 use App\Services\SupplierQuoteImportService;
 use Filament\Forms\Components\FileUpload;
@@ -30,6 +32,15 @@ class SuppliersToQuoteRelationManager extends RelationManager
 
     protected static ?string $title = 'Suppliers to Quote';
 
+    protected OrderRepository $orderRepository;
+    protected SupplierRepository $supplierRepository;
+
+    public function __construct()
+    {
+        parent::__construct();
+        $this->orderRepository = app(OrderRepository::class);
+        $this->supplierRepository = app(SupplierRepository::class);
+    }
 
     /**
      * Get the table query for suppliers matching RFQ tags
@@ -248,107 +259,157 @@ class SuppliersToQuoteRelationManager extends RelationManager
 
                         return [
                             CheckboxList::make('contact_ids')
-                                ->label('Select Contacts to Send RFQ')
+                                ->label('Send to')
                                 ->options($options)
                                 ->required()
-                                ->columns(1)
-                                ->helperText('Select one or more contacts to receive the RFQ via email.')
+                                ->default(array_keys($options))
                         ];
                     })
-                    ->modalHeading('Send Quotation Request')
-                    ->modalDescription(fn (Supplier $record) => "Select contacts from {$record->name} to receive the RFQ")
-                    ->modalSubmitActionLabel('Send RFQ')
-                    ->action(function (Supplier $record, array $data) {
+                    ->action(function (array $data, Supplier $record) {
                         /** @var Order $owner */
                         $owner = $this->getOwnerRecord();
-
-                        // Check if supplier has contacts
-                        $contacts = $record->suppliercontacts()
-                            ->whereNotNull('email')
-                            ->get();
-
-                        if ($contacts->isEmpty()) {
-                            Notification::make()
-                                ->title('No Contacts')
-                                ->body('This supplier has no contacts with email addresses.')
-                                ->warning()
-                                ->send();
-                            return;
-                        }
-
+                        $rfqService = app(RFQExcelService::class);
+                        
                         try {
                             // Get selected contacts
-                            $selectedContactIds = $data['contact_ids'] ?? [];
-                            $selectedContacts = $contacts->whereIn('id', $selectedContactIds);
+                            $contactIds = $data['contact_ids'] ?? [];
+                            $contacts = $record->suppliercontacts()
+                                ->whereIn('id', $contactIds)
+                                ->get();
 
-                            if ($selectedContacts->isEmpty()) {
-                                Notification::make()
-                                    ->title('No Contacts Selected')
-                                    ->body('Please select at least one contact.')
-                                    ->warning()
-                                    ->send();
-                                return;
+                            if ($contacts->isEmpty()) {
+                                throw new \Exception('No contacts selected');
                             }
 
-                            // Generate RFQ Excel
-                            $excelService = new RFQExcelService();
-                            $filePath = $excelService->generateRFQ($owner);
+                            // Generate and send Excel file
+                            $filePath = $rfqService->generateRFQExcel($owner, $record);
+                            
+                            foreach ($contacts as $contact) {
+                                if ($contact->email) {
+                                    try {
+                                        Mail::send('emails.rfq-request', [
+                                            'supplier' => $record,
+                                            'contact' => $contact,
+                                            'order' => $owner,
+                                        ], function ($message) use ($contact, $filePath, $record) {
+                                            $message->to($contact->email)
+                                                ->subject("RFQ Request from {$owner->company?->name ?? 'Our Company'}")
+                                                ->attach($filePath);
+                                        });
 
-                            // Send email to each selected contact
-                            foreach ($selectedContacts as $contact) {
-                                // TODO: Implement actual email sending
-                                // Mail::to($contact->email)->send(new RFQMail($owner, $filePath));
+                                        \Log::info("RFQ sent to {$contact->email}");
+                                    } catch (\Exception $e) {
+                                        \Log::error("Failed to send to {$contact->email}: " . $e->getMessage());
+                                    }
+                                }
                             }
 
                             // Mark as sent
-                            $owner->markSentToSupplier($record->id, 'email');
-
-                            // Clean up temp file
-                            if (file_exists($filePath)) {
-                                unlink($filePath);
-                            }
+                            RFQSupplierStatus::updateOrCreate(
+                                [
+                                    'order_id' => $owner->id,
+                                    'supplier_id' => $record->id,
+                                ],
+                                [
+                                    'sent' => true,
+                                    'sent_at' => now(),
+                                ]
+                            );
 
                             Notification::make()
-                                ->title('Quotation Sent')
-                                ->body("RFQ sent to " . $selectedContacts->count() . " contact(s) from {$record->name}")
                                 ->success()
+                                ->title('Quotation Sent')
+                                ->body("RFQ sent to {$contacts->count()} contact(s) at {$record->name}")
                                 ->send();
-
                         } catch (\Exception $e) {
                             Notification::make()
-                                ->title('Error')
-                                ->body('Failed to send quotation: ' . $e->getMessage())
                                 ->danger()
+                                ->title('Failed to Send')
+                                ->body($e->getMessage())
                                 ->send();
-                        }
-                    }),
 
-                Action::make('view_supplier')
-                    ->label('View Details')
-                    ->icon('heroicon-o-eye')
-                    ->url(fn (Supplier $record): string => route('filament.admin.resources.suppliers.edit', ['record' => $record->id]))
-                    ->openUrlInNewTab(),
-            ])
-            ->bulkActions([
-                BulkAction::make('send_to_all')
-                    ->label('Send to Selected')
-                    ->icon('heroicon-o-paper-airplane')
-                    ->color('primary')
+                            \Log::error('Error sending RFQ', [
+                                'supplier_id' => $record->id,
+                                'order_id' => $owner->id,
+                                'error' => $e->getMessage(),
+                            ]);
+                        }
+                    })
                     ->requiresConfirmation()
-                    ->modalHeading('Send Quotation to Selected Suppliers')
-                    ->modalDescription('Send quotation request to all selected suppliers?')
-                    ->action(function ($records) {
+                    ->modalHeading('Send Quotation Request')
+                    ->modalSubmitActionLabel('Send'),
+
+                Action::make('send_all')
+                    ->label('Send All')
+                    ->icon('heroicon-o-paper-airplane')
+                    ->color('success')
+                    ->requiresConfirmation()
+                    ->modalHeading('Send Quotation Requests to All Suppliers')
+                    ->modalDescription('This will send RFQ requests to all suppliers with matching tags that have not been sent yet.')
+                    ->modalSubmitActionLabel('Send All')
+                    ->action(function () {
                         /** @var Order $owner */
                         $owner = $this->getOwnerRecord();
+                        $rfqService = app(RFQExcelService::class);
                         $count = 0;
 
-                        foreach ($records as $supplier) {
+                        // Get all suppliers with matching tags that haven't been sent
+                        $tagIds = $owner->tags()->pluck('tags.id');
+                        $suppliers = Supplier::query()
+                            ->whereHas('tags', function ($q) use ($tagIds) {
+                                $q->whereIn('tags.id', $tagIds);
+                            })
+                            ->whereDoesntHave('rfqStatuses', function ($q) use ($owner) {
+                                $q->where('order_id', $owner->id)
+                                    ->where('sent', true);
+                            })
+                            ->get();
+
+                        foreach ($suppliers as $supplier) {
+                            $contacts = $supplier->suppliercontacts()
+                                ->whereNotNull('email')
+                                ->get();
+
+                            if ($contacts->isEmpty()) {
+                                continue;
+                            }
+
                             try {
-                                // Skip if already sent
-                                if (!$owner->isSentToSupplier($supplier->id)) {
-                                    $owner->markSentToSupplier($supplier->id, 'email');
-                                    $count++;
+                                $filePath = $rfqService->generateRFQExcel($owner, $supplier);
+                                
+                                foreach ($contacts as $contact) {
+                                    if ($contact->email) {
+                                        try {
+                                            Mail::send('emails.rfq-request', [
+                                                'supplier' => $supplier,
+                                                'contact' => $contact,
+                                                'order' => $owner,
+                                            ], function ($message) use ($contact, $filePath, $supplier) {
+                                                $message->to($contact->email)
+                                                    ->subject("RFQ Request from {$owner->company?->name ?? 'Our Company'}")
+                                                    ->attach($filePath);
+                                            });
+
+                                            \Log::info("RFQ sent to {$contact->email}");
+                                        } catch (\Exception $e) {
+                                            \Log::error("Failed to send to {$contact->email}: " . $e->getMessage());
+                                        }
+                                    }
                                 }
+
+                                // Mark as sent
+                                RFQSupplierStatus::updateOrCreate(
+                                    [
+                                        'order_id' => $owner->id,
+                                        'supplier_id' => $supplier->id,
+                                    ],
+                                    [
+                                        'sent' => true,
+                                        'sent_at' => now(),
+                                    ]
+                                );
+
+                                $count++;
                             } catch (\Exception $e) {
                                 \Log::error("Failed to send to supplier {$supplier->id}: " . $e->getMessage());
                             }

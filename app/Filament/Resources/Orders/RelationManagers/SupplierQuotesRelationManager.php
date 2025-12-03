@@ -4,6 +4,8 @@ namespace App\Filament\Resources\Orders\RelationManagers;
 
 use App\Exceptions\MissingExchangeRateException;
 use App\Models\ExchangeRate;
+use App\Repositories\OrderRepository;
+use App\Repositories\SupplierQuoteRepository;
 use App\Services\SupplierQuoteImportService;
 use Filament\Actions\Action;
 use Filament\Forms\Components\FileUpload;
@@ -30,6 +32,16 @@ class SupplierQuotesRelationManager extends RelationManager
     protected static string $relationship = 'supplierQuotes';
 
     protected static ?string $title = 'Supplier Quotes';
+
+    protected OrderRepository $orderRepository;
+    protected SupplierQuoteRepository $quoteRepository;
+
+    public function __construct()
+    {
+        parent::__construct();
+        $this->orderRepository = app(OrderRepository::class);
+        $this->quoteRepository = app(SupplierQuoteRepository::class);
+    }
 
     public function form(Schema $schema): Schema
     {
@@ -85,6 +97,9 @@ class SupplierQuotesRelationManager extends RelationManager
     {
         return $table
             ->recordTitleAttribute('quote_number')
+            ->query(
+                $this->orderRepository->getSupplierQuotesQuery($this->getOwnerRecord()->id)
+            )
             ->columns([
                 TextColumn::make('quote_number')
                     ->searchable(),
@@ -219,7 +234,26 @@ class SupplierQuotesRelationManager extends RelationManager
                     ->label('Recalculate')
                     ->icon('heroicon-o-calculator')
                     ->action(function ($record) {
-                        $record->calculateCommission();
+                        try {
+                            $this->quoteRepository->recalculate($record->id);
+                            
+                            Notification::make()
+                                ->success()
+                                ->title('Quote Recalculated')
+                                ->body('Commission and totals have been recalculated.')
+                                ->send();
+                        } catch (\Exception $e) {
+                            Notification::make()
+                                ->danger()
+                                ->title('Recalculation Failed')
+                                ->body($e->getMessage())
+                                ->send();
+
+                            \Log::error('Erro ao recalcular cotação', [
+                                'id' => $record->id,
+                                'error' => $e->getMessage(),
+                            ]);
+                        }
                     })
                     ->requiresConfirmation()
                     ->color('warning'),
