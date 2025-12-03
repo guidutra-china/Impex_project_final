@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Shipments\RelationManagers;
 
+use App\Repositories\ShipmentRepository;
 use App\Services\Shipment\ShipmentService;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
@@ -29,6 +30,14 @@ class ItemsRelationManager extends RelationManager
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCube;
 
     protected static ?string $recordTitleAttribute = 'product_name';
+
+    protected ShipmentRepository $repository;
+
+    public function __construct()
+    {
+        parent::__construct();
+        $this->repository = app(ShipmentRepository::class);
+    }
 
     public function form(Schema $schema): Schema
     {
@@ -129,6 +138,9 @@ class ItemsRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         return $table
+            ->query(
+                $this->repository->getItemsQuery($this->getOwnerRecord()->id)
+            )
             ->columns([
                 TextColumn::make('salesInvoiceItem.salesInvoice.invoice_number')
                     ->label('Invoice #')

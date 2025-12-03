@@ -3,6 +3,8 @@
 namespace App\Filament\Resources\Products\RelationManagers;
 
 use App\Models\CategoryFeature;
+use App\Repositories\ProductRepository;
+use App\Repositories\CategoryRepository;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
@@ -26,10 +28,23 @@ class FeaturesRelationManager extends RelationManager
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedSparkles;
 
+    protected ProductRepository $productRepository;
+    protected CategoryRepository $categoryRepository;
+
+    public function __construct()
+    {
+        parent::__construct();
+        $this->productRepository = app(ProductRepository::class);
+        $this->categoryRepository = app(CategoryRepository::class);
+    }
+
     public function table(Table $table): Table
     {
         return $table
             ->recordTitleAttribute('feature_name')
+            ->query(
+                $this->productRepository->getFeaturesQuery($this->getOwnerRecord()->id)
+            )
             ->columns([
                 TextColumn::make('feature_name')
                     ->label('Feature Name')
