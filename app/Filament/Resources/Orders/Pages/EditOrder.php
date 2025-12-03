@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Orders\Pages;
 use App\Filament\Resources\Orders\OrderResource;
 use App\Models\FinancialCategory;
 use App\Models\FinancialTransaction;
+use App\Repositories\OrderRepository;
 use App\Services\RFQExcelService;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
@@ -19,6 +20,14 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 class EditOrder extends EditRecord
 {
     protected static string $resource = OrderResource::class;
+
+    protected OrderRepository $orderRepository;
+
+    public function __construct()
+    {
+        parent::__construct();
+        $this->orderRepository = app(OrderRepository::class);
+    }
 
     protected function getHeaderActions(): array
     {

@@ -3,11 +3,20 @@
 namespace App\Filament\Resources\Orders\Pages;
 
 use App\Filament\Resources\Orders\OrderResource;
+use App\Repositories\OrderRepository;
 use Filament\Resources\Pages\CreateRecord;
 
 class CreateOrder extends CreateRecord
 {
     protected static string $resource = OrderResource::class;
+
+    protected OrderRepository $orderRepository;
+
+    public function __construct()
+    {
+        parent::__construct();
+        $this->orderRepository = app(OrderRepository::class);
+    }
 
     protected function mutateFormDataBeforeCreate(array $data): array
     {

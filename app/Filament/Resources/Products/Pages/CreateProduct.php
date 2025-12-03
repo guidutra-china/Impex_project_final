@@ -3,12 +3,21 @@
 namespace App\Filament\Resources\Products\Pages;
 
 use App\Filament\Resources\Products\ProductResource;
+use App\Repositories\ProductRepository;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
 
 class CreateProduct extends CreateRecord
 {
     protected static string $resource = ProductResource::class;
+
+    protected ProductRepository $productRepository;
+
+    public function __construct()
+    {
+        parent::__construct();
+        $this->productRepository = app(ProductRepository::class);
+    }
 
     /**
      * Auto-populate features from category after product creation
