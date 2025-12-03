@@ -19,9 +19,9 @@ class QuoteComparison extends Page
         return 'filament.pages.quote-comparison';
     }
 
-    protected static string | UnitEnum | null $navigationGroup = 'Sales & Orders';
+    protected static string | UnitEnum | null $navigationGroup = 'Sales & Quotations';
 
-    protected static ?int $navigationSort = 12;
+    protected static ?int $navigationSort = 50;
 
     protected static ?string $navigationLabel = 'Quote Comparison';
 

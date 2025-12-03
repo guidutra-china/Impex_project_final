@@ -15,6 +15,8 @@ class GeneratedDocumentResource extends Resource
 
     protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-document-duplicate';
 
+    protected static UnitEnum|string|null $navigationGroup = 'Documents';
+
     protected static ?string $navigationLabel = 'Document History';
 
     protected static ?string $modelLabel = 'Document History';

@@ -64,12 +64,13 @@ class AdminPanelProvider extends PanelProvider
                 Dashboard::class,
             ])
             ->navigationGroups([
-                'Sales & Orders',
-                'Purchasing & Inventory',
-                'Logistics',
-                'Suppliers',
+                'Sales & Quotations',
+                'Purchasing',
+                'Logistics & Shipping',
                 'Finance',
-                'Configuration',
+                'Documents',
+                'Contacts',
+                'Inventory',
                 'Settings',
                 'Security',
             ])
