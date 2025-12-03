@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Storage;
 echo "🔍 Avatar Debug Script\n";
 echo "=====================\n\n";
 
-// Get first user
+// Get first user teste
 $user = User::first();
 
 if (!$user) {
