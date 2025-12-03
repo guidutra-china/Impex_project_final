@@ -5,6 +5,7 @@ namespace Database\Factories;
 use App\Models\Client;
 use App\Models\Currency;
 use App\Models\Order;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class OrderFactory extends Factory
@@ -24,8 +25,8 @@ class OrderFactory extends Factory
             'customer_notes' => $this->faker->sentence(),
             'notes' => $this->faker->sentence(),
             'total_amount' => $this->faker->numberBetween(1000, 100000),
-            'created_by' => 1,
-            'updated_by' => 1,
+            'created_by' => User::factory(),
+            'updated_by' => User::factory(),
         ];
     }
 

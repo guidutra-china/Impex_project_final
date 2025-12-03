@@ -229,7 +229,7 @@ test('it can convert between currencies using historical rates', function () {
         'date' => today()->toDateString(),
         'source' => 'api',
         'source_name' => 'ExchangeRate-API',
-        'status' => 'sent',
+        'status' => 'approved',
         'approved_at' => now(),
     ]);
 
@@ -274,7 +274,7 @@ test('it can get rate history for a currency pair', function () {
         'inverse_rate' => 1 / 0.90,
         'date' => today()->subDays(5)->toDateString(),
         'source' => 'api',
-        'status' => 'sent',
+        'status' => 'approved',
         'approved_at' => now(),
     ]);
 
@@ -286,7 +286,7 @@ test('it can get rate history for a currency pair', function () {
         'date' => today()->toDateString(),
         'source' => 'api',
         'source_name' => 'ExchangeRate-API',
-        'status' => 'sent',
+        'status' => 'approved',
         'approved_at' => now(),
     ]);
 
@@ -310,7 +310,7 @@ test('it can get latest rate for a currency pair', function () {
         'date' => today()->toDateString(),
         'source' => 'api',
         'source_name' => 'ExchangeRate-API',
-        'status' => 'sent',
+        'status' => 'approved',
         'approved_at' => now(),
     ]);
 
