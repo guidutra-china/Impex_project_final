@@ -75,7 +75,10 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->plugin(
                 \BezhanSalleh\FilamentShield\FilamentShieldPlugin::make()
-                    ->navigationGroup('Configuration')
+                    ->navigationGroup('Security')
+                    ->navigationSort(20)
+                    ->navigationLabel('Roles & Permissions')
+                    ->navigationIcon('heroicon-o-shield-check')
             )
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
             ->widgets([
