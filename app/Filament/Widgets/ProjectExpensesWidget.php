@@ -2,8 +2,8 @@
 
 namespace App\Filament\Widgets;
 
-use App\Models\FinancialTransaction;
 use App\Models\Order;
+use App\Repositories\FinancialTransactionRepository;
 use Filament\Actions\DeleteAction;
 use Filament\Notifications\Notification;
 use Filament\Tables;
@@ -21,10 +21,18 @@ class ProjectExpensesWidget extends BaseWidget
 
     protected static ?int $sort = 50;
 
+    protected FinancialTransactionRepository $repository;
+
+    public function __construct()
+    {
+        parent::__construct();
+        $this->repository = app(FinancialTransactionRepository::class);
+    }
+
     public function table(Table $table): Table
     {
         if (!$this->record instanceof Order) {
-            return $table->query(FinancialTransaction::query()->whereRaw('1 = 0'));
+            return $table->query($this->repository->getModel()->query()->whereRaw('1 = 0'));
         }
 
         // Get totals (now correctly using amount_base_currency)
@@ -41,11 +49,7 @@ class ProjectExpensesWidget extends BaseWidget
                 $realMarginPercent
             ))
             ->query(
-                FinancialTransaction::query()
-                    ->where('project_id', $this->record->id)
-                    ->where('type', 'payable')
-                    ->with(['category', 'currency', 'creator'])
-                    ->orderBy('transaction_date', 'desc')
+                $this->repository->getProjectExpensesQuery($this->record->id)
             )
             ->columns([
                 TextColumn::make('transaction_number')
@@ -82,7 +86,7 @@ class ProjectExpensesWidget extends BaseWidget
                 
                 TextColumn::make('amount')
                     ->label('Amount (Original)')
-                    ->money(fn (FinancialTransaction $record): string => $record->currency->code ?? 'USD', divideBy: 100)
+                    ->money(fn ($record) => $record->currency->code ?? 'USD', divideBy: 100)
                     ->sortable()
                     ->alignEnd(),
                 
@@ -91,7 +95,7 @@ class ProjectExpensesWidget extends BaseWidget
                     ->money('USD', divideBy: 100)
                     ->sortable()
                     ->alignEnd()
-                    ->description(fn (FinancialTransaction $record): string => 
+                    ->description(fn ($record) => 
                         $record->exchange_rate_to_base 
                             ? sprintf('Rate: %s', number_format($record->exchange_rate_to_base, 4))
                             : ''
@@ -119,7 +123,7 @@ class ProjectExpensesWidget extends BaseWidget
                     ->label('Due Date')
                     ->date()
                     ->sortable()
-                    ->color(fn (FinancialTransaction $record): string => 
+                    ->color(fn ($record) => 
                         $record->isOverdue() ? 'danger' : 'gray'
                     ),
                 
@@ -132,20 +136,33 @@ class ProjectExpensesWidget extends BaseWidget
                 Action::make('view')
                     ->label('View')
                     ->icon('heroicon-o-eye')
-                    ->url(fn (FinancialTransaction $record): string => 
+                    ->url(fn ($record) => 
                         route('filament.admin.resources.financial-transactions.edit', ['record' => $record->id])
                     )
                     ->openUrlInNewTab(),
                 
                 DeleteAction::make()
                     ->requiresConfirmation()
-                    ->action(function (FinancialTransaction $record) {
-                        $record->delete();
-                        
-                        Notification::make()
-                            ->title('Expense deleted successfully')
-                            ->success()
-                            ->send();
+                    ->action(function ($record) {
+                        try {
+                            $this->repository->delete($record->id);
+                            
+                            Notification::make()
+                                ->title('Expense deleted successfully')
+                                ->success()
+                                ->send();
+                        } catch (\Exception $e) {
+                            Notification::make()
+                                ->title('Error deleting expense')
+                                ->danger()
+                                ->body($e->getMessage())
+                                ->send();
+
+                            \Log::error('Erro ao deletar despesa', [
+                                'id' => $record->id,
+                                'error' => $e->getMessage(),
+                            ]);
+                        }
                     }),
             ])
             ->emptyStateHeading('No project expenses yet')

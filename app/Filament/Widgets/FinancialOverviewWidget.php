@@ -2,15 +2,24 @@
 
 namespace App\Filament\Widgets;
 
-use App\Models\SalesInvoice;
-use App\Models\PurchaseOrder;
+use App\Repositories\SalesInvoiceRepository;
+use App\Repositories\PurchaseOrderRepository;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
-use Illuminate\Support\Facades\DB;
 
 class FinancialOverviewWidget extends BaseWidget
 {
     protected static ?int $sort = 3;
+
+    protected SalesInvoiceRepository $salesInvoiceRepository;
+    protected PurchaseOrderRepository $purchaseOrderRepository;
+
+    public function __construct()
+    {
+        parent::__construct();
+        $this->salesInvoiceRepository = app(SalesInvoiceRepository::class);
+        $this->purchaseOrderRepository = app(PurchaseOrderRepository::class);
+    }
     
     public static function canView(): bool
     {
@@ -40,50 +49,29 @@ class FinancialOverviewWidget extends BaseWidget
         // ========================================
         
         // Invoices pending payment (not paid, not cancelled)
-        $invoicesPending = SalesInvoice::query()
-            ->whereIn('status', ['draft', 'sent', 'overdue'])
-            ->count();
+        $invoicesPending = $this->salesInvoiceRepository->countPending();
         
         // Total to receive (pending invoices)
-        $totalToReceive = SalesInvoice::query()
-            ->whereIn('status', ['draft', 'sent', 'overdue'])
-            ->sum(DB::raw('COALESCE(total_base_currency, 0)'));
-        
-        $totalToReceive = $totalToReceive / 100; // Convert from cents
+        $totalToReceive = $this->salesInvoiceRepository->getTotalPending() / 100; // Convert from cents
         
         // Invoices overdue
-        $invoicesOverdue = SalesInvoice::query()
-            ->where('status', 'overdue')
-            ->count();
+        $invoicesOverdue = $this->salesInvoiceRepository->countOverdue();
         
         // Total overdue
-        $totalOverdue = SalesInvoice::query()
-            ->where('status', 'overdue')
-            ->sum(DB::raw('COALESCE(total_base_currency, 0)'));
-        
-        $totalOverdue = $totalOverdue / 100; // Convert from cents
+        $totalOverdue = $this->salesInvoiceRepository->getTotalOverdue() / 100; // Convert from cents
         
         // Invoices due in next 30 days
-        $invoicesDueSoon = SalesInvoice::query()
-            ->whereIn('status', ['sent'])
-            ->whereBetween('due_date', [now(), now()->addDays(30)])
-            ->count();
+        $invoicesDueSoon = $this->salesInvoiceRepository->countDueSoon(30);
         
         // ========================================
         // CONTAS A PAGAR (Purchase Orders)
         // ========================================
         
         // POs pending payment (active but not fully paid)
-        $posPending = PurchaseOrder::query()
-            ->whereIn('status', ['approved', 'sent', 'confirmed', 'in_production', 'partially_received'])
-            ->count();
+        $posPending = $this->purchaseOrderRepository->countActive();
         
         // Total to pay (active POs)
-        $totalToPay = PurchaseOrder::query()
-            ->whereIn('status', ['approved', 'sent', 'confirmed', 'in_production', 'partially_received'])
-            ->sum(DB::raw('COALESCE(total_base_currency, 0)'));
-        
-        $totalToPay = $totalToPay / 100; // Convert from cents
+        $totalToPay = $this->purchaseOrderRepository->getTotalActive() / 100; // Convert from cents
         
         // ========================================
         // FLUXO DE CAIXA (Cash Flow)
@@ -96,25 +84,11 @@ class FinancialOverviewWidget extends BaseWidget
         // VENDAS DO MÊS (This Month Sales)
         // ========================================
         
-        $thisMonthSales = SalesInvoice::query()
-            ->whereYear('invoice_date', now()->year)
-            ->whereMonth('invoice_date', now()->month)
-            ->sum(DB::raw('COALESCE(total_base_currency, 0)'));
-        
-        $thisMonthSales = $thisMonthSales / 100;
-        
-        // Last month sales
-        $lastMonthSales = SalesInvoice::query()
-            ->whereYear('invoice_date', now()->subMonth()->year)
-            ->whereMonth('invoice_date', now()->subMonth()->month)
-            ->sum(DB::raw('COALESCE(total_base_currency, 0)'));
-        
-        $lastMonthSales = $lastMonthSales / 100;
+        $thisMonthSales = $this->salesInvoiceRepository->getThisMonthTotal() / 100;
+        $lastMonthSales = $this->salesInvoiceRepository->getLastMonthTotal() / 100;
         
         // Calculate trend
-        $salesTrend = $lastMonthSales > 0 
-            ? round((($thisMonthSales - $lastMonthSales) / $lastMonthSales) * 100, 1)
-            : 0;
+        $salesTrend = $this->salesInvoiceRepository->calculateSalesTrend();
         
         // ========================================
         // FORMAT VALUES
@@ -171,7 +145,9 @@ class FinancialOverviewWidget extends BaseWidget
         
         for ($i = 6; $i >= 0; $i--) {
             $date = now()->subDays($i)->toDateString();
-            $count = SalesInvoice::whereDate('invoice_date', $date)->count();
+            $count = $this->salesInvoiceRepository->getModel()
+                ->whereDate('invoice_date', $date)
+                ->count();
             $data[] = $count;
         }
         
