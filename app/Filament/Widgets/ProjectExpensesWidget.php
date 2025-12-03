@@ -20,6 +20,8 @@ class ProjectExpensesWidget extends BaseWidget
     protected int | string | array $columnSpan = 'full';
 
     protected static ?int $sort = 50;
+    
+    protected static bool $isDiscovered = true;
 
     public function table(Table $table): Table
     {
@@ -27,9 +29,20 @@ class ProjectExpensesWidget extends BaseWidget
             return $table->query(FinancialTransaction::query()->whereRaw('1 = 0'));
         }
 
-        $totalExpenses = $this->record->total_project_expenses_dollars;
-        $realMargin = $this->record->real_margin;
-        $realMarginPercent = $this->record->real_margin_percent;
+        // Safely get values with error handling
+        try {
+            $totalExpenses = $this->record->total_project_expenses_dollars ?? 0;
+            $realMargin = $this->record->real_margin ?? 0;
+            $realMarginPercent = $this->record->real_margin_percent ?? 0;
+        } catch (\Exception $e) {
+            \Log::error('ProjectExpensesWidget: Error getting order attributes', [
+                'error' => $e->getMessage(),
+                'order_id' => $this->record->id
+            ]);
+            $totalExpenses = 0;
+            $realMargin = 0;
+            $realMarginPercent = 0;
+        }
 
         return $table
             ->heading('Project Expenses')
