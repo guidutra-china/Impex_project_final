@@ -17,7 +17,7 @@ jobs:
           MYSQL_ROOT_PASSWORD: root
           MYSQL_DATABASE: impex_test
         options: >-
-          --health-cmd="mysqladmin ping"
+          --health-cmd="mysqladmin ping -uroot -proot"
           --health-interval=10s
           --health-timeout=5s
           --health-retries=3
@@ -53,12 +53,23 @@ jobs:
           cp .env.example .env
           php artisan key:generate
       
+      - name: Wait for MySQL
+        run: |
+          for i in {1..30}; do
+            if mysqladmin ping -h 127.0.0.1 -u root -proot --silent; then
+              echo "MySQL is ready!"
+              break
+            fi
+            echo "Waiting for MySQL... ($i/30)"
+            sleep 1
+          done
+      
       - name: Create test database
         run: |
-          mysql -h 127.0.0.1 -u root -proot -e "CREATE DATABASE IF NOT EXISTS impex_test;"
+          MYSQL_PWD=root mysql -h 127.0.0.1 -u root -e "CREATE DATABASE IF NOT EXISTS impex_test;"
       
       - name: Run migrations
-        run: php artisan migrate --env=testing
+        run: php artisan migrate --env=testing --force
       
       - name: Run performance tests
         run: php artisan test --filter=PerformanceTest
