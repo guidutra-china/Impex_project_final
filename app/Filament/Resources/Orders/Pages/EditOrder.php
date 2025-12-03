@@ -33,7 +33,7 @@ class EditOrder extends EditRecord
                         ->options(
                             FinancialCategory::where('code', 'LIKE', 'RFQ-EXP-%')
                                 ->orWhere('code', 'RFQ-EXPENSES')
-                                ->pluck('full_name', 'id')
+                                ->pluck('name', 'id')
                         )
                         ->searchable()
                         ->required()
