@@ -40,7 +40,7 @@
             
             // Add custom button to toolbar
             const customButton = document.createElement('a');
-            customButton.href = '{{ route('filament.admin.resources.events.create') }}';
+            customButton.href = '{{ route('filament.admin.resources.event-resource.create') }}';
             customButton.className = 'fc-button fc-button-primary';
             customButton.style.cssText = 'margin-left: 0.5rem; padding: 0.4em 0.65em; font-size: 1em; line-height: 1.5; border-radius: 0.25em; cursor: pointer; background-color: rgb(99 102 241); border-color: rgb(99 102 241); color: white; text-decoration: none; display: inline-flex; align-items: center; justify-content: center;';
             customButton.innerHTML = '<svg style="width: 1em; height: 1em;" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>';
