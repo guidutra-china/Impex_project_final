@@ -21,7 +21,7 @@ jobs:
           MYSQL_ROOT_PASSWORD: root
           MYSQL_DATABASE: impex_test
         options: >-
-          --health-cmd="mysqladmin ping"
+          --health-cmd="mysqladmin ping -uroot -proot"
           --health-interval=10s
           --health-timeout=5s
           --health-retries=3
@@ -58,12 +58,23 @@ jobs:
           cp .env.example .env
           php artisan key:generate
       
+      - name: Wait for MySQL
+        run: |
+          for i in {1..30}; do
+            if mysqladmin ping -h 127.0.0.1 -u root -proot --silent; then
+              echo "MySQL is ready!"
+              break
+            fi
+            echo "Waiting for MySQL... ($i/30)"
+            sleep 1
+          done
+      
       - name: Create test database
         run: |
-          mysql -h 127.0.0.1 -u root -proot -e "CREATE DATABASE IF NOT EXISTS impex_test;"
+          MYSQL_PWD=root mysql -h 127.0.0.1 -u root -e "CREATE DATABASE IF NOT EXISTS impex_test;"
       
       - name: Run migrations
-        run: php artisan migrate --env=testing
+        run: php artisan migrate --env=testing --force
       
       - name: Run tests with coverage
         run: php artisan test --coverage --coverage-html=coverage --coverage-clover=coverage.xml
@@ -89,18 +100,22 @@ jobs:
         with:
           script: |
             const fs = require('fs');
-            const coverage = fs.readFileSync('coverage.xml', 'utf8');
-            const match = coverage.match(/lines-valid="(\d+)".*lines-covered="(\d+)"/);
-            
-            if (match) {
-              const valid = parseInt(match[1]);
-              const covered = parseInt(match[2]);
-              const percent = ((covered / valid) * 100).toFixed(2);
+            try {
+              const coverage = fs.readFileSync('coverage.xml', 'utf8');
+              const match = coverage.match(/lines-valid="(\d+)".*lines-covered="(\d+)"/);
               
-              github.rest.issues.createComment({
-                issue_number: context.issue.number,
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                body: `✅ Tests passed!\n\n📊 Code Coverage: **${percent}%** (${covered}/${valid} lines)`
-              });
+              if (match) {
+                const valid = parseInt(match[1]);
+                const covered = parseInt(match[2]);
+                const percent = ((covered / valid) * 100).toFixed(2);
+                
+                github.rest.issues.createComment({
+                  issue_number: context.issue.number,
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  body: `✅ Tests passed!\n\n📊 Code Coverage: **${percent}%** (${covered}/${valid} lines)`
+                });
+              }
+            } catch (error) {
+              console.log('Could not read coverage file');
             }
