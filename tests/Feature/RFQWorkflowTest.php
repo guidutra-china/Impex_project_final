@@ -73,7 +73,7 @@ class RFQWorkflowTest extends TestCase
             'order_id' => $order->id,
             'product_id' => $product->id,
             'quantity' => 100,
-            'unit_price' => 10.00,
+            'commission_type' => 'embedded',
         ]);
 
         $this->assertTrue($order->items()->count() > 0);
@@ -121,6 +121,7 @@ class RFQWorkflowTest extends TestCase
             'order_id' => $order->id,
             'product_id' => $product->id,
             'quantity' => 50,
+            'commission_type' => 'embedded',
         ]);
 
         // Create supplier quotes

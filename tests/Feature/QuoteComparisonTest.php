@@ -59,6 +59,7 @@ class QuoteComparisonTest extends TestCase
             'order_id' => $order->id,
             'product_id' => $product->id,
             'quantity' => 100,
+            'commission_type' => 'embedded',
         ]);
 
         // Create multiple supplier quotes
@@ -84,6 +85,7 @@ class QuoteComparisonTest extends TestCase
                 'order_item_id' => $orderItem->id,
                 'product_id' => $product->id,
                 'quantity' => 100,
+            'commission_type' => 'embedded',
                 'unit_price_before_commission' => $prices[$index],
                 'unit_price_after_commission' => $prices[$index],
                 'total_price_before_commission' => $prices[$index] * 100,
@@ -114,6 +116,7 @@ class QuoteComparisonTest extends TestCase
             'order_id' => $order->id,
             'product_id' => $product->id,
             'quantity' => 100,
+            'commission_type' => 'embedded',
         ]);
 
         // Create suppliers with different prices
@@ -132,6 +135,7 @@ class QuoteComparisonTest extends TestCase
             'order_item_id' => $orderItem->id,
             'product_id' => $product->id,
             'quantity' => 100,
+            'commission_type' => 'embedded',
             'unit_price_before_commission' => 50,
             'unit_price_after_commission' => 50,
             'total_price_before_commission' => 5000,
@@ -151,6 +155,7 @@ class QuoteComparisonTest extends TestCase
             'order_item_id' => $orderItem->id,
             'product_id' => $product->id,
             'quantity' => 100,
+            'commission_type' => 'embedded',
             'unit_price_before_commission' => 100,
             'unit_price_after_commission' => 100,
             'total_price_before_commission' => 10000,
@@ -181,12 +186,14 @@ class QuoteComparisonTest extends TestCase
             'order_id' => $order->id,
             'product_id' => $product1->id,
             'quantity' => 100,
+            'commission_type' => 'embedded',
         ]);
 
         $item2 = OrderItem::create([
             'order_id' => $order->id,
             'product_id' => $product2->id,
             'quantity' => 50,
+            'commission_type' => 'embedded',
         ]);
 
         // Create supplier quote
@@ -203,6 +210,7 @@ class QuoteComparisonTest extends TestCase
             'order_item_id' => $item1->id,
             'product_id' => $product1->id,
             'quantity' => 100,
+            'commission_type' => 'embedded',
             'unit_price_before_commission' => 100,
             'unit_price_after_commission' => 100,
             'total_price_before_commission' => 10000,
@@ -215,6 +223,7 @@ class QuoteComparisonTest extends TestCase
             'order_item_id' => $item2->id,
             'product_id' => $product2->id,
             'quantity' => 50,
+            'commission_type' => 'embedded',
             'unit_price_before_commission' => 200,
             'unit_price_after_commission' => 200,
             'total_price_before_commission' => 10000,
@@ -242,6 +251,7 @@ class QuoteComparisonTest extends TestCase
             'order_id' => $order->id,
             'product_id' => $product->id,
             'quantity' => 100,
+            'commission_type' => 'embedded',
         ]);
 
         // Create quote without items
@@ -273,6 +283,7 @@ class QuoteComparisonTest extends TestCase
             'order_id' => $order->id,
             'product_id' => $product->id,
             'quantity' => 100,
+            'commission_type' => 'embedded',
         ]);
 
         // No supplier quotes created
@@ -297,6 +308,7 @@ class QuoteComparisonTest extends TestCase
             'order_id' => $order->id,
             'product_id' => $product->id,
             'quantity' => 100,
+            'commission_type' => 'embedded',
         ]);
 
         // Create two supplier quotes
@@ -320,6 +332,7 @@ class QuoteComparisonTest extends TestCase
             'order_item_id' => $orderItem->id,
             'product_id' => $product->id,
             'quantity' => 100,
+            'commission_type' => 'embedded',
             'unit_price_before_commission' => 100,
             'unit_price_after_commission' => 100,
             'total_price_before_commission' => 10000,
@@ -332,6 +345,7 @@ class QuoteComparisonTest extends TestCase
             'order_item_id' => $orderItem->id,
             'product_id' => $product->id,
             'quantity' => 100,
+            'commission_type' => 'embedded',
             'unit_price_before_commission' => 95,
             'unit_price_after_commission' => 95,
             'total_price_before_commission' => 9500,
@@ -385,6 +399,7 @@ class QuoteComparisonTest extends TestCase
             'order_id' => $order->id,
             'product_id' => $product->id,
             'quantity' => 100,
+            'commission_type' => 'embedded',
         ]);
 
         // Create quote in different currency
@@ -400,6 +415,7 @@ class QuoteComparisonTest extends TestCase
             'order_item_id' => $orderItem->id,
             'product_id' => $product->id,
             'quantity' => 100,
+            'commission_type' => 'embedded',
             'unit_price_before_commission' => 85,
             'unit_price_after_commission' => 85,
             'total_price_before_commission' => 8500,

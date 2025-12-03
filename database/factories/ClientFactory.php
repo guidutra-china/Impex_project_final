@@ -13,9 +13,10 @@ class ClientFactory extends Factory
     {
         $companyName = $this->faker->company();
         
-        // Generate 2-letter code from company name
-        $words = explode(' ', $companyName);
-        $code = strtoupper(substr($words[0], 0, 2));
+        // Generate unique 2-letter code
+        do {
+            $code = strtoupper($this->faker->bothify('??'));
+        } while (Client::where('code', $code)->exists());
         
         return [
             'name' => $companyName,
