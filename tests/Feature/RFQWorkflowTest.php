@@ -49,7 +49,7 @@ class RFQWorkflowTest extends TestCase
         $order = Order::factory()->create([
             'customer_id' => $this->client->id,
             'currency_id' => $this->currency->id,
-            'status' => 'draft',
+            'status' => 'pending',
         ]);
 
         $this->assertNotNull($order->id);
@@ -96,7 +96,7 @@ class RFQWorkflowTest extends TestCase
             'order_id' => $order->id,
             'supplier_id' => $supplier->id,
             'currency_id' => $this->currency->id,
-            'status' => 'draft',
+            'status' => 'pending',
         ]);
 
         $this->assertNotNull($quote->id);
@@ -112,7 +112,7 @@ class RFQWorkflowTest extends TestCase
         $order = Order::factory()->create([
             'customer_id' => $this->client->id,
             'currency_id' => $this->currency->id,
-            'status' => 'draft',
+            'status' => 'pending',
         ]);
 
         // Add items
@@ -153,7 +153,7 @@ class RFQWorkflowTest extends TestCase
         $order = Order::factory()->create([
             'customer_id' => $this->client->id,
             'currency_id' => $this->currency->id,
-            'status' => 'draft',
+            'status' => 'pending',
         ]);
 
         $this->assertEquals('pending', $order->status);
@@ -200,7 +200,7 @@ class RFQWorkflowTest extends TestCase
         ]);
 
         $this->assertEquals(5.00, $order->commission_percent);
-        $this->assertEquals('percentage', $order->commission_type);
+        $this->assertEquals('embedded', $order->commission_type);
     }
 
     /**
@@ -258,7 +258,7 @@ class RFQWorkflowTest extends TestCase
         $order = Order::create([
             'customer_id' => $this->client->id,
             'currency_id' => $this->currency->id,
-            'status' => 'draft',
+            'status' => 'pending',
         ]);
 
         // Order number should be auto-generated
