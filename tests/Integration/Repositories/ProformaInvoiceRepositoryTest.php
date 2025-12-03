@@ -65,7 +65,7 @@ class ProformaInvoiceRepositoryTest extends TestCase
         $data = [
             'order_id' => $this->order->id,
             'proforma_number' => 'PI-' . now()->timestamp,
-            'status' => 'draft',
+            'status' => 'pending',
             'total_amount' => 100000,
             'currency_id' => 1,
             'issue_date' => now(),
@@ -110,7 +110,7 @@ class ProformaInvoiceRepositoryTest extends TestCase
     /** @test */
     public function it_can_get_proforma_invoices_by_status()
     {
-        ProformaInvoice::factory(2)->for($this->order)->create(['status' => 'draft']);
+        ProformaInvoice::factory(2)->for($this->order)->create(['status' => 'pending']);
         ProformaInvoice::factory(1)->for($this->order)->create(['status' => 'sent']);
         
         $drafts = $this->repository->getByStatus('draft');
@@ -147,7 +147,7 @@ class ProformaInvoiceRepositoryTest extends TestCase
     {
         $invoice = ProformaInvoice::factory()
             ->for($this->order)
-            ->create(['status' => 'draft']);
+            ->create(['status' => 'pending']);
         
         $result = $this->repository->approve($invoice->id);
         
@@ -160,7 +160,7 @@ class ProformaInvoiceRepositoryTest extends TestCase
     {
         $invoice = ProformaInvoice::factory()
             ->for($this->order)
-            ->create(['status' => 'draft']);
+            ->create(['status' => 'pending']);
         
         $result = $this->repository->reject($invoice->id);
         
@@ -173,7 +173,7 @@ class ProformaInvoiceRepositoryTest extends TestCase
     {
         $invoice = ProformaInvoice::factory()
             ->for($this->order)
-            ->create(['status' => 'draft']);
+            ->create(['status' => 'pending']);
         
         $result = $this->repository->markAsSent($invoice->id);
         
@@ -297,7 +297,7 @@ class ProformaInvoiceRepositoryTest extends TestCase
     /** @test */
     public function it_can_count_invoices_by_status()
     {
-        ProformaInvoice::factory(3)->for($this->order)->create(['status' => 'draft']);
+        ProformaInvoice::factory(3)->for($this->order)->create(['status' => 'pending']);
         
         $count = $this->repository->countByStatus('draft');
         

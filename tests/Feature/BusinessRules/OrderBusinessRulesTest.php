@@ -91,7 +91,7 @@ class OrderBusinessRulesTest extends TestCase
     /** @test */
     public function can_transition_from_draft_to_confirmed()
     {
-        $order = Order::factory()->for($this->client)->create(['status' => 'draft']);
+        $order = Order::factory()->for($this->client)->create(['status' => 'pending']);
         OrderItem::factory()->for($order)->create();
         
         $this->put("/admin/orders/{$order->id}", ['status' => 'processing']);
@@ -118,7 +118,7 @@ class OrderBusinessRulesTest extends TestCase
     /** @test */
     public function cannot_transition_from_draft_to_shipped_directly()
     {
-        $order = Order::factory()->for($this->client)->create(['status' => 'draft']);
+        $order = Order::factory()->for($this->client)->create(['status' => 'pending']);
         
         $response = $this->put("/admin/orders/{$order->id}", ['status' => 'shipped']);
         
@@ -184,7 +184,7 @@ class OrderBusinessRulesTest extends TestCase
     /** @test */
     public function can_delete_draft_order()
     {
-        $order = Order::factory()->for($this->client)->create(['status' => 'draft']);
+        $order = Order::factory()->for($this->client)->create(['status' => 'pending']);
         
         $response = $this->delete("/admin/orders/{$order->id}");
         
@@ -275,7 +275,7 @@ class OrderBusinessRulesTest extends TestCase
     /** @test */
     public function can_change_customer_if_order_draft()
     {
-        $order = Order::factory()->for($this->client)->create(['status' => 'draft']);
+        $order = Order::factory()->for($this->client)->create(['status' => 'pending']);
         $newClient = Client::factory()->for($this->user)->create();
         
         $this->put("/admin/orders/{$order->id}", [

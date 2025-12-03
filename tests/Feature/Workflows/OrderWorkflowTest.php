@@ -40,7 +40,7 @@ class OrderWorkflowTest extends TestCase
             'order_number' => 'ORD-' . now()->timestamp,
             'customer_id' => $this->client->id,
             'currency_id' => $this->client->currency_id,
-            'status' => 'draft',
+            'status' => 'pending',
             'order_date' => now()->format('Y-m-d'),
             'expected_delivery_date' => now()->addDays(30)->format('Y-m-d'),
         ];
@@ -80,7 +80,7 @@ class OrderWorkflowTest extends TestCase
         $quote = SupplierQuote::factory()
             ->for($order)
             ->for($this->supplier)
-            ->create(['status' => 'draft']);
+            ->create(['status' => 'pending']);
         
         $this->assertDatabaseHas('supplier_quotes', [
             'order_id' => $order->id,
@@ -97,11 +97,11 @@ class OrderWorkflowTest extends TestCase
         // 7. Criar proforma invoice
         $invoice = ProformaInvoice::factory()
             ->for($order)
-            ->create(['status' => 'draft']);
+            ->create(['status' => 'pending']);
         
         $this->assertDatabaseHas('proforma_invoices', [
             'order_id' => $order->id,
-            'status' => 'draft',
+            'status' => 'pending',
         ]);
 
         // 8. Aprovar proforma invoice
@@ -131,11 +131,11 @@ class OrderWorkflowTest extends TestCase
         // 11. Criar shipment
         $shipment = Shipment::factory()
             ->for($order)
-            ->create(['status' => 'draft']);
+            ->create(['status' => 'pending']);
         
         $this->assertDatabaseHas('shipments', [
             'order_id' => $order->id,
-            'status' => 'draft',
+            'status' => 'pending',
         ]);
 
         // 12. Marcar como entregue
@@ -151,14 +151,14 @@ class OrderWorkflowTest extends TestCase
     /** @test */
     public function cannot_confirm_order_without_items()
     {
-        $order = Order::factory()->for($this->client)->create(['status' => 'draft']);
+        $order = Order::factory()->for($this->client)->create(['status' => 'pending']);
         
         $response = $this->put("/admin/orders/{$order->id}", ['status' => 'processing']);
         
         // Deve retornar erro ou manter status draft
         $this->assertDatabaseHas('orders', [
             'id' => $order->id,
-            'status' => 'draft',
+            'status' => 'pending',
         ]);
     }
 
@@ -184,7 +184,7 @@ class OrderWorkflowTest extends TestCase
         $quote = SupplierQuote::factory()
             ->for($order)
             ->for($this->supplier)
-            ->create(['status' => 'draft']);
+            ->create(['status' => 'pending']);
         
         // Tentar criar invoice sem aprovar cotação
         $response = $this->post("/admin/proforma-invoices", [
@@ -241,7 +241,7 @@ class OrderWorkflowTest extends TestCase
     /** @test */
     public function can_cancel_draft_order()
     {
-        $order = Order::factory()->for($this->client)->create(['status' => 'draft']);
+        $order = Order::factory()->for($this->client)->create(['status' => 'pending']);
         
         $this->delete("/admin/orders/{$order->id}");
         
@@ -325,7 +325,7 @@ class OrderWorkflowTest extends TestCase
     /** @test */
     public function order_status_changes_are_logged()
     {
-        $order = Order::factory()->for($this->client)->create(['status' => 'draft']);
+        $order = Order::factory()->for($this->client)->create(['status' => 'pending']);
         
         $this->put("/admin/orders/{$order->id}", ['status' => 'processing']);
         

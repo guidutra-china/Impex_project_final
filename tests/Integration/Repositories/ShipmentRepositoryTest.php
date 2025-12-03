@@ -64,7 +64,7 @@ class ShipmentRepositoryTest extends TestCase
         $data = [
             'order_id' => $this->order->id,
             'shipment_number' => 'SHP-' . now()->timestamp,
-            'status' => 'draft',
+            'status' => 'pending',
             'shipment_date' => now(),
             'expected_delivery_date' => now()->addDays(30),
             'created_by' => $this->user->id,
@@ -105,7 +105,7 @@ class ShipmentRepositoryTest extends TestCase
     /** @test */
     public function it_can_get_shipments_by_status()
     {
-        Shipment::factory(2)->for($this->order)->create(['status' => 'draft']);
+        Shipment::factory(2)->for($this->order)->create(['status' => 'pending']);
         Shipment::factory(1)->for($this->order)->create(['status' => 'shipped']);
         
         $pending = $this->repository->getByStatus('pending');
@@ -192,7 +192,7 @@ class ShipmentRepositoryTest extends TestCase
     /** @test */
     public function it_can_count_shipments_by_status()
     {
-        Shipment::factory(3)->for($this->order)->create(['status' => 'draft']);
+        Shipment::factory(3)->for($this->order)->create(['status' => 'pending']);
         
         $count = $this->repository->countByStatus('pending');
         

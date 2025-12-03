@@ -57,7 +57,7 @@ class EventRepositoryTest extends TestCase
         $data = [
             'title' => 'Test Event',
             'description' => 'Test Description',
-            'status' => 'draft',
+            'status' => 'pending',
             'event_date' => now()->addDays(5),
             'created_by' => $this->user->id,
         ];
@@ -97,7 +97,7 @@ class EventRepositoryTest extends TestCase
     /** @test */
     public function it_can_get_events_by_status()
     {
-        Event::factory(2)->for($this->user)->create(['status' => 'draft']);
+        Event::factory(2)->for($this->user)->create(['status' => 'pending']);
         Event::factory(1)->for($this->user)->create(['status' => 'completed']);
         
         $pending = $this->repository->getByStatus('pending');
@@ -121,7 +121,7 @@ class EventRepositoryTest extends TestCase
     public function it_can_get_completed_events()
     {
         Event::factory(2)->for($this->user)->create(['status' => 'completed']);
-        Event::factory(1)->for($this->user)->create(['status' => 'draft']);
+        Event::factory(1)->for($this->user)->create(['status' => 'pending']);
         
         $completed = $this->repository->getCompleted();
         
