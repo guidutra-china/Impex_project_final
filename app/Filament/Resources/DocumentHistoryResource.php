@@ -6,12 +6,14 @@ use App\Filament\Resources\DocumentHistory\Tables\DocumentHistoryTable;
 use App\Models\GeneratedDocument;
 use Filament\Resources\Resource;
 use Filament\Tables\Table;
+use BackedEnum;
+use UnitEnum;
 
 class DocumentHistoryResource extends Resource
 {
     protected static ?string $model = GeneratedDocument::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-document-duplicate';
+    protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-document-duplicate';
 
     protected static ?string $navigationLabel = 'Document History';
 
