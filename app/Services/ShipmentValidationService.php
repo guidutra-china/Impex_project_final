@@ -10,18 +10,18 @@ use Illuminate\Validation\ValidationException;
 class ShipmentValidationService
 {
     /**
-     * Validar se um container pode ser selado
+     * Validate if a container can be sealed
      */
     public function validateContainerSealing(ShipmentContainer $container): bool
     {
-        // Validar se container tem itens
+        // Validate if container has items
         if ($container->items()->count() === 0) {
             throw ValidationException::withMessages([
-                'container' => 'Container deve ter pelo menos um item para ser selado.',
+                'container' => 'Container must have at least one item to be sealed.',
             ]);
         }
 
-        // Validar se todos os itens têm peso e volume
+        // Validate if all items have weight and volume
         $invalidItems = $container->items()
             ->where(function ($q) {
                 $q->whereNull('total_weight')
@@ -33,7 +33,7 @@ class ShipmentValidationService
 
         if ($invalidItems > 0) {
             throw ValidationException::withMessages([
-                'container' => 'Todos os itens devem ter peso e volume definidos.',
+                'container' => 'All items must have weight and volume defined.',
             ]);
         }
 
@@ -41,36 +41,36 @@ class ShipmentValidationService
     }
 
     /**
-     * Validar se um shipment pode ser confirmado
+     * Validate if a shipment can be confirmed
      */
     public function validateShipmentConfirmation(Shipment $shipment): bool
     {
-        // Validar se shipment tem containers
+        // Validate if shipment has containers
         if ($shipment->containers()->count() === 0) {
             throw ValidationException::withMessages([
-                'shipment' => 'Shipment deve ter pelo menos um container.',
+                'shipment' => 'Shipment must have at least one container.',
             ]);
         }
 
-        // Validar se todos os containers estão selados
+        // Validate if all containers are sealed
         $unsealedContainers = $shipment->containers()
             ->where('status', '!=', 'sealed')
             ->count();
 
         if ($unsealedContainers > 0) {
             throw ValidationException::withMessages([
-                'shipment' => 'Todos os containers devem estar selados antes de confirmar o shipment.',
+                'shipment' => 'All containers must be sealed before confirming the shipment.',
             ]);
         }
 
-        // Validar se todas as ProformaInvoices estão totalmente alocadas
+        // Validate if all ProformaInvoices are fully allocated
         $incompletePIs = $shipment->shipmentInvoices()
             ->where('status', '!=', 'fully_shipped')
             ->count();
 
         if ($incompletePIs > 0) {
             throw ValidationException::withMessages([
-                'shipment' => 'Todas as ProformaInvoices devem estar totalmente alocadas.',
+                'shipment' => 'All ProformaInvoices must be fully allocated.',
             ]);
         }
 
@@ -78,32 +78,33 @@ class ShipmentValidationService
     }
 
     /**
-     * Validar se uma quantidade pode ser adicionada a um container
+     * Validate if a quantity can be added to a container
      */
     public function validateQuantityAddition(
         ShipmentContainer $container,
         ProformaInvoiceItem $piItem,
         int $quantity
     ): bool {
-        // Validar quantidade disponível
+        // Validate available quantity
         if ($quantity > $piItem->quantity_remaining) {
             throw ValidationException::withMessages([
-                'quantity' => "Quantidade insuficiente. Restante: {$piItem->quantity_remaining}, Solicitado: {$quantity}",
+                'quantity' => "Insufficient quantity. Remaining: {$piItem->quantity_remaining}, Requested: {$quantity}",
             ]);
         }
 
-        // Validar capacidade do container
+        // Validate container weight capacity
         $totalWeight = $container->current_weight + ($piItem->unit_weight * $quantity);
         if ($totalWeight > $container->max_weight) {
             throw ValidationException::withMessages([
-                'weight' => "Peso excedido. Máximo: {$container->max_weight}kg, Total: {$totalWeight}kg",
+                'weight' => "Weight exceeded. Maximum: {$container->max_weight}kg, Total: {$totalWeight}kg",
             ]);
         }
 
+        // Validate container volume capacity
         $totalVolume = $container->current_volume + ($piItem->unit_volume * $quantity);
         if ($totalVolume > $container->max_volume) {
             throw ValidationException::withMessages([
-                'volume' => "Volume excedido. Máximo: {$container->max_volume}m³, Total: {$totalVolume}m³",
+                'volume' => "Volume exceeded. Maximum: {$container->max_volume}m³, Total: {$totalVolume}m³",
             ]);
         }
 
@@ -111,21 +112,21 @@ class ShipmentValidationService
     }
 
     /**
-     * Validar se um container pode ser removido
+     * Validate if a container can be removed
      */
     public function validateContainerRemoval(ShipmentContainer $container): bool
     {
-        // Validar se container está selado
+        // Validate if container is sealed
         if ($container->status === 'sealed') {
             throw ValidationException::withMessages([
-                'container' => 'Não é possível remover um container selado.',
+                'container' => 'Cannot remove a sealed container.',
             ]);
         }
 
-        // Validar se container está em trânsito
+        // Validate if container is in transit
         if ($container->status === 'in_transit') {
             throw ValidationException::withMessages([
-                'container' => 'Não é possível remover um container em trânsito.',
+                'container' => 'Cannot remove a container in transit.',
             ]);
         }
 
@@ -133,7 +134,7 @@ class ShipmentValidationService
     }
 
     /**
-     * Calcular utilização de container
+     * Calculate container utilization
      */
     public function calculateUtilization(ShipmentContainer $container): array
     {
@@ -149,22 +150,22 @@ class ShipmentValidationService
     }
 
     /**
-     * Validar integridade de dados do shipment
+     * Validate shipment data integrity
      */
     public function validateDataIntegrity(Shipment $shipment): array
     {
         $issues = [];
 
-        // Verificar se há containers órfãos
+        // Check for orphan containers
         $orphanContainers = $shipment->containers()
             ->whereDoesntHave('items')
             ->count();
 
         if ($orphanContainers > 0) {
-            $issues[] = "Existem {$orphanContainers} containers sem itens.";
+            $issues[] = "There are {$orphanContainers} containers without items.";
         }
 
-        // Verificar se há itens duplicados
+        // Check for duplicate items
         $duplicateItems = $shipment->containers()
             ->with('items')
             ->get()
@@ -174,10 +175,10 @@ class ShipmentValidationService
             ->count();
 
         if ($duplicateItems > 0) {
-            $issues[] = "Existem {$duplicateItems} itens duplicados em múltiplos containers.";
+            $issues[] = "There are {$duplicateItems} duplicate items across multiple containers.";
         }
 
-        // Verificar se há discrepâncias de quantidade
+        // Check for quantity discrepancies
         foreach ($shipment->shipmentInvoices as $si) {
             $totalAllocated = $shipment->containers()
                 ->with('items')
@@ -189,10 +190,148 @@ class ShipmentValidationService
             $expected = $si->proformaInvoice->items->sum('quantity');
 
             if ($totalAllocated !== $expected) {
-                $issues[] = "ProformaInvoice #{$si->proforma_invoice_id}: Alocado {$totalAllocated}, Esperado {$expected}";
+                $issues[] = "ProformaInvoice #{$si->proforma_invoice_id}: Allocated {$totalAllocated}, Expected {$expected}";
             }
         }
 
         return $issues;
+    }
+
+    /**
+     * Check for capacity warnings (before errors)
+     * 
+     * Returns warnings when utilization is approaching limits
+     */
+    public function checkCapacityWarnings(ShipmentContainer $container): array
+    {
+        $warnings = [];
+        
+        $weightUtilization = ($container->current_weight / $container->max_weight) * 100;
+        $volumeUtilization = ($container->current_volume / $container->max_volume) * 100;
+
+        // Warning at 90% capacity
+        if ($weightUtilization >= 90 && $weightUtilization < 100) {
+            $warnings[] = [
+                'type' => 'weight',
+                'level' => 'warning',
+                'message' => "Weight capacity at {$weightUtilization}% - approaching limit",
+                'utilization' => round($weightUtilization, 2),
+            ];
+        }
+
+        if ($volumeUtilization >= 90 && $volumeUtilization < 100) {
+            $warnings[] = [
+                'type' => 'volume',
+                'level' => 'warning',
+                'message' => "Volume capacity at {$volumeUtilization}% - approaching limit",
+                'utilization' => round($volumeUtilization, 2),
+            ];
+        }
+
+        // Critical warning at 95% capacity
+        if ($weightUtilization >= 95 && $weightUtilization < 100) {
+            $warnings[] = [
+                'type' => 'weight',
+                'level' => 'critical',
+                'message' => "Weight capacity at {$weightUtilization}% - CRITICAL",
+                'utilization' => round($weightUtilization, 2),
+            ];
+        }
+
+        if ($volumeUtilization >= 95 && $volumeUtilization < 100) {
+            $warnings[] = [
+                'type' => 'volume',
+                'level' => 'critical',
+                'message' => "Volume capacity at {$volumeUtilization}% - CRITICAL",
+                'utilization' => round($volumeUtilization, 2),
+            ];
+        }
+
+        // Low utilization warning (below 50%)
+        if ($weightUtilization < 50 && $container->items()->count() > 0) {
+            $warnings[] = [
+                'type' => 'weight',
+                'level' => 'info',
+                'message' => "Weight utilization is low ({$weightUtilization}%) - consider consolidation",
+                'utilization' => round($weightUtilization, 2),
+            ];
+        }
+
+        if ($volumeUtilization < 50 && $container->items()->count() > 0) {
+            $warnings[] = [
+                'type' => 'volume',
+                'level' => 'info',
+                'message' => "Volume utilization is low ({$volumeUtilization}%) - consider consolidation",
+                'utilization' => round($volumeUtilization, 2),
+            ];
+        }
+
+        return $warnings;
+    }
+
+    /**
+     * Validate quantity availability across all items
+     */
+    public function validateQuantityAvailability(Shipment $shipment): array
+    {
+        $issues = [];
+
+        foreach ($shipment->items as $item) {
+            $piItem = $item->proformaInvoiceItem;
+            
+            if (!$piItem) {
+                $issues[] = "Item #{$item->id} has no linked ProformaInvoice item";
+                continue;
+            }
+
+            if ($item->quantity_to_ship > $piItem->quantity_remaining) {
+                $issues[] = "Item '{$piItem->product_name}': Requested {$item->quantity_to_ship}, Available {$piItem->quantity_remaining}";
+            }
+        }
+
+        return $issues;
+    }
+
+    /**
+     * Get comprehensive validation report
+     */
+    public function getValidationReport(Shipment $shipment): array
+    {
+        $report = [
+            'is_valid' => true,
+            'errors' => [],
+            'warnings' => [],
+            'info' => [],
+        ];
+
+        // Check data integrity
+        $integrityIssues = $this->validateDataIntegrity($shipment);
+        if (!empty($integrityIssues)) {
+            $report['errors'] = array_merge($report['errors'], $integrityIssues);
+            $report['is_valid'] = false;
+        }
+
+        // Check quantity availability
+        $quantityIssues = $this->validateQuantityAvailability($shipment);
+        if (!empty($quantityIssues)) {
+            $report['errors'] = array_merge($report['errors'], $quantityIssues);
+            $report['is_valid'] = false;
+        }
+
+        // Check container warnings
+        foreach ($shipment->containers as $container) {
+            $warnings = $this->checkCapacityWarnings($container);
+            foreach ($warnings as $warning) {
+                if ($warning['level'] === 'critical') {
+                    $report['warnings'][] = "Container {$container->container_number}: {$warning['message']}";
+                } elseif ($warning['level'] === 'warning') {
+                    $report['warnings'][] = "Container {$container->container_number}: {$warning['message']}";
+                } else {
+                    $report['info'][] = "Container {$container->container_number}: {$warning['message']}";
+                }
+            }
+        }
+
+        return $report;
     }
 }
