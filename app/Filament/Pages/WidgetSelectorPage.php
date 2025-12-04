@@ -22,6 +22,15 @@ class WidgetSelectorPage extends Page
 
     protected static bool $shouldRegisterNavigation = true;
 
+    /**
+     * Permitir acesso a todos os usuários autenticados
+     * TODO: Configurar permissões específicas com Filament Shield
+     */
+    public static function canAccess(): bool
+    {
+        return true;
+    }
+
     public array $availableWidgets = [];
 
     public array $selectedWidgets = [];
