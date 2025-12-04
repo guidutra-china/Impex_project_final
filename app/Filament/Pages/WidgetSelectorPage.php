@@ -68,11 +68,13 @@ class WidgetSelectorPage extends Page
             $this->dashboardService = app(DashboardConfigurationService::class);
         }
 
-        // Atualizar widgets visíveis
-        $this->dashboardService->updateVisibleWidgets($user, $this->selectedWidgets);
-
-        // Atualizar ordem
-        $this->dashboardService->updateWidgetOrder($user, $this->widgetOrder);
+        // Obter configuração atual
+        $config = $this->dashboardService->getOrCreateConfiguration($user);
+        
+        // Atualizar widgets visíveis e ordem
+        $config->visible_widgets = $this->selectedWidgets;
+        $config->widget_order = $this->widgetOrder;
+        $config->save();
 
         \Filament\Notifications\Notification::make()
             ->title('Sucesso')
