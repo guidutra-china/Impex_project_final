@@ -174,6 +174,14 @@ class Shipment extends Model
     }
 
     /**
+     * Shipment containers relationship
+     */
+    public function containers(): HasMany
+    {
+        return $this->hasMany(ShipmentContainer::class);
+    }
+
+    /**
      * NEW: Commercial invoice
      */
     public function commercialInvoice(): HasOne
