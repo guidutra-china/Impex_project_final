@@ -31,7 +31,9 @@ class ProjectExpensesWidget extends BaseWidget
     public function table(Table $table): Table
     {
         if (!$this->record instanceof Order) {
-            return $table->query($this->repository->getModel()->query()->whereRaw('1 = 0'));
+            return $table->query(
+                $this->repository->getModel()::query()->whereRaw('1 = 0')
+            );
         }
 
         // Get totals (now correctly using amount_base_currency)
