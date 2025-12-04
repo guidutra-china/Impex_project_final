@@ -3,12 +3,10 @@
 namespace App\Filament\Pages;
 
 use App\Models\AvailableWidget;
-use App\Models\DashboardConfiguration;
 use App\Services\DashboardConfigurationService;
 use App\Services\WidgetRegistryService;
 use Filament\Pages\Page;
 use Illuminate\Support\Facades\Auth;
-use Livewire\Attributes\Computed;
 
 class WidgetSelectorPage extends Page
 {
@@ -20,7 +18,7 @@ class WidgetSelectorPage extends Page
 
     protected static ?string $title = 'Personalizar Dashboard';
 
-    protected static string $view = 'filament.pages.widget-selector-page';
+    protected static bool $shouldRegisterNavigation = true;
 
     public array $availableWidgets = [];
 
