@@ -25,11 +25,33 @@ class WidgetSelectorPage extends Page
     protected string $view = 'filament.pages.widget-selector-page';
 
     /**
-     * Permitir acesso a todos os usuários autenticados
-     * TODO: Configurar permissões específicas com Filament Shield
+     * Controle de acesso à página
+     * 
+     * Permite acesso a:
+     * - Super admins (sempre)
+     * - Usuários com permissão específica (quando configurada)
+     * - Todos os usuários autenticados (fallback)
      */
     public static function canAccess(): bool
     {
+        $user = auth()->user();
+        
+        if (!$user) {
+            return false;
+        }
+        
+        // Super admins sempre têm acesso
+        if (method_exists($user, 'hasRole') && $user->hasRole('super_admin')) {
+            return true;
+        }
+        
+        // Verificar permissão específica (se existir)
+        if (method_exists($user, 'can') && $user->can('page_WidgetSelectorPage')) {
+            return true;
+        }
+        
+        // Fallback: permitir acesso a todos os usuários autenticados
+        // TODO: Restringir a roles específicas quando necessário
         return true;
     }
 
