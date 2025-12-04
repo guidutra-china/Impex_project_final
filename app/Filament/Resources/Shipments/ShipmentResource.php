@@ -48,7 +48,9 @@ class ShipmentResource extends Resource
             InvoicesRelationManager::class,
             ItemsRelationManager::class,
             PackingBoxesRelationManager::class,
-            ShipmentContainersRelationManager::class,
+            // TODO: ShipmentContainersRelationManager causing Livewire component discovery error
+            // Temporarily disabled until root cause is fixed
+            // ShipmentContainersRelationManager::class,
         ];
     }
 
