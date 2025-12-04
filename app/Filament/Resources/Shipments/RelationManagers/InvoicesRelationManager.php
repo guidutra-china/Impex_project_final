@@ -110,7 +110,7 @@ class InvoicesRelationManager extends RelationManager
                     ->recordSelectOptionsQuery(function ($query) {
                         // Only show invoices that are not cancelled and have items
                         return $query->whereHas('items')
-                            ->where('status', '!=', 'cancelled');
+                            ->where('sales_invoices.status', '!=', 'cancelled');
                     })
                     ->after(function ($record, $livewire) {
                         // Recalculate pivot totals after attaching
