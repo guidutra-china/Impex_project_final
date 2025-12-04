@@ -13,9 +13,12 @@ class ShipmentInvoice extends Model
     protected $fillable = [
         'shipment_id',
         'sales_invoice_id',
+        'proforma_invoice_id',
         'total_items',
         'total_quantity',
         'total_value',
+        'status',
+        'shipped_at',
         'notes',
     ];
 
@@ -54,7 +57,8 @@ class ShipmentInvoice extends Model
     {
         $shipmentItems = $this->shipment->items()
             ->whereHas('salesInvoiceItem', function ($query) {
-                $query->where('sales_invoice_id', $this->sales_invoice_id);
+                $query->where('sales_invoice_id',
+        'proforma_invoice_id', $this->sales_invoice_id);
             })
             ->get();
 

@@ -15,6 +15,9 @@ class ProformaInvoiceItem extends Model
         'product_name',
         'product_sku',
         'quantity',
+        'quantity_shipped',
+        'quantity_remaining',
+        'shipment_count',
         'unit_price',
         'commission_amount',
         'commission_percent',
@@ -26,6 +29,9 @@ class ProformaInvoiceItem extends Model
 
     protected $casts = [
         'quantity' => 'integer',
+        'quantity_shipped' => 'integer',
+        'quantity_remaining' => 'integer',
+        'shipment_count' => 'integer',
         'delivery_days' => 'integer',
         'commission_percent' => 'decimal:2',
     ];
@@ -106,5 +112,69 @@ class ProformaInvoiceItem extends Model
     public function quoteItem(): BelongsTo
     {
         return $this->belongsTo(QuoteItem::class);
+    }
+
+    public function shipmentContainerItems()
+    {
+        return $this->hasMany(ShipmentContainerItem::class);
+    }
+
+    /**
+     * Methods for shipment tracking
+     */
+    public function getQuantityRemaining(): int
+    {
+        return $this->quantity - ($this->quantity_shipped ?? 0);
+    }
+
+    public function canShip(int $quantity): bool
+    {
+        return $quantity <= $this->getQuantityRemaining();
+    }
+
+    public function getShipments()
+    {
+        return $this->shipmentContainerItems()
+            ->with('container.shipment')
+            ->get()
+            ->groupBy(fn($item) => $item->container->shipment_id)
+            ->map(fn($items) => [
+                'shipment_id' => $items->first()->container->shipment_id,
+                'shipment_number' => $items->first()->container->shipment->shipment_number,
+                'quantity' => $items->sum('quantity'),
+                'containers' => $items->map(fn($i) => $i->container->container_number)->unique()->values(),
+                'sequence' => $items->first()->shipment_sequence,
+            ]);
+    }
+
+    public function addShipped(int $quantity): void
+    {
+        if (!$this->canShip($quantity)) {
+            throw new \Exception(
+                "Quantidade insuficiente. Restante: {$this->getQuantityRemaining()}, Solicitado: {$quantity}"
+            );
+        }
+
+        $this->quantity_shipped = ($this->quantity_shipped ?? 0) + $quantity;
+        $this->quantity_remaining = $this->quantity - $this->quantity_shipped;
+        $this->shipment_count = ($this->shipment_count ?? 0) + 1;
+        $this->save();
+    }
+
+    public function removeShipped(int $quantity): void
+    {
+        $this->quantity_shipped = max(0, ($this->quantity_shipped ?? 0) - $quantity);
+        $this->quantity_remaining = $this->quantity - $this->quantity_shipped;
+        $this->save();
+    }
+
+    public function isFullyShipped(): bool
+    {
+        return $this->quantity_shipped >= $this->quantity;
+    }
+
+    public function isPartiallyShipped(): bool
+    {
+        return $this->quantity_shipped > 0 && $this->quantity_shipped < $this->quantity;
     }
 }

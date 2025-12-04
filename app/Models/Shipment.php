@@ -408,3 +408,29 @@ class Shipment extends Model
         return sprintf('SHP-%d-%04d', $year, $nextNumber);
     }
 }
+
+    // Métodos adicionais para containers
+    public function getProformaInvoicesInShipment()
+    {
+        return $this->shipmentInvoices()
+            ->with('proformaInvoice')
+            ->get()
+            ->map(fn($si) => [
+                'proforma_invoice_id' => $si->proforma_invoice_id,
+                'proforma_number' => $si->proformaInvoice->proforma_number,
+                'total_quantity' => $si->total_quantity,
+                'is_fully_shipped' => $si->isFullyShipped(),
+                'sequence' => $si->getShipmentSequence(),
+            ]);
+    }
+
+    public function getContainersByProformaInvoice($proformaInvoiceId)
+    {
+        return $this->containers()
+            ->whereHas('items', fn($q) => 
+                $q->whereHas('proformaInvoiceItem', fn($q2) => 
+                    $q2->where('proforma_invoice_id', $proformaInvoiceId)
+                )
+            )
+            ->get();
+    }
