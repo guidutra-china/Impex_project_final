@@ -41,6 +41,7 @@ class ProformaInvoiceResource extends Resource
     {
         return [
             RelationManagers\ItemsRelationManager::class,
+            RelationManagers\ShipmentsRelationManager::class,
         ];
     }
 

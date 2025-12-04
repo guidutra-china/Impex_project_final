@@ -11,15 +11,20 @@ use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Actions\Action;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Grid;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Filament\Support\Enums\FontWeight;
+use Filament\Notifications\Notification;
 
 class ItemsRelationManager extends RelationManager
 {
@@ -40,169 +45,180 @@ class ItemsRelationManager extends RelationManager
     {
         return $schema
             ->components([
-                Select::make('supplier_quote_id')
-                    ->label('Source Supplier Quote')
-                    ->options(function () {
-                        return $this->quoteRepository->getSelectOptions();
-                    })
-                    ->searchable()
-                    ->preload()
-                    ->live()
-                    ->afterStateUpdated(function (Set $set) {
-                        // Clear quote item when supplier quote changes
-                        $set('quote_item_id', null);
-                        $set('product_id', null);
-                        $set('quantity', null);
-                        $set('unit_price', null);
-                        $set('commission_percent', null);
-                        $set('commission_type', null);
-                    })
-                    ->helperText('Select supplier quote to load items from')
-                    ->columnSpan(2),
+                Section::make('Source Information')
+                    ->description('Select the supplier quote and item to import')
+                    ->schema([
+                        Select::make('supplier_quote_id')
+                            ->label('Source Supplier Quote')
+                            ->options(function () {
+                                return $this->quoteRepository->getSelectOptions();
+                            })
+                            ->searchable()
+                            ->preload()
+                            ->live()
+                            ->afterStateUpdated(function (Set $set) {
+                                // Clear quote item when supplier quote changes
+                                $set('quote_item_id', null);
+                                $set('product_id', null);
+                                $set('quantity', null);
+                                $set('unit_price', null);
+                                $set('commission_percent', null);
+                                $set('commission_type', null);
+                            })
+                            ->helperText('Select supplier quote to load items from')
+                            ->columnSpan(2),
 
-                Select::make('quote_item_id')
-                    ->label('Quote Item')
-                    ->options(function (Get $get) {
-                        $quoteId = $get('supplier_quote_id');
-                        if (!$quoteId) {
-                            return [];
-                        }
+                        Select::make('quote_item_id')
+                            ->label('Quote Item')
+                            ->options(function (Get $get) {
+                                $quoteId = $get('supplier_quote_id');
+                                if (!$quoteId) {
+                                    return [];
+                                }
 
-                        return QuoteItem::where('supplier_quote_id', $quoteId)
-                            ->with('product')
-                            ->get()
-                            ->mapWithKeys(function ($item) {
-                                $label = sprintf(
-                                    '%s - Qty: %d @ $%s',
-                                    $item->product?->name ?? 'Unknown',
-                                    $item->quantity,
-                                    number_format($item->unit_price_after_commission / 100, 2)
-                                );
-                                return [$item->id => $label];
-                            });
-                    })
-                    ->searchable()
-                    ->preload()
-                    ->live()
-                    ->afterStateUpdated(function (Get $get, Set $set, $state) {
-                        if (!$state) {
-                            return;
-                        }
+                                return QuoteItem::where('supplier_quote_id', $quoteId)
+                                    ->with('product')
+                                    ->get()
+                                    ->mapWithKeys(function ($item) {
+                                        $label = sprintf(
+                                            '%s - Qty: %d @ $%s',
+                                            $item->product?->name ?? 'Unknown',
+                                            $item->quantity,
+                                            number_format($item->unit_price_after_commission / 100, 2)
+                                        );
+                                        return [$item->id => $label];
+                                    });
+                            })
+                            ->searchable()
+                            ->preload()
+                            ->live()
+                            ->afterStateUpdated(function (Get $get, Set $set, $state) {
+                                if (!$state) {
+                                    return;
+                                }
 
-                        $quoteItem = QuoteItem::with('product')->find($state);
-                        if (!$quoteItem) {
-                            return;
-                        }
+                                $quoteItem = QuoteItem::with('product')->find($state);
+                                if (!$quoteItem) {
+                                    return;
+                                }
 
-                        // Auto-fill from quote item
-                        $set('product_id', $quoteItem->product_id);
-                        $set('quantity', $quoteItem->quantity);
-                        $set('unit_price', $quoteItem->unit_price_after_commission / 100); // Convert from cents
-                        $set('commission_percent', $quoteItem->commission_percent);
-                        $set('commission_type', $quoteItem->commission_type);
-                        $set('delivery_days', $quoteItem->delivery_days);
-                        
-                        // Calculate total
-                        $total = ($quoteItem->quantity * $quoteItem->unit_price_after_commission) / 100;
-                        $set('total', $total);
-                        
-                        // Calculate commission amount
-                        if ($quoteItem->commission_type === 'embedded') {
-                            $basePrice = $quoteItem->unit_price_before_commission / 100;
-                            $commissionAmount = (($quoteItem->unit_price_after_commission - $quoteItem->unit_price_before_commission) * $quoteItem->quantity) / 100;
-                            $set('commission_amount', $commissionAmount);
-                        } else {
-                            $commissionAmount = ($quoteItem->unit_price_before_commission * $quoteItem->quantity * $quoteItem->commission_percent / 100) / 100;
-                            $set('commission_amount', $commissionAmount);
-                        }
-                    })
-                    ->required()
-                    ->disabled(fn (Get $get) => !$get('supplier_quote_id'))
-                    ->helperText('Select item from the supplier quote')
-                    ->columnSpan(2),
-
-                Select::make('product_id')
-                    ->relationship('product', 'name')
-                    ->required()
-                    ->searchable()
-                    ->preload()
-                    ->disabled()
-                    ->dehydrated()
-                    ->columnSpan(2),
-
-                TextInput::make('quantity')
-                    ->required()
-                    ->numeric()
-                    ->minValue(1)
-                    ->default(1)
-                    ->live()
-                    ->afterStateUpdated(function (Get $get, Set $set) {
-                        $quantity = (float) $get('quantity');
-                        $unitPrice = (float) $get('unit_price');
-                        $total = $quantity * $unitPrice;
-                        $set('total', $total);
-                    })
-                    ->columnSpan(1),
-
-                TextInput::make('unit_price')
-                    ->label('Unit Price (with commission)')
-                    ->required()
-                    ->numeric()
-                    ->minValue(0)
-                    ->prefix('$')
-                    ->live()
-                    ->afterStateUpdated(function (Get $get, Set $set) {
-                        $quantity = (float) $get('quantity');
-                        $unitPrice = (float) $get('unit_price');
-                        $total = $quantity * $unitPrice;
-                        $set('total', $total);
-                    })
-                    ->columnSpan(1),
-
-                TextInput::make('commission_percent')
-                    ->label('Commission %')
-                    ->numeric()
-                    ->suffix('%')
-                    ->disabled()
-                    ->dehydrated()
-                    ->columnSpan(1),
-
-                Select::make('commission_type')
-                    ->options([
-                        'embedded' => 'Embedded',
-                        'separate' => 'Separate',
+                                // Auto-fill from quote item
+                                $set('product_id', $quoteItem->product_id);
+                                $set('quantity', $quoteItem->quantity);
+                                $set('unit_price', $quoteItem->unit_price_after_commission / 100); // Convert from cents
+                                $set('commission_percent', $quoteItem->commission_percent);
+                                $set('commission_type', $quoteItem->commission_type);
+                                $set('delivery_days', $quoteItem->delivery_days);
+                                
+                                // Calculate total
+                                $total = ($quoteItem->quantity * $quoteItem->unit_price_after_commission) / 100;
+                                $set('total', $total);
+                                
+                                // Calculate commission amount
+                                if ($quoteItem->commission_type === 'embedded') {
+                                    $basePrice = $quoteItem->unit_price_before_commission / 100;
+                                    $commissionAmount = (($quoteItem->unit_price_after_commission - $quoteItem->unit_price_before_commission) * $quoteItem->quantity) / 100;
+                                    $set('commission_amount', $commissionAmount);
+                                } else {
+                                    $commissionAmount = ($quoteItem->unit_price_before_commission * $quoteItem->quantity * $quoteItem->commission_percent / 100) / 100;
+                                    $set('commission_amount', $commissionAmount);
+                                }
+                            })
+                            ->required()
+                            ->disabled(fn (Get $get) => !$get('supplier_quote_id'))
+                            ->helperText('Select item from the supplier quote')
+                            ->columnSpan(2),
                     ])
-                    ->disabled()
-                    ->dehydrated()
-                    ->columnSpan(1),
+                    ->columns(2)
+                    ->collapsible(),
 
-                TextInput::make('commission_amount')
-                    ->label('Commission Amount')
-                    ->numeric()
-                    ->prefix('$')
-                    ->disabled()
-                    ->dehydrated()
-                    ->columnSpan(1),
+                Section::make('Product & Pricing')
+                    ->description('Product details and pricing information')
+                    ->schema([
+                        Select::make('product_id')
+                            ->relationship('product', 'name')
+                            ->required()
+                            ->searchable()
+                            ->preload()
+                            ->disabled()
+                            ->dehydrated()
+                            ->columnSpan(2),
 
-                TextInput::make('total')
-                    ->label('Total')
-                    ->numeric()
-                    ->disabled()
-                    ->dehydrated()
-                    ->prefix('$')
-                    ->columnSpan(1),
+                        TextInput::make('quantity')
+                            ->required()
+                            ->numeric()
+                            ->minValue(1)
+                            ->default(1)
+                            ->live()
+                            ->afterStateUpdated(function (Get $get, Set $set) {
+                                $quantity = (float) $get('quantity');
+                                $unitPrice = (float) $get('unit_price');
+                                $total = $quantity * $unitPrice;
+                                $set('total', $total);
+                            })
+                            ->columnSpan(1),
 
-                TextInput::make('delivery_days')
-                    ->label('Delivery (days)')
-                    ->numeric()
-                    ->minValue(0)
-                    ->columnSpan(1),
+                        TextInput::make('unit_price')
+                            ->label('Unit Price (with commission)')
+                            ->required()
+                            ->numeric()
+                            ->minValue(0)
+                            ->prefix('$')
+                            ->live()
+                            ->afterStateUpdated(function (Get $get, Set $set) {
+                                $quantity = (float) $get('quantity');
+                                $unitPrice = (float) $get('unit_price');
+                                $total = $quantity * $unitPrice;
+                                $set('total', $total);
+                            })
+                            ->columnSpan(1),
 
-                Textarea::make('notes')
-                    ->rows(2)
-                    ->columnSpanFull(),
-            ])
-            ->columns(4);
+                        TextInput::make('commission_percent')
+                            ->label('Commission %')
+                            ->numeric()
+                            ->suffix('%')
+                            ->disabled()
+                            ->dehydrated()
+                            ->columnSpan(1),
+
+                        Select::make('commission_type')
+                            ->options([
+                                'embedded' => 'Embedded',
+                                'separate' => 'Separate',
+                            ])
+                            ->disabled()
+                            ->dehydrated()
+                            ->columnSpan(1),
+
+                        TextInput::make('commission_amount')
+                            ->label('Commission Amount')
+                            ->numeric()
+                            ->prefix('$')
+                            ->disabled()
+                            ->dehydrated()
+                            ->columnSpan(1),
+
+                        TextInput::make('total')
+                            ->label('Total')
+                            ->numeric()
+                            ->disabled()
+                            ->dehydrated()
+                            ->prefix('$')
+                            ->columnSpan(1),
+
+                        TextInput::make('delivery_days')
+                            ->label('Delivery (days)')
+                            ->numeric()
+                            ->minValue(0)
+                            ->columnSpan(1),
+
+                        Textarea::make('notes')
+                            ->rows(2)
+                            ->columnSpanFull(),
+                    ])
+                    ->columns(4)
+                    ->collapsible(),
+            ]);
     }
 
     public function table(Table $table): Table
@@ -215,18 +231,57 @@ class ItemsRelationManager extends RelationManager
             ->columns([
                 TextColumn::make('product.code')
                     ->label('Code')
-                    ->searchable(),
+                    ->searchable()
+                    ->sortable(),
 
                 TextColumn::make('product.name')
+                    ->label('Product')
                     ->searchable()
-                    ->wrap(),
+                    ->sortable()
+                    ->wrap()
+                    ->weight(FontWeight::Medium),
 
                 TextColumn::make('quantity')
-                    ->alignCenter(),
+                    ->label('Qty')
+                    ->alignCenter()
+                    ->sortable(),
+
+                TextColumn::make('quantity_shipped')
+                    ->label('Shipped')
+                    ->alignCenter()
+                    ->sortable()
+                    ->default(0)
+                    ->badge()
+                    ->color(fn ($record) => $record->quantity_shipped >= $record->quantity ? 'success' : 'warning'),
+
+                TextColumn::make('quantity_remaining')
+                    ->label('Remaining')
+                    ->alignCenter()
+                    ->getStateUsing(fn ($record) => $record->quantity - ($record->quantity_shipped ?? 0))
+                    ->badge()
+                    ->color(fn ($state) => $state == 0 ? 'success' : 'info'),
+
+                TextColumn::make('shipment_status')
+                    ->label('Status')
+                    ->badge()
+                    ->getStateUsing(function ($record) {
+                        $shipped = $record->quantity_shipped ?? 0;
+                        if ($shipped == 0) return 'pending';
+                        if ($shipped >= $record->quantity) return 'completed';
+                        return 'partial';
+                    })
+                    ->color(fn (string $state): string => match ($state) {
+                        'completed' => 'success',
+                        'partial' => 'warning',
+                        'pending' => 'gray',
+                        default => 'gray',
+                    })
+                    ->formatStateUsing(fn (string $state): string => ucfirst($state)),
 
                 TextColumn::make('unit_price')
                     ->label('Unit Price')
-                    ->money(fn () => $this->getOwnerRecord()->currency?->code ?? 'USD'),
+                    ->money(fn () => $this->getOwnerRecord()->currency?->code ?? 'USD')
+                    ->sortable(),
 
                 TextColumn::make('commission_percent')
                     ->label('Comm %')
@@ -248,7 +303,18 @@ class ItemsRelationManager extends RelationManager
                 TextColumn::make('total')
                     ->label('Total')
                     ->money(fn () => $this->getOwnerRecord()->currency?->code ?? 'USD')
-                    ->weight('bold'),
+                    ->weight(FontWeight::Bold)
+                    ->sortable(),
+
+                TextColumn::make('product.weight')
+                    ->label('Weight (kg)')
+                    ->numeric(decimalPlaces: 2)
+                    ->toggleable(isToggledHiddenByDefault: true),
+
+                TextColumn::make('product.volume')
+                    ->label('Volume (m³)')
+                    ->numeric(decimalPlaces: 4)
+                    ->toggleable(isToggledHiddenByDefault: true),
 
                 TextColumn::make('supplierQuote.quote_number')
                     ->label('Source Quote')
@@ -258,16 +324,59 @@ class ItemsRelationManager extends RelationManager
                 //
             ])
             ->headerActions([
-                CreateAction::make(),
+                CreateAction::make()
+                    ->icon('heroicon-o-plus-circle'),
             ])
             ->actions([
-                EditAction::make(),
-                DeleteAction::make(),
+                Action::make('view_shipments')
+                    ->label('Shipments')
+                    ->icon('heroicon-o-truck')
+                    ->color('info')
+                    ->visible(fn ($record) => ($record->quantity_shipped ?? 0) > 0)
+                    ->url(fn ($record) => route('filament.admin.resources.shipments.index', [
+                        'tableFilters' => [
+                            'proforma_invoice_item_id' => ['value' => $record->id]
+                        ]
+                    ]))
+                    ->openUrlInNewTab(),
+
+                EditAction::make()
+                    ->icon('heroicon-o-pencil-square'),
+
+                DeleteAction::make()
+                    ->icon('heroicon-o-trash')
+                    ->before(function ($record, DeleteAction $action) {
+                        // Prevent deletion if item has been shipped
+                        if (($record->quantity_shipped ?? 0) > 0) {
+                            Notification::make()
+                                ->title('Cannot delete item')
+                                ->body('This item has already been shipped and cannot be deleted.')
+                                ->danger()
+                                ->send();
+
+                            $action->cancel();
+                        }
+                    }),
             ])
             ->bulkActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make(),
+                    DeleteBulkAction::make()
+                        ->before(function ($records, DeleteBulkAction $action) {
+                            // Check if any record has been shipped
+                            $hasShipped = $records->contains(fn ($record) => ($record->quantity_shipped ?? 0) > 0);
+                            
+                            if ($hasShipped) {
+                                Notification::make()
+                                    ->title('Cannot delete items')
+                                    ->body('One or more items have already been shipped and cannot be deleted.')
+                                    ->danger()
+                                    ->send();
+
+                                $action->cancel();
+                            }
+                        }),
                 ]),
-            ]);
+            ])
+            ->defaultSort('created_at', 'desc');
     }
 }
