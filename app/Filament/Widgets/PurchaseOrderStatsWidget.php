@@ -36,7 +36,7 @@ class PurchaseOrderStatsWidget extends BaseWidget
     protected function getStats(): array
     {
         // Ensure repository is initialized
-        if (!$this->repository) {
+        if (!isset($this->repository) || !$this->repository) {
             $this->repository = app(PurchaseOrderRepository::class);
         }
         
@@ -122,7 +122,7 @@ class PurchaseOrderStatsWidget extends BaseWidget
     protected function getLastSevenDaysChart(): array
     {
         // Ensure repository is initialized
-        if (!$this->repository) {
+        if (!isset($this->repository) || !$this->repository) {
             $this->repository = app(PurchaseOrderRepository::class);
         }
         
