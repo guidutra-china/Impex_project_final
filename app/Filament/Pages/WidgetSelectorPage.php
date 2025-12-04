@@ -82,10 +82,15 @@ class WidgetSelectorPage extends Page
             ->success()
             ->send();
     }
-
     public function resetToDefault(): void
     {
         $user = Auth::user();
+
+        // Lazy initialize if not already done
+        if (!isset($this->dashboardService)) {
+            $this->dashboardService = app(DashboardConfigurationService::class);
+        }
+
         $this->dashboardService->resetToDefault($user);
 
         $this->mount();
