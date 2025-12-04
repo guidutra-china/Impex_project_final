@@ -13,9 +13,9 @@ class EditProduct extends EditRecord
 
     protected ?ProductRepository $productRepository = null;
 
-    public function mount(): void
+    public function mount(string|int $record): void
     {
-        parent::mount();
+        parent::mount($record);
         $this->productRepository = app(ProductRepository::class);
     }
 

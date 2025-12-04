@@ -16,9 +16,9 @@ class EditProformaInvoice extends EditRecord
 
     protected ?ProformaInvoiceRepository $proformaRepository = null;
 
-    public function mount(): void
+    public function mount(string|int $record): void
     {
-        parent::mount();
+        parent::mount($record);
         $this->proformaRepository = app(ProformaInvoiceRepository::class);
     }
 

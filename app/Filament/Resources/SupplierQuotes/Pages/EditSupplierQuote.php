@@ -17,9 +17,9 @@ class EditSupplierQuote extends EditRecord
 
     protected ?SupplierQuoteRepository $quoteRepository = null;
 
-    public function mount(): void
+    public function mount(string|int $record): void
     {
-        parent::mount();
+        parent::mount($record);
         $this->quoteRepository = app(SupplierQuoteRepository::class);
     }
 

@@ -13,9 +13,9 @@ class EditClient extends EditRecord
 
     protected ?ClientRepository $clientRepository = null;
 
-    public function mount(): void
+    public function mount(string|int $record): void
     {
-        parent::mount();
+        parent::mount($record);
         $this->clientRepository = app(ClientRepository::class);
     }
 

@@ -13,9 +13,9 @@ class EditSupplier extends EditRecord
 
     protected ?SupplierRepository $supplierRepository = null;
 
-    public function mount(): void
+    public function mount(string|int $record): void
     {
-        parent::mount();
+        parent::mount($record);
         $this->supplierRepository = app(SupplierRepository::class);
     }
 

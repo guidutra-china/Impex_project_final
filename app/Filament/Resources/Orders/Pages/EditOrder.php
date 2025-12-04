@@ -24,9 +24,9 @@ class EditOrder extends EditRecord
     protected ?OrderRepository $orderRepository = null;
     protected ?FinancialTransactionRepository $financialTransactionRepository = null;
 
-    public function mount(): void
+    public function mount(string|int $record): void
     {
-        parent::mount();
+        parent::mount($record);
         $this->orderRepository = app(OrderRepository::class);
         $this->financialTransactionRepository = app(FinancialTransactionRepository::class);
     }
