@@ -10,11 +10,11 @@ class CreateClient extends CreateRecord
 {
     protected static string $resource = ClientResource::class;
 
-    protected ClientRepository $clientRepository;
+    protected ?ClientRepository $clientRepository = null;
 
-    public function __construct()
+    public function mount(): void
     {
-        parent::__construct();
+        parent::mount();
         $this->clientRepository = app(ClientRepository::class);
     }
 }

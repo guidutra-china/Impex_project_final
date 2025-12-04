@@ -14,11 +14,11 @@ class EditProformaInvoice extends EditRecord
 {
     protected static string $resource = ProformaInvoiceResource::class;
 
-    protected ProformaInvoiceRepository $proformaRepository;
+    protected ?ProformaInvoiceRepository $proformaRepository = null;
 
-    public function __construct()
+    public function mount(): void
     {
-        parent::__construct();
+        parent::mount();
         $this->proformaRepository = app(ProformaInvoiceRepository::class);
     }
 

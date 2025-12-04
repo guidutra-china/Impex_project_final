@@ -15,11 +15,11 @@ class EditSupplierQuote extends EditRecord
 {
     protected static string $resource = SupplierQuoteResource::class;
 
-    protected SupplierQuoteRepository $quoteRepository;
+    protected ?SupplierQuoteRepository $quoteRepository = null;
 
-    public function __construct()
+    public function mount(): void
     {
-        parent::__construct();
+        parent::mount();
         $this->quoteRepository = app(SupplierQuoteRepository::class);
     }
 

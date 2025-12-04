@@ -10,11 +10,11 @@ class CreateSupplier extends CreateRecord
 {
     protected static string $resource = SupplierResource::class;
 
-    protected SupplierRepository $supplierRepository;
+    protected ?SupplierRepository $supplierRepository = null;
 
-    public function __construct()
+    public function mount(): void
     {
-        parent::__construct();
+        parent::mount();
         $this->supplierRepository = app(SupplierRepository::class);
     }
 }

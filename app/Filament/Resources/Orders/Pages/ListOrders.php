@@ -12,11 +12,11 @@ class ListOrders extends ListRecords
 {
     protected static string $resource = OrderResource::class;
 
-    protected OrderRepository $orderRepository;
+    protected ?OrderRepository $orderRepository = null;
 
-    public function __construct()
+    public function mount(): void
     {
-        parent::__construct();
+        parent::mount();
         $this->orderRepository = app(OrderRepository::class);
     }
 

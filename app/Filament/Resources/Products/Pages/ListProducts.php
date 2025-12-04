@@ -12,11 +12,11 @@ class ListProducts extends ListRecords
 {
     protected static string $resource = ProductResource::class;
 
-    protected ProductRepository $productRepository;
+    protected ?ProductRepository $productRepository = null;
 
-    public function __construct()
+    public function mount(): void
     {
-        parent::__construct();
+        parent::mount();
         $this->productRepository = app(ProductRepository::class);
     }
 
