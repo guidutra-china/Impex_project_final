@@ -3,7 +3,7 @@
 namespace App\Filament\Actions;
 
 use App\Models\ShipmentContainer;
-use Filament\Tables\Actions\Action;
+use Filament\Actions\Action;
 use Illuminate\Database\Eloquent\Model;
 
 class UnsealContainerAction extends Action

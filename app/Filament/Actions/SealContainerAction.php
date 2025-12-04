@@ -4,7 +4,7 @@ namespace App\Filament\Actions;
 
 use App\Models\ShipmentContainer;
 use Filament\Forms\Components\TextInput;
-use Filament\Tables\Actions\Action;
+use Filament\Actions\Action;
 use Illuminate\Database\Eloquent\Model;
 
 class SealContainerAction extends Action
