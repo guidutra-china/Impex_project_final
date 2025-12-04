@@ -25,6 +25,11 @@ class ShipmentContainersRelationManager extends RelationManager
 
     protected static ?string $recordTitleAttribute = 'container_number';
 
+    public function mount(): void
+    {
+        parent::mount();
+    }
+
     public function form(Schema $schema): Schema
     {
         return $schema
