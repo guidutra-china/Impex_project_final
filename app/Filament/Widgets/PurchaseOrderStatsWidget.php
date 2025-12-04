@@ -121,6 +121,11 @@ class PurchaseOrderStatsWidget extends BaseWidget
      */
     protected function getLastSevenDaysChart(): array
     {
+        // Ensure repository is initialized
+        if (!$this->repository) {
+            $this->repository = app(PurchaseOrderRepository::class);
+        }
+        
         $data = [];
         
         for ($i = 6; $i >= 0; $i--) {
