@@ -25,7 +25,7 @@ class ShipmentContainersRelationManager extends RelationManager
 
     protected static ?string $recordTitleAttribute = 'container_number';
 
-    public static function form(Schema $schema): Schema
+    public function form(Schema $schema): Schema
     {
         return $schema
             ->schema([
@@ -94,7 +94,7 @@ class ShipmentContainersRelationManager extends RelationManager
             ]);
     }
 
-    public static function table(Table $table): Table
+    public function table(Table $table): Table
     {
         return $table
             ->columns([
