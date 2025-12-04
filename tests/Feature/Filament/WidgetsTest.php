@@ -9,7 +9,7 @@ use App\Filament\Widgets\PurchaseOrderStatsWidget;
 use App\Filament\Widgets\RelatedDocumentsWidget;
 use App\Filament\Widgets\RfqStatsWidget;
 use App\Models\User;
-use Filament\Facades\Filament;
+
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Tests\TestCase;
@@ -24,7 +24,7 @@ class WidgetsTest extends TestCase
     {
         parent::setUp();
         $this->user = User::factory()->create();
-        Filament::actingAs($this->user);
+        $this->actingAs($this->user);
     }
 
     /** @dataProvider widgetProvider */

@@ -5,7 +5,7 @@ namespace Tests\Feature\Filament;
 use App\Filament\Pages\WidgetSelectorPage;
 use App\Models\AvailableWidget;
 use App\Models\User;
-use Filament\Facades\Filament;
+
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Tests\TestCase;
@@ -20,7 +20,7 @@ class WidgetSelectorPageTest extends TestCase
     {
         parent::setUp();
         $this->user = User::factory()->create();
-        Filament::actingAs($this->user);
+        $this->actingAs($this->user);
 
         // Seed available widgets
         AvailableWidget::factory()->create(["widget_id" => "calendar", "title" => "Calendar"]);
