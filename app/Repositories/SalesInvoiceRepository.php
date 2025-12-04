@@ -18,9 +18,9 @@ class SalesInvoiceRepository extends BaseRepository
     /**
      * Retorna a classe do modelo
      */
-    public function getModel(): string
+    protected function resolveModel(): \Illuminate\Database\Eloquent\Model
     {
-        return SalesInvoice::class;
+        return new SalesInvoice();
     }
 
     /**

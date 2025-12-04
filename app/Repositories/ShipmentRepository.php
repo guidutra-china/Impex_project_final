@@ -18,9 +18,9 @@ class ShipmentRepository extends BaseRepository
     /**
      * Retorna a classe do modelo
      */
-    public function getModel(): string
+    protected function resolveModel(): \Illuminate\Database\Eloquent\Model
     {
-        return Shipment::class;
+        return new Shipment();
     }
 
     /**

@@ -18,9 +18,9 @@ class DocumentRepository extends BaseRepository
     /**
      * Retorna a classe do modelo
      */
-    public function getModel(): string
+    protected function resolveModel(): \Illuminate\Database\Eloquent\Model
     {
-        return Document::class;
+        return new Document();
     }
 
     /**

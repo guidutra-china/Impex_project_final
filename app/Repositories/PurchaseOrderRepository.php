@@ -18,9 +18,9 @@ class PurchaseOrderRepository extends BaseRepository
     /**
      * Retorna a classe do modelo
      */
-    public function getModel(): string
+    protected function resolveModel(): \Illuminate\Database\Eloquent\Model
     {
-        return PurchaseOrder::class;
+        return new PurchaseOrder();
     }
 
     /**

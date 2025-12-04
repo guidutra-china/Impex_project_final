@@ -18,9 +18,9 @@ class FinancialTransactionRepository extends BaseRepository
     /**
      * Retorna a classe do modelo
      */
-    public function getModel(): string
+    protected function resolveModel(): \Illuminate\Database\Eloquent\Model
     {
-        return FinancialTransaction::class;
+        return new FinancialTransaction();
     }
 
     /**

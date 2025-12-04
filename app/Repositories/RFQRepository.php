@@ -18,9 +18,9 @@ class RFQRepository extends BaseRepository
     /**
      * Retorna a classe do modelo
      */
-    public function getModel(): string
+    protected function resolveModel(): \Illuminate\Database\Eloquent\Model
     {
-        return Order::class;
+        return new Order();
     }
 
     /**
