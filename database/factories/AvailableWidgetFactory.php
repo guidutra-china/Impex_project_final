@@ -12,6 +12,7 @@ class AvailableWidgetFactory extends Factory
             'widget_id' => $this->faker->unique()->slug(),
             'title' => $this->faker->words(2, true),
             'description' => $this->faker->sentence(),
+            'class' => 'App\\Filament\\Widgets\\' . ucfirst($this->faker->word()) . 'Widget',
             'icon' => 'heroicon-o-square-2-stack',
             'category' => $this->faker->randomElement(['dashboard', 'reports', 'analytics']),
             'is_available' => true,
