@@ -423,9 +423,9 @@ class Shipment extends Model
                 ->lockForUpdate()
                 ->first();
 
-            $nextNumber = $lastShipment ? (int) substr($lastShipment->shipment_number, -4) + 1 : 1;
+            $nextNumber = $lastShipment ? (int) substr($lastShipment->shipment_number, -5) + 1 : 1;
 
-            return sprintf('SHP-%d-%04d', $year, $nextNumber);
+            return sprintf('SHP-%d-%05d', $year, $nextNumber);
         });
     }
 
