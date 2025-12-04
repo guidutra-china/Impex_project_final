@@ -9,14 +9,15 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use BackedEnum;
+use FilamentSupportEnumsVerticalAlignment;
 
 class DashboardConfigurationResource extends Resource
 {
     protected static ?string $model = DashboardConfiguration::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-cog-6-tooth';
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-cog-6-tooth';
 
-    protected static ?string $navigationGroup = 'Configurações';
+    protected static string|BackedEnum|null $navigationGroup = 'Configurações';
 
     protected static ?string $label = 'Configuração do Dashboard';
 
