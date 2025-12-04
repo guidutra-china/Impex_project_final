@@ -13,12 +13,12 @@ use Illuminate\Support\Facades\Auth;
 use UnitEnum;
 
 class WidgetSelectorPage extends Page
-    {
-        protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-squares-2x2';
+{
+    protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-squares-2x2';
 
-        protected string $view = 'filament.pages.widget-selector-page';
+    protected string $view = 'filament.pages.widget-selector-page';
 
-        protected static UnitEnum|string|null $navigationGroup = 'Dashboard';
+    protected static UnitEnum|string|null $navigationGroup = 'Dashboard';
 
     protected static ?string $navigationLabel = 'Personalizar Dashboard';
 
@@ -82,6 +82,7 @@ class WidgetSelectorPage extends Page
             ->success()
             ->send();
     }
+
     public function resetToDefault(): void
     {
         $user = Auth::user();
