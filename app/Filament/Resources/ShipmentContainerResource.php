@@ -1,7 +1,9 @@
 <?php
 
 namespace App\Filament\Resources;
+
 use UnitEnum;
+use BackedEnum;
 
 use App\Models\ShipmentContainer;
 use Filament\Forms;
@@ -22,7 +24,7 @@ class ShipmentContainerResource extends Resource
 {
     protected static ?string $model = ShipmentContainer::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-cube-transparent';
+    protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-cube-transparent';
 
     protected static UnitEnum|string|null $navigationGroup = 'Shipments';
 
