@@ -148,6 +148,11 @@ class FinancialOverviewWidget extends BaseWidget
      */
     protected function getReceivablesChart(): array
     {
+        // Ensure repository is initialized
+        if (!isset($this->salesInvoiceRepository) || !$this->salesInvoiceRepository) {
+            $this->salesInvoiceRepository = app(SalesInvoiceRepository::class);
+        }
+        
         $data = [];
         
         for ($i = 6; $i >= 0; $i--) {
