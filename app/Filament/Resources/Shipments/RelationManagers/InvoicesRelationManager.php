@@ -39,7 +39,7 @@ class InvoicesRelationManager extends RelationManager
     {
         return $table
             ->query(
-                $this->shipmentRepository->getInvoicesQuery($this->getOwnerRecord()->id)
+                ($this->shipmentRepository ?? app(ShipmentRepository::class))->getInvoicesQuery($this->getOwnerRecord()->id)
             )
             ->columns([
                 TextColumn::make('invoice_number')
