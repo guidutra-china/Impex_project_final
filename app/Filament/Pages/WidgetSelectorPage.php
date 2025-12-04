@@ -7,10 +7,10 @@ use App\Services\DashboardConfigurationService;
 use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Forms\Components\CheckboxList;
-use Filament\Forms\Components\Section;
+use Filament\Schemas\Components\Section;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
-use Filament\Forms\Form;
+use Filament\Schemas\Schema;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Illuminate\Support\Facades\Auth;
@@ -78,7 +78,7 @@ class WidgetSelectorPage extends Page implements HasForms
         ]);
     }
     
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
         $availableWidgets = AvailableWidget::where('is_available', true)
             ->get()
@@ -87,8 +87,8 @@ class WidgetSelectorPage extends Page implements HasForms
             ])
             ->toArray();
         
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 Section::make('Widgets Disponíveis')
                     ->description('Selecione os widgets que deseja exibir no seu dashboard')
                     ->icon('heroicon-o-squares-2x2')
