@@ -416,14 +416,24 @@ class Shipment extends Model
     {
         $year = now()->year;
         
-        // Use transaction with lock to prevent race conditions
+        // Use dedicated sequence table with pessimistic locking
         return \DB::transaction(function () use ($year) {
-            $lastShipment = static::whereYear('created_at', $year)
-                ->orderBy('id', 'desc')
+            $sequence = ShipmentSequence::forYear($year);
+            
+            // Lock the sequence row to prevent concurrent increments
+            $sequence = ShipmentSequence::where('year', $year)
                 ->lockForUpdate()
-                ->first();
-
-            $nextNumber = $lastShipment ? (int) substr($lastShipment->shipment_number, -5) + 1 : 1;
+                ->firstOrFail();
+            
+            $nextNumber = $sequence->next_number;
+            
+            // Increment for next call
+            $sequence->increment('next_number');
+            
+            // Validate we don't exceed 5 digits
+            if ($nextNumber > 99999) {
+                throw new \Exception('Shipment number exceeds maximum for year ' . $year);
+            }
 
             return sprintf('SHP-%d-%05d', $year, $nextNumber);
         });
