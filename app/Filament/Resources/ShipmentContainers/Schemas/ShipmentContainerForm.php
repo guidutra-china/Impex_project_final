@@ -1,39 +1,20 @@
 <?php
 
-namespace App\Filament\Resources;
+namespace App\Filament\Resources\ShipmentContainers\Schemas;
 
-use App\Models\ShipmentContainer;
-use BackedEnum;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Schemas\Schema;
-use Filament\Resources\Resource;
-use App\Filament\Resources\ShipmentContainerResource\Pages;
-use Filament\Support\Icons\Heroicon;
-use Filament\Tables\Actions\DeleteAction;
-use Filament\Tables\Actions\EditAction;
-use Filament\Tables\Columns\BadgeColumn;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Table;
-use UnitEnum;
 
-class ShipmentContainerResource extends Resource
+class ShipmentContainerForm
 {
-    protected static ?string $model = ShipmentContainer::class;
-
-    protected static UnitEnum|string|null $navigationGroup = 'Logistics & Shipping';
-
-    protected static BackedEnum|string|null $navigationIcon = Heroicon::OutlinedCubeTransparent;
-
-    protected static ?int $navigationSort = 11;
-
-    public static function form(Schema $schema): Schema
+    public static function configure(Schema $schema): Schema
     {
         return $schema
-            ->schema([
+            ->components([
                 Section::make('Container Information')
                     ->schema([
                         Grid::make(2)
@@ -121,70 +102,5 @@ class ShipmentContainerResource extends Resource
                             ->rows(3),
                     ]),
             ]);
-    }
-
-    public static function table(Table $table): Table
-    {
-        return $table
-            ->columns([
-                TextColumn::make('container_number')
-                    ->searchable()
-                    ->sortable(),
-
-                TextColumn::make('container_type')
-                    ->badge(),
-
-                BadgeColumn::make('status')
-                    ->colors([
-                        'gray' => 'draft',
-                        'info' => 'packed',
-                        'success' => 'sealed',
-                        'warning' => 'in_transit',
-                        'success' => 'delivered',
-                    ]),
-
-                TextColumn::make('current_weight')
-                    ->label('Weight')
-                    ->sortable(),
-
-                TextColumn::make('current_volume')
-                    ->label('Volume')
-                    ->sortable(),
-
-                TextColumn::make('shipment.shipment_number')
-                    ->label('Shipment')
-                    ->searchable()
-                    ->sortable(),
-
-                TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable(),
-            ])
-            ->filters([
-                //
-            ])
-            ->actions([
-                EditAction::make(),
-                DeleteAction::make(),
-            ])
-            ->bulkActions([
-                //
-            ]);
-    }
-
-    public static function getRelations(): array
-    {
-        return [
-            //
-        ];
-    }
-
-    public static function getPages(): array
-    {
-        return [
-            'index' => Pages\ListShipmentContainers::route('/'),
-            'create' => Pages\CreateShipmentContainer::route('/create'),
-            'edit' => Pages\EditShipmentContainer::route('/{record}/edit'),
-        ];
     }
 }

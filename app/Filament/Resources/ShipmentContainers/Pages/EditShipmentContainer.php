@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Filament\Resources\ShipmentContainerResource\Pages;
+namespace App\Filament\Resources\ShipmentContainers\Pages;
 
-use App\Filament\Resources\ShipmentContainerResource;
-use Filament\Actions;
+use App\Filament\Resources\ShipmentContainers\ShipmentContainerResource;
+use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
 
 class EditShipmentContainer extends EditRecord
@@ -13,7 +13,7 @@ class EditShipmentContainer extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\DeleteAction::make(),
+            DeleteAction::make(),
         ];
     }
 }
