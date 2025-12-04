@@ -48,14 +48,9 @@ class ShipmentContainerResourceTest extends TestCase
 
     public function test_can_create_new_container()
     {
-        // Create a shipment first (required foreign key)
-        $shipment = ShipmentContainer::factory()->create()->shipment;
-        
-        $container = ShipmentContainer::create([
-            "shipment_id" => $shipment->id,
+        // Use factory which includes all required fields
+        $container = ShipmentContainer::factory()->create([
             "container_number" => "TEST1234567",
-            "container_type" => "40ft",
-            "status" => "draft",
         ]);
 
         $this->assertDatabaseHas("shipment_containers", [

@@ -13,7 +13,9 @@ class AvailableWidgetFactory extends Factory
             'title' => $this->faker->words(2, true),
             'description' => $this->faker->sentence(),
             'icon' => 'heroicon-o-square-2-stack',
-            'is_default' => $this->faker->boolean(),
+            'category' => $this->faker->randomElement(['dashboard', 'reports', 'analytics']),
+            'is_available' => true,
+            'default_visible' => $this->faker->boolean(),
         ];
     }
 }
