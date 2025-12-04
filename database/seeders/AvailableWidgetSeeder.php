@@ -19,8 +19,10 @@ class AvailableWidgetSeeder extends Seeder
                 'description' => 'Visualize eventos e prazos importantes',
                 'class' => 'App\Filament\Widgets\CalendarWidget',
                 'icon' => 'heroicon-o-calendar',
+                'category' => 'General',
                 'is_available' => true,
-                'required_permission' => null,
+                'default_visible' => true,
+                'requires_permission' => null,
             ],
             [
                 'widget_id' => 'rfq_stats',
@@ -28,8 +30,10 @@ class AvailableWidgetSeeder extends Seeder
                 'description' => 'Acompanhe solicitações de cotação',
                 'class' => 'App\Filament\Widgets\RfqStatsWidget',
                 'icon' => 'heroicon-o-chart-bar',
+                'category' => 'Sales',
                 'is_available' => true,
-                'required_permission' => null,
+                'default_visible' => true,
+                'requires_permission' => null,
             ],
             [
                 'widget_id' => 'purchase_order_stats',
@@ -37,8 +41,10 @@ class AvailableWidgetSeeder extends Seeder
                 'description' => 'Monitore seus pedidos de compra',
                 'class' => 'App\Filament\Widgets\PurchaseOrderStatsWidget',
                 'icon' => 'heroicon-o-shopping-cart',
+                'category' => 'Purchasing',
                 'is_available' => true,
-                'required_permission' => null,
+                'default_visible' => true,
+                'requires_permission' => null,
             ],
             [
                 'widget_id' => 'financial_overview',
@@ -46,8 +52,10 @@ class AvailableWidgetSeeder extends Seeder
                 'description' => 'Resumo financeiro do negócio',
                 'class' => 'App\Filament\Widgets\FinancialOverviewWidget',
                 'icon' => 'heroicon-o-banknotes',
+                'category' => 'Finance',
                 'is_available' => true,
-                'required_permission' => null,
+                'default_visible' => true,
+                'requires_permission' => null,
             ],
         ];
 
