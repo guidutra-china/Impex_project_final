@@ -138,7 +138,7 @@ class ItemsRelationManager extends RelationManager
     {
         return $table
             ->query(
-                $this->repository->getItemsQuery($this->getOwnerRecord()->id)
+                ($this->repository ?? app(ShipmentRepository::class))->getItemsQuery($this->getOwnerRecord()->id)
             )
             ->columns([
                 TextColumn::make('salesInvoiceItem.salesInvoice.invoice_number')
