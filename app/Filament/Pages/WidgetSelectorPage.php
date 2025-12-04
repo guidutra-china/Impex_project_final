@@ -16,7 +16,7 @@ class WidgetSelectorPage extends Page
     {
         protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-squares-2x2';
 
-        protected static string $view = 'filament.pages.widget-selector-page';
+        protected string $view = 'filament.pages.widget-selector-page';
 
         protected static UnitEnum|string|null $navigationGroup = 'Dashboard';
 
