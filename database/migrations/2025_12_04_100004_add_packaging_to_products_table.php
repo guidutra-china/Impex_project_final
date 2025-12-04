@@ -11,13 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('products', function (Blueprint $table) {
-            // Standard packaging information
-            $table->integer('standard_packaging_quantity')->nullable()->after('weight')->comment('Units per standard box');
-            $table->decimal('package_weight', 10, 2)->nullable()->after('standard_packaging_quantity')->comment('Weight of one standard box in kg');
-            $table->string('package_dimensions')->nullable()->after('package_weight')->comment('L x W x H in cm (e.g., 50x30x20)');
-            $table->decimal('package_volume', 12, 4)->nullable()->after('package_dimensions')->comment('Volume of one standard box in m³');
-        });
+        // Products table already has comprehensive packing information:
+        // - pcs_per_inner_box: Units per inner box (standard packaging)
+        // - inner_box_weight: Weight of inner box
+        // - inner_box_length, width, height: Inner box dimensions
+        // - pcs_per_carton: Units per master carton
+        // - carton_weight: Weight of master carton
+        // - carton_length, width, height: Master carton dimensions
+        // - carton_cbm: Volume of master carton
+        //
+        // No additional columns needed - use existing fields for packaging logic
     }
 
     /**
@@ -25,13 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('products', function (Blueprint $table) {
-            $table->dropColumn([
-                'standard_packaging_quantity',
-                'package_weight',
-                'package_dimensions',
-                'package_volume',
-            ]);
-        });
+        // No changes to reverse
     }
 };
