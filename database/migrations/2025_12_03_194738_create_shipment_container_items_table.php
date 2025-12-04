@@ -31,8 +31,8 @@ return new class extends Migration
             $table->text('notes')->nullable();
             $table->timestamps();
 
-            $table->index(['shipment_container_id', 'proforma_invoice_item_id']);
-            $table->index(['proforma_invoice_item_id', 'shipment_sequence']);
+            $table->index(['shipment_container_id', 'proforma_invoice_item_id'], 'sci_container_pii_idx');
+            $table->index(['proforma_invoice_item_id', 'shipment_sequence'], 'sci_pii_seq_idx');
         });
     }
 
