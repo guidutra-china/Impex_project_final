@@ -27,6 +27,13 @@ class ShipmentForm
                                     ->dehydrated(false)
                                     ->placeholder('Auto-generated'),
 
+                                Select::make('customer_id')
+                                    ->label('Customer')
+                                    ->relationship('customer', 'name')
+                                    ->searchable()
+                                    ->preload()
+                                    ->required(),
+
                                 Select::make('shipment_type')
                                     ->label('Type')
                                     ->options([
@@ -35,7 +42,10 @@ class ShipmentForm
                                     ])
                                     ->default('outbound')
                                     ->required(),
+                            ]),
 
+                        Grid::make(2)
+                            ->schema([
                                 Select::make('status')
                                     ->label('Status')
                                     ->options([
@@ -53,6 +63,10 @@ class ShipmentForm
                                     ])
                                     ->default('draft')
                                     ->required(),
+
+                                TextInput::make('reference_number')
+                                    ->label('Reference Number')
+                                    ->placeholder('Customer PO or reference'),
                             ]),
                     ]),
 
@@ -79,12 +93,8 @@ class ShipmentForm
                                     ->label('Tracking Number'),
                             ]),
 
-                        Grid::make(3)
+                        Grid::make(2)
                             ->schema([
-                                TextInput::make('container_number')
-                                    ->label('Container Number')
-                                    ->placeholder('e.g., MSCU1234567'),
-
                                 TextInput::make('vessel_name')
                                     ->label('Vessel/Flight Name'),
 
