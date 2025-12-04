@@ -158,7 +158,11 @@ class ShipmentContainersRelationManager extends RelationManager
                 CreateAction::make()
                     ->label('Add Container')
                     ->color('success')
-                    ->icon(Heroicon::OutlinedPlus),
+                    ->icon(Heroicon::OutlinedPlus)
+                    ->before(function ($data) {
+                        $data['created_by'] = auth()->id();
+                        return $data;
+                    }),
             ])
             ->recordActions([
                 SealContainerAction::make(),
