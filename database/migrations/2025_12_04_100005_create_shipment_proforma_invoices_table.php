@@ -23,8 +23,8 @@ return new class extends Migration
             $table->foreignId('created_by')->nullable()->constrained('users')->onDelete('set null');
             $table->timestamps();
             
-            // Unique constraint to prevent duplicate relationships
-            $table->unique(['shipment_id', 'proforma_invoice_id']);
+            // Unique constraint with shorter name to avoid MySQL identifier length limit
+            $table->unique(['shipment_id', 'proforma_invoice_id'], 'uq_shipment_proforma');
             
             // Indexes
             $table->index('shipment_id');
