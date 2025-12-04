@@ -17,9 +17,9 @@ php artisan config:clear
 php artisan view:clear
 ```
 
-### 2. Limpar Cache do Livewire (se disponível)
+### 2. Recompilar Autoloader
 ```bash
-php artisan livewire:discover
+composer dump-autoload
 ```
 
 ### 3. Recompilar Assets (se necessário)
@@ -27,6 +27,11 @@ php artisan livewire:discover
 npm run build
 # ou
 yarn build
+```
+
+### 3.5. Limpar Cache de Rota
+```bash
+php artisan route:clear
 ```
 
 ### 4. Limpar Cache do Navegador

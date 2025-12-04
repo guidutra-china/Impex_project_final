@@ -77,18 +77,18 @@ composer show filament/filament
 tail -f storage/logs/laravel.log
 ```
 
-### 2. Verificar Componentes Registrados
+### 2. Verificar Versão do Livewire
 ```bash
-php artisan tinker
-> \Livewire\Livewire::getRegisteredComponents()->keys()
+composer show livewire/livewire
 ```
 
 ### 3. Forçar Recompilação
 ```bash
 composer dump-autoload
-php artisan config:cache
-php artisan route:cache
-php artisan view:cache
+php artisan config:clear
+php artisan route:clear
+php artisan view:clear
+php artisan cache:clear
 ```
 
 ### 4. Reiniciar Servidor
