@@ -159,10 +159,11 @@ class ShipmentContainersRelationManager extends RelationManager
                     ->label('Add Container')
                     ->color('success')
                     ->icon(Heroicon::OutlinedPlus)
-                    ->mutateFormDataBeforeCreate(function (array $data): array {
+                    ->using(function (array $data, $livewire) {
                         $data['created_by'] = auth()->id();
-                        return $data;
-                    }),
+                        return $livewire->getOwnerRecord()->containers()->create($data);
+                    })
+                    ->successNotificationTitle('Container created successfully'),
             ])
             ->recordActions([
                 SealContainerAction::make(),
