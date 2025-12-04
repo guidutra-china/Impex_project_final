@@ -23,6 +23,8 @@ class ShipmentContainersRelationManager extends RelationManager
 {
     protected static string $relationship = 'containers';
 
+    protected static ?string $title = 'Shipment Containers';
+
     protected static ?string $recordTitleAttribute = 'container_number';
 
     public function mount(): void
