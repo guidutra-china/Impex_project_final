@@ -30,9 +30,9 @@ class WidgetSelectorPage extends Page
 
     public array $widgetOrder = [];
 
-    protected DashboardConfigurationService $dashboardService;
+    protected ?DashboardConfigurationService $dashboardService = null;
 
-    protected WidgetRegistryService $widgetService;
+    protected ?WidgetRegistryService $widgetService = null;
 
     public function mount(): void
     {
@@ -62,6 +62,11 @@ class WidgetSelectorPage extends Page
     public function saveConfiguration(): void
     {
         $user = Auth::user();
+
+        // Lazy initialize if not already done
+        if (!isset($this->dashboardService)) {
+            $this->dashboardService = app(DashboardConfigurationService::class);
+        }
 
         // Atualizar widgets visíveis
         $this->dashboardService->updateVisibleWidgets($user, $this->selectedWidgets);
