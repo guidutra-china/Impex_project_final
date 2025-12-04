@@ -6,23 +6,21 @@ use App\Models\AvailableWidget;
 use App\Models\DashboardConfiguration;
 use App\Services\DashboardConfigurationService;
 use App\Services\WidgetRegistryService;
-use BackedEnum;
-use Filament\Forms;
 use Filament\Pages\Page;
 use Illuminate\Support\Facades\Auth;
-use UnitEnum;
+use Livewire\Attributes\Computed;
 
 class WidgetSelectorPage extends Page
 {
-    protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-squares-2x2';
+    protected static ?string $navigationIcon = 'heroicon-o-squares-2x2';
 
-    protected string $view = 'filament.pages.widget-selector-page';
-
-    protected static UnitEnum|string|null $navigationGroup = 'Dashboard';
+    protected static ?string $navigationGroup = 'Dashboard';
 
     protected static ?string $navigationLabel = 'Personalizar Dashboard';
 
     protected static ?string $title = 'Personalizar Dashboard';
+
+    protected static string $view = 'filament.pages.widget-selector-page';
 
     public array $availableWidgets = [];
 
