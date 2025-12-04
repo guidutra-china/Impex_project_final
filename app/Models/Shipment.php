@@ -160,6 +160,14 @@ class Shipment extends Model
         return $this->hasMany(ShipmentInvoice::class);
     }
 
+    /**
+     * Alias for salesInvoices() relationship
+     */
+    public function invoices(): BelongsToMany
+    {
+        return $this->salesInvoices();
+    }
+
     public function items(): HasMany
     {
         return $this->hasMany(ShipmentItem::class);
