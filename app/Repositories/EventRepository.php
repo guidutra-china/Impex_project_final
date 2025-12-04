@@ -16,11 +16,11 @@ use Illuminate\Pagination\Paginator;
 class EventRepository extends BaseRepository
 {
     /**
-     * Retorna a classe do modelo
+     * Resolve e retorna uma nova instância do modelo
      */
-    public function getModel(): string
+    protected function resolveModel(): \Illuminate\Database\Eloquent\Model
     {
-        return Event::class;
+        return new Event();
     }
 
     /**
