@@ -53,7 +53,7 @@ class WidgetSelectorPage extends Page
             ->toArray();
 
         // Carregar configuração do usuário
-        $config = $this->dashboardService->getUserConfiguration($user);
+        $config = $this->dashboardService->getOrCreateConfiguration($user);
 
         $this->selectedWidgets = $config->visible_widgets ?? [];
         $this->widgetOrder = $config->widget_order ?? [];
