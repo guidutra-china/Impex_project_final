@@ -3,6 +3,7 @@
 namespace App\Providers\Filament;
 
 use App\Filament\Pages\EditProfile;
+use App\Filament\Pages\WidgetSelectorPage;
 use App\Filament\Widgets\RfqStatsWidget;
 use App\Filament\Widgets\PurchaseOrderStatsWidget;
 use App\Filament\Widgets\FinancialOverviewWidget;
@@ -62,6 +63,7 @@ class AdminPanelProvider extends PanelProvider
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
             ->pages([
                 Dashboard::class,
+                WidgetSelectorPage::class,
             ])
             ->navigationGroups([
                 'Sales & Quotations',
