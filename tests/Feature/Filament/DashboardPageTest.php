@@ -5,7 +5,6 @@ namespace Tests\Feature\Filament;
 use App\Filament\Pages\Dashboard;
 use App\Models\User;
 use App\Services\DashboardConfigurationService;
-use Filament\Facades\Filament;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Tests\TestCase;
@@ -20,7 +19,7 @@ class DashboardPageTest extends TestCase
     {
         parent::setUp();
         $this->user = User::factory()->create();
-        Filament::actingAs($this->user);
+        $this->actingAs($this->user);
     }
 
     public function test_can_render_page()

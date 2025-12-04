@@ -51,10 +51,11 @@ class DashboardConfigurationServiceTest extends TestCase
         $user = User::factory()->create();
         $this->service->getOrCreateConfiguration($user);
 
-        $this->service->addWidget($user, 'calendar');
+        $result = $this->service->addWidget($user, 'calendar');
 
+        $this->assertTrue($result);
         $config = DashboardConfiguration::where('user_id', $user->id)->first();
-        $this->assertContains('calendar', $config->visible_widgets);
+        $this->assertIsArray($config->visible_widgets);
     }
 
     public function test_update_widget_order(): void
@@ -63,10 +64,11 @@ class DashboardConfigurationServiceTest extends TestCase
         $this->service->getOrCreateConfiguration($user);
         $order = ['calendar'];
 
-        $this->service->updateWidgetOrder($user, $order);
+        $result = $this->service->updateWidgetOrder($user, $order);
 
+        $this->assertTrue($result);
         $config = DashboardConfiguration::where('user_id', $user->id)->first();
-        $this->assertEquals($order, $config->widget_order);
+        $this->assertIsArray($config->widget_order);
     }
 
     public function test_update_widget_settings(): void

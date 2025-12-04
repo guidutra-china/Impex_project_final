@@ -5,7 +5,6 @@ namespace Tests\Feature\Filament;
 use App\Filament\Resources\DashboardConfigurations\DashboardConfigurationResource;
 use App\Models\DashboardConfiguration;
 use App\Models\User;
-use Filament\Facades\Filament;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Tests\TestCase;
@@ -25,7 +24,7 @@ class DashboardConfigurationResourceTest extends TestCase
         }
         $this->user = User::factory()->create();
         $this->user->assignRole('super_admin');
-        Filament::actingAs($this->user);
+        $this->actingAs($this->user);
     }
 
     public function test_can_render_list_page()
