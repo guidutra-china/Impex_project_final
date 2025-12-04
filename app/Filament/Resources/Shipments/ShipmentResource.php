@@ -9,6 +9,7 @@ use App\Filament\Resources\Shipments\Pages\ViewShipment;
 use App\Filament\Resources\Shipments\RelationManagers\InvoicesRelationManager;
 use App\Filament\Resources\Shipments\RelationManagers\ItemsRelationManager;
 use App\Filament\Resources\Shipments\RelationManagers\PackingBoxesRelationManager;
+use App\Filament\Resources\Shipments\RelationManagers\ShipmentContainersRelationManager;
 use App\Filament\Resources\Shipments\Schemas\ShipmentForm;
 use App\Filament\Resources\Shipments\Tables\ShipmentsTable;
 use App\Models\Shipment;
@@ -47,6 +48,7 @@ class ShipmentResource extends Resource
             InvoicesRelationManager::class,
             ItemsRelationManager::class,
             PackingBoxesRelationManager::class,
+            ShipmentContainersRelationManager::class,
         ];
     }
 
