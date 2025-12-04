@@ -415,13 +415,18 @@ class Shipment extends Model
     public static function generateShipmentNumber(): string
     {
         $year = now()->year;
-        $lastShipment = static::whereYear('created_at', $year)
-            ->orderBy('id', 'desc')
-            ->first();
+        
+        // Use transaction with lock to prevent race conditions
+        return \DB::transaction(function () use ($year) {
+            $lastShipment = static::whereYear('created_at', $year)
+                ->orderBy('id', 'desc')
+                ->lockForUpdate()
+                ->first();
 
-        $nextNumber = $lastShipment ? (int) substr($lastShipment->shipment_number, -4) + 1 : 1;
+            $nextNumber = $lastShipment ? (int) substr($lastShipment->shipment_number, -4) + 1 : 1;
 
-        return sprintf('SHP-%d-%04d', $year, $nextNumber);
+            return sprintf('SHP-%d-%04d', $year, $nextNumber);
+        });
     }
 
     // Métodos adicionais para containers
