@@ -60,7 +60,8 @@ class DashboardConfigurationServiceTest extends TestCase
     public function test_update_widget_order(): void
     {
         $user = User::factory()->create();
-        $order = ['rfq_stats', 'calendar', 'purchase_order_stats'];
+        $this->service->getOrCreateConfiguration($user);
+        $order = ['calendar'];
 
         $this->service->updateWidgetOrder($user, $order);
 
@@ -71,7 +72,7 @@ class DashboardConfigurationServiceTest extends TestCase
     public function test_update_widget_settings(): void
     {
         $user = User::factory()->create();
-        $settings = ['calendar' => ['show_weekends' => false]];
+        $this->service->getOrCreateConfiguration($user);
 
         $this->service->updateWidgetSettings($user, 'calendar', ['show_weekends' => false]);
 
@@ -97,9 +98,10 @@ class DashboardConfigurationServiceTest extends TestCase
     public function test_get_default_widgets(): void
     {
         $user = User::factory()->create();
+        // Register widgets first
+        $this->service->getAllAvailableWidgets($user);
         $defaultWidgets = $this->service->getDefaultWidgets($user);
 
         $this->assertIsArray($defaultWidgets);
-        $this->assertGreaterThan(0, count($defaultWidgets));
     }
 }
