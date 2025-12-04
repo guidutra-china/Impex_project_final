@@ -38,14 +38,6 @@
             var events = {!! json_encode($events) !!};
             console.log('Events loaded:', events);
             
-            // Add custom button to toolbar
-            const customButton = document.createElement('a');
-            customButton.href = '{{ route('filament.admin.resources.events.create') }}';
-            customButton.className = 'fc-button fc-button-primary';
-            customButton.style.cssText = 'margin-left: 0.5rem; padding: 0.4em 0.65em; font-size: 1em; line-height: 1.5; border-radius: 0.25em; cursor: pointer; background-color: rgb(99 102 241); border-color: rgb(99 102 241); color: white; text-decoration: none; display: inline-flex; align-items: center; justify-content: center;';
-            customButton.innerHTML = '<svg style="width: 1em; height: 1em;" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>';
-            customButton.title = 'New Event';
-            
             // Store all events for filtering
             let allEvents = events;
             // Initialize with all event types from Model
@@ -83,9 +75,7 @@
                     message += '\n\nType: ' + props.type;
                     message += '\nCompleted: ' + (props.completed ? 'Yes' : 'No');
                     
-                    if (confirm(message + '\n\nEdit this event?')) {
-                        window.location.href = '{{ url('filament/admin/resources/events') }}/' + event.id + '/edit';
-                    }
+                    alert(message);
                 },
                 eventDidMount: function(info) {
                     if (info.event.extendedProps.description) {
@@ -119,12 +109,6 @@
             });
             
             calendar.render();
-            
-            // Insert custom button next to Today button
-            const todayButton = calendarEl.querySelector('.fc-today-button');
-            if (todayButton) {
-                todayButton.parentNode.insertBefore(customButton, todayButton.nextSibling);
-            }
             
             // Setup filter event listeners
             document.querySelectorAll('.event-type-filter').forEach(checkbox => {

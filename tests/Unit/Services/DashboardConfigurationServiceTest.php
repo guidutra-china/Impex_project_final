@@ -50,6 +50,8 @@ class DashboardConfigurationServiceTest extends TestCase
     {
         $user = User::factory()->create();
         $this->service->getOrCreateConfiguration($user);
+        // Register widgets first
+        $this->service->getAllAvailableWidgets($user);
 
         $result = $this->service->addWidget($user, 'calendar');
 
@@ -62,6 +64,8 @@ class DashboardConfigurationServiceTest extends TestCase
     {
         $user = User::factory()->create();
         $this->service->getOrCreateConfiguration($user);
+        // Register widgets first
+        $this->service->getAllAvailableWidgets($user);
         $order = ['calendar'];
 
         $result = $this->service->updateWidgetOrder($user, $order);
