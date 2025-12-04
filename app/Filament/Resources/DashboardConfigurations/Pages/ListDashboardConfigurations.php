@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Filament\Resources\DashboardConfigurationResource\Pages;
+namespace App\Filament\Resources\DashboardConfigurations\Pages;
 
-use App\Filament\Resources\DashboardConfigurationResource;
+use App\Filament\Resources\DashboardConfigurations\DashboardConfigurationResource;
 use Filament\Resources\Pages\ListRecords;
 
 class ListDashboardConfigurations extends ListRecords

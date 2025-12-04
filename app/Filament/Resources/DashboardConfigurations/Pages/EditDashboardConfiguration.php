@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Filament\Resources\DashboardConfigurationResource\Pages;
+namespace App\Filament\Resources\DashboardConfigurations\Pages;
 
-use App\Filament\Resources\DashboardConfigurationResource;
-use Filament\Actions;
+use App\Filament\Resources\DashboardConfigurations\DashboardConfigurationResource;
+use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
 
 class EditDashboardConfiguration extends EditRecord
@@ -13,7 +13,7 @@ class EditDashboardConfiguration extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\DeleteAction::make(),
+            DeleteAction::make(),
         ];
     }
 }

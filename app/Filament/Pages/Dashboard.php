@@ -7,13 +7,16 @@ use App\Filament\Widgets\RfqStatsWidget;
 use App\Filament\Widgets\PurchaseOrderStatsWidget;
 use App\Filament\Widgets\FinancialOverviewWidget;
 use App\Services\DashboardConfigurationService;
-use Filament\Pages\Dashboard as BaseDashboard;
 use BackedEnum;
+use Filament\Pages\Dashboard as BaseDashboard;
 use Illuminate\Support\Facades\Auth;
+use UnitEnum;
 
 class Dashboard extends BaseDashboard
 {
-    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-home';
+    protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-home';
+
+    protected static ?string $title = 'Dashboard';
 
     protected string $view = 'filament.pages.dashboard';
 
