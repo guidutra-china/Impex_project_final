@@ -17,6 +17,7 @@ class Shipment extends Model
 
     protected $fillable = [
         'shipment_number',
+        'customer_id',
         'sales_order_id',
         'purchase_order_id',
         'shipment_type',
@@ -132,6 +133,11 @@ class Shipment extends Model
     }
 
     // Relationships
+    public function customer(): BelongsTo
+    {
+        return $this->belongsTo(Client::class);
+    }
+
     public function salesOrder(): BelongsTo
     {
         return $this->belongsTo(Order::class, 'sales_order_id');
