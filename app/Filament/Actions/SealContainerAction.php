@@ -37,7 +37,7 @@ class SealContainerAction extends Action
                     'sealed_at' => now(),
                 ]);
             })
-            ->successNotification()
+            ->successNotificationTitle('Container sealed successfully')
             ->visible(fn (Model $record): bool => $record->status === 'packed');
     }
 }

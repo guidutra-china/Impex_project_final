@@ -31,7 +31,7 @@ class UnsealContainerAction extends Action
                     'sealed_at' => null,
                 ]);
             })
-            ->successNotification()
+            ->successNotificationTitle('Container unsealed successfully')
             ->visible(fn (Model $record): bool => $record->status === 'sealed');
     }
 }
