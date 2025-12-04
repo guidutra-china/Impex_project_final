@@ -11,6 +11,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Schemas\Schema;
 use Filament\Resources\Resource;
+use App\Filament\Resources\ShipmentContainerResource\Pages;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Actions\EditAction;
@@ -181,9 +182,9 @@ class ShipmentContainerResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => \App\Filament\Resources\ShipmentContainerResource\Pages\ListShipmentContainers::class,
-            'create' => \App\Filament\Resources\ShipmentContainerResource\Pages\CreateShipmentContainer::class,
-            'edit' => \App\Filament\Resources\ShipmentContainerResource\Pages\EditShipmentContainer::class,
+            'index' => Pages\ListShipmentContainers::route('/'),
+            'create' => Pages\CreateShipmentContainer::route('/create'),
+            'edit' => Pages\EditShipmentContainer::route('/{record}/edit'),
         ];
     }
 }
