@@ -20,9 +20,8 @@ class CalendarWidget extends Widget
 
     protected EventRepository $repository;
 
-    public function __construct()
+    public function mount(): void
     {
-        parent::__construct();
         $this->repository = app(EventRepository::class);
     }
     

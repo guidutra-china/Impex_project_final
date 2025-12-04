@@ -14,9 +14,8 @@ class FinancialOverviewWidget extends BaseWidget
     protected SalesInvoiceRepository $salesInvoiceRepository;
     protected PurchaseOrderRepository $purchaseOrderRepository;
 
-    public function __construct()
+    public function mount(): void
     {
-        parent::__construct();
         $this->salesInvoiceRepository = app(SalesInvoiceRepository::class);
         $this->purchaseOrderRepository = app(PurchaseOrderRepository::class);
     }

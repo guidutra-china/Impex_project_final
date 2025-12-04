@@ -23,9 +23,8 @@ class RelatedDocumentsWidget extends BaseWidget
 
     protected DocumentRepository $repository;
 
-    public function __construct()
+    public function mount(): void
     {
-        parent::__construct();
         $this->repository = app(DocumentRepository::class);
     }
 

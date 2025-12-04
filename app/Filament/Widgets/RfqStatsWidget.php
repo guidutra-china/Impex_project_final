@@ -14,9 +14,8 @@ class RfqStatsWidget extends BaseWidget
     protected RFQRepository $rfqRepository;
     protected SupplierQuoteRepository $quoteRepository;
 
-    public function __construct()
+    public function mount(): void
     {
-        parent::__construct();
         $this->rfqRepository = app(RFQRepository::class);
         $this->quoteRepository = app(SupplierQuoteRepository::class);
     }

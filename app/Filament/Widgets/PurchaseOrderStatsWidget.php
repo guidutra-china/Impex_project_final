@@ -12,9 +12,8 @@ class PurchaseOrderStatsWidget extends BaseWidget
 
     protected PurchaseOrderRepository $repository;
 
-    public function __construct()
+    public function mount(): void
     {
-        parent::__construct();
         $this->repository = app(PurchaseOrderRepository::class);
     }
     

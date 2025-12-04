@@ -23,9 +23,8 @@ class ProjectExpensesWidget extends BaseWidget
 
     protected FinancialTransactionRepository $repository;
 
-    public function __construct()
+    public function mount(): void
     {
-        parent::__construct();
         $this->repository = app(FinancialTransactionRepository::class);
     }
 
