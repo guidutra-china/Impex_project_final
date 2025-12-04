@@ -109,7 +109,7 @@ class ShipmentRepository extends BaseRepository
         return $this->model
             ->find($shipmentId)
             ->items()
-            ->query()
+            ->getQuery()
             ->with(['product', 'orderItem']);
     }
 
@@ -139,7 +139,7 @@ class ShipmentRepository extends BaseRepository
         return $this->model
             ->find($shipmentId)
             ->packingBoxes()
-            ->query()
+            ->getQuery()
             ->with(['items']);
     }
 

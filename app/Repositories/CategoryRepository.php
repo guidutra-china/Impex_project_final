@@ -95,7 +95,7 @@ class CategoryRepository extends BaseRepository
         return $this->model
             ->find($categoryId)
             ->features()
-            ->query();
+            ->getQuery();
     }
 
     /**
@@ -109,7 +109,7 @@ class CategoryRepository extends BaseRepository
         return $this->model
             ->find($categoryId)
             ->products()
-            ->query()
+            ->getQuery()
             ->with(['features']);
     }
 
