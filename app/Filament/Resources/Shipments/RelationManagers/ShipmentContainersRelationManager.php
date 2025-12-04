@@ -12,18 +12,24 @@ use Filament\Schemas\Schema;
 use Filament\Resources\RelationManagers\RelationManager;
 use App\Filament\Actions\SealContainerAction;
 use App\Filament\Actions\UnsealContainerAction;
+use Filament\Tables\Actions\BulkActionGroup;
 use Filament\Tables\Actions\CreateAction;
 use Filament\Tables\Actions\DeleteAction;
+use Filament\Tables\Actions\DeleteBulkAction;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Columns\BadgeColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Filament\Support\Icons\Heroicon;
+use BackedEnum;
 
 class ShipmentContainersRelationManager extends RelationManager
 {
     protected static string $relationship = 'containers';
 
     protected static ?string $title = 'Shipment Containers';
+
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedArchiveBox;
 
     protected static ?string $recordTitleAttribute = 'container_number';
 
@@ -69,11 +75,13 @@ class ShipmentContainersRelationManager extends RelationManager
                                 TextInput::make('current_weight')
                                     ->numeric()
                                     ->disabled()
+                                    ->dehydrated(false)
                                     ->suffix('kg'),
 
                                 TextInput::make('current_volume')
                                     ->numeric()
                                     ->disabled()
+                                    ->dehydrated(false)
                                     ->suffix('m³'),
 
                                 Select::make('status')
@@ -107,10 +115,12 @@ class ShipmentContainersRelationManager extends RelationManager
             ->columns([
                 TextColumn::make('container_number')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->weight('bold'),
 
                 TextColumn::make('container_type')
-                    ->badge(),
+                    ->badge()
+                    ->sortable(),
 
                 BadgeColumn::make('status')
                     ->colors([
@@ -119,37 +129,52 @@ class ShipmentContainersRelationManager extends RelationManager
                         'success' => 'sealed',
                         'warning' => 'in_transit',
                         'success' => 'delivered',
-                    ]),
+                    ])
+                    ->sortable(),
 
                 TextColumn::make('current_weight')
                     ->label('Weight')
                     ->formatStateUsing(fn($state, $record) => "{$state} / {$record->max_weight} kg")
-                    ->sortable(),
+                    ->sortable()
+                    ->alignEnd(),
 
                 TextColumn::make('current_volume')
                     ->label('Volume')
                     ->formatStateUsing(fn($state, $record) => "{$state} / {$record->max_volume} m³")
-                    ->sortable(),
+                    ->sortable()
+                    ->alignEnd(),
 
                 TextColumn::make('items_count')
                     ->label('Items')
-                    ->counts('items'),
+                    ->counts('items')
+                    ->alignCenter(),
 
                 TextColumn::make('seal_number')
                     ->label('Seal')
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(),
             ])
-            ->filters([
-                //
+            ->headerActions([
+                CreateAction::make()
+                    ->label('Add Container')
+                    ->color('success')
+                    ->icon(Heroicon::OutlinedPlus),
             ])
-            ->actions([
+            ->recordActions([
                 SealContainerAction::make(),
                 UnsealContainerAction::make(),
                 EditAction::make(),
-                DeleteAction::make(),
+                DeleteAction::make()
+                    ->requiresConfirmation(),
             ])
-            ->bulkActions([
-                //
-            ]);
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make()
+                        ->requiresConfirmation(),
+                ]),
+            ])
+            ->emptyStateHeading('No containers added')
+            ->emptyStateDescription('Add containers to this shipment to organize items.')
+            ->emptyStateIcon(Heroicon::OutlinedArchiveBox);
     }
 }
