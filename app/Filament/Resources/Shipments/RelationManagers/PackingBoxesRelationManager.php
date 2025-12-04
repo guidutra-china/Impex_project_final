@@ -135,7 +135,7 @@ class PackingBoxesRelationManager extends RelationManager
     {
         return $table
             ->query(
-                $this->repository->getPackingBoxesQuery($this->getOwnerRecord()->id)
+                ($this->repository ?? app(ShipmentRepository::class))->getPackingBoxesQuery($this->getOwnerRecord()->id)
             )
             ->columns([
                 TextColumn::make('box_number')
