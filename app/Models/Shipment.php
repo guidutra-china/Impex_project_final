@@ -407,7 +407,6 @@ class Shipment extends Model
 
         return sprintf('SHP-%d-%04d', $year, $nextNumber);
     }
-}
 
     // Métodos adicionais para containers
     public function getProformaInvoicesInShipment()
@@ -434,3 +433,4 @@ class Shipment extends Model
             )
             ->get();
     }
+}
