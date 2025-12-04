@@ -38,6 +38,14 @@ class RfqStatsWidget extends BaseWidget
     
     protected function getStats(): array
     {
+        // Ensure repositories are initialized
+        if (!$this->rfqRepository) {
+            $this->rfqRepository = app(RFQRepository::class);
+        }
+        if (!$this->quoteRepository) {
+            $this->quoteRepository = app(SupplierQuoteRepository::class);
+        }
+        
         $user = auth()->user();
         
         // Check if user can see all clients
