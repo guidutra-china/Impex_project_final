@@ -263,6 +263,16 @@ class ProductRepository extends BaseRepository
     }
 
     /**
+     * Obtém query de BOM items para um produto
+     */
+    public function getBomItemsQuery(int|string $productId)
+    {
+        return Product::find($productId)?->bomItems()
+            ->with('componentProduct')
+            ->getQuery() ?? Product::query()->whereRaw('1=0');
+    }
+
+    /**
      * Obtém estatísticas de produtos
      */
     public function getStatistics(): array
