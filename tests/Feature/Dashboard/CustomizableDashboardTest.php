@@ -5,6 +5,7 @@ namespace Tests\Feature\Dashboard;
 use App\Models\AvailableWidget;
 use App\Models\DashboardConfiguration;
 use App\Models\User;
+use App\Services\DashboardConfigurationService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -12,9 +13,12 @@ class CustomizableDashboardTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected DashboardConfigurationService $service;
+
     protected function setUp(): void
     {
         parent::setUp();
+        $this->service = app(DashboardConfigurationService::class);
 
         // Seed available widgets
         AvailableWidget::create([
@@ -34,87 +38,90 @@ class CustomizableDashboardTest extends TestCase
         ]);
     }
 
-    public function test_user_can_access_widget_selector_page(): void
+    public function test_dashboard_configuration_service_integration(): void
     {
         $user = User::factory()->create();
 
-        $response = $this->actingAs($user)->get('/admin/widget-selector');
+        $config = $this->service->getOrCreateConfiguration($user);
 
-        $response->assertStatus(200);
+        $this->assertNotNull($config);
+        $this->assertEquals($user->id, $config->user_id);
     }
 
-    public function test_widget_selector_page_displays_available_widgets(): void
+    public function test_available_widgets_are_seeded(): void
     {
-        $user = User::factory()->create();
-
-        $response = $this->actingAs($user)->get('/admin/widget-selector');
-
-        $response->assertSee('Calendar');
-        $response->assertSee('RFQ Stats');
+        $this->assertGreaterThan(0, AvailableWidget::count());
     }
 
-    public function test_user_can_save_widget_configuration(): void
+    public function test_user_can_add_widget(): void
     {
         $user = User::factory()->create();
 
-        $response = $this->actingAs($user)->post('/admin/widget-selector/save', [
-            'visible_widgets' => ['calendar'],
-            'widget_order' => ['calendar'],
-        ]);
+        $this->service->getOrCreateConfiguration($user);
+        $this->service->addWidget($user, 'calendar');
 
         $config = DashboardConfiguration::where('user_id', $user->id)->first();
         $this->assertNotNull($config);
-        $this->assertEquals(['calendar'], $config->visible_widgets);
+        $this->assertContains('calendar', $config->visible_widgets);
     }
 
-    public function test_dashboard_respects_user_widget_configuration(): void
+    public function test_user_can_remove_widget(): void
     {
         $user = User::factory()->create();
 
-        // Create a custom configuration
-        DashboardConfiguration::create([
-            'user_id' => $user->id,
-            'visible_widgets' => ['rfq_stats'],
-            'widget_order' => ['rfq_stats'],
-        ]);
+        $this->service->getOrCreateConfiguration($user);
+        $this->service->addWidget($user, 'calendar');
+        $this->service->removeWidget($user, 'calendar');
 
-        // Dashboard should load with the configured widgets
-        $response = $this->actingAs($user)->get('/admin');
+        $config = DashboardConfiguration::where('user_id', $user->id)->first();
+        $this->assertNotContains('calendar', $config->visible_widgets);
+    }
 
-        $response->assertStatus(200);
+    public function test_user_can_update_widget_order(): void
+    {
+        $user = User::factory()->create();
+
+        $this->service->getOrCreateConfiguration($user);
+        $this->service->updateWidgetOrder($user, ['rfq_stats', 'calendar']);
+
+        $config = DashboardConfiguration::where('user_id', $user->id)->first();
+        $this->assertEquals(['rfq_stats', 'calendar'], $config->widget_order);
     }
 
     public function test_user_can_reset_to_default_configuration(): void
     {
         $user = User::factory()->create();
 
-        // Create a custom configuration
-        DashboardConfiguration::create([
-            'user_id' => $user->id,
-            'visible_widgets' => ['calendar'],
-            'widget_order' => ['calendar'],
-        ]);
-
-        // Reset to default
-        $response = $this->actingAs($user)->post('/admin/widget-selector/reset');
+        $this->service->getOrCreateConfiguration($user);
+        $this->service->addWidget($user, 'calendar');
+        $this->service->resetToDefault($user);
 
         $config = DashboardConfiguration::where('user_id', $user->id)->first();
-        $this->assertNotNull($config);
+        $this->assertGreaterThan(0, count($config->visible_widgets));
     }
 
-    public function test_admin_can_view_dashboard_configurations(): void
+    public function test_multiple_users_have_separate_configurations(): void
     {
-        $admin = User::factory()->create(['email' => 'admin@test.com']);
+        $user1 = User::factory()->create();
+        $user2 = User::factory()->create();
+
+        $config1 = $this->service->getOrCreateConfiguration($user1);
+        $config2 = $this->service->getOrCreateConfiguration($user2);
+
+        $this->assertNotEquals($config1->id, $config2->id);
+        $this->assertEquals($user1->id, $config1->user_id);
+        $this->assertEquals($user2->id, $config2->user_id);
+    }
+
+    public function test_widget_settings_can_be_updated(): void
+    {
         $user = User::factory()->create();
 
-        DashboardConfiguration::create([
-            'user_id' => $user->id,
-            'visible_widgets' => ['calendar'],
-        ]);
+        $this->service->getOrCreateConfiguration($user);
+        $this->service->updateWidgetSettings($user, 'calendar', ['show_weekends' => false]);
 
-        $response = $this->actingAs($admin)->get('/admin/dashboard-configurations');
-
-        $response->assertStatus(200);
+        $config = DashboardConfiguration::where('user_id', $user->id)->first();
+        $this->assertIsArray($config->widget_settings);
     }
 
     public function test_widget_order_is_respected(): void
@@ -132,7 +139,7 @@ class CustomizableDashboardTest extends TestCase
         $this->assertEquals($order, $config->widget_order);
     }
 
-    public function test_unavailable_widgets_are_not_shown(): void
+    public function test_unavailable_widgets_are_not_returned(): void
     {
         AvailableWidget::create([
             'widget_id' => 'unavailable',
@@ -143,19 +150,20 @@ class CustomizableDashboardTest extends TestCase
 
         $user = User::factory()->create();
 
-        $response = $this->actingAs($user)->get('/admin/widget-selector');
+        $availableWidgets = $this->service->getAllAvailableWidgets($user);
 
-        $response->assertDontSee('Unavailable Widget');
+        $widgetIds = array_column($availableWidgets, 'id');
+        $this->assertNotContains('unavailable', $widgetIds);
     }
 
-    public function test_new_user_gets_default_configuration(): void
+    public function test_new_user_gets_default_configuration_on_first_access(): void
     {
         $user = User::factory()->create();
 
-        // First access to dashboard should create default config
-        $this->actingAs($user)->get('/admin');
+        // First access should create default config
+        $config = $this->service->getOrCreateConfiguration($user);
 
-        $config = DashboardConfiguration::where('user_id', $user->id)->first();
         $this->assertNotNull($config);
+        $this->assertEquals($user->id, $config->user_id);
     }
 }

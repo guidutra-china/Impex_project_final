@@ -20,31 +20,24 @@ class WidgetRegistryServiceTest extends TestCase
         $this->service = app(WidgetRegistryService::class);
     }
 
-    public function test_register_widget(): void
+    public function test_register_widgets(): void
     {
-        $widgetId = 'test_widget';
-        $class = 'App\Filament\Widgets\TestWidget';
-        $metadata = [
-            'title' => 'Test Widget',
-            'description' => 'A test widget',
-            'icon' => 'heroicon-o-chart-bar',
-        ];
+        $this->service->registerWidgets();
 
-        $this->service->registerWidget($widgetId, $class, $metadata);
-
-        $widget = AvailableWidget::where('widget_id', $widgetId)->first();
+        $widget = AvailableWidget::where('widget_id', 'calendar')->first();
         $this->assertNotNull($widget);
-        $this->assertEquals($class, $widget->class);
-        $this->assertEquals('Test Widget', $widget->title);
+        $this->assertEquals('App\Filament\Widgets\CalendarWidget', $widget->class);
+        $this->assertEquals('Calendário', $widget->title);
     }
 
-    public function test_get_available_widgets(): void
+    public function test_get_available_widgets_for_user(): void
     {
         AvailableWidget::create([
             'widget_id' => 'calendar',
             'title' => 'Calendar',
             'class' => 'App\Filament\Widgets\CalendarWidget',
             'is_available' => true,
+            'requires_permission' => null,
         ]);
 
         AvailableWidget::create([
@@ -52,41 +45,58 @@ class WidgetRegistryServiceTest extends TestCase
             'title' => 'Unavailable',
             'class' => 'App\Filament\Widgets\UnavailableWidget',
             'is_available' => false,
+            'requires_permission' => null,
         ]);
 
         $user = User::factory()->create();
-        $widgets = $this->service->getAvailableWidgets($user);
+        $widgets = $this->service->getAvailableWidgetsForUser($user);
 
         $this->assertCount(1, $widgets);
-        $this->assertEquals('calendar', $widgets[0]->widget_id);
+        $this->assertEquals('calendar', $widgets[0]['id']);
     }
 
-    public function test_get_widget_by_id(): void
+    public function test_get_widget(): void
     {
         AvailableWidget::create([
             'widget_id' => 'calendar',
             'title' => 'Calendar',
             'class' => 'App\Filament\Widgets\CalendarWidget',
+            'is_available' => true,
+            'requires_permission' => null,
         ]);
 
-        $widget = $this->service->getWidgetById('calendar');
+        $widget = $this->service->getWidget('calendar');
 
         $this->assertNotNull($widget);
-        $this->assertEquals('calendar', $widget->widget_id);
+        $this->assertEquals('calendar', $widget['id']);
     }
 
-    public function test_get_widget_by_id_returns_null_if_not_found(): void
+    public function test_get_widget_returns_null_if_not_found(): void
     {
-        $widget = $this->service->getWidgetById('non_existent');
+        $widget = $this->service->getWidget('non_existent');
 
         $this->assertNull($widget);
     }
 
-    public function test_seed_default_widgets(): void
+    public function test_register_widgets_creates_records(): void
     {
-        $this->service->seedDefaultWidgets();
+        $this->service->registerWidgets();
 
         $widgets = AvailableWidget::all();
         $this->assertGreaterThan(0, $widgets->count());
+    }
+
+    public function test_widget_exists(): void
+    {
+        AvailableWidget::create([
+            'widget_id' => 'calendar',
+            'title' => 'Calendar',
+            'class' => 'App\Filament\Widgets\CalendarWidget',
+            'is_available' => true,
+            'requires_permission' => null,
+        ]);
+
+        $this->assertTrue($this->service->widgetExists('calendar'));
+        $this->assertFalse($this->service->widgetExists('non_existent'));
     }
 }

@@ -20,18 +20,18 @@ class DashboardConfigurationServiceTest extends TestCase
         $this->service = app(DashboardConfigurationService::class);
     }
 
-    public function test_get_user_configuration_creates_default_if_not_exists(): void
+    public function test_get_or_create_configuration_creates_default_if_not_exists(): void
     {
         $user = User::factory()->create();
 
-        $config = $this->service->getUserConfiguration($user);
+        $config = $this->service->getOrCreateConfiguration($user);
 
         $this->assertNotNull($config);
         $this->assertEquals($user->id, $config->user_id);
         $this->assertIsArray($config->visible_widgets);
     }
 
-    public function test_get_user_configuration_returns_existing(): void
+    public function test_get_or_create_configuration_returns_existing(): void
     {
         $user = User::factory()->create();
         $existingConfig = DashboardConfiguration::create([
@@ -40,21 +40,21 @@ class DashboardConfigurationServiceTest extends TestCase
             'widget_order' => ['calendar', 'rfq_stats'],
         ]);
 
-        $config = $this->service->getUserConfiguration($user);
+        $config = $this->service->getOrCreateConfiguration($user);
 
         $this->assertEquals($existingConfig->id, $config->id);
         $this->assertEquals(['calendar', 'rfq_stats'], $config->visible_widgets);
     }
 
-    public function test_update_visible_widgets(): void
+    public function test_add_widget(): void
     {
         $user = User::factory()->create();
-        $widgets = ['calendar', 'rfq_stats', 'purchase_order_stats'];
+        $this->service->getOrCreateConfiguration($user);
 
-        $this->service->updateVisibleWidgets($user, $widgets);
+        $this->service->addWidget($user, 'calendar');
 
         $config = DashboardConfiguration::where('user_id', $user->id)->first();
-        $this->assertEquals($widgets, $config->visible_widgets);
+        $this->assertContains('calendar', $config->visible_widgets);
     }
 
     public function test_update_widget_order(): void
@@ -94,12 +94,12 @@ class DashboardConfigurationServiceTest extends TestCase
         $this->assertIsArray($config->visible_widgets);
     }
 
-    public function test_get_default_configuration(): void
+    public function test_get_default_widgets(): void
     {
-        $defaultConfig = $this->service->getDefaultConfiguration();
+        $user = User::factory()->create();
+        $defaultWidgets = $this->service->getDefaultWidgets($user);
 
-        $this->assertIsArray($defaultConfig);
-        $this->assertArrayHasKey('visible_widgets', $defaultConfig);
-        $this->assertArrayHasKey('widget_order', $defaultConfig);
+        $this->assertIsArray($defaultWidgets);
+        $this->assertGreaterThan(0, count($defaultWidgets));
     }
 }

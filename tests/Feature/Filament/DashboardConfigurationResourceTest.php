@@ -19,8 +19,12 @@ class DashboardConfigurationResourceTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        // Create super_admin role if it doesn't exist
+        if (!\Spatie\Permission\Models\Role::where('name', 'super_admin')->exists()) {
+            \Spatie\Permission\Models\Role::create(['name' => 'super_admin', 'guard_name' => 'web']);
+        }
         $this->user = User::factory()->create();
-        $this->user->assignRole('super_admin'); // Ensure user has permissions
+        $this->user->assignRole('super_admin');
         Filament::actingAs($this->user);
     }
 

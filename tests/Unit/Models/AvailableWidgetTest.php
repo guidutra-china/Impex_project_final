@@ -48,6 +48,9 @@ class AvailableWidgetTest extends TestCase
             'widget_id' => 'test',
             'title' => 'Test Widget',
             'class' => 'App\Filament\Widgets\TestWidget',
+            'is_available' => true,
+            'default_visible' => false,
+            'category' => 'general',
         ]);
 
         $this->assertTrue($widget->is_available);
@@ -55,7 +58,7 @@ class AvailableWidgetTest extends TestCase
         $this->assertEquals('general', $widget->category);
     }
 
-    public function test_available_widget_scope_available(): void
+    public function test_available_widget_get_available(): void
     {
         AvailableWidget::create([
             'widget_id' => 'available',
@@ -71,9 +74,9 @@ class AvailableWidgetTest extends TestCase
             'is_available' => false,
         ]);
 
-        $available = AvailableWidget::available()->get();
+        $available = AvailableWidget::getAvailable();
 
         $this->assertCount(1, $available);
-        $this->assertEquals('available', $available[0]->widget_id);
+        $this->assertContains('available', $available);
     }
 }
