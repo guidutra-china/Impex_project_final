@@ -36,9 +36,8 @@ class PhotosRelationManager extends RelationManager
     protected SupplierRepository $supplierRepository;
     protected DocumentRepository $documentRepository;
 
-    public function __construct()
-    {
-        parent::__construct();
+    public function mount(): void {
+        parent::mount();
         $this->supplierRepository = app(SupplierRepository::class);
         $this->documentRepository = app(DocumentRepository::class);
     }

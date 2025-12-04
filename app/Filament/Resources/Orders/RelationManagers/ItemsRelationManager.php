@@ -26,9 +26,8 @@ class ItemsRelationManager extends RelationManager
     protected OrderRepository $orderRepository;
     protected ProductRepository $productRepository;
 
-    public function __construct()
-    {
-        parent::__construct();
+    public function mount(): void {
+        parent::mount();
         $this->orderRepository = app(OrderRepository::class);
         $this->productRepository = app(ProductRepository::class);
     }

@@ -25,12 +25,12 @@ class InvoicesRelationManager extends RelationManager
 
     protected static ?string $recordTitleAttribute = 'invoice_number';
 
-    protected ShipmentRepository $shipmentRepository;
-    protected SalesInvoiceRepository $salesInvoiceRepository;
+    protected ?ShipmentRepository $shipmentRepository = null;
+    protected ?SalesInvoiceRepository $salesInvoiceRepository = null;
 
-    public function __construct()
+    public function mount(): void
     {
-        parent::__construct();
+        parent::mount();
         $this->shipmentRepository = app(ShipmentRepository::class);
         $this->salesInvoiceRepository = app(SalesInvoiceRepository::class);
     }

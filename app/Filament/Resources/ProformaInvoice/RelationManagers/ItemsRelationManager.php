@@ -30,9 +30,8 @@ class ItemsRelationManager extends RelationManager
     protected ProformaInvoiceRepository $proformaRepository;
     protected SupplierQuoteRepository $quoteRepository;
 
-    public function __construct()
-    {
-        parent::__construct();
+    public function mount(): void {
+        parent::mount();
         $this->proformaRepository = app(ProformaInvoiceRepository::class);
         $this->quoteRepository = app(SupplierQuoteRepository::class);
     }

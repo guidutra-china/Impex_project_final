@@ -27,9 +27,8 @@ class ItemsRelationManager extends RelationManager
 
     protected SupplierQuoteRepository $repository;
 
-    public function __construct()
-    {
-        parent::__construct();
+    public function mount(): void {
+        parent::mount();
         $this->repository = app(SupplierQuoteRepository::class);
     }
 

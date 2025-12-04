@@ -31,9 +31,8 @@ class FeaturesRelationManager extends RelationManager
     protected ProductRepository $productRepository;
     protected CategoryRepository $categoryRepository;
 
-    public function __construct()
-    {
-        parent::__construct();
+    public function mount(): void {
+        parent::mount();
         $this->productRepository = app(ProductRepository::class);
         $this->categoryRepository = app(CategoryRepository::class);
     }

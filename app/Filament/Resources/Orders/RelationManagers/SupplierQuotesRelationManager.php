@@ -36,9 +36,8 @@ class SupplierQuotesRelationManager extends RelationManager
     protected OrderRepository $orderRepository;
     protected SupplierQuoteRepository $quoteRepository;
 
-    public function __construct()
-    {
-        parent::__construct();
+    public function mount(): void {
+        parent::mount();
         $this->orderRepository = app(OrderRepository::class);
         $this->quoteRepository = app(SupplierQuoteRepository::class);
     }

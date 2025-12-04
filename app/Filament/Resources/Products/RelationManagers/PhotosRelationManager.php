@@ -36,9 +36,8 @@ class PhotosRelationManager extends RelationManager
     protected ProductRepository $productRepository;
     protected DocumentRepository $documentRepository;
 
-    public function __construct()
-    {
-        parent::__construct();
+    public function mount(): void {
+        parent::mount();
         $this->productRepository = app(ProductRepository::class);
         $this->documentRepository = app(DocumentRepository::class);
     }

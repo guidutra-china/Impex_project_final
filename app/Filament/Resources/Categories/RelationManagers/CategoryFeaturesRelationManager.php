@@ -30,9 +30,8 @@ class CategoryFeaturesRelationManager extends RelationManager
 
     protected CategoryRepository $repository;
 
-    public function __construct()
-    {
-        parent::__construct();
+    public function mount(): void {
+        parent::mount();
         $this->repository = app(CategoryRepository::class);
     }
 
