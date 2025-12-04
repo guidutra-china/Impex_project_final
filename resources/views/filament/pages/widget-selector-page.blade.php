@@ -12,12 +12,12 @@
                     icon="heroicon-o-cog-6-tooth"
                     class="h-5 w-5 text-gray-500 dark:text-gray-400"
                 />
-                <span>Ações</span>
+                <span>Actions</span>
             </div>
         </x-slot>
         
         <x-slot name="description">
-            Salve suas configurações ou restaure os padrões do sistema
+            Save your settings or restore system defaults
         </x-slot>
         
         <div class="flex gap-3 justify-end">

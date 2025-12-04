@@ -24,9 +24,9 @@ class WidgetSelectorPage extends Page implements HasForms
     
     protected static UnitEnum|string|null $navigationGroup = 'Dashboard';
     
-    protected static ?string $navigationLabel = 'Personalizar Dashboard';
+    protected static ?string $navigationLabel = 'Customize Dashboard';
     
-    protected static ?string $title = 'Personalizar Dashboard';
+    protected static ?string $title = 'Customize Dashboard';
     
     protected static bool $shouldRegisterNavigation = true;
     
@@ -89,8 +89,8 @@ class WidgetSelectorPage extends Page implements HasForms
         
         return $schema
             ->components([
-                Section::make('Widgets Disponíveis')
-                    ->description('Selecione os widgets que deseja exibir no seu dashboard')
+                Section::make('Available Widgets')
+                    ->description('Select the widgets you want to display on your dashboard')
                     ->icon('heroicon-o-squares-2x2')
                     ->schema([
                         CheckboxList::make('selected_widgets')
@@ -111,22 +111,22 @@ class WidgetSelectorPage extends Page implements HasForms
     {
         return [
             Action::make('save')
-                ->label('Salvar Configuração')
+                ->label('Save Configuration')
                 ->action('saveConfiguration')
                 ->color('primary')
                 ->icon('heroicon-o-check')
                 ->size('lg'),
             
             Action::make('reset')
-                ->label('Resetar para Padrão')
+                ->label('Reset to Default')
                 ->action('resetToDefault')
                 ->color('gray')
                 ->icon('heroicon-o-arrow-path')
                 ->size('lg')
                 ->requiresConfirmation()
-                ->modalHeading('Resetar Dashboard')
-                ->modalDescription('Tem certeza que deseja resetar o dashboard para a configuração padrão?')
-                ->modalSubmitActionLabel('Sim, resetar'),
+                ->modalHeading('Reset Dashboard')
+                ->modalDescription('Are you sure you want to reset the dashboard to the default configuration?')
+                ->modalSubmitActionLabel('Yes, reset'),
         ];
     }
     
@@ -143,8 +143,8 @@ class WidgetSelectorPage extends Page implements HasForms
         $config->save();
         
         Notification::make()
-            ->title('Sucesso!')
-            ->body('Configuração do dashboard atualizada com sucesso')
+            ->title('Success!')
+            ->body('Dashboard configuration updated successfully')
             ->success()
             ->send();
     }
@@ -161,8 +161,8 @@ class WidgetSelectorPage extends Page implements HasForms
         $this->mount();
         
         Notification::make()
-            ->title('Sucesso!')
-            ->body('Dashboard resetado para a configuração padrão')
+            ->title('Success!')
+            ->body('Dashboard reset to default configuration')
             ->success()
             ->send();
     }
