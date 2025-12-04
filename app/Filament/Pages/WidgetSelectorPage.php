@@ -30,7 +30,7 @@ class WidgetSelectorPage extends Page implements HasForms
     
     protected static bool $shouldRegisterNavigation = true;
     
-    protected static string $view = 'filament.pages.widget-selector-page';
+    protected string $view = 'filament.pages.widget-selector-page';
     
     /**
      * Controle de acesso à página
