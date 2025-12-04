@@ -11,8 +11,8 @@ class RfqStatsWidget extends BaseWidget
 {
     protected static ?int $sort = 2;
 
-    protected RFQRepository $rfqRepository;
-    protected SupplierQuoteRepository $quoteRepository;
+    protected ?RFQRepository $rfqRepository = null;
+    protected ?SupplierQuoteRepository $quoteRepository = null;
 
     public function mount(): void
     {
