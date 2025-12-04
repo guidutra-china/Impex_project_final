@@ -22,8 +22,6 @@ class WidgetSelectorPage extends Page
 
     protected static bool $shouldRegisterNavigation = true;
 
-    protected static string $view = 'filament.pages.widget-selector-page';
-
     /**
      * Permitir acesso a todos os usuários autenticados
      * TODO: Configurar permissões específicas com Filament Shield
