@@ -416,8 +416,9 @@ class Shipment extends Model
     {
         $year = now()->year;
         
-        // Use dedicated sequence table with pessimistic locking
-        return \DB::transaction(function () use ($year) {
+        try {
+            // Use dedicated sequence table with pessimistic locking
+            return \DB::transaction(function () use ($year) {
             $sequence = ShipmentSequence::forYear($year);
             
             // Lock the sequence row to prevent concurrent increments
@@ -436,7 +437,31 @@ class Shipment extends Model
             }
 
             return sprintf('SHP-%d-%05d', $year, $nextNumber);
-        });
+            });
+        } catch (\Exception $e) {
+            // Fallback if shipment_sequences table doesn't exist yet
+            if (strpos($e->getMessage(), 'shipment_sequences') !== false || 
+                strpos($e->getMessage(), 'Base table or view not found') !== false) {
+                
+                // Use shipment records directly with lock
+                return \DB::transaction(function () use ($year) {
+                    $lastShipment = static::whereYear('created_at', $year)
+                        ->orderBy('id', 'desc')
+                        ->lockForUpdate()
+                        ->first();
+
+                    $nextNumber = $lastShipment ? (int) substr($lastShipment->shipment_number, -5) + 1 : 1;
+
+                    if ($nextNumber > 99999) {
+                        throw new \Exception('Shipment number exceeds maximum for year ' . $year);
+                    }
+
+                    return sprintf('SHP-%d-%05d', $year, $nextNumber);
+                });
+            }
+            
+            throw $e;
+        }
     }
 
     // Métodos adicionais para containers
