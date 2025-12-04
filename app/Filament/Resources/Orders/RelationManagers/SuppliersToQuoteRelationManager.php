@@ -54,9 +54,9 @@ class SuppliersToQuoteRelationManager extends RelationManager
                 $owner = $this->getOwnerRecord();
 
                 // Get tag IDs from the RFQ
-                $tagIds = $owner->tags()->pluck('tags.id');
+                $tagIds = $owner->tags()->pluck('id');
 
-                if ($tagIds->isEmpty()) {
+                if (empty($tagIds)) {
                     // No tags, return empty query
                     return Supplier::query()->whereRaw('1 = 0');
                 }
