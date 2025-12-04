@@ -159,7 +159,7 @@ class ShipmentContainersRelationManager extends RelationManager
                     ->label('Add Container')
                     ->color('success')
                     ->icon(Heroicon::OutlinedPlus)
-                    ->before(function ($data) {
+                    ->mutateFormDataBeforeCreate(function (array $data): array {
                         $data['created_by'] = auth()->id();
                         return $data;
                     }),
