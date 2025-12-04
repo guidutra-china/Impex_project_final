@@ -14,9 +14,9 @@ return new class extends Migration
         Schema::create('dashboard_configurations', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-            $table->json('visible_widgets')->nullable()->default(json_encode([]));
-            $table->json('widget_order')->nullable()->default(json_encode([]));
-            $table->json('widget_settings')->nullable()->default(json_encode([]));
+            $table->json('visible_widgets')->nullable();
+            $table->json('widget_order')->nullable();
+            $table->json('widget_settings')->nullable();
             $table->timestamps();
 
             $table->unique('user_id');
