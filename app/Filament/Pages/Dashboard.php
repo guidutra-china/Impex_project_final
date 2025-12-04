@@ -6,15 +6,27 @@ use App\Filament\Widgets\CalendarWidget;
 use App\Filament\Widgets\RfqStatsWidget;
 use App\Filament\Widgets\PurchaseOrderStatsWidget;
 use App\Filament\Widgets\FinancialOverviewWidget;
+use App\Services\DashboardConfigurationService;
 use Filament\Pages\Dashboard as BaseDashboard;
 use BackedEnum;
+use Illuminate\Support\Facades\Auth;
 
 class Dashboard extends BaseDashboard
 {
     protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-home';
 
     protected string $view = 'filament.pages.dashboard';
-    
+
+    /**
+     * Mapeamento de IDs de widgets para suas classes
+     */
+    protected array $widgetClassMap = [
+        'calendar' => CalendarWidget::class,
+        'rfq_stats' => RfqStatsWidget::class,
+        'purchase_order_stats' => PurchaseOrderStatsWidget::class,
+        'financial_overview' => FinancialOverviewWidget::class,
+    ];
+
     /**
      * Allow all authenticated users to access the dashboard.
      */
@@ -25,8 +37,56 @@ class Dashboard extends BaseDashboard
 
     /**
      * Get the widgets that should be displayed on the dashboard.
+     * Carrega widgets baseado na configuração do usuário.
      */
     public function getWidgets(): array
+    {
+        $user = Auth::user();
+
+        if (!$user) {
+            return $this->getDefaultWidgets();
+        }
+
+        try {
+            $dashboardService = app(DashboardConfigurationService::class);
+            $config = $dashboardService->getUserConfiguration($user);
+
+            if (!$config || empty($config->visible_widgets)) {
+                return $this->getDefaultWidgets();
+            }
+
+            $visibleWidgets = $config->visible_widgets;
+            $widgetOrder = $config->widget_order ?? [];
+
+            // Construir array de widgets na ordem especificada
+            $widgets = [];
+
+            // Primeiro adicionar widgets na ordem especificada
+            foreach ($widgetOrder as $widgetId) {
+                if (in_array($widgetId, $visibleWidgets) && isset($this->widgetClassMap[$widgetId])) {
+                    $widgets[] = $this->widgetClassMap[$widgetId];
+                }
+            }
+
+            // Depois adicionar widgets visíveis que não estão na ordem
+            foreach ($visibleWidgets as $widgetId) {
+                if (!in_array($widgetId, $widgetOrder) && isset($this->widgetClassMap[$widgetId])) {
+                    $widgets[] = $this->widgetClassMap[$widgetId];
+                }
+            }
+
+            return !empty($widgets) ? $widgets : $this->getDefaultWidgets();
+        } catch (\Exception $e) {
+            \Log::error('Erro ao carregar widgets do dashboard: ' . $e->getMessage());
+
+            return $this->getDefaultWidgets();
+        }
+    }
+
+    /**
+     * Retorna os widgets padrão
+     */
+    protected function getDefaultWidgets(): array
     {
         return [
             CalendarWidget::class,

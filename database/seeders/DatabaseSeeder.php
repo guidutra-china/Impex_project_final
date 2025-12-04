@@ -42,6 +42,10 @@ class DatabaseSeeder extends Seeder
         // Create financial categories
         $this->call(FinancialCategorySeeder::class);
 
+        // Create available widgets
+        $this->call(AvailableWidgetSeeder::class);
+        $this->command->info('✓ Created available widgets');
+
         // Create categories (max 5)
         $categories = Category::factory(5)->create();
         $this->command->info('✓ Created ' . $categories->count() . ' categories');
