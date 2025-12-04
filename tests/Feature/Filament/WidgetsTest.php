@@ -27,7 +27,9 @@ class WidgetsTest extends TestCase
         $this->actingAs($this->user);
     }
 
-    /** @dataProvider widgetProvider */
+    /**
+     * @dataProvider widgetProvider
+     */
     public function test_widgets_use_mount_instead_of_construct(string $widgetClass)
     {
         $reflection = new \ReflectionClass($widgetClass);

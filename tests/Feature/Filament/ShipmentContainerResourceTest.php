@@ -30,7 +30,7 @@ class ShipmentContainerResourceTest extends TestCase
     {
         // Just verify we can create containers
         ShipmentContainer::factory()->count(5)->create();
-        $this->assertTrue(true);
+        $this->assertDatabaseCount('shipment_containers', 5);
     }
 
     public function test_can_render_create_page()
@@ -43,12 +43,16 @@ class ShipmentContainerResourceTest extends TestCase
     {
         $container = ShipmentContainer::factory()->create();
         // Just verify we can retrieve the container
-        $this->assertNotNull($container);
+        $this->assertDatabaseHas('shipment_containers', ['id' => $container->id]);
     }
 
     public function test_can_create_new_container()
     {
+        // Create a shipment first (required foreign key)
+        $shipment = ShipmentContainer::factory()->create()->shipment;
+        
         $container = ShipmentContainer::create([
+            "shipment_id" => $shipment->id,
             "container_number" => "TEST1234567",
             "container_type" => "40ft",
             "status" => "draft",
