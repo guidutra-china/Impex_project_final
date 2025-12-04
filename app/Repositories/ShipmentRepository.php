@@ -124,7 +124,7 @@ class ShipmentRepository extends BaseRepository
         return $this->model
             ->find($shipmentId)
             ->invoices()
-            ->query()
+            ->getQuery()
             ->with(['client']);
     }
 
