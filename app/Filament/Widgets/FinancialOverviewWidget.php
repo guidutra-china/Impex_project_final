@@ -11,8 +11,8 @@ class FinancialOverviewWidget extends BaseWidget
 {
     protected static ?int $sort = 3;
 
-    protected SalesInvoiceRepository $salesInvoiceRepository;
-    protected PurchaseOrderRepository $purchaseOrderRepository;
+    protected ?SalesInvoiceRepository $salesInvoiceRepository = null;
+    protected ?PurchaseOrderRepository $purchaseOrderRepository = null;
 
     public function mount(): void
     {
@@ -38,6 +38,14 @@ class FinancialOverviewWidget extends BaseWidget
     
     protected function getStats(): array
     {
+        // Ensure repositories are initialized
+        if (!isset($this->salesInvoiceRepository) || !$this->salesInvoiceRepository) {
+            $this->salesInvoiceRepository = app(SalesInvoiceRepository::class);
+        }
+        if (!isset($this->purchaseOrderRepository) || !$this->purchaseOrderRepository) {
+            $this->purchaseOrderRepository = app(PurchaseOrderRepository::class);
+        }
+        
         $user = auth()->user();
         
         // Check if user can see all clients
