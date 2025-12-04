@@ -7,7 +7,7 @@ use Filament\Widgets\Widget;
 
 class ContainerUtilizationWidget extends Widget
 {
-    protected static string $view = 'filament.widgets.container-utilization-widget';
+    protected string $view = 'filament.widgets.container-utilization-widget';
 
     protected static ?int $sort = 2;
 
