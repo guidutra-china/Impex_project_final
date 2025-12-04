@@ -10,7 +10,7 @@ class PurchaseOrderStatsWidget extends BaseWidget
 {
     protected static ?int $sort = 2;
 
-    protected PurchaseOrderRepository $repository;
+    protected ?PurchaseOrderRepository $repository = null;
 
     public function mount(): void
     {
@@ -35,6 +35,11 @@ class PurchaseOrderStatsWidget extends BaseWidget
     
     protected function getStats(): array
     {
+        // Ensure repository is initialized
+        if (!$this->repository) {
+            $this->repository = app(PurchaseOrderRepository::class);
+        }
+        
         $user = auth()->user();
         
         // Check if user can see all clients
