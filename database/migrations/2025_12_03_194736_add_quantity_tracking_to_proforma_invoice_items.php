@@ -17,7 +17,7 @@ return new class extends Migration
             $table->integer('shipment_count')->default(0)->after('quantity_remaining');
 
             // Índices para performance
-            $table->index(['proforma_invoice_id', 'quantity_shipped']);
+            $table->index(['proforma_invoice_id', 'quantity_shipped'], 'pii_shipped_idx');
         });
     }
 
@@ -27,7 +27,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('proforma_invoice_items', function (Blueprint $table) {
-            $table->dropIndex(['proforma_invoice_id', 'quantity_shipped']);
+            $table->dropIndex('pii_shipped_idx');
             $table->dropColumn(['quantity_shipped', 'quantity_remaining', 'shipment_count']);
         });
     }
