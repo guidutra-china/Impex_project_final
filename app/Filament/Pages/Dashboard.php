@@ -52,7 +52,7 @@ class Dashboard extends BaseDashboard
 
         try {
             $dashboardService = app(DashboardConfigurationService::class);
-            $config = $dashboardService->getUserConfiguration($user);
+            $config = $dashboardService->getOrCreateConfiguration($user);
 
             if (!$config || empty($config->visible_widgets)) {
                 return $this->getDefaultWidgets();
