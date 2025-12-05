@@ -136,11 +136,13 @@ class ProformaInvoiceRepository extends BaseRepository
                 throw new \Exception("Esta Proforma Invoice não pode ser aprovada no status atual");
             }
 
-            return $this->update($id, [
+            $this->update($id, [
                 'status' => 'approved',
                 'approved_at' => now(),
                 'approved_by' => $approvedBy,
             ]);
+            
+            return $this->findById($id);
         } catch (\Exception $e) {
             \Log::error('Erro ao aprovar Proforma Invoice', [
                 'id' => $id,
