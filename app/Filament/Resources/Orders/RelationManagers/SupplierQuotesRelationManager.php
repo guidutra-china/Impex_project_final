@@ -4,7 +4,7 @@ namespace App\Filament\Resources\Orders\RelationManagers;
 
 use App\Exceptions\MissingExchangeRateException;
 use App\Models\ExchangeRate;
-use App\Repositories\OrderRepository;
+
 use App\Repositories\SupplierQuoteRepository;
 use App\Services\SupplierQuoteImportService;
 use Filament\Actions\Action;
@@ -33,12 +33,10 @@ class SupplierQuotesRelationManager extends RelationManager
 
     protected static ?string $title = 'Supplier Quotes';
 
-    protected OrderRepository $orderRepository;
     protected SupplierQuoteRepository $quoteRepository;
 
     public function mount(): void {
         parent::mount();
-        $this->orderRepository = app(OrderRepository::class);
         $this->quoteRepository = app(SupplierQuoteRepository::class);
     }
 
@@ -96,9 +94,6 @@ class SupplierQuotesRelationManager extends RelationManager
     {
         return $table
             ->recordTitleAttribute('quote_number')
-            ->query(
-                $this->orderRepository->getSupplierQuotesQuery($this->getOwnerRecord()->id)
-            )
             ->columns([
                 TextColumn::make('quote_number')
                     ->searchable(),
