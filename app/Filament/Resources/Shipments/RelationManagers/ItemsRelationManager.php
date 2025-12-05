@@ -272,14 +272,79 @@ class ItemsRelationManager extends RelationManager
                                     ->searchable()
                                     ->visible(fn ($get) => $get('destination_type') === 'container')
                                     ->required(fn ($get) => $get('destination_type') === 'container')
-                                    ->helperText('Create new containers in the Containers tab'),
+                                    ->createOptionForm([
+                                        Select::make('container_type_id')
+                                            ->label('Container Type')
+                                            ->options(\App\Models\PackingUnit::where('unit_type', 'container')->pluck('name', 'id'))
+                                            ->required()
+                                            ->searchable()
+                                            ->preload(),
+                                        TextInput::make('container_number')
+                                            ->label('Container Number')
+                                            ->required()
+                                            ->maxLength(50),
+                                        TextInput::make('seal_number')
+                                            ->label('Seal Number')
+                                            ->maxLength(50),
+                                    ])
+                                    ->createOptionUsing(function (array $data) use ($shipment) {
+                                        $container = \App\Models\ShipmentContainer::create([
+                                            'shipment_id' => $shipment->id,
+                                            'container_type_id' => $data['container_type_id'],
+                                            'container_number' => $data['container_number'],
+                                            'seal_number' => $data['seal_number'] ?? null,
+                                            'status' => 'loading',
+                                        ]);
+                                        return $container->id;
+                                    })
+                                    ->helperText('Click + to create a new container'),
                                 Select::make('box_id')
                                     ->label('Select Box/Pallet')
                                     ->options(fn () => $shipment->packingBoxes()->where('packing_status', '!=', 'sealed')->get()->mapWithKeys(fn ($b) => [$b->id => sprintf('%s - %s', $b->box_label ?? "Box #{$b->box_number}", ucfirst($b->box_type))]))
                                     ->searchable()
                                     ->visible(fn ($get) => $get('destination_type') === 'box')
                                     ->required(fn ($get) => $get('destination_type') === 'box')
-                                    ->helperText('Create new boxes in the Packing Boxes tab'),
+                                    ->createOptionForm([
+                                        Select::make('box_type')
+                                            ->label('Box Type')
+                                            ->options([
+                                                'box' => 'Box',
+                                                'pallet' => 'Pallet',
+                                                'crate' => 'Crate',
+                                                'bundle' => 'Bundle',
+                                            ])
+                                            ->required()
+                                            ->default('box'),
+                                        TextInput::make('box_label')
+                                            ->label('Box Label (optional)')
+                                            ->maxLength(100)
+                                            ->helperText('e.g., "Electronics Box 1", "Fragile Items"'),
+                                        TextInput::make('length')
+                                            ->label('Length (cm)')
+                                            ->numeric()
+                                            ->default(0),
+                                        TextInput::make('width')
+                                            ->label('Width (cm)')
+                                            ->numeric()
+                                            ->default(0),
+                                        TextInput::make('height')
+                                            ->label('Height (cm)')
+                                            ->numeric()
+                                            ->default(0),
+                                    ])
+                                    ->createOptionUsing(function (array $data) use ($shipment) {
+                                        $box = \App\Models\PackingBox::create([
+                                            'shipment_id' => $shipment->id,
+                                            'box_type' => $data['box_type'],
+                                            'box_label' => $data['box_label'] ?? null,
+                                            'length' => $data['length'] ?? 0,
+                                            'width' => $data['width'] ?? 0,
+                                            'height' => $data['height'] ?? 0,
+                                            'packing_status' => 'empty',
+                                        ]);
+                                        return $box->id;
+                                    })
+                                    ->helperText('Click + to create a new box/pallet'),
                             ];
                         })
                         ->action(function (Collection $records, array $data) {
