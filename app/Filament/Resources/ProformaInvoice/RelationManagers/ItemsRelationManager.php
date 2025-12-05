@@ -21,6 +21,7 @@ use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\TextInputColumn;
 use Filament\Tables\Table;
 use Filament\Support\Enums\FontWeight;
 use Filament\Notifications\Notification;
@@ -61,7 +62,7 @@ class ItemsRelationManager extends RelationManager
                                 $set('commission_type', null);
                             })
                             ->helperText('Select supplier quote to load items from')
-                            ->columnSpan(2),
+,
 
                         Select::make('quote_item_id')
                             ->label('Quote Item')
@@ -122,9 +123,8 @@ class ItemsRelationManager extends RelationManager
                             ->required()
                             ->disabled(fn (Get $get) => !$get('supplier_quote_id'))
                             ->helperText('Select item from the supplier quote')
-                            ->columnSpan(2),
+,
                     ])
-                    ->columns(2)
                     ->collapsible(),
 
                 Section::make('Product & Pricing')
@@ -136,8 +136,7 @@ class ItemsRelationManager extends RelationManager
                             ->searchable()
                             ->preload()
                             ->disabled()
-                            ->dehydrated()
-                            ->columnSpan(2),
+                            ->dehydrated(),
 
                         TextInput::make('quantity')
                             ->required()
@@ -151,7 +150,7 @@ class ItemsRelationManager extends RelationManager
                                 $total = $quantity * $unitPrice;
                                 $set('total', $total);
                             })
-                            ->columnSpan(1),
+,
 
                         TextInput::make('unit_price')
                             ->label('Unit Price (with commission)')
@@ -166,7 +165,7 @@ class ItemsRelationManager extends RelationManager
                                 $total = $quantity * $unitPrice;
                                 $set('total', $total);
                             })
-                            ->columnSpan(1),
+,
 
                         TextInput::make('commission_percent')
                             ->label('Commission %')
@@ -174,7 +173,7 @@ class ItemsRelationManager extends RelationManager
                             ->suffix('%')
                             ->disabled()
                             ->dehydrated()
-                            ->columnSpan(1),
+,
 
                         Select::make('commission_type')
                             ->options([
@@ -183,7 +182,7 @@ class ItemsRelationManager extends RelationManager
                             ])
                             ->disabled()
                             ->dehydrated()
-                            ->columnSpan(1),
+,
 
                         TextInput::make('commission_amount')
                             ->label('Commission Amount')
@@ -191,7 +190,7 @@ class ItemsRelationManager extends RelationManager
                             ->prefix('$')
                             ->disabled()
                             ->dehydrated()
-                            ->columnSpan(1),
+,
 
                         TextInput::make('total')
                             ->label('Total')
@@ -199,19 +198,18 @@ class ItemsRelationManager extends RelationManager
                             ->disabled()
                             ->dehydrated()
                             ->prefix('$')
-                            ->columnSpan(1),
+,
 
                         TextInput::make('delivery_days')
                             ->label('Delivery (days)')
                             ->numeric()
                             ->minValue(0)
-                            ->columnSpan(1),
+,
 
                         Textarea::make('notes')
                             ->rows(2)
-                            ->columnSpanFull(),
+,
                     ])
-                    ->columns(4)
                     ->collapsible(),
             ]);
     }
@@ -233,8 +231,10 @@ class ItemsRelationManager extends RelationManager
                     ->wrap()
                     ->weight(FontWeight::Medium),
 
-                TextColumn::make('quantity')
+                TextInputColumn::make('quantity')
                     ->label('Qty')
+                    ->type('number')
+                    ->rules(['required', 'numeric', 'min:1'])
                     ->alignCenter()
                     ->sortable(),
 
@@ -270,9 +270,11 @@ class ItemsRelationManager extends RelationManager
                     })
                     ->formatStateUsing(fn (string $state): string => ucfirst($state)),
 
-                TextColumn::make('unit_price')
+                TextInputColumn::make('unit_price')
                     ->label('Unit Price')
-                    ->money(fn () => $this->getOwnerRecord()->currency?->code ?? 'USD')
+                    ->type('number')
+                    ->step(0.01)
+                    ->rules(['required', 'numeric', 'min:0'])
                     ->sortable(),
 
                 TextColumn::make('commission_percent')
