@@ -21,12 +21,12 @@ class EditOrder extends EditRecord
 {
     protected static string $resource = OrderResource::class;
 
-    protected ?OrderRepository $orderRepository = null;
-    protected ?FinancialTransactionRepository $financialTransactionRepository = null;
+    protected OrderRepository $orderRepository;
+    protected FinancialTransactionRepository $financialTransactionRepository;
 
-    public function mount(string|int $record): void
+    public function __construct()
     {
-        parent::mount($record);
+        parent::__construct();
         $this->orderRepository = app(OrderRepository::class);
         $this->financialTransactionRepository = app(FinancialTransactionRepository::class);
     }
