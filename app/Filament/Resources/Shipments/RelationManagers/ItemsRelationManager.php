@@ -8,8 +8,11 @@ use Filament\Actions\CreateAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
+use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Tables\Actions\BulkAction;
+use Illuminate\Database\Eloquent\Collection;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
@@ -249,7 +252,82 @@ class ItemsRelationManager extends RelationManager
             ])
             ->bulkActions([
                 BulkActionGroup::make([
-                    \App\Filament\Actions\Shipments\PackSelectedItemsBulkAction::make(),
+                    BulkAction::make('packSelectedItems')
+                        ->label('Pack Selected Items')
+                        ->icon(Heroicon::OutlinedCube)
+                        ->color('success')
+                        ->requiresConfirmation()
+                        ->modalHeading('Pack Selected Items')
+                        ->modalWidth('2xl')
+                        ->form(function ($livewire) {
+                            $shipment = $livewire->getOwnerRecord();
+                            return [
+                                Radio::make('destination_type')
+                                    ->label('Pack into')
+                                    ->options(['container' => 'Container', 'box' => 'Packing Box/Pallet'])
+                                    ->required()->reactive()->default('container'),
+                                Select::make('container_id')
+                                    ->label('Select Container')
+                                    ->options(fn () => $shipment->containers()->where('status', '!=', 'sealed')->pluck('container_number', 'id'))
+                                    ->searchable()
+                                    ->visible(fn ($get) => $get('destination_type') === 'container')
+                                    ->required(fn ($get) => $get('destination_type') === 'container')
+                                    ->helperText('Create new containers in the Containers tab'),
+                                Select::make('box_id')
+                                    ->label('Select Box/Pallet')
+                                    ->options(fn () => $shipment->packingBoxes()->where('packing_status', '!=', 'sealed')->get()->mapWithKeys(fn ($b) => [$b->id => sprintf('%s - %s', $b->box_label ?? "Box #{$b->box_number}", ucfirst($b->box_type))]))
+                                    ->searchable()
+                                    ->visible(fn ($get) => $get('destination_type') === 'box')
+                                    ->required(fn ($get) => $get('destination_type') === 'box')
+                                    ->helperText('Create new boxes in the Packing Boxes tab'),
+                            ];
+                        })
+                        ->action(function (Collection $records, array $data) {
+                            if ($data['destination_type'] === 'container') {
+                                $container = \App\Models\ShipmentContainer::find($data['container_id']);
+                                foreach ($records as $item) {
+                                    $qty = $item->quantity_to_ship - $item->quantity_packed;
+                                    if ($qty > 0) {
+                                        \App\Models\ShipmentContainerItem::create([
+                                            'shipment_container_id' => $container->id,
+                                            'proforma_invoice_item_id' => $item->proforma_invoice_item_id,
+                                            'product_id' => $item->product_id,
+                                            'quantity' => $qty,
+                                            'unit_weight' => $item->unit_weight,
+                                            'total_weight' => $qty * $item->unit_weight,
+                                            'unit_volume' => $item->unit_volume,
+                                            'total_volume' => $qty * $item->unit_volume,
+                                            'unit_price' => $item->unit_price,
+                                            'customs_value' => $qty * $item->unit_price,
+                                            'hs_code' => $item->hs_code,
+                                            'country_of_origin' => $item->country_of_origin,
+                                            'status' => 'draft',
+                                            'shipment_sequence' => 1,
+                                        ]);
+                                        $item->updatePackedQuantity();
+                                    }
+                                }
+                                $container->recalculateTotals();
+                            } else {
+                                $box = \App\Models\PackingBox::find($data['box_id']);
+                                foreach ($records as $item) {
+                                    $qty = $item->quantity_to_ship - $item->quantity_packed;
+                                    if ($qty > 0) {
+                                        \App\Models\PackingBoxItem::create([
+                                            'packing_box_id' => $box->id,
+                                            'shipment_item_id' => $item->id,
+                                            'product_id' => $item->product_id,
+                                            'quantity' => $qty,
+                                            'unit_weight' => $item->unit_weight,
+                                            'unit_volume' => $item->unit_volume,
+                                        ]);
+                                        $item->updatePackedQuantity();
+                                    }
+                                }
+                                $box->recalculateTotals();
+                            }
+                            \Filament\Notifications\Notification::make()->title('Items packed successfully')->success()->send();
+                        }),
                     DeleteBulkAction::make(),
                 ]),
             ])
