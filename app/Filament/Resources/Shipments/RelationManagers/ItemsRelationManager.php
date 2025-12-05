@@ -358,8 +358,30 @@ class ItemsRelationManager extends RelationManager
                                 foreach ($records as $item) {
                                     $qty = $item->quantity_to_ship - $item->quantity_packed;
                                     if ($qty > 0) {
-                                        $unitWeight = $item->unit_weight ?? 0;
-                                        $unitVolume = $item->unit_volume ?? 0;
+                                        // Calculate weight and volume from product packaging info
+                                        $product = $item->product;
+                                        
+                                        // Calculate based on master carton (standard shipping unit)
+                                        if ($product && $product->pcs_per_carton > 0) {
+                                            // Calculate number of cartons needed
+                                            $cartons = ceil($qty / $product->pcs_per_carton);
+                                            
+                                            // Weight per piece (from carton)
+                                            $unitWeight = $product->carton_weight / $product->pcs_per_carton;
+                                            
+                                            // Volume per piece (from carton CBM)
+                                            $unitVolume = $product->carton_cbm / $product->pcs_per_carton;
+                                        } else {
+                                            // Fallback to product net weight and calculated volume
+                                            $unitWeight = $product->net_weight ?? 0;
+                                            
+                                            // Calculate volume from product dimensions (L x W x H in cm to m³)
+                                            if ($product && $product->product_length && $product->product_width && $product->product_height) {
+                                                $unitVolume = ($product->product_length * $product->product_width * $product->product_height) / 1000000;
+                                            } else {
+                                                $unitVolume = 0;
+                                            }
+                                        }
                                         
                                         \App\Models\ShipmentContainerItem::create([
                                             'shipment_container_id' => $container->id,
@@ -386,8 +408,27 @@ class ItemsRelationManager extends RelationManager
                                 foreach ($records as $item) {
                                     $qty = $item->quantity_to_ship - $item->quantity_packed;
                                     if ($qty > 0) {
-                                        $unitWeight = $item->unit_weight ?? 0;
-                                        $unitVolume = $item->unit_volume ?? 0;
+                                        // Calculate weight and volume from product packaging info
+                                        $product = $item->product;
+                                        
+                                        // Calculate based on master carton (standard shipping unit)
+                                        if ($product && $product->pcs_per_carton > 0) {
+                                            // Weight per piece (from carton)
+                                            $unitWeight = $product->carton_weight / $product->pcs_per_carton;
+                                            
+                                            // Volume per piece (from carton CBM)
+                                            $unitVolume = $product->carton_cbm / $product->pcs_per_carton;
+                                        } else {
+                                            // Fallback to product net weight and calculated volume
+                                            $unitWeight = $product->net_weight ?? 0;
+                                            
+                                            // Calculate volume from product dimensions (L x W x H in cm to m³)
+                                            if ($product && $product->product_length && $product->product_width && $product->product_height) {
+                                                $unitVolume = ($product->product_length * $product->product_width * $product->product_height) / 1000000;
+                                            } else {
+                                                $unitVolume = 0;
+                                            }
+                                        }
                                         
                                         \App\Models\PackingBoxItem::create([
                                             'packing_box_id' => $box->id,
