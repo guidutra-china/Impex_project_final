@@ -275,7 +275,7 @@ class ItemsRelationManager extends RelationManager
                                     ->createOptionForm([
                                         Select::make('container_type_id')
                                             ->label('Container Type')
-                                            ->options(\App\Models\PackingUnit::where('unit_type', 'container')->pluck('name', 'id'))
+                                            ->options(\App\Models\ContainerType::pluck('name', 'id'))
                                             ->required()
                                             ->searchable()
                                             ->preload(),
