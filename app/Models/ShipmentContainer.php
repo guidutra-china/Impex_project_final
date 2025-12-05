@@ -151,4 +151,14 @@ class ShipmentContainer extends Model
         $this->status = 'packed';
         $this->save();
     }
+
+    /**
+     * Recalculate container totals based on items
+     */
+    public function recalculateTotals(): void
+    {
+        $this->current_weight = $this->items()->sum('total_weight');
+        $this->current_volume = $this->items()->sum('total_volume');
+        $this->save();
+    }
 }

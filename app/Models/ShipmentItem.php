@@ -210,6 +210,32 @@ class ShipmentItem extends Model
         $this->save();
     }
 
+    /**
+     * Update packed quantity based on container items
+     */
+    public function updatePackedQuantity(): void
+    {
+        // Sum quantity from all container items for this shipment item
+        $totalPacked = \App\Models\ShipmentContainerItem::whereHas('container', function ($query) {
+            $query->where('shipment_id', $this->shipment_id);
+        })
+        ->where('product_id', $this->product_id)
+        ->sum('quantity');
+        
+        $this->quantity_packed = $totalPacked;
+        
+        // Update packing status
+        if ($totalPacked == 0) {
+            $this->packing_status = 'unpacked';
+        } elseif ($totalPacked < $this->quantity_to_ship) {
+            $this->packing_status = 'partially_packed';
+        } else {
+            $this->packing_status = 'fully_packed';
+        }
+        
+        $this->save();
+    }
+
     // Boot method
     protected static function boot()
     {
