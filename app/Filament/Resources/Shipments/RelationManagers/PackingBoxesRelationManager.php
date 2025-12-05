@@ -126,9 +126,6 @@ class PackingBoxesRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         return $table
-            ->query(
-                ($this->repository ?? app(ShipmentRepository::class))->getPackingBoxesQuery($this->getOwnerRecord()->id)
-            )
             ->columns([
                 TextColumn::make('box_number')
                     ->label('Box #')
