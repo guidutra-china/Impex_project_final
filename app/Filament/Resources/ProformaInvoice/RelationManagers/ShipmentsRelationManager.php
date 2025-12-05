@@ -5,8 +5,7 @@ namespace App\Filament\Resources\ProformaInvoice\RelationManagers;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables\Table;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Actions\ViewAction;
-use Filament\Tables\Actions\EditAction;
+use Filament\Actions\Action;
 use Filament\Support\Enums\FontWeight;
 
 class ShipmentsRelationManager extends RelationManager
@@ -112,12 +111,18 @@ class ShipmentsRelationManager extends RelationManager
             ->headerActions([
                 // No create action - shipments are created from the shipment resource
             ])
-            ->actions([
-                ViewAction::make()
+            ->recordActions([
+                Action::make('view')
+                    ->label('View')
+                    ->icon('heroicon-o-eye')
+                    ->color('info')
                     ->url(fn ($record) => route('filament.admin.resources.shipments.view', ['record' => $record->id]))
                     ->openUrlInNewTab(),
 
-                EditAction::make()
+                Action::make('edit')
+                    ->label('Edit')
+                    ->icon('heroicon-o-pencil-square')
+                    ->color('warning')
                     ->url(fn ($record) => route('filament.admin.resources.shipments.edit', ['record' => $record->id]))
                     ->openUrlInNewTab()
                     ->visible(fn ($record) => in_array($record->status, ['draft', 'preparing'])),
