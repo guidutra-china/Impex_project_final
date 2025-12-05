@@ -236,9 +236,21 @@ class ProformaInvoice extends Model
         return $this->belongsTo(User::class, 'updated_by');
     }
 
-    public function shipments(): HasMany
+    public function shipmentInvoices(): HasMany
     {
-        return $this->hasMany(Shipment::class, 'proforma_invoice_id');
+        return $this->hasMany(ShipmentInvoice::class, 'proforma_invoice_id');
+    }
+
+    public function shipments()
+    {
+        return $this->hasManyThrough(
+            Shipment::class,
+            ShipmentInvoice::class,
+            'proforma_invoice_id',  // Foreign key on shipment_invoices
+            'id',                    // Foreign key on shipments
+            'id',                    // Local key on proforma_invoices
+            'shipment_id'            // Local key on shipment_invoices
+        );
     }
 
     /**
