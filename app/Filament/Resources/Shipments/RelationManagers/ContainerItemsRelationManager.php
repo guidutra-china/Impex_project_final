@@ -141,6 +141,7 @@ class ContainerItemsRelationManager extends RelationManager
                             ->label('Total Weight')
                             ->numeric()
                             ->disabled()
+                            ->dehydrated()  // ← SAVE even when disabled
                             ->suffix('kg')
                             ->columnSpanFull(),
 
@@ -148,6 +149,7 @@ class ContainerItemsRelationManager extends RelationManager
                             ->label('Total Volume')
                             ->numeric()
                             ->disabled()
+                            ->dehydrated()  // ← SAVE even when disabled
                             ->suffix('m³')
                             ->columnSpanFull(),
 
@@ -155,6 +157,7 @@ class ContainerItemsRelationManager extends RelationManager
                             ->label('Customs Value')
                             ->numeric()
                             ->disabled()
+                            ->dehydrated()  // ← SAVE even when disabled
                             ->prefix('$')
                             ->columnSpanFull(),
                     ])
