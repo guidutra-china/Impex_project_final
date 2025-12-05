@@ -19,8 +19,10 @@ class CategoryForm
                     ->label('Category Name')
                     ->required()
                     ->maxLength(255)
+                    ->unique(ignoreRecord: true)
                     ->live(onBlur: true)
-                    ->afterStateUpdated(fn ($state, callable $set) => $set('slug', \Illuminate\Support\Str::slug($state))),
+                    ->afterStateUpdated(fn ($state, callable $set) => $set('slug', \Illuminate\Support\Str::slug($state)))
+                    ->helperText('Category name must be unique'),
 
                 TextInput::make('slug')
                     ->label('Slug')
