@@ -12,8 +12,20 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // MySQL doesn't support direct ALTER COLUMN for ENUM
-        // We need to use raw SQL to modify the enum
+        // First, update existing values to new equivalents
+        DB::table('shipments')
+            ->where('status', 'draft')
+            ->update(['status' => 'pending']);
+        
+        DB::table('shipments')
+            ->where('status', 'confirmed')
+            ->update(['status' => 'ready_to_ship']);
+        
+        DB::table('shipments')
+            ->where('status', 'in_transit')
+            ->update(['status' => 'on_board']);
+        
+        // Now modify the enum to only include new values
         DB::statement("ALTER TABLE shipments MODIFY COLUMN status ENUM(
             'pending',
             'preparing',
