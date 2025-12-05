@@ -79,7 +79,30 @@ class SupplierForm
                             ->label('Tags')
                             ->relationship('tags', 'name')
                             ->multiple()
-                            ->preload(),
+                            ->preload()
+                            ->searchable()
+                            ->createOptionForm([
+                                TextInput::make('name')
+                                    ->label('Tag Name')
+                                    ->required()
+                                    ->maxLength(255)
+                                    ->unique()
+                                    ->live(onBlur: true)
+                                    ->afterStateUpdated(fn ($state, callable $set) => $set('slug', \Illuminate\Support\Str::slug($state)))
+                                    ->helperText('Tag name must be unique'),
+                                
+                                TextInput::make('slug')
+                                    ->label('Slug')
+                                    ->required()
+                                    ->maxLength(255)
+                                    ->unique()
+                                    ->helperText('URL-friendly identifier (auto-generated from name)'),
+                            ])
+                            ->createOptionModalHeading('Create New Tag')
+                            ->createOptionUsing(function (array $data) {
+                                $tag = \App\Models\Tag::create($data);
+                                return $tag->id;
+                            }),
 
                         TextEntry::make('created_at')
                             ->state(fn (Supplier $record): ?string => $record->created_at?->diffForHumans()),
