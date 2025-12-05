@@ -265,8 +265,85 @@ class PackingBoxesRelationManager extends RelationManager
                     ->icon(Heroicon::OutlinedEye)
                     ->color('info')
                     ->modalHeading(fn ($record) => 'Items in Box #' . $record->box_number)
-                    ->modalWidth('4xl')
-                    ->modalContent(fn ($record) => view('filament.modals.packing-box-items', ['box' => $record])),
+                    ->modalWidth('6xl')
+                    ->modalSubmitAction(false)
+                    ->modalCancelActionLabel('Close')
+                    ->infolist([
+                        \Filament\Infolists\Components\Section::make('Box Items')
+                            ->schema([
+                                \Filament\Infolists\Components\RepeatableEntry::make('packingBoxItems')
+                                    ->label('')
+                                    ->schema([
+                                        \Filament\Infolists\Components\TextEntry::make('shipmentItem.product_sku')
+                                            ->label('SKU'),
+                                        \Filament\Infolists\Components\TextEntry::make('shipmentItem.product_name')
+                                            ->label('Product'),
+                                        \Filament\Infolists\Components\TextEntry::make('quantity')
+                                            ->label('Quantity')
+                                            ->numeric(),
+                                        \Filament\Infolists\Components\TextEntry::make('unit_weight')
+                                            ->label('Unit Weight')
+                                            ->suffix(' kg')
+                                            ->numeric(decimalPlaces: 2),
+                                        \Filament\Infolists\Components\TextEntry::make('total_weight')
+                                            ->label('Total Weight')
+                                            ->suffix(' kg')
+                                            ->state(fn ($record) => $record->quantity * $record->unit_weight)
+                                            ->numeric(decimalPlaces: 2)
+                                            ->weight('bold'),
+                                        \Filament\Infolists\Components\TextEntry::make('unit_volume')
+                                            ->label('Unit Volume')
+                                            ->suffix(' m³')
+                                            ->numeric(decimalPlaces: 4),
+                                        \Filament\Infolists\Components\TextEntry::make('total_volume')
+                                            ->label('Total Volume')
+                                            ->suffix(' m³')
+                                            ->state(fn ($record) => $record->quantity * $record->unit_volume)
+                                            ->numeric(decimalPlaces: 4)
+                                            ->weight('bold'),
+                                    ])
+                                    ->columns(7)
+                                    ->grid(7),
+                            ]),
+                        \Filament\Infolists\Components\Section::make('Box Summary')
+                            ->schema([
+                                \Filament\Infolists\Components\TextEntry::make('box_type')
+                                    ->label('Box Type')
+                                    ->formatStateUsing(fn ($state) => ucfirst($state)),
+                                \Filament\Infolists\Components\TextEntry::make('packing_status')
+                                    ->label('Status')
+                                    ->badge()
+                                    ->formatStateUsing(fn ($state) => ucfirst(str_replace('_', ' ', $state))),
+                                \Filament\Infolists\Components\TextEntry::make('total_items')
+                                    ->label('Total Items'),
+                                \Filament\Infolists\Components\TextEntry::make('total_quantity')
+                                    ->label('Total Quantity')
+                                    ->suffix(' units')
+                                    ->numeric(),
+                                \Filament\Infolists\Components\TextEntry::make('net_weight')
+                                    ->label('Net Weight')
+                                    ->suffix(' kg')
+                                    ->numeric(decimalPlaces: 2)
+                                    ->weight('bold')
+                                    ->size('lg'),
+                                \Filament\Infolists\Components\TextEntry::make('gross_weight')
+                                    ->label('Gross Weight')
+                                    ->suffix(' kg')
+                                    ->numeric(decimalPlaces: 2)
+                                    ->weight('bold')
+                                    ->size('lg'),
+                                \Filament\Infolists\Components\TextEntry::make('volume')
+                                    ->label('Volume')
+                                    ->suffix(' m³')
+                                    ->numeric(decimalPlaces: 4)
+                                    ->weight('bold')
+                                    ->size('lg'),
+                                \Filament\Infolists\Components\TextEntry::make('dimensions')
+                                    ->label('Dimensions (L×W×H)')
+                                    ->state(fn ($record) => $record->length . ' × ' . $record->width . ' × ' . $record->height . ' cm'),
+                            ])
+                            ->columns(4),
+                    ]),
                 EditAction::make(),
                 DeleteAction::make()
                     ->requiresConfirmation()
