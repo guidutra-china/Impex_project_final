@@ -326,12 +326,12 @@ class ShipmentService
     {
         $availableItems = [];
 
-        foreach ($shipment->salesInvoices as $invoice) {
+        foreach ($shipment->proformaInvoices as $invoice) {
             foreach ($invoice->items as $item) {
                 if ($item->canBeShipped()) {
                     $availableItems[] = [
                         'invoice_id' => $invoice->id,
-                        'invoice_number' => $invoice->invoice_number,
+                        'invoice_number' => $invoice->proforma_number,
                         'item_id' => $item->id,
                         'product_id' => $item->product_id,
                         'product_name' => $item->product_name,

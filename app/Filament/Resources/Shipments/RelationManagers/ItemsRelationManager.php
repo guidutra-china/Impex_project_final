@@ -36,8 +36,8 @@ class ItemsRelationManager extends RelationManager
             ->components([
                 Section::make('Item Selection')
                     ->schema([
-                        Select::make('sales_invoice_item_id')
-                            ->label('Invoice Item')
+                        Select::make('proforma_invoice_item_id')
+                            ->label('Proforma Invoice Item')
                             ->options(function ($livewire) {
                                 $shipment = $livewire->getOwnerRecord();
                                 $service = new ShipmentService();
@@ -61,7 +61,7 @@ class ItemsRelationManager extends RelationManager
                             ->reactive()
                             ->afterStateUpdated(function ($state, $set) {
                                 if ($state) {
-                                    $invoiceItem = \App\Models\SalesInvoiceItem::find($state);
+                                    $invoiceItem = \App\Models\ProformaInvoiceItem::find($state);
                                     if ($invoiceItem) {
                                         $set('product_id', $invoiceItem->product_id);
                                         $set('product_name', $invoiceItem->product_name);
@@ -81,9 +81,9 @@ class ItemsRelationManager extends RelationManager
                                     ->required()
                                     ->minValue(1)
                                     ->helperText(function ($get) {
-                                        $invoiceItemId = $get('sales_invoice_item_id');
+                                        $invoiceItemId = $get('proforma_invoice_item_id');
                                         if ($invoiceItemId) {
-                                            $invoiceItem = \App\Models\SalesInvoiceItem::find($invoiceItemId);
+                                            $invoiceItem = \App\Models\ProformaInvoiceItem::find($invoiceItemId);
                                             if ($invoiceItem) {
                                                 return "Available: {$invoiceItem->quantity_remaining}";
                                             }
@@ -130,8 +130,8 @@ class ItemsRelationManager extends RelationManager
     {
         return $table
             ->columns([
-                TextColumn::make('salesInvoiceItem.salesInvoice.invoice_number')
-                    ->label('Invoice #')
+                TextColumn::make('proformaInvoiceItem.proformaInvoice.proforma_number')
+                    ->label('Proforma #')
                     ->searchable()
                     ->sortable(),
 
@@ -154,133 +154,105 @@ class ItemsRelationManager extends RelationManager
 
                 TextColumn::make('quantity_ordered')
                     ->label('Ordered')
-                    ->alignCenter()
-                    ->toggleable(),
+                    ->numeric()
+                    ->alignCenter(),
 
                 TextColumn::make('quantity_to_ship')
                     ->label('To Ship')
+                    ->numeric()
                     ->alignCenter()
-                    ->weight('bold')
-                    ->color('primary'),
+                    ->weight('bold'),
 
                 TextColumn::make('quantity_shipped')
                     ->label('Shipped')
-                    ->alignCenter()
-                    ->toggleable(),
-
-                BadgeColumn::make('packing_status')
-                    ->label('Packing')
-                    ->formatStateUsing(fn ($state) => match($state) {
-                        'unpacked' => 'Unpacked',
-                        'partially_packed' => 'Partial',
-                        'fully_packed' => 'Packed',
-                        default => 'N/A',
-                    })
-                    ->colors([
-                        'secondary' => 'unpacked',
-                        'warning' => 'partially_packed',
-                        'success' => 'fully_packed',
-                    ]),
-
-                TextColumn::make('quantity_packed')
-                    ->label('Packed')
-                    ->alignCenter()
-                    ->default(0),
+                    ->numeric()
+                    ->alignCenter(),
 
                 TextColumn::make('quantity_remaining')
                     ->label('Remaining')
+                    ->numeric()
                     ->alignCenter()
-                    ->default(0)
+                    ->badge()
                     ->color(fn ($state) => $state > 0 ? 'warning' : 'success'),
 
-                TextColumn::make('unit_weight')
-                    ->label('Unit Wt (kg)')
-                    ->numeric(3)
-                    ->alignEnd()
+                BadgeColumn::make('packing_status')
+                    ->label('Packing')
+                    ->colors([
+                        'danger' => 'unpacked',
+                        'warning' => 'partially_packed',
+                        'success' => 'fully_packed',
+                    ])
+                    ->icons([
+                        'heroicon-o-x-circle' => 'unpacked',
+                        'heroicon-o-clock' => 'partially_packed',
+                        'heroicon-o-check-circle' => 'fully_packed',
+                    ]),
+
+                TextColumn::make('unit_price')
+                    ->label('Unit Price')
+                    ->money('USD')
                     ->toggleable(),
-
-                TextColumn::make('total_weight')
-                    ->label('Total Wt (kg)')
-                    ->numeric(3)
-                    ->alignEnd()
-                    ->toggleable(),
-
-                TextColumn::make('unit_volume')
-                    ->label('Unit Vol (m³)')
-                    ->numeric(6)
-                    ->alignEnd()
-                    ->toggleable()
-                    ->toggledHiddenByDefault(),
-
-                TextColumn::make('total_volume')
-                    ->label('Total Vol (m³)')
-                    ->numeric(6)
-                    ->alignEnd()
-                    ->toggleable()
-                    ->toggledHiddenByDefault(),
 
                 TextColumn::make('customs_value')
                     ->label('Customs Value')
-                    ->money('USD', 100)
-                    ->alignEnd()
-                    ->toggleable()
-                    ->toggledHiddenByDefault(),
+                    ->money('USD')
+                    ->toggleable(),
+
+                TextColumn::make('total_weight')
+                    ->label('Weight (kg)')
+                    ->numeric(2)
+                    ->suffix(' kg')
+                    ->toggleable(),
+
+                TextColumn::make('total_volume')
+                    ->label('Volume (m³)')
+                    ->numeric(4)
+                    ->suffix(' m³')
+                    ->toggleable(),
             ])
             ->headerActions([
                 CreateAction::make()
-                    ->label('Add Item')
-                    ->color('success')
                     ->icon(Heroicon::OutlinedPlus)
-                    ->using(function (array $data, $livewire) {
-                        $shipment = $livewire->getOwnerRecord();
-                        $service = new ShipmentService();
+                    ->modalWidth('3xl')
+                    ->mutateFormDataUsing(function (array $data): array {
+                        // Load product data from proforma invoice item
+                        $invoiceItem = \App\Models\ProformaInvoiceItem::find($data['proforma_invoice_item_id']);
                         
-                        $invoiceItem = \App\Models\SalesInvoiceItem::findOrFail($data['sales_invoice_item_id']);
+                        if ($invoiceItem) {
+                            $data['product_id'] = $invoiceItem->product_id;
+                            $data['product_name'] = $invoiceItem->product_name;
+                            $data['product_sku'] = $invoiceItem->product_sku;
+                            $data['product_description'] = $invoiceItem->product_description;
+                            $data['hs_code'] = $invoiceItem->hs_code;
+                            $data['unit_price'] = $invoiceItem->unit_price;
+                            $data['quantity_ordered'] = $invoiceItem->quantity;
+                            $data['quantity_remaining'] = $data['quantity_to_ship'];
+                            $data['packing_status'] = 'unpacked';
+                            $data['quantity_packed'] = 0;
+                            
+                            // Load product weight and volume if available
+                            if ($invoiceItem->product) {
+                                $data['unit_weight'] = $invoiceItem->product->weight;
+                                $data['unit_volume'] = $invoiceItem->product->volume;
+                                $data['country_of_origin'] = $invoiceItem->product->country_of_origin;
+                            }
+                        }
                         
-                        return $service->addItem($shipment, [
-                            'sales_invoice_item_id' => $data['sales_invoice_item_id'],
-                            'product_id' => $invoiceItem->product_id,
-                            'quantity_ordered' => $invoiceItem->quantity,
-                            'quantity_to_ship' => $data['quantity_to_ship'],
-                            'product_name' => $invoiceItem->product_name,
-                            'product_sku' => $invoiceItem->product_sku,
-                            'unit_price' => $invoiceItem->unit_price,
-                        ]);
-                    })
-                    ->successNotificationTitle('Item added successfully'),
+                        return $data;
+                    }),
             ])
-            ->recordActions([
+            ->actions([
                 EditAction::make()
-                    ->form([
-                        TextInput::make('quantity_to_ship')
-                            ->label('Quantity to Ship')
-                            ->numeric()
-                            ->required()
-                            ->minValue(1),
-                    ])
-                    ->using(function ($record, array $data) {
-                        $service = new ShipmentService();
-                        $service->updateItemQuantity($record, $data['quantity_to_ship']);
-                        return $record;
-                    })
-                    ->successNotificationTitle('Quantity updated'),
-
-                DeleteAction::make()
-                    ->requiresConfirmation()
-                    ->using(function ($record) {
-                        $service = new ShipmentService();
-                        $service->removeItem($record);
-                    })
-                    ->successNotificationTitle('Item removed'),
+                    ->modalWidth('3xl'),
+                DeleteAction::make(),
             ])
-            ->toolbarActions([
+            ->bulkActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make()
-                        ->requiresConfirmation(),
+                    DeleteBulkAction::make(),
                 ]),
             ])
-            ->emptyStateHeading('No items added')
-            ->emptyStateDescription('Add items from attached invoices to this shipment.')
+            ->emptyStateHeading('No items added yet')
+            ->emptyStateDescription('Add items from the attached proforma invoices to this shipment.')
             ->emptyStateIcon(Heroicon::OutlinedCube);
     }
 }
