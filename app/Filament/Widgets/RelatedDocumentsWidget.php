@@ -21,11 +21,9 @@ class RelatedDocumentsWidget extends BaseWidget
 
     protected static ?int $sort = 99;
 
-    protected DocumentRepository $repository;
-
-    public function mount(): void
+    protected function getRepository(): DocumentRepository
     {
-        $this->repository = app(DocumentRepository::class);
+        return app(DocumentRepository::class);
     }
 
     public function table(Table $table): Table
@@ -34,7 +32,7 @@ class RelatedDocumentsWidget extends BaseWidget
             ->heading('Generated Documents History')
             ->description('All PDF and Excel documents generated for this record')
             ->query(
-                $this->repository->getTransactableDocumentsQuery(
+                $this->getRepository()->getTransactableDocumentsQuery(
                     get_class($this->record),
                     $this->record->id
                 )
@@ -140,7 +138,7 @@ class RelatedDocumentsWidget extends BaseWidget
                     ->modalSubmitActionLabel('Yes, delete it')
                     ->action(function (GeneratedDocument $record) {
                         try {
-                            $this->repository->delete($record->id);
+                            $this->getRepository()->delete($record->id);
                             
                             Notification::make()
                                 ->title('Document deleted successfully')
