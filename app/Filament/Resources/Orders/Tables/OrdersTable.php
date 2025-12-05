@@ -359,6 +359,40 @@ class OrdersTable
                     })
                     ->requiresConfirmation()
                     ->visible(fn (Order $record) => $record->status === 'cancelled'),
+                
+                Action::make('generate_rfq_excel')
+                    ->label(fn (Order $record) => $record->rfq_generated_at ? 'RFQ Generated' : 'Generate RFQ Excel')
+                    ->icon(fn (Order $record) => $record->rfq_generated_at ? 'heroicon-o-check-circle' : 'heroicon-o-document-arrow-down')
+                    ->color(fn (Order $record) => $record->rfq_generated_at ? 'success' : 'primary')
+                    ->disabled(fn (Order $record) => $record->rfq_generated_at !== null)
+                    ->action(function (Order $record) {
+                        try {
+                            $rfqService = app(\App\Services\RFQExcelService::class);
+                            $filePath = $rfqService->generateRFQ($record);
+                            
+                            // Mark as generated
+                            $record->update(['rfq_generated_at' => now()]);
+                            
+                            Notification::make()
+                                ->success()
+                                ->title('RFQ Excel generated successfully')
+                                ->body('Document saved to Documents History')
+                                ->send();
+                            
+                            return response()->download($filePath, basename($filePath))->deleteFileAfterSend(true);
+                        } catch (\Exception $e) {
+                            Notification::make()
+                                ->danger()
+                                ->title('RFQ Generation Failed')
+                                ->body($e->getMessage())
+                                ->send();
+                            
+                            \Log::error('RFQ Excel generation failed', [
+                                'order_id' => $record->id,
+                                'error' => $e->getMessage(),
+                            ]);
+                        }
+                    }),
             ])
             ->bulkActions([
                 BulkActionGroup::make([

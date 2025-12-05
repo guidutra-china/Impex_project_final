@@ -136,20 +136,6 @@ class EditOrder extends EditRecord
         return [
             $this->getSaveFormAction(),
             $this->getCancelFormAction(),
-            Action::make('download_rfq_excel')
-                ->label('Download RFQ Excel')
-                ->icon('heroicon-o-arrow-down-tray')
-                ->color('success')
-                ->action(function () {
-                    $order = $this->record;
-                    
-                    // Generate Excel
-                    $excelService = new RFQExcelService();
-                    $filePath = $excelService->generateRFQ($order);
-                    
-                    // Stream the file
-                    return response()->download($filePath, basename($filePath))->deleteFileAfterSend(true);
-                }),
         ];
     }
 
