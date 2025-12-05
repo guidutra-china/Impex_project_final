@@ -6,7 +6,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\MorphToMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\Relations\MorphToMany;y;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Supplier extends Model
@@ -55,19 +56,21 @@ class Supplier extends Model
     {
         return $this->hasMany(SupplierContact::class);
     }
+    /**
+     * Get all documents for this supplier (polymorphic relationship)
+     */
+    public function documents(): MorphMany
+    {
+        return $this->morphMany(Document::class, 'documentable');
+    }
+
+    /**
+     * Legacy relationship - kept for backward compatibility
+     * @deprecated Use documents() instead
+     */
     public function files(): HasMany
     {
         return $this->hasMany(SupplierFile::class)->orderBy('sort_order');
-    }
-
-    public function photos(): HasMany
-    {
-        return $this->hasMany(SupplierFile::class)->where('file_type', 'photo')->orderBy('sort_order');
-    }
-
-    public function documents(): HasMany
-    {
-        return $this->hasMany(SupplierFile::class)->where('file_type', 'document')->orderBy('date_uploaded', 'desc');
     }
 
     public function products()

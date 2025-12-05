@@ -2,15 +2,16 @@
 
 namespace App\Filament\Resources\Suppliers\RelationManagers;
 
-use App\Repositories\SupplierRepository;
-use App\Repositories\DocumentRepository;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Hidden;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
+use Filament\Tables\Columns\BadgeColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Actions\CreateAction;
@@ -21,91 +22,98 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\Action;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use BackedEnum;
 
 class DocumentsRelationManager extends RelationManager
 {
-    protected static string $relationship = 'files';
+    protected static string $relationship = 'documents';
 
     protected static ?string $title = 'Documents';
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedDocument;
-
-    protected SupplierRepository $supplierRepository;
-    protected DocumentRepository $documentRepository;
-
-    public function mount(): void {
-        parent::mount();
-        $this->supplierRepository = app(SupplierRepository::class);
-        $this->documentRepository = app(DocumentRepository::class);
-    }
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedDocumentText;
 
     public function table(Table $table): Table
     {
         return $table
-            ->query(
-                $this->documentRepository->getSupplierDocumentsQuery($this->getOwnerRecord()->id)
-            )
-            ->recordTitleAttribute('original_filename')
+            ->modifyQueryUsing(fn (Builder $query) => $query->where('mime_type', 'not like', 'image/%'))
+            ->recordTitleAttribute('title')
             ->columns([
-                TextColumn::make('original_filename')
-                    ->label('Filename')
+                TextColumn::make('document_number')
+                    ->label('Doc #')
                     ->searchable()
-                    ->icon('heroicon-o-document')
-                    ->iconColor('primary')
-                    ->weight('medium'),
-                
+                    ->copyable()
+                    ->tooltip('Click to copy'),
+
+                TextColumn::make('title')
+                    ->label('Title')
+                    ->searchable()
+                    ->limit(30)
+                    ->tooltip(fn ($record) => $record->title)
+                    ->weight('bold'),
+
+                BadgeColumn::make('document_type')
+                    ->label('Type')
+                    ->colors([
+                        'primary' => 'contract',
+                        'success' => 'certificate_of_origin',
+                        'warning' => 'quality_certificate',
+                        'info' => 'other',
+                    ]),
+
                 TextColumn::make('description')
-                    ->limit(60)
+                    ->limit(40)
                     ->placeholder('No description')
                     ->wrap(),
-                
-                TextColumn::make('date_uploaded')
-                    ->label('Upload Date')
+
+                TextColumn::make('issue_date')
+                    ->label('Issue Date')
                     ->date()
                     ->sortable(),
-                
+
+                TextColumn::make('expiry_date')
+                    ->label('Expiry')
+                    ->date()
+                    ->sortable()
+                    ->placeholder('N/A'),
+
+                BadgeColumn::make('status')
+                    ->colors([
+                        'success' => 'valid',
+                        'warning' => 'draft',
+                        'danger' => 'expired',
+                        'secondary' => 'cancelled',
+                    ]),
+
                 TextColumn::make('file_size_formatted')
-                    ->label('Size'),
-//
-                TextColumn::make('mime_type')
-                    ->label('Type')
-                    ->badge()
-                    ->formatStateUsing(fn (string $state): string => match ($state) {
-                        'application/pdf' => 'PDF',
-                        'application/msword' => 'Word',
-                        'application/vnd.openxmlformats-officedocument.wordprocessingml.document' => 'Word',
-                        'application/vnd.ms-excel' => 'Excel',
-                        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' => 'Excel',
-                        default => 'Document',
-                    })
-                    ->color(fn (string $state): string => match ($state) {
-                        'application/pdf' => 'danger',
-                        'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' => 'info',
-                        'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' => 'success',
-                        default => 'gray',
-                    }),
+                    ->label('Size')
+                    ->getStateUsing(fn ($record) => number_format($record->file_size / 1024, 2) . ' KB'),
             ])
             ->headerActions([
                 CreateAction::make()
-                    ->label('Upload Documents')
-                    ->mutateFormDataUsing(function (array $data): array {
-                        $data['file_type'] = 'document';
-                        if (isset($data['file_path']) && !isset($data['original_filename'])) {
-                            $data['original_filename'] = basename($data['file_path']);
+                    ->label('Upload Document')
+                    ->mutateFormDataUsing(function (array $data, $livewire): array {
+                        $data['document_number'] = 'SUP-DOC-' . strtoupper(Str::random(8));
+                        $data['related_type'] = 'App\\Models\\Supplier';
+                        $data['related_id'] = $livewire->getOwnerRecord()->id;
+                        
+                        if (isset($data['file_path']) && !isset($data['file_name'])) {
+                            $data['file_name'] = basename($data['file_path']);
+                            $data['safe_filename'] = Str::slug(pathinfo($data['file_name'], PATHINFO_FILENAME)) . '_' . Str::random(8);
                         }
+                        
                         return $data;
                     }),
             ])
-            ->actions([
+            ->recordActions([
                 Action::make('download')
                     ->label('Download')
                     ->icon('heroicon-o-arrow-down-tray')
                     ->url(fn ($record) => Storage::disk('public')->url($record->file_path))
                     ->openUrlInNewTab(),
-                
+
                 EditAction::make(),
-                
+
                 DeleteAction::make()
                     ->after(function ($record) {
                         if ($record->file_path) {
@@ -113,7 +121,7 @@ class DocumentsRelationManager extends RelationManager
                         }
                     }),
             ])
-            ->bulkActions([
+            ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make()
                         ->after(function ($records) {
@@ -125,56 +133,80 @@ class DocumentsRelationManager extends RelationManager
                         }),
                 ]),
             ])
-            ->defaultSort('date_uploaded', 'desc');
+            ->defaultSort('created_at', 'desc');
     }
 
     public function form(Schema $schema): Schema
     {
         return $schema
             ->components([
-                Hidden::make('file_type')
-                    ->default('document'),
-                
                 FileUpload::make('file_path')
-                    ->label('Document')
+                    ->label('Document File')
                     ->disk('public')
                     ->directory('suppliers/documents')
                     ->required()
-                    ->acceptedFileTypes([
-                        'application/pdf',
-                        'application/msword',
-                        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-                        'application/vnd.ms-excel',
-                        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-                    ])
-                    ->maxSize(10240)
+                    ->maxSize(10240) // 10MB
+                    ->acceptedFileTypes(['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'])
                     ->preserveFilenames()
                     ->afterStateUpdated(function ($state, callable $set) {
                         if ($state && is_object($state) && method_exists($state, 'getClientOriginalName')) {
-                            $set('original_filename', $state->getClientOriginalName());
+                            $set('file_name', $state->getClientOriginalName());
+                            $set('title', pathinfo($state->getClientOriginalName(), PATHINFO_FILENAME));
                             $set('file_size', $state->getSize());
                             $set('mime_type', $state->getMimeType());
                         }
                     })
-                    ->helperText('Accepted formats: PDF, Word (.doc, .docx), Excel (.xls, .xlsx) - Max 10MB')
                     ->columnSpanFull(),
-                
+
+                TextInput::make('title')
+                    ->label('Document Title')
+                    ->required()
+                    ->maxLength(255)
+                    ->columnSpanFull(),
+
+                Select::make('document_type')
+                    ->label('Document Type')
+                    ->required()
+                    ->options([
+                        'contract' => 'Contract',
+                        'certificate_of_origin' => 'Certificate of Origin',
+                        'quality_certificate' => 'Quality Certificate',
+                        'insurance_certificate' => 'Insurance Certificate',
+                        'other' => 'Other',
+                    ])
+                    ->default('other'),
+
+                Select::make('status')
+                    ->label('Status')
+                    ->required()
+                    ->options([
+                        'draft' => 'Draft',
+                        'valid' => 'Valid',
+                        'expired' => 'Expired',
+                        'cancelled' => 'Cancelled',
+                    ])
+                    ->default('valid'),
+
                 Textarea::make('description')
-                    ->label('Document Description')
+                    ->label('Description')
                     ->maxLength(65535)
                     ->rows(3)
                     ->columnSpanFull(),
-                
-                DatePicker::make('date_uploaded')
-                    ->label('Upload Date')
+
+                DatePicker::make('issue_date')
+                    ->label('Issue Date')
                     ->required()
                     ->default(now())
+                    ->native(false),
+
+                DatePicker::make('expiry_date')
+                    ->label('Expiry Date')
                     ->native(false)
-                    ->columnSpanFull(),
-                
-                Hidden::make('original_filename'),
+                    ->after('issue_date'),
+
+                Hidden::make('file_name'),
                 Hidden::make('file_size'),
                 Hidden::make('mime_type'),
-            ]);
+            ])->columns(2);
     }
 }
