@@ -259,9 +259,15 @@ class PackingBoxesRelationManager extends RelationManager
                     })
                     ->requiresConfirmation(),
             ])
-            ->recordActions([
+             ->recordActions([
+                Action::make('viewItems')
+                    ->label('View Items')
+                    ->icon(Heroicon::OutlinedEye)
+                    ->color('info')
+                    ->modalHeading(fn ($record) => 'Items in Box #' . $record->box_number)
+                    ->modalWidth('4xl')
+                    ->modalContent(fn ($record) => view('filament.modals.packing-box-items', ['box' => $record])),
                 EditAction::make(),
-
                 DeleteAction::make()
                     ->requiresConfirmation()
                     ->using(function ($record) {
