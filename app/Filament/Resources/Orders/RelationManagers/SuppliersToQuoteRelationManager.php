@@ -281,7 +281,7 @@ class SuppliersToQuoteRelationManager extends RelationManager
                             }
 
                             // Generate and send Excel file
-                            $filePath = $rfqService->generateRFQExcel($owner, $record);
+                            $filePath = $rfqService->generateRFQ($owner);
                             
                             foreach ($contacts as $contact) {
                                 if ($contact->email) {
