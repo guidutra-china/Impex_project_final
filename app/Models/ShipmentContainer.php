@@ -161,4 +161,24 @@ class ShipmentContainer extends Model
         $this->current_volume = $this->items()->sum('total_volume');
         $this->save();
     }
+
+    // Boot method
+    protected static function boot()
+    {
+        parent::boot();
+        
+        static::saved(function ($container) {
+            // Recalculate shipment totals when container is created/updated
+            if ($container->shipment) {
+                $container->shipment->calculateTotals();
+            }
+        });
+        
+        static::deleted(function ($container) {
+            // Recalculate shipment totals when container is deleted
+            if ($container->shipment) {
+                $container->shipment->calculateTotals();
+            }
+        });
+    }
 }

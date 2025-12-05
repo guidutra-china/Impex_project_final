@@ -181,5 +181,19 @@ class PackingBox extends Model
                 $box->box_number = $lastBox ? $lastBox->box_number + 1 : 1;
             }
         });
+        
+        static::saved(function ($box) {
+            // Recalculate shipment totals when box is created/updated
+            if ($box->shipment) {
+                $box->shipment->calculateTotals();
+            }
+        });
+        
+        static::deleted(function ($box) {
+            // Recalculate shipment totals when box is deleted
+            if ($box->shipment) {
+                $box->shipment->calculateTotals();
+            }
+        });
     }
 }
