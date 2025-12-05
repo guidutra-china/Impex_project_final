@@ -140,10 +140,12 @@ class PhotosRelationManager extends RelationManager
                     ->preserveFilenames()
                     ->afterStateUpdated(function ($state, callable $set) {
                         if ($state && is_object($state) && method_exists($state, 'getClientOriginalName')) {
-                            $set('file_name', $state->getClientOriginalName());
-                            $set('title', pathinfo($state->getClientOriginalName(), PATHINFO_FILENAME));
+                            $filename = $state->getClientOriginalName();
+                            $set('file_name', $filename);
+                            $set('title', pathinfo($filename, PATHINFO_FILENAME));
                             $set('file_size', $state->getSize());
                             $set('mime_type', $state->getMimeType());
+                            $set('safe_filename', Str::slug(pathinfo($filename, PATHINFO_FILENAME)) . '_' . Str::random(8));
                         }
                     })
                     ->columnSpanFull(),
@@ -169,6 +171,7 @@ class PhotosRelationManager extends RelationManager
                 Hidden::make('file_name'),
                 Hidden::make('file_size'),
                 Hidden::make('mime_type'),
+                Hidden::make('safe_filename'),
             ])->columns(2);
     }
 }
