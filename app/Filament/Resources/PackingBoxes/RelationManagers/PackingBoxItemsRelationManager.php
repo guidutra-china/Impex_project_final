@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\PackingBoxes\RelationManagers;
 
+use BackedEnum;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables\Table;
 use Filament\Tables\Columns\TextColumn;
@@ -21,7 +22,7 @@ class PackingBoxItemsRelationManager extends RelationManager
 
     protected static ?string $title = 'Items in Box';
 
-    protected static ?string $icon = Heroicon::OutlinedCube;
+    protected static BackedEnum|string|null $icon = Heroicon::OutlinedCube;
 
     public function table(Table $table): Table
     {
