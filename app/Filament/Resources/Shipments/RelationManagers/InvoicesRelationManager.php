@@ -119,7 +119,14 @@ class InvoicesRelationManager extends RelationManager
                             ->where('customer_id', $shipment->customer_id)
                             ->whereIn('proforma_invoices.status', ['confirmed', 'approved']);
                     })
-                    ->after(function ($record, $livewire) {
+                    ->form(fn () => [
+                        \Filament\Forms\Components\Toggle::make('add_all_items')
+                            ->label('Automatically add all items from this Proforma Invoice')
+                            ->helperText('All items will be added to Shipment Items with full quantities')
+                            ->default(true)
+                            ->inline(false),
+                    ])
+                    ->after(function ($record, $livewire, $data) {
                         // Recalculate pivot totals after attaching
                         $shipment = $livewire->getOwnerRecord();
                         $pivotRecord = $shipment->shipmentInvoices()
@@ -128,6 +135,25 @@ class InvoicesRelationManager extends RelationManager
                         
                         if ($pivotRecord) {
                             $pivotRecord->calculateTotals();
+                        }
+                        
+                        // Auto-add items if checkbox is checked
+                        if ($data['add_all_items'] ?? false) {
+                            foreach ($record->items as $piItem) {
+                                \App\Models\ShipmentItem::create([
+                                    'shipment_id' => $shipment->id,
+                                    'proforma_invoice_item_id' => $piItem->id,
+                                    'product_id' => $piItem->product_id,
+                                    'quantity_to_ship' => $piItem->quantity,
+                                    'quantity_ordered' => $piItem->quantity,
+                                    'quantity_remaining' => $piItem->quantity,
+                                    'unit_price' => $piItem->unit_price,
+                                    'unit_weight' => $piItem->product->unit_weight ?? 0,
+                                    'unit_volume' => $piItem->product->unit_volume ?? 0,
+                                    'packing_status' => 'unpacked',
+                                    'quantity_packed' => 0,
+                                ]);
+                            }
                         }
                     }),
             ])

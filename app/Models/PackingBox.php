@@ -14,6 +14,7 @@ class PackingBox extends Model
 
     protected $fillable = [
         'shipment_id',
+        'shipment_container_id',
         'box_number',
         'box_label',
         'box_type',
@@ -49,6 +50,11 @@ class PackingBox extends Model
     public function shipment(): BelongsTo
     {
         return $this->belongsTo(Shipment::class);
+    }
+
+    public function container(): BelongsTo
+    {
+        return $this->belongsTo(ShipmentContainer::class, 'shipment_container_id');
     }
 
     public function packingBoxItems(): HasMany
@@ -92,7 +98,7 @@ class PackingBox extends Model
         // Calculate net weight from items
         $netWeight = 0;
         foreach ($this->packingBoxItems as $item) {
-            $netWeight += $item->shipmentItem->unit_weight * $item->quantity;
+            $netWeight += ($item->unit_weight ?? 0) * $item->quantity;
         }
         $this->net_weight = $netWeight;
         
@@ -102,6 +108,14 @@ class PackingBox extends Model
         }
         
         $this->save();
+    }
+
+    /**
+     * Alias for calculateTotals()
+     */
+    public function recalculateTotals(): void
+    {
+        $this->calculateTotals();
     }
 
     /**

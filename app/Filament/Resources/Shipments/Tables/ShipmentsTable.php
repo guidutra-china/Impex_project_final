@@ -230,6 +230,18 @@ class ShipmentsTable
             ->recordActions([
                 ViewAction::make(),
                 EditAction::make(),
+                \Filament\Actions\Action::make('commercialInvoice')
+                    ->label('Commercial Invoice')
+                    ->icon('heroicon-o-document-text')
+                    ->color('success')
+                    ->visible(fn ($record) => $record->status !== 'draft' && $record->total_items > 0)
+                    ->action(function ($record) {
+                        \Filament\Notifications\Notification::make()
+                            ->title('Feature Coming Soon')
+                            ->body('Commercial Invoice generation will be implemented soon.')
+                            ->info()
+                            ->send();
+                    }),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

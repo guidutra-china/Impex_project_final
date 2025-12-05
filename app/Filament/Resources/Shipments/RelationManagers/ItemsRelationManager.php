@@ -152,11 +152,18 @@ class ItemsRelationManager extends RelationManager
                     ->numeric()
                     ->alignCenter(),
 
-                TextColumn::make('quantity_to_ship')
+                \Filament\Tables\Columns\TextInputColumn::make('quantity_to_ship')
                     ->label('To Ship')
-                    ->numeric()
+                    ->type('number')
+                    ->rules(['required', 'numeric', 'min:1'])
                     ->alignCenter()
-                    ->weight('bold'),
+                    ->disabled(fn ($record) => $record->packing_status !== 'unpacked')
+                    ->afterStateUpdated(function ($record, $state) {
+                        $record->quantity_remaining = $state - $record->quantity_packed;
+                        $record->save();
+                    })
+                    ->extraAttributes(['class' => 'font-bold'])
+                    ->helperText(fn ($record) => $record->packing_status !== 'unpacked' ? 'Locked (already packed)' : null),
 
                 TextColumn::make('quantity_shipped')
                     ->label('Shipped')
@@ -243,6 +250,7 @@ class ItemsRelationManager extends RelationManager
             ])
             ->bulkActions([
                 BulkActionGroup::make([
+                    \App\Filament\Actions\Shipments\PackSelectedItemsBulkAction::make(),
                     DeleteBulkAction::make(),
                 ]),
             ])
