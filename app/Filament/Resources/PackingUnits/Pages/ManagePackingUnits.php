@@ -9,101 +9,72 @@ use App\Filament\Resources\PackingUnits\Tables\ContainerTypesTable;
 use App\Filament\Resources\PackingUnits\Tables\PackingBoxTypesTable;
 use App\Models\ContainerType;
 use App\Models\PackingBoxType;
+use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ManageRecords;
 use Filament\Schemas\Schema;
-use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 
 class ManagePackingUnits extends ManageRecords
 {
     protected static string $resource = PackingUnitResource::class;
 
+    // Property to track which view we're showing
+    public string $currentView = 'containers';
+
+    public function mount(): void
+    {
+        parent::mount();
+        
+        // Check if there's a view parameter in the URL
+        $this->currentView = request()->query('view', 'containers');
+    }
+
     public function form(Schema $schema): Schema
     {
-        // Default to container form, will be dynamic in modal
-        return ContainerTypeForm::configure($schema);
+        if ($this->currentView === 'containers') {
+            return ContainerTypeForm::configure($schema);
+        }
+        
+        return PackingBoxTypeForm::configure($schema);
     }
 
     public function table(Table $table): Table
     {
-        return $table
-            ->query(function () {
-                // Combine both models into a unified query
-                // We'll use ContainerType as base and add a type indicator
-                return ContainerType::query()
-                    ->selectRaw("'container' as packing_type, container_types.*")
-                    ->union(
-                        PackingBoxType::query()
-                            ->selectRaw("'box' as packing_type, packing_box_types.*")
-                    );
-            })
-            ->columns([
-                \Filament\Tables\Columns\TextColumn::make('packing_type')
-                    ->label('Type')
-                    ->badge()
-                    ->formatStateUsing(fn ($state) => $state === 'container' ? 'Container' : 'Box/Pallet')
-                    ->color(fn ($state) => $state === 'container' ? 'primary' : 'success')
-                    ->sortable(),
-
-                \Filament\Tables\Columns\TextColumn::make('name')
-                    ->label('Name')
-                    ->searchable()
-                    ->sortable()
-                    ->weight('bold'),
-
-                \Filament\Tables\Columns\TextColumn::make('code')
-                    ->label('Code')
-                    ->searchable()
-                    ->sortable()
-                    ->badge(),
-
-                \Filament\Tables\Columns\TextColumn::make('dimensions')
-                    ->label('Dimensions (L×W×H)')
-                    ->getStateUsing(function ($record) {
-                        if ($record->packing_type === 'container') {
-                            return sprintf('%.2f × %.2f × %.2f m', $record->length, $record->width, $record->height);
-                        }
-                        return sprintf('%.1f × %.1f × %.1f cm', $record->length, $record->width, $record->height);
-                    }),
-
-                \Filament\Tables\Columns\TextColumn::make('max_volume')
-                    ->label('Volume')
-                    ->formatStateUsing(fn ($state) => number_format($state, 4) . ' m³')
-                    ->sortable()
-                    ->alignEnd(),
-
-                \Filament\Tables\Columns\TextColumn::make('max_weight')
-                    ->label('Max Weight')
-                    ->formatStateUsing(fn ($state) => number_format($state, 1) . ' kg')
-                    ->sortable()
-                    ->alignEnd(),
-
-                \Filament\Tables\Columns\IconColumn::make('is_active')
-                    ->label('Active')
-                    ->boolean()
-                    ->sortable()
-                    ->alignCenter(),
-            ])
-            ->filters([
-                SelectFilter::make('packing_type')
-                    ->label('Type')
-                    ->options([
-                        'container' => 'Containers',
-                        'box' => 'Boxes & Pallets',
-                    ])
-                    ->default('container'),
-            ])
-            ->defaultSort('name', 'asc');
+        if ($this->currentView === 'containers') {
+            return ContainerTypesTable::configure($table);
+        }
+        
+        return PackingBoxTypesTable::configure($table)
+            ->query(PackingBoxType::query());
     }
 
     protected function getHeaderActions(): array
     {
-        return [
-            CreateAction::make('create_container')
+        $actions = [];
+
+        // View switcher buttons
+        $actions[] = Action::make('view_containers')
+            ->label('Containers')
+            ->icon('heroicon-o-cube')
+            ->color($this->currentView === 'containers' ? 'primary' : 'gray')
+            ->badge(ContainerType::where('is_active', true)->count())
+            ->url(fn () => static::getUrl(['view' => 'containers']))
+            ->outlined($this->currentView !== 'containers');
+
+        $actions[] = Action::make('view_boxes')
+            ->label('Boxes & Pallets')
+            ->icon('heroicon-o-archive-box')
+            ->color($this->currentView === 'boxes' ? 'success' : 'gray')
+            ->badge(PackingBoxType::where('is_active', true)->count())
+            ->url(fn () => static::getUrl(['view' => 'boxes']))
+            ->outlined($this->currentView !== 'boxes');
+
+        // Create button based on current view
+        if ($this->currentView === 'containers') {
+            $actions[] = CreateAction::make()
                 ->label('New Container')
-                ->icon('heroicon-o-cube')
-                ->color('primary')
+                ->icon('heroicon-o-plus')
                 ->model(ContainerType::class)
                 ->form(fn (Schema $schema) => ContainerTypeForm::configure($schema))
                 ->mutateFormDataUsing(function (array $data): array {
@@ -116,12 +87,11 @@ class ManagePackingUnits extends ManageRecords
                     }
                     
                     return $data;
-                }),
-
-            CreateAction::make('create_box')
+                });
+        } else {
+            $actions[] = CreateAction::make()
                 ->label('New Box/Pallet')
-                ->icon('heroicon-o-archive-box')
-                ->color('success')
+                ->icon('heroicon-o-plus')
                 ->model(PackingBoxType::class)
                 ->form(fn (Schema $schema) => PackingBoxTypeForm::configure($schema))
                 ->mutateFormDataUsing(function (array $data): array {
@@ -134,7 +104,9 @@ class ManagePackingUnits extends ManageRecords
                     }
                     
                     return $data;
-                }),
-        ];
+                });
+        }
+
+        return $actions;
     }
 }
