@@ -9,7 +9,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Actions\CreateAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\DeleteAction;
-use Filament\Tables\Actions\BulkActionGroup;
+use Filament\Actions\BulkActionGroup;
 use Filament\Tables\Actions\DeleteBulkAction;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
