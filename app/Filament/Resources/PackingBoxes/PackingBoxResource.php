@@ -3,15 +3,17 @@
 namespace App\Filament\Resources\PackingBoxes;
 
 use App\Models\PackingBox;
+use BackedEnum;
 use Filament\Resources\Resource;
+use UnitEnum;
 
 class PackingBoxResource extends Resource
 {
     protected static ?string $model = PackingBox::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-cube';
+    protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-cube';
 
-    protected static ?string $navigationGroup = 'Logistics & Shipping';
+    protected static UnitEnum|string|null $navigationGroup = 'Logistics & Shipping';
 
     protected static ?string $navigationLabel = 'Packing Boxes';
 
