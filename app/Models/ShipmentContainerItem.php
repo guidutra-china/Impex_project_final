@@ -70,21 +70,19 @@ class ShipmentContainerItem extends Model
     {
         parent::boot();
 
-        // Ao criar: incrementar quantity_shipped da PI
+        // Ao criar: recalcular totals do container
         static::created(function ($item) {
-            if ($item->proformaInvoiceItem) {
-                $item->proformaInvoiceItem->addShipped($item->quantity);
-            }
+            // Don't call addShipped here - that's for actual shipping, not packing
+            // ShipmentItem already handles quantity tracking
             if ($item->container) {
                 $item->container->calculateTotals();
             }
         });
 
-        // Ao deletar: decrementar quantity_shipped da PI
+        // Ao deletar: recalcular totals do container
         static::deleted(function ($item) {
-            if ($item->proformaInvoiceItem) {
-                $item->proformaInvoiceItem->removeShipped($item->quantity);
-            }
+            // Don't call removeShipped here - that's for actual shipping, not packing
+            // ShipmentItem already handles quantity tracking
             if ($item->container) {
                 $item->container->calculateTotals();
             }
