@@ -10,7 +10,7 @@ use App\Filament\Resources\PackingUnits\PackingUnitResource;
 use App\Models\ContainerType;
 use App\Models\PackingBoxType;
 use Filament\Actions\CreateAction;
-use Filament\Resources\Components\Tab;
+use Filament\Resources\Pages\ListRecords\Tab;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
