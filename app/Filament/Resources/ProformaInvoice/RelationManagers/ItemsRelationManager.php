@@ -31,11 +31,9 @@ class ItemsRelationManager extends RelationManager
 
     protected static ?string $title = 'Proforma Items';
 
-    protected SupplierQuoteRepository $quoteRepository;
-
-    public function mount(): void {
-        parent::mount();
-        $this->quoteRepository = app(SupplierQuoteRepository::class);
+    protected function getQuoteRepository(): SupplierQuoteRepository
+    {
+        return app(SupplierQuoteRepository::class);
     }
 
     public function form(Schema $schema): Schema
@@ -48,7 +46,7 @@ class ItemsRelationManager extends RelationManager
                         Select::make('supplier_quote_id')
                             ->label('Source Supplier Quote')
                             ->options(function () {
-                                return $this->quoteRepository->getSelectOptions();
+                                return $this->getQuoteRepository()->getSelectOptions();
                             })
                             ->searchable()
                             ->preload()
