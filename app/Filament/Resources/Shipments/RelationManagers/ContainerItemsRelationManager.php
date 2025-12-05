@@ -38,7 +38,7 @@ class ContainerItemsRelationManager extends RelationManager
                     ->schema([
                         Select::make('shipment_item_id')
                             ->label('Shipment Item')
-                            ->options(function ($livewire) {
+                            ->options(function ($livewire, $record) {
                                 $container = $livewire->getOwnerRecord();
                                 $shipment = $container->shipment;
                                 
@@ -56,6 +56,18 @@ class ContainerItemsRelationManager extends RelationManager
                                         $item->product_name,
                                         $remaining
                                     );
+                                }
+                                
+                                // When editing, include the current shipment item even if fully packed
+                                if ($record && $record->shipmentItem) {
+                                    $currentItem = $record->shipmentItem;
+                                    if (!isset($options[$currentItem->id])) {
+                                        $options[$currentItem->id] = sprintf(
+                                            '%s - %s (Current item)',
+                                            $currentItem->product_sku,
+                                            $currentItem->product_name
+                                        );
+                                    }
                                 }
                                 
                                 return $options;
