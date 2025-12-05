@@ -79,6 +79,13 @@ class ShipmentContainerItem extends Model
             }
         });
 
+        // Ao atualizar: recalcular totals do container
+        static::updated(function ($item) {
+            if ($item->container) {
+                $item->container->calculateTotals();
+            }
+        });
+
         // Ao deletar: recalcular totals do container
         static::deleted(function ($item) {
             // Don't call removeShipped here - that's for actual shipping, not packing
