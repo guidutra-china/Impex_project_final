@@ -19,9 +19,9 @@ class FinancialCategoriesSeeder extends Seeder
         
         // Fixed Costs
         $fixedCosts = FinancialCategory::create([
-            'name' => 'Custos Fixos',
+            'name' => 'Fixed Costs',
             'code' => 'COST-FIXED',
-            'description' => 'Despesas fixas mensais',
+            'description' => 'Monthly fixed expenses',
             'type' => 'expense',
             'is_system' => true,
             'is_active' => true,
@@ -29,7 +29,7 @@ class FinancialCategoriesSeeder extends Seeder
         ]);
 
         FinancialCategory::create([
-            'name' => 'Aluguel',
+            'name' => 'Rent',
             'code' => 'COST-FIX-RENT',
             'type' => 'expense',
             'parent_id' => $fixedCosts->id,
@@ -38,7 +38,7 @@ class FinancialCategoriesSeeder extends Seeder
         ]);
 
         FinancialCategory::create([
-            'name' => 'Salários',
+            'name' => 'Salaries',
             'code' => 'COST-FIX-SALARY',
             'type' => 'expense',
             'parent_id' => $fixedCosts->id,
@@ -47,7 +47,7 @@ class FinancialCategoriesSeeder extends Seeder
         ]);
 
         FinancialCategory::create([
-            'name' => 'Impostos Fixos',
+            'name' => 'Fixed Taxes',
             'code' => 'COST-FIX-TAX',
             'type' => 'expense',
             'parent_id' => $fixedCosts->id,
@@ -56,7 +56,7 @@ class FinancialCategoriesSeeder extends Seeder
         ]);
 
         FinancialCategory::create([
-            'name' => 'Seguros',
+            'name' => 'Insurance',
             'code' => 'COST-FIX-INSURANCE',
             'type' => 'expense',
             'parent_id' => $fixedCosts->id,
@@ -66,9 +66,9 @@ class FinancialCategoriesSeeder extends Seeder
 
         // Variable Costs
         $variableCosts = FinancialCategory::create([
-            'name' => 'Custos Variáveis',
+            'name' => 'Variable Costs',
             'code' => 'COST-VARIABLE',
-            'description' => 'Despesas variáveis de acordo com produção/vendas',
+            'description' => 'Variable expenses according to production/sales',
             'type' => 'expense',
             'is_system' => true,
             'is_active' => true,
@@ -76,7 +76,7 @@ class FinancialCategoriesSeeder extends Seeder
         ]);
 
         FinancialCategory::create([
-            'name' => 'Compras de Matéria-Prima',
+            'name' => 'Raw Material Purchases',
             'code' => 'COST-VAR-PURCHASE',
             'type' => 'expense',
             'parent_id' => $variableCosts->id,
@@ -86,7 +86,7 @@ class FinancialCategoriesSeeder extends Seeder
         ]);
 
         FinancialCategory::create([
-            'name' => 'Frete',
+            'name' => 'Freight',
             'code' => 'COST-VAR-FREIGHT',
             'type' => 'expense',
             'parent_id' => $variableCosts->id,
@@ -95,7 +95,7 @@ class FinancialCategoriesSeeder extends Seeder
         ]);
 
         FinancialCategory::create([
-            'name' => 'Comissões de Vendas',
+            'name' => 'Sales Commissions',
             'code' => 'COST-VAR-COMMISSION',
             'type' => 'expense',
             'parent_id' => $variableCosts->id,
@@ -104,7 +104,7 @@ class FinancialCategoriesSeeder extends Seeder
         ]);
 
         FinancialCategory::create([
-            'name' => 'Embalagens',
+            'name' => 'Packaging',
             'code' => 'COST-VAR-PACKAGING',
             'type' => 'expense',
             'parent_id' => $variableCosts->id,
@@ -114,9 +114,9 @@ class FinancialCategoriesSeeder extends Seeder
 
         // Operating Expenses
         $operatingExpenses = FinancialCategory::create([
-            'name' => 'Despesas Operacionais',
+            'name' => 'Operating Expenses',
             'code' => 'EXPENSE-OPERATING',
-            'description' => 'Despesas gerais de operação',
+            'description' => 'General operating expenses',
             'type' => 'expense',
             'is_system' => true,
             'is_active' => true,
@@ -133,7 +133,7 @@ class FinancialCategoriesSeeder extends Seeder
         ]);
 
         FinancialCategory::create([
-            'name' => 'Viagens',
+            'name' => 'Travel',
             'code' => 'EXP-OP-TRAVEL',
             'type' => 'expense',
             'parent_id' => $operatingExpenses->id,
@@ -142,7 +142,7 @@ class FinancialCategoriesSeeder extends Seeder
         ]);
 
         FinancialCategory::create([
-            'name' => 'Telefone/Internet',
+            'name' => 'Phone/Internet',
             'code' => 'EXP-OP-TELECOM',
             'type' => 'expense',
             'parent_id' => $operatingExpenses->id,
@@ -151,7 +151,7 @@ class FinancialCategoriesSeeder extends Seeder
         ]);
 
         FinancialCategory::create([
-            'name' => 'Material de Escritório',
+            'name' => 'Office Supplies',
             'code' => 'EXP-OP-OFFICE',
             'type' => 'expense',
             'parent_id' => $operatingExpenses->id,
@@ -160,7 +160,7 @@ class FinancialCategoriesSeeder extends Seeder
         ]);
 
         FinancialCategory::create([
-            'name' => 'Manutenção',
+            'name' => 'Maintenance',
             'code' => 'EXP-OP-MAINTENANCE',
             'type' => 'expense',
             'parent_id' => $operatingExpenses->id,
@@ -171,9 +171,9 @@ class FinancialCategoriesSeeder extends Seeder
         // === REVENUES ===
         
         $salesRevenue = FinancialCategory::create([
-            'name' => 'Receita de Vendas',
+            'name' => 'Sales Revenue',
             'code' => 'REV-SALES',
-            'description' => 'Receitas provenientes de vendas',
+            'description' => 'Revenue from sales',
             'type' => 'revenue',
             'is_system' => true,
             'is_active' => true,
@@ -181,7 +181,7 @@ class FinancialCategoriesSeeder extends Seeder
         ]);
 
         FinancialCategory::create([
-            'name' => 'Vendas Nacionais',
+            'name' => 'Domestic Sales',
             'code' => 'REV-SALES-DOMESTIC',
             'type' => 'revenue',
             'parent_id' => $salesRevenue->id,
@@ -190,7 +190,7 @@ class FinancialCategoriesSeeder extends Seeder
         ]);
 
         FinancialCategory::create([
-            'name' => 'Vendas Exportação',
+            'name' => 'Export Sales',
             'code' => 'REV-SALES-EXPORT',
             'type' => 'revenue',
             'parent_id' => $salesRevenue->id,
@@ -199,9 +199,9 @@ class FinancialCategoriesSeeder extends Seeder
         ]);
 
         $otherRevenue = FinancialCategory::create([
-            'name' => 'Outras Receitas',
+            'name' => 'Other Revenue',
             'code' => 'REV-OTHER',
-            'description' => 'Receitas não operacionais',
+            'description' => 'Non-operating revenue',
             'type' => 'revenue',
             'is_system' => true,
             'is_active' => true,
@@ -209,7 +209,7 @@ class FinancialCategoriesSeeder extends Seeder
         ]);
 
         FinancialCategory::create([
-            'name' => 'Receitas Financeiras',
+            'name' => 'Financial Revenue',
             'code' => 'REV-OTH-FINANCIAL',
             'type' => 'revenue',
             'parent_id' => $otherRevenue->id,
@@ -218,7 +218,7 @@ class FinancialCategoriesSeeder extends Seeder
         ]);
 
         FinancialCategory::create([
-            'name' => 'Descontos Obtidos',
+            'name' => 'Discounts Obtained',
             'code' => 'REV-OTH-DISCOUNT',
             'type' => 'revenue',
             'parent_id' => $otherRevenue->id,
@@ -229,9 +229,9 @@ class FinancialCategoriesSeeder extends Seeder
         // === EXCHANGE VARIATION ===
         
         $exchangeVariation = FinancialCategory::create([
-            'name' => 'Variação Cambial',
+            'name' => 'Exchange Variation',
             'code' => 'EXCHANGE-VAR',
-            'description' => 'Ganhos e perdas com variação cambial',
+            'description' => 'Gains and losses from exchange variation',
             'type' => 'exchange_variation',
             'is_system' => true,
             'is_active' => true,
@@ -239,7 +239,7 @@ class FinancialCategoriesSeeder extends Seeder
         ]);
 
         FinancialCategory::create([
-            'name' => 'Ganhos Cambiais',
+            'name' => 'Exchange Gains',
             'code' => 'EXCHANGE-GAIN',
             'type' => 'exchange_variation',
             'parent_id' => $exchangeVariation->id,
@@ -249,7 +249,7 @@ class FinancialCategoriesSeeder extends Seeder
         ]);
 
         FinancialCategory::create([
-            'name' => 'Perdas Cambiais',
+            'name' => 'Exchange Losses',
             'code' => 'EXCHANGE-LOSS',
             'type' => 'exchange_variation',
             'parent_id' => $exchangeVariation->id,
