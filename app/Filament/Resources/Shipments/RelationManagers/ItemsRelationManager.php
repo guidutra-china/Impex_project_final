@@ -162,8 +162,7 @@ class ItemsRelationManager extends RelationManager
                         $record->quantity_remaining = $state - $record->quantity_packed;
                         $record->save();
                     })
-                    ->extraAttributes(['class' => 'font-bold'])
-                    ->helperText(fn ($record) => $record->packing_status !== 'unpacked' ? 'Locked (already packed)' : null),
+                    ->extraAttributes(['class' => 'font-bold']),
 
                 TextColumn::make('quantity_shipped')
                     ->label('Shipped')
