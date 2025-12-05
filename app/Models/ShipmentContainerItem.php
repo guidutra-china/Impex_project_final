@@ -45,7 +45,7 @@ class ShipmentContainerItem extends Model
      */
     public function container(): BelongsTo
     {
-        return $this->belongsTo(ShipmentContainer::class);
+        return $this->belongsTo(ShipmentContainer::class, 'shipment_container_id');
     }
 
     public function proformaInvoiceItem(): BelongsTo
@@ -72,14 +72,22 @@ class ShipmentContainerItem extends Model
 
         // Ao criar: incrementar quantity_shipped da PI
         static::created(function ($item) {
-            $item->proformaInvoiceItem->addShipped($item->quantity);
-            $item->container->calculateTotals();
+            if ($item->proformaInvoiceItem) {
+                $item->proformaInvoiceItem->addShipped($item->quantity);
+            }
+            if ($item->container) {
+                $item->container->calculateTotals();
+            }
         });
 
         // Ao deletar: decrementar quantity_shipped da PI
         static::deleted(function ($item) {
-            $item->proformaInvoiceItem->removeShipped($item->quantity);
-            $item->container->calculateTotals();
+            if ($item->proformaInvoiceItem) {
+                $item->proformaInvoiceItem->removeShipped($item->quantity);
+            }
+            if ($item->container) {
+                $item->container->calculateTotals();
+            }
         });
     }
 }
