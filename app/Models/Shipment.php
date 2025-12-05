@@ -167,11 +167,21 @@ class Shipment extends Model
     }
 
     /**
-     * Alias for salesInvoices() relationship
+     * Many-to-Many relationship with ProformaInvoice
+     */
+    public function proformaInvoices(): BelongsToMany
+    {
+        return $this->belongsToMany(ProformaInvoice::class, 'shipment_invoices')
+            ->withPivot(['total_items', 'total_quantity', 'total_value', 'total_weight', 'total_volume', 'status', 'shipped_at', 'notes'])
+            ->withTimestamps();
+    }
+
+    /**
+     * Alias for proformaInvoices() relationship (primary)
      */
     public function invoices(): BelongsToMany
     {
-        return $this->salesInvoices();
+        return $this->proformaInvoices();
     }
 
     public function items(): HasMany

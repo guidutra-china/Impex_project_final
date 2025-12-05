@@ -15,45 +15,52 @@ use BackedEnum;
 
 class InvoicesRelationManager extends RelationManager
 {
-    protected static string $relationship = 'salesInvoices';
+    protected static string $relationship = 'proformaInvoices';
 
-    protected static ?string $title = 'Sales Invoices';
+    protected static ?string $title = 'Proforma Invoices';
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedDocumentText;
 
-    protected static ?string $recordTitleAttribute = 'invoice_number';
+    protected static ?string $recordTitleAttribute = 'proforma_number';
 
     public function table(Table $table): Table
     {
         return $table
             ->columns([
-                TextColumn::make('invoice_number')
-                    ->label('Invoice #')
+                TextColumn::make('proforma_number')
+                    ->label('Proforma #')
                     ->searchable()
                     ->sortable()
                     ->weight('bold'),
 
-                TextColumn::make('customer.name')
-                    ->label('Customer')
+                TextColumn::make('client.name')
+                    ->label('Client')
                     ->searchable()
                     ->sortable(),
 
-                TextColumn::make('invoice_date')
-                    ->label('Invoice Date')
+                TextColumn::make('issue_date')
+                    ->label('Issue Date')
+                    ->date('Y-m-d')
+                    ->sortable(),
+
+                TextColumn::make('validity_date')
+                    ->label('Valid Until')
                     ->date('Y-m-d')
                     ->sortable(),
 
                 BadgeColumn::make('status')
                     ->label('Status')
-                    ->formatStateUsing(fn ($state) => ucfirst($state))
+                    ->formatStateUsing(fn ($state) => ucfirst(str_replace('_', ' ', $state)))
                     ->colors([
                         'warning' => 'draft',
                         'info' => 'sent',
-                        'success' => 'paid',
-                        'danger' => 'overdue',
+                        'primary' => 'confirmed',
+                        'success' => 'approved',
+                        'danger' => 'rejected',
+                        'gray' => 'expired',
                     ]),
 
-                TextColumn::make('total')
+                TextColumn::make('total_amount')
                     ->label('Total')
                     ->money('USD', 100)
                     ->sortable(),
@@ -85,23 +92,38 @@ class InvoicesRelationManager extends RelationManager
                     ->label('Volume (m³)')
                     ->formatStateUsing(fn ($state) => $state ? number_format($state, 3) : '0.000')
                     ->alignEnd(),
+
+                BadgeColumn::make('pivot.status')
+                    ->label('Shipment Status')
+                    ->formatStateUsing(fn ($state) => ucfirst(str_replace('_', ' ', $state ?? 'pending')))
+                    ->colors([
+                        'warning' => 'pending',
+                        'info' => 'partial_shipped',
+                        'success' => 'fully_shipped',
+                    ]),
             ])
             ->headerActions([
                 AttachAction::make()
-                    ->label('Attach Invoice')
+                    ->label('Attach Proforma Invoice')
                     ->color('info')
                     ->icon(Heroicon::OutlinedPlusCircle)
                     ->preloadRecordSelect()
                     ->recordSelectOptionsQuery(function ($query) {
-                        // Only show invoices that are not cancelled and have items
+                        $shipment = $this->getOwnerRecord();
+                        
+                        // Only show proforma invoices that:
+                        // 1. Belong to the same client as the shipment
+                        // 2. Are approved or confirmed
+                        // 3. Have items
                         return $query->whereHas('items')
-                            ->where('sales_invoices.status', '!=', 'cancelled');
+                            ->where('client_id', $shipment->customer_id)
+                            ->whereIn('status', ['confirmed', 'approved']);
                     })
                     ->after(function ($record, $livewire) {
                         // Recalculate pivot totals after attaching
                         $shipment = $livewire->getOwnerRecord();
                         $pivotRecord = $shipment->shipmentInvoices()
-                            ->where('sales_invoice_id', $record->id)
+                            ->where('proforma_invoice_id', $record->id)
                             ->first();
                         
                         if ($pivotRecord) {
@@ -113,11 +135,11 @@ class InvoicesRelationManager extends RelationManager
                 DetachAction::make()
                     ->requiresConfirmation()
                     ->before(function ($record, $livewire) {
-                        // Remove all shipment items from this invoice before detaching
+                        // Remove all shipment items from this proforma invoice before detaching
                         $shipment = $livewire->getOwnerRecord();
                         $shipment->items()
-                            ->whereHas('salesInvoiceItem', function ($query) use ($record) {
-                                $query->where('sales_invoice_id', $record->id);
+                            ->whereHas('proformaInvoiceItem', function ($query) use ($record) {
+                                $query->where('proforma_invoice_id', $record->id);
                             })
                             ->delete();
                     }),
@@ -128,8 +150,8 @@ class InvoicesRelationManager extends RelationManager
                         ->requiresConfirmation(),
                 ]),
             ])
-            ->emptyStateHeading('No invoices attached')
-            ->emptyStateDescription('Attach sales invoices to this shipment to start adding items.')
+            ->emptyStateHeading('No proforma invoices attached')
+            ->emptyStateDescription('Attach proforma invoices from the client to this shipment to start adding items.')
             ->emptyStateIcon(Heroicon::OutlinedDocumentText);
     }
 }
