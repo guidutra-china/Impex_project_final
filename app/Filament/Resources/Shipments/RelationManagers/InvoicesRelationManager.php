@@ -107,31 +107,31 @@ class InvoicesRelationManager extends RelationManager
                     ->label('Attach Proforma Invoice')
                     ->color('info')
                     ->icon(Heroicon::OutlinedPlusCircle)
-                    ->preloadRecordSelect()
-                    ->recordSelectSearchColumns(['proforma_number', 'customer.name'])
-                    ->recordSelectOptionsQuery(function ($query) {
-                        $shipment = $this->getOwnerRecord();
+                    ->form(function ($livewire) {
+                        $shipment = $livewire->getOwnerRecord();
                         
-                        // Debug: Show all invoices first
-                        \Log::info('Shipment customer_id: ' . $shipment->customer_id);
-                        \Log::info('Total invoices in DB: ' . \App\Models\ProformaInvoice::count());
-                        \Log::info('Invoices for customer: ' . \App\Models\ProformaInvoice::where('customer_id', $shipment->customer_id)->count());
-                        
-                        // Only show proforma invoices that:
-                        // 1. Belong to the same customer as the shipment
-                        // 2. Are approved or confirmed
-                        // 3. Have items
-                        return $query->whereHas('items')
-                            ->where('customer_id', $shipment->customer_id)
-                            ->whereIn('status', ['confirmed', 'approved']);
+                        return [
+                            \Filament\Forms\Components\Select::make('recordId')
+                                ->label('Proforma Invoice')
+                                ->options(function () use ($shipment) {
+                                    return \App\Models\ProformaInvoice::query()
+                                        ->whereHas('items')
+                                        ->where('customer_id', $shipment->customer_id)
+                                        ->whereIn('status', ['confirmed', 'approved'])
+                                        ->pluck('proforma_number', 'id');
+                                })
+                                ->searchable()
+                                ->required()
+                                ->preload()
+                                ->helperText('Only showing invoices from the same customer with confirmed/approved status'),
+                            
+                            \Filament\Forms\Components\Toggle::make('add_all_items')
+                                ->label('Automatically add all items from this Proforma Invoice')
+                                ->helperText('All items will be added to Shipment Items with full quantities')
+                                ->default(true)
+                                ->inline(false),
+                        ];
                     })
-                    ->formSchema(fn () => [
-                        \Filament\Forms\Components\Toggle::make('add_all_items')
-                            ->label('Automatically add all items from this Proforma Invoice')
-                            ->helperText('All items will be added to Shipment Items with full quantities')
-                            ->default(true)
-                            ->inline(false),
-                    ])
                     ->after(function ($record, $livewire, $data) {
                         // Recalculate pivot totals after attaching
                         $shipment = $livewire->getOwnerRecord();
