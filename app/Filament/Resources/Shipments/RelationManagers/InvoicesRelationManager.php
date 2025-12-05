@@ -33,8 +33,8 @@ class InvoicesRelationManager extends RelationManager
                     ->sortable()
                     ->weight('bold'),
 
-                TextColumn::make('client.name')
-                    ->label('Client')
+                TextColumn::make('customer.name')
+                    ->label('Customer')
                     ->searchable()
                     ->sortable(),
 
@@ -112,11 +112,11 @@ class InvoicesRelationManager extends RelationManager
                         $shipment = $this->getOwnerRecord();
                         
                         // Only show proforma invoices that:
-                        // 1. Belong to the same client as the shipment
+                        // 1. Belong to the same customer as the shipment
                         // 2. Are approved or confirmed
                         // 3. Have items
                         return $query->whereHas('items')
-                            ->where('client_id', $shipment->customer_id)
+                            ->where('customer_id', $shipment->customer_id)
                             ->whereIn('status', ['confirmed', 'approved']);
                     })
                     ->after(function ($record, $livewire) {
