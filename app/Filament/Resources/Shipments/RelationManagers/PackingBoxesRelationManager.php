@@ -263,66 +263,11 @@ class PackingBoxesRelationManager extends RelationManager
                     ->requiresConfirmation(),
             ])
              ->recordActions([
-                Action::make('viewItems')
-                    ->label('View Items')
-                    ->icon(Heroicon::OutlinedEye)
-                    ->color('info')
-                    ->modalHeading(fn ($record) => 'Items in Box #' . $record->box_number)
-                    ->modalWidth('6xl')
-                    ->modalSubmitAction(false)
-                    ->modalCancelActionLabel('Close')
-                    ->modalContent(function ($record) {
-                        $items = $record->packingBoxItems;
-                        $html = '<div class="space-y-4">';
-                        
-                        // Box Summary
-                        $html .= '<div class="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">';
-                        $html .= '<h3 class="text-lg font-semibold mb-2">Box Summary</h3>';
-                        $html .= '<div class="grid grid-cols-4 gap-4 text-sm">';
-                        $html .= '<div><span class="font-medium">Type:</span> ' . ucfirst($record->box_type) . '</div>';
-                        $html .= '<div><span class="font-medium">Status:</span> ' . ucfirst(str_replace('_', ' ', $record->packing_status)) . '</div>';
-                        $html .= '<div><span class="font-medium">Items:</span> ' . $record->total_items . '</div>';
-                        $html .= '<div><span class="font-medium">Quantity:</span> ' . $record->total_quantity . ' units</div>';
-                        $html .= '<div><span class="font-medium">Net Weight:</span> ' . number_format($record->net_weight, 2) . ' kg</div>';
-                        $html .= '<div><span class="font-medium">Gross Weight:</span> ' . number_format($record->gross_weight, 2) . ' kg</div>';
-                        $html .= '<div><span class="font-medium">Volume:</span> ' . number_format($record->volume, 4) . ' m³</div>';
-                        $html .= '<div><span class="font-medium">Dimensions:</span> ' . $record->length . '×' . $record->width . '×' . $record->height . ' cm</div>';
-                        $html .= '</div></div>';
-                        
-                        // Items Table
-                        if ($items->count() > 0) {
-                            $html .= '<div class="overflow-x-auto">';
-                            $html .= '<table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">';
-                            $html .= '<thead class="bg-gray-50 dark:bg-gray-800"><tr>';
-                            $html .= '<th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">SKU</th>';
-                            $html .= '<th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Product</th>';
-                            $html .= '<th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">Qty</th>';
-                            $html .= '<th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">Unit Wt (kg)</th>';
-                            $html .= '<th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">Total Wt (kg)</th>';
-                            $html .= '<th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">Unit Vol (m³)</th>';
-                            $html .= '<th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">Total Vol (m³)</th>';
-                            $html .= '</tr></thead><tbody class="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">';
-                            
-                            foreach ($items as $item) {
-                                $html .= '<tr>';
-                                $html .= '<td class="px-4 py-2 text-sm">' . $item->shipmentItem->product_sku . '</td>';
-                                $html .= '<td class="px-4 py-2 text-sm">' . $item->shipmentItem->product_name . '</td>';
-                                $html .= '<td class="px-4 py-2 text-sm text-right">' . $item->quantity . '</td>';
-                                $html .= '<td class="px-4 py-2 text-sm text-right">' . number_format($item->unit_weight, 2) . '</td>';
-                                $html .= '<td class="px-4 py-2 text-sm text-right font-semibold">' . number_format($item->quantity * $item->unit_weight, 2) . '</td>';
-                                $html .= '<td class="px-4 py-2 text-sm text-right">' . number_format($item->unit_volume, 4) . '</td>';
-                                $html .= '<td class="px-4 py-2 text-sm text-right font-semibold">' . number_format($item->quantity * $item->unit_volume, 4) . '</td>';
-                                $html .= '</tr>';
-                            }
-                            
-                            $html .= '</tbody></table></div>';
-                        } else {
-                            $html .= '<div class="text-center py-8 text-gray-500">No items in this box yet.</div>';
-                        }
-                        
-                        $html .= '</div>';
-                        return new \Illuminate\Support\HtmlString($html);
-                    }),
+                Action::make('manageItems')
+                    ->label('Manage Items')
+                    ->icon(Heroicon::OutlinedPencilSquare)
+                    ->color('primary')
+                    ->url(fn ($record) => \App\Filament\Resources\PackingBoxes\PackingBoxResource::getUrl('edit', ['record' => $record])),
                 EditAction::make(),
                 DeleteAction::make()
                     ->requiresConfirmation()
