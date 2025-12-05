@@ -70,8 +70,14 @@ class ProformaInvoiceItem extends Model
     {
         parent::boot();
 
-        // Auto-fill product name and SKU
-        static::creating(function ($item) {
+        // Auto-calculate total before saving
+        static::saving(function ($item) {
+            // Calculate total from quantity and unit_price
+            if ($item->quantity && $item->unit_price) {
+                $item->total = $item->quantity * $item->unit_price;
+            }
+            
+            // Auto-fill product name and SKU
             if ($item->product_id && !$item->product_name) {
                 $product = Product::find($item->product_id);
                 if ($product) {
