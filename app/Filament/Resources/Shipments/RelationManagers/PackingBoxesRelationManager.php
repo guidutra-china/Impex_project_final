@@ -20,6 +20,9 @@ use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\BadgeColumn;
 use Filament\Tables\Table;
+use Filament\Infolists\Components\Section as InfolistSection;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Infolists\Components\RepeatableEntry;
 use BackedEnum;
 
 class PackingBoxesRelationManager extends RelationManager
@@ -269,33 +272,33 @@ class PackingBoxesRelationManager extends RelationManager
                     ->modalSubmitAction(false)
                     ->modalCancelActionLabel('Close')
                     ->infolist([
-                        \Filament\Infolists\Components\Section::make('Box Items')
+                        InfolistSection::make('Box Items')
                             ->schema([
-                                \Filament\Infolists\Components\RepeatableEntry::make('packingBoxItems')
+                                RepeatableEntry::make('packingBoxItems')
                                     ->label('')
                                     ->schema([
-                                        \Filament\Infolists\Components\TextEntry::make('shipmentItem.product_sku')
+                                        TextEntry::make('shipmentItem.product_sku')
                                             ->label('SKU'),
-                                        \Filament\Infolists\Components\TextEntry::make('shipmentItem.product_name')
+                                        TextEntry::make('shipmentItem.product_name')
                                             ->label('Product'),
-                                        \Filament\Infolists\Components\TextEntry::make('quantity')
+                                        TextEntry::make('quantity')
                                             ->label('Quantity')
                                             ->numeric(),
-                                        \Filament\Infolists\Components\TextEntry::make('unit_weight')
+                                        TextEntry::make('unit_weight')
                                             ->label('Unit Weight')
                                             ->suffix(' kg')
                                             ->numeric(decimalPlaces: 2),
-                                        \Filament\Infolists\Components\TextEntry::make('total_weight')
+                                        TextEntry::make('total_weight')
                                             ->label('Total Weight')
                                             ->suffix(' kg')
                                             ->state(fn ($record) => $record->quantity * $record->unit_weight)
                                             ->numeric(decimalPlaces: 2)
                                             ->weight('bold'),
-                                        \Filament\Infolists\Components\TextEntry::make('unit_volume')
+                                        TextEntry::make('unit_volume')
                                             ->label('Unit Volume')
                                             ->suffix(' m³')
                                             ->numeric(decimalPlaces: 4),
-                                        \Filament\Infolists\Components\TextEntry::make('total_volume')
+                                        TextEntry::make('total_volume')
                                             ->label('Total Volume')
                                             ->suffix(' m³')
                                             ->state(fn ($record) => $record->quantity * $record->unit_volume)
@@ -305,40 +308,40 @@ class PackingBoxesRelationManager extends RelationManager
                                     ->columns(7)
                                     ->grid(7),
                             ]),
-                        \Filament\Infolists\Components\Section::make('Box Summary')
+                        InfolistSection::make('Box Summary')
                             ->schema([
-                                \Filament\Infolists\Components\TextEntry::make('box_type')
+                                TextEntry::make('box_type')
                                     ->label('Box Type')
                                     ->formatStateUsing(fn ($state) => ucfirst($state)),
-                                \Filament\Infolists\Components\TextEntry::make('packing_status')
+                                TextEntry::make('packing_status')
                                     ->label('Status')
                                     ->badge()
                                     ->formatStateUsing(fn ($state) => ucfirst(str_replace('_', ' ', $state))),
-                                \Filament\Infolists\Components\TextEntry::make('total_items')
+                                TextEntry::make('total_items')
                                     ->label('Total Items'),
-                                \Filament\Infolists\Components\TextEntry::make('total_quantity')
+                                TextEntry::make('total_quantity')
                                     ->label('Total Quantity')
                                     ->suffix(' units')
                                     ->numeric(),
-                                \Filament\Infolists\Components\TextEntry::make('net_weight')
+                                TextEntry::make('net_weight')
                                     ->label('Net Weight')
                                     ->suffix(' kg')
                                     ->numeric(decimalPlaces: 2)
                                     ->weight('bold')
                                     ->size('lg'),
-                                \Filament\Infolists\Components\TextEntry::make('gross_weight')
+                                TextEntry::make('gross_weight')
                                     ->label('Gross Weight')
                                     ->suffix(' kg')
                                     ->numeric(decimalPlaces: 2)
                                     ->weight('bold')
                                     ->size('lg'),
-                                \Filament\Infolists\Components\TextEntry::make('volume')
+                                TextEntry::make('volume')
                                     ->label('Volume')
                                     ->suffix(' m³')
                                     ->numeric(decimalPlaces: 4)
                                     ->weight('bold')
                                     ->size('lg'),
-                                \Filament\Infolists\Components\TextEntry::make('dimensions')
+                                TextEntry::make('dimensions')
                                     ->label('Dimensions (L×W×H)')
                                     ->state(fn ($record) => $record->length . ' × ' . $record->width . ' × ' . $record->height . ' cm'),
                             ])
