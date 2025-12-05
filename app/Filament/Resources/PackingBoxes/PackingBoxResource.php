@@ -4,10 +4,10 @@ namespace App\Filament\Resources\PackingBoxes;
 
 use App\Models\PackingBox;
 use BackedEnum;
+use Filament\Actions\EditAction;
 use Filament\Resources\Resource;
-use Filament\Tables\Table;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Actions\EditAction;
+use Filament\Tables\Table;
 use UnitEnum;
 
 class PackingBoxResource extends Resource
