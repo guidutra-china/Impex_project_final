@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Resources\ContainerTypes\Schemas;
+namespace App\Filament\Resources\PackingUnits\Schemas;
 
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -10,7 +10,7 @@ use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 
-class ContainerTypeForm
+class PackingBoxTypeForm
 {
     public static function configure(Schema $schema): Schema
     {
@@ -24,23 +24,34 @@ class ContainerTypeForm
                                     ->label('Name')
                                     ->required()
                                     ->maxLength(255)
-                                    ->placeholder('e.g., 20ft Standard Container')
+                                    ->placeholder('e.g., Standard Carton Box')
                                     ->unique(ignoreRecord: true),
 
                                 TextInput::make('code')
                                     ->label('Code')
                                     ->required()
                                     ->maxLength(255)
-                                    ->placeholder('e.g., 20ft, 40ft, 40hc')
+                                    ->placeholder('e.g., STD-BOX-001')
                                     ->unique(ignoreRecord: true)
                                     ->helperText('Short code for identification'),
                             ]),
+
+                        Select::make('category')
+                            ->label('Category')
+                            ->options([
+                                'carton_box' => 'Carton Box',
+                                'pallet' => 'Pallet',
+                                'other' => 'Other',
+                            ])
+                            ->default('carton_box')
+                            ->required()
+                            ->helperText('Type of packing unit'),
 
                         Textarea::make('description')
                             ->label('Description')
                             ->rows(3)
                             ->maxLength(65535)
-                            ->placeholder('Additional details about this container type...'),
+                            ->placeholder('Additional details about this box type...'),
 
                         Toggle::make('is_active')
                             ->label('Active')
@@ -49,36 +60,36 @@ class ContainerTypeForm
                     ]),
 
                 Section::make('Dimensions')
-                    ->description('All dimensions in meters')
+                    ->description('All dimensions in centimeters (cm)')
                     ->schema([
                         Grid::make(3)
                             ->schema([
                                 TextInput::make('length')
-                                    ->label('Length (m)')
+                                    ->label('Length (cm)')
                                     ->required()
                                     ->numeric()
                                     ->minValue(0)
                                     ->step(0.01)
-                                    ->suffix('m')
-                                    ->placeholder('5.90'),
+                                    ->suffix('cm')
+                                    ->placeholder('60'),
 
                                 TextInput::make('width')
-                                    ->label('Width (m)')
+                                    ->label('Width (cm)')
                                     ->required()
                                     ->numeric()
                                     ->minValue(0)
                                     ->step(0.01)
-                                    ->suffix('m')
-                                    ->placeholder('2.35'),
+                                    ->suffix('cm')
+                                    ->placeholder('40'),
 
                                 TextInput::make('height')
-                                    ->label('Height (m)')
+                                    ->label('Height (cm)')
                                     ->required()
                                     ->numeric()
                                     ->minValue(0)
                                     ->step(0.01)
-                                    ->suffix('m')
-                                    ->placeholder('2.39'),
+                                    ->suffix('cm')
+                                    ->placeholder('40'),
                             ]),
                     ]),
 
@@ -93,7 +104,7 @@ class ContainerTypeForm
                                     ->minValue(0)
                                     ->step(0.01)
                                     ->suffix('kg')
-                                    ->placeholder('28,000')
+                                    ->placeholder('25')
                                     ->helperText('Maximum gross weight'),
 
                                 TextInput::make('max_volume')
@@ -103,7 +114,7 @@ class ContainerTypeForm
                                     ->minValue(0)
                                     ->step(0.0001)
                                     ->suffix('m³')
-                                    ->placeholder('33.2')
+                                    ->placeholder('0.096')
                                     ->helperText('Maximum internal volume'),
 
                                 TextInput::make('tare_weight')
@@ -112,8 +123,8 @@ class ContainerTypeForm
                                     ->minValue(0)
                                     ->step(0.01)
                                     ->suffix('kg')
-                                    ->placeholder('2,300')
-                                    ->helperText('Empty container weight'),
+                                    ->placeholder('0.5')
+                                    ->helperText('Empty box weight'),
                             ]),
                     ]),
 
@@ -121,21 +132,21 @@ class ContainerTypeForm
                     ->schema([
                         Grid::make(2)
                             ->schema([
-                                TextInput::make('base_cost')
-                                    ->label('Base Cost')
+                                TextInput::make('unit_cost')
+                                    ->label('Unit Cost')
                                     ->numeric()
                                     ->minValue(0)
                                     ->step(0.01)
                                     ->prefix('$')
                                     ->placeholder('0.00')
-                                    ->helperText('Base cost for this container type'),
+                                    ->helperText('Cost per box'),
 
                                 Select::make('currency_id')
                                     ->label('Currency')
                                     ->relationship('currency', 'code')
                                     ->searchable()
                                     ->preload()
-                                    ->helperText('Currency for base cost'),
+                                    ->helperText('Currency for unit cost'),
                             ]),
                     ])
                     ->collapsible()

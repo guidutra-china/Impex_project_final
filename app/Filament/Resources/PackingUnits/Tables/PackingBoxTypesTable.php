@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Resources\PackingBoxTypes\Tables;
+namespace App\Filament\Resources\PackingUnits\Tables;
 
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
@@ -33,6 +33,23 @@ class PackingBoxTypesTable
                     ->sortable()
                     ->badge()
                     ->color('primary'),
+
+                TextColumn::make('category')
+                    ->label('Category')
+                    ->formatStateUsing(fn ($state) => match($state) {
+                        'carton_box' => 'Carton Box',
+                        'pallet' => 'Pallet',
+                        'other' => 'Other',
+                        default => ucfirst($state)
+                    })
+                    ->badge()
+                    ->color(fn ($state) => match($state) {
+                        'carton_box' => 'info',
+                        'pallet' => 'warning',
+                        'other' => 'gray',
+                        default => 'gray'
+                    })
+                    ->sortable(),
 
                 TextColumn::make('dimensions')
                     ->label('Dimensions (L×W×H)')

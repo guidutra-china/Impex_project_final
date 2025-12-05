@@ -14,6 +14,8 @@ class ContainerType extends Model
     protected $fillable = [
         'name',
         'code',
+        'category',
+        'unit_system',
         'description',
         'length',
         'width',
@@ -29,6 +31,8 @@ class ContainerType extends Model
 
     protected $casts = [
         'is_active' => 'boolean',
+        'category' => 'string',
+        'unit_system' => 'string',
         'length' => 'decimal:2',
         'width' => 'decimal:2',
         'height' => 'decimal:2',
