@@ -191,7 +191,6 @@ class ShipmentItem extends Model
         if (!$this->product) {
             return;
         }
-
         $product = $this->product;
         
         $this->product_name = $product->name;
@@ -207,7 +206,7 @@ class ShipmentItem extends Model
             $this->unit_price = $this->salesInvoiceItem->unit_price;
         }
         
-        $this->save();
+        // Don't save here - let the creating observer finish and save automatically
     }
 
     /**
