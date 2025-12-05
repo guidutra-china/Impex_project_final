@@ -2,80 +2,115 @@
 
 namespace App\Models;
 
+use App\Models\Scopes\ClientOwnershipScope;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class CommercialInvoice extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
+
+    protected $table = 'commercial_invoices';
+
+    protected static function booted(): void
+    {
+        static::addGlobalScope(new ClientOwnershipScope());
+    }
 
     protected $fillable = [
-        'shipment_id',
         'invoice_number',
+        'revision_number',
+        'client_id',
+        'shipment_id',
+        'proforma_invoice_id',
+        'payment_term_id',
+        'currency_id',
+        'base_currency_id',
+        
+        // Dates
         'invoice_date',
-        // Exporter
+        'shipment_date',
+        'due_date',
+        'payment_date',
+        
+        // Financial (stored in cents)
+        'exchange_rate',
+        'customs_discount_percentage',
+        'subtotal',
+        'commission',
+        'tax',
+        'total',
+        'total_base_currency',
+        
+        // Incoterms
+        'incoterm',
+        'incoterm_location',
+        
+        // Exporter details
         'exporter_name',
         'exporter_address',
         'exporter_tax_id',
         'exporter_country',
-        'exporter_phone',
-        'exporter_email',
-        // Importer
+        
+        // Importer details
         'importer_name',
         'importer_address',
         'importer_tax_id',
         'importer_country',
-        'importer_phone',
-        'importer_email',
-        // Notify Party
-        'notify_party_name',
-        'notify_party_address',
-        'notify_party_phone',
-        // Shipping
+        
+        // Shipping details
         'port_of_loading',
         'port_of_discharge',
-        'country_of_origin',
-        'country_of_destination',
-        'vessel_flight_number',
-        // Terms
-        'incoterm',
-        'payment_terms',
-        'terms_of_sale',
-        // Totals
-        'currency_id',
-        'subtotal',
-        'freight_cost',
-        'insurance_cost',
-        'other_costs',
-        'total_value',
-        // Additional
-        'reason_for_export',
-        'declaration',
-        'additional_notes',
-        // Status
-        'status',
-        'issued_at',
-        'issued_by',
-        // Customs & Display
-        'customs_discount_percentage',
-        'display_options',
-        // Bank
+        'final_destination',
+        'bl_number',
+        'container_numbers',
+        
+        // Payment details
+        'payment_method',
+        'payment_reference',
         'bank_name',
-        'bank_account_number',
-        'bank_swift_code',
+        'bank_account',
+        'bank_swift',
         'bank_address',
+        
+        // Status and additional info
+        'status',
+        'notes',
+        'terms_and_conditions',
+        'display_options',
+        
+        // Timestamps
+        'sent_at',
+        'paid_at',
+        'cancelled_at',
+        'cancellation_reason',
+        
+        // Deposit fields (kept for compatibility, can be removed later)
+        'deposit_required',
+        'deposit_amount',
+        'deposit_received',
+        'deposit_received_at',
+        'deposit_payment_method',
+        'deposit_payment_reference',
     ];
 
     protected $casts = [
         'invoice_date' => 'date',
-        'subtotal' => 'integer',
-        'freight_cost' => 'integer',
-        'insurance_cost' => 'integer',
-        'other_costs' => 'integer',
-        'total_value' => 'integer',
-        'issued_at' => 'datetime',
+        'shipment_date' => 'date',
+        'due_date' => 'date',
+        'payment_date' => 'date',
+        'exchange_rate' => 'decimal:6',
         'customs_discount_percentage' => 'decimal:2',
+        'sent_at' => 'datetime',
+        'paid_at' => 'datetime',
+        'cancelled_at' => 'datetime',
+        'deposit_received' => 'boolean',
+        'deposit_required' => 'boolean',
+        'deposit_received_at' => 'datetime',
         'display_options' => 'array',
     ];
 
@@ -85,15 +120,48 @@ class CommercialInvoice extends Model
     protected function subtotal(): \Illuminate\Database\Eloquent\Casts\Attribute
     {
         return \Illuminate\Database\Eloquent\Casts\Attribute::make(
-            get: fn ($value) => $value / 100,
-            set: fn ($value) => (int) round($value * 100),
+            get: fn ($value) => $value ? $value / 100 : 0,
+            set: fn ($value) => is_numeric($value) && $value ? (int) round($value * 100) : 0,
         );
     }
 
     /**
-     * Get freight_cost in decimal format for display
+     * Get commission in decimal format for display
      */
-    protected function freightCost(): \Illuminate\Database\Eloquent\Casts\Attribute
+    protected function commission(): \Illuminate\Database\Eloquent\Casts\Attribute
+    {
+        return \Illuminate\Database\Eloquent\Casts\Attribute::make(
+            get: fn ($value) => $value ? $value / 100 : 0,
+            set: fn ($value) => is_numeric($value) && $value ? (int) round($value * 100) : 0,
+        );
+    }
+
+    /**
+     * Get tax in decimal format for display
+     */
+    protected function tax(): \Illuminate\Database\Eloquent\Casts\Attribute
+    {
+        return \Illuminate\Database\Eloquent\Casts\Attribute::make(
+            get: fn ($value) => $value ? $value / 100 : 0,
+            set: fn ($value) => is_numeric($value) && $value ? (int) round($value * 100) : 0,
+        );
+    }
+
+    /**
+     * Get total in decimal format for display
+     */
+    protected function total(): \Illuminate\Database\Eloquent\Casts\Attribute
+    {
+        return \Illuminate\Database\Eloquent\Casts\Attribute::make(
+            get: fn ($value) => $value ? $value / 100 : 0,
+            set: fn ($value) => is_numeric($value) && $value ? (int) round($value * 100) : 0,
+        );
+    }
+
+    /**
+     * Get total_base_currency in decimal format for display
+     */
+    protected function totalBaseCurrency(): \Illuminate\Database\Eloquent\Casts\Attribute
     {
         return \Illuminate\Database\Eloquent\Casts\Attribute::make(
             get: fn ($value) => $value / 100,
@@ -102,31 +170,9 @@ class CommercialInvoice extends Model
     }
 
     /**
-     * Get insurance_cost in decimal format for display
+     * Get deposit_amount in decimal format for display
      */
-    protected function insuranceCost(): \Illuminate\Database\Eloquent\Casts\Attribute
-    {
-        return \Illuminate\Database\Eloquent\Casts\Attribute::make(
-            get: fn ($value) => $value / 100,
-            set: fn ($value) => (int) round($value * 100),
-        );
-    }
-
-    /**
-     * Get other_costs in decimal format for display
-     */
-    protected function otherCosts(): \Illuminate\Database\Eloquent\Casts\Attribute
-    {
-        return \Illuminate\Database\Eloquent\Casts\Attribute::make(
-            get: fn ($value) => $value / 100,
-            set: fn ($value) => (int) round($value * 100),
-        );
-    }
-
-    /**
-     * Get total_value in decimal format for display
-     */
-    protected function totalValue(): \Illuminate\Database\Eloquent\Casts\Attribute
+    protected function depositAmount(): \Illuminate\Database\Eloquent\Casts\Attribute
     {
         return \Illuminate\Database\Eloquent\Casts\Attribute::make(
             get: fn ($value) => $value / 100,
@@ -135,9 +181,19 @@ class CommercialInvoice extends Model
     }
 
     // Relationships
+    public function client(): BelongsTo
+    {
+        return $this->belongsTo(Client::class);
+    }
+
     public function shipment(): BelongsTo
     {
         return $this->belongsTo(Shipment::class);
+    }
+
+    public function proformaInvoice(): BelongsTo
+    {
+        return $this->belongsTo(ProformaInvoice::class);
     }
 
     public function currency(): BelongsTo
@@ -145,151 +201,179 @@ class CommercialInvoice extends Model
         return $this->belongsTo(Currency::class);
     }
 
-    public function issuedBy(): BelongsTo
+    public function baseCurrency(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'issued_by');
+        return $this->belongsTo(Currency::class, 'base_currency_id');
     }
 
-    // Methods
-
-    /**
-     * Calculate totals from shipment
-     */
-    public function calculateTotals(): void
+    public function paymentTerm(): BelongsTo
     {
-        $shipment = $this->shipment;
-        
-        // Sum customs values from all shipment items
-        $this->subtotal = $shipment->items()->sum('customs_value');
-        
-        // Get costs from shipment
-        $this->freight_cost = $shipment->shipping_cost ?? 0;
-        $this->insurance_cost = $shipment->insurance_cost ?? 0;
-        $this->other_costs = $shipment->other_costs ?? 0;
-        
-        // Calculate total
-        $this->total_value = $this->subtotal + $this->freight_cost + $this->insurance_cost + $this->other_costs;
-        
-        $this->save();
+        return $this->belongsTo(PaymentTerm::class);
+    }
+
+    public function items(): HasMany
+    {
+        return $this->hasMany(CommercialInvoiceItem::class);
+    }
+
+    public function purchaseOrders(): BelongsToMany
+    {
+        return $this->belongsToMany(PurchaseOrder::class, 'commercial_invoice_purchase_orders')
+            ->withTimestamps();
+    }
+
+    // Customs calculation methods
+    
+    /**
+     * Get subtotal with customs discount applied (in cents)
+     */
+    public function getCustomsSubtotalCents(): int
+    {
+        $originalCents = $this->getRawOriginal('subtotal') ?? 0;
+        $discountMultiplier = 1 - ($this->customs_discount_percentage / 100);
+        return (int) round($originalCents * $discountMultiplier);
     }
 
     /**
-     * Issue the commercial invoice (lock it)
+     * Get subtotal with customs discount applied (in decimal)
      */
-    public function issue(): void
+    public function getCustomsSubtotal(): float
     {
-        if ($this->canBeIssued()) {
-            $this->status = 'issued';
-            $this->issued_at = now();
-            $this->issued_by = auth()->id();
-            $this->save();
-            
-            // Update shipment
-            $this->shipment->commercial_invoice_generated = true;
-            $this->shipment->save();
+        return $this->getCustomsSubtotalCents() / 100;
+    }
+
+    /**
+     * Get total with customs discount applied (in cents)
+     */
+    public function getCustomsTotalCents(): int
+    {
+        $customsSubtotalCents = $this->getCustomsSubtotalCents();
+        $taxCents = $this->getRawOriginal('tax') ?? 0;
+        return $customsSubtotalCents + $taxCents;
+    }
+
+    /**
+     * Get total with customs discount applied (in decimal)
+     */
+    public function getCustomsTotal(): float
+    {
+        return $this->getCustomsTotalCents() / 100;
+    }
+
+    /**
+     * Check if customs discount is applied
+     */
+    public function hasCustomsDiscount(): bool
+    {
+        return $this->customs_discount_percentage > 0;
+    }
+
+    // Helper methods
+    public function recalculateTotals(): void
+    {
+        // Use raw SQL to bypass Attribute getters
+        $subtotalCents = \DB::table('commercial_invoice_items')
+            ->where('commercial_invoice_id', $this->id)
+            ->sum('total');
+        
+        $commissionCents = \DB::table('commercial_invoice_items')
+            ->where('commercial_invoice_id', $this->id)
+            ->sum('commission');
+        
+        // Get tax in cents (raw value from database)
+        $taxCents = $this->getRawOriginal('tax') ?? 0;
+        
+        // Calculate total in cents
+        $totalCents = $subtotalCents + $taxCents;
+        
+        // Calculate total in base currency (in cents)
+        $totalBaseCurrencyCents = $totalCents * ($this->exchange_rate ?? 1);
+        
+        // Use raw SQL update to bypass Eloquent casting
+        \DB::table('commercial_invoices')
+            ->where('id', $this->id)
+            ->update([
+                'subtotal' => $subtotalCents,
+                'commission' => $commissionCents,
+                'total' => $totalCents,
+                'total_base_currency' => $totalBaseCurrencyCents,
+                'updated_at' => now(),
+            ]);
+        
+        // Refresh the model to get the updated values
+        $this->refresh();
+    }
+
+    public function isOverdue(): bool
+    {
+        return $this->status !== 'paid' 
+            && $this->status !== 'cancelled' 
+            && $this->due_date 
+            && $this->due_date < now();
+    }
+
+    public function markAsOverdueIfNeeded(): void
+    {
+        if ($this->isOverdue() && $this->status !== 'overdue') {
+            $this->update(['status' => 'overdue']);
         }
     }
 
     /**
-     * Check if can be issued
+     * Generate Commercial Invoice from Shipment
      */
-    public function canBeIssued(): bool
+    public static function generateFromShipment(Shipment $shipment, array $additionalData = []): self
     {
-        return $this->status === 'draft' && $this->total_value > 0;
-    }
-
-    /**
-     * Get subtotal with customs discount applied
-     */
-    public function getCustomsSubtotal(): float
-    {
-        $discount = $this->customs_discount_percentage / 100;
-        return $this->subtotal * (1 - $discount);
-    }
-
-    /**
-     * Get total value with customs discount applied
-     */
-    public function getCustomsTotalValue(): float
-    {
-        $customsSubtotal = $this->getCustomsSubtotal();
-        return $customsSubtotal + $this->freight_cost + $this->insurance_cost + $this->other_costs;
-    }
-
-    /**
-     * Get items with customs discount applied to unit prices
-     */
-    public function getItemsWithCustomsDiscount(): array
-    {
-        $items = $this->shipment->items;
-        $discount = $this->customs_discount_percentage / 100;
+        $invoice = new self();
         
-        return $items->map(function ($item) use ($discount) {
-            $customsUnitPrice = $item->unit_price * (1 - $discount);
-            $customsValue = $customsUnitPrice * $item->quantity_to_ship;
-            
-            return [
-                'product_sku' => $item->product_sku,
-                'product_name' => $item->product_name,
-                'product_description' => $item->product_description,
-                'hs_code' => $item->hs_code,
-                'country_of_origin' => $item->country_of_origin,
-                'quantity' => $item->quantity_to_ship,
-                'unit_price' => $item->unit_price,
-                'customs_unit_price' => $customsUnitPrice,
-                'total_value' => $item->unit_price * $item->quantity_to_ship,
-                'customs_total_value' => $customsValue,
-                'unit_weight' => $item->unit_weight,
-                'total_weight' => $item->unit_weight * $item->quantity_to_ship,
-                'unit_volume' => $item->unit_volume,
-                'total_volume' => $item->unit_volume * $item->quantity_to_ship,
-            ];
-        })->toArray();
-    }
-
-    /**
-     * Get default display options
-     */
-    public function getDefaultDisplayOptions(): array
-    {
-        return [
-            'show_exporter_tax_id' => true,
-            'show_exporter_phone' => true,
-            'show_exporter_email' => true,
-            'show_importer_tax_id' => true,
-            'show_importer_phone' => true,
-            'show_importer_email' => true,
-            'show_notify_party' => false,
-            'show_bank_info' => false,
-            'show_payment_terms' => true,
-            'show_terms_of_sale' => false,
-            'show_declaration' => true,
-            'show_additional_notes' => false,
-            'show_unit_weight' => true,
-            'show_unit_volume' => true,
-            'show_hs_code' => true,
-            'show_country_of_origin' => true,
-        ];
-    }
-
-    /**
-     * Generate PDF (placeholder - will be implemented in Phase 4)
-     */
-    public function generatePDF(string $version = 'original'): string
-    {
-        // TODO: Implement in Phase 4
-        // version: 'original' or 'customs'
-        return '';
-    }
-
-    /**
-     * Generate Excel (placeholder - will be implemented in Phase 5)
-     */
-    public function generateExcel(string $version = 'original'): string
-    {
-        // TODO: Implement in Phase 5
-        // version: 'original' or 'customs'
-        return '';
+        // Basic info
+        $invoice->shipment_id = $shipment->id;
+        $invoice->client_id = $shipment->customer_id;
+        $invoice->invoice_date = now();
+        $invoice->shipment_date = $shipment->actual_departure_date ?? $shipment->estimated_departure_date;
+        
+        // Get proforma invoice from shipment if exists
+        $proformaInvoice = $shipment->proformaInvoices()->first();
+        if ($proformaInvoice) {
+            $invoice->proforma_invoice_id = $proformaInvoice->id;
+            $invoice->currency_id = $proformaInvoice->currency_id;
+            $invoice->payment_term_id = $proformaInvoice->payment_term_id;
+            $invoice->incoterm = $proformaInvoice->incoterm;
+            $invoice->incoterm_location = $proformaInvoice->incoterm_location;
+        }
+        
+        // Shipping details from shipment
+        $invoice->port_of_loading = $shipment->port_of_loading;
+        $invoice->port_of_discharge = $shipment->port_of_discharge;
+        $invoice->final_destination = $shipment->final_destination;
+        
+        // Container numbers from shipment
+        $containerNumbers = $shipment->containers()->pluck('container_number')->join(', ');
+        $invoice->container_numbers = $containerNumbers;
+        
+        // Merge additional data
+        $invoice->fill($additionalData);
+        
+        $invoice->save();
+        
+        // Copy items from shipment
+        foreach ($shipment->items as $shipmentItem) {
+            $invoiceItem = new CommercialInvoiceItem();
+            $invoiceItem->commercial_invoice_id = $invoice->id;
+            $invoiceItem->product_id = $shipmentItem->product_id;
+            $invoiceItem->description = $shipmentItem->product->name ?? '';
+            $invoiceItem->quantity = $shipmentItem->quantity_to_ship;
+            $invoiceItem->unit_price = $shipmentItem->unit_price ?? 0;
+            $invoiceItem->total = ($shipmentItem->unit_price ?? 0) * $shipmentItem->quantity_to_ship;
+            $invoiceItem->hs_code = $shipmentItem->product->hs_code ?? '';
+            $invoiceItem->country_of_origin = $shipmentItem->product->country_of_origin ?? '';
+            $invoiceItem->save();
+        }
+        
+        // Recalculate totals
+        $invoice->recalculateTotals();
+        
+        return $invoice;
     }
 
     // Boot method
@@ -301,16 +385,9 @@ class CommercialInvoice extends Model
             if (!$invoice->invoice_number) {
                 $invoice->invoice_number = static::generateInvoiceNumber();
             }
-            
-            if (!$invoice->invoice_date) {
-                $invoice->invoice_date = now();
-            }
         });
     }
 
-    /**
-     * Generate unique invoice number
-     */
     public static function generateInvoiceNumber(): string
     {
         $year = now()->year;
