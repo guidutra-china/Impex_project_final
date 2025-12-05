@@ -48,10 +48,9 @@ $this->getRepository()->getModel()::query()->whereRaw('1 = 0')
                 $realMarginPercent
             ))
             ->query(
-$this->getRepository()->getModel()::query()
-                    ->where('transactionable_type', Order::class)
-                    ->where('transactionable_id', $this->record->id)
-                    ->where('type', 'expense')
+                $this->getRepository()->getModel()::query()
+                    ->where('project_id', $this->record->id)
+                    ->where('type', 'payable')
                     ->orderBy('transaction_date', 'desc')
             )
             ->columns([
