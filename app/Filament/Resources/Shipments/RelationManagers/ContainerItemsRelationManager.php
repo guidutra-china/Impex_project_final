@@ -33,24 +33,43 @@ class ContainerItemsRelationManager extends RelationManager
     {
         return $schema
             ->components([
-                Section::make('Select Item')
-                    ->description('Choose a shipment item to add to this container')
+                Section::make('Item Information')
+                    ->description(fn ($record) => $record ? 'Editing container item' : 'Choose a shipment item to add to this container')
                     ->schema([
-                        Select::make('shipment_item_id')
+                        // Show product info when editing
+                        TextInput::make('product_info')
+                            ->label('Product')
+                            ->default(fn ($record) => $record ? sprintf('%s - %s', $record->product->sku ?? 'N/A', $record->product->name ?? 'N/A') : null)
+                            ->disabled()
+                            ->dehydrated(false)
+                            ->visible(fn ($record) => $record !== null)
+                            ->columnSpanFull(),
+                        
+                        TextInput::make('proforma_invoice_info')
+                            ->label('Proforma Invoice Item')
+                            ->default(fn ($record) => $record && $record->proformaInvoiceItem ? sprintf('PI #%s', $record->proformaInvoiceItem->proformaInvoice->proforma_number ?? 'N/A') : null)
+                            ->disabled()
+                            ->dehydrated(false)
+                            ->visible(fn ($record) => $record !== null)
+                            ->columnSpanFull(),
+                        
+                        // Show select when creating
+                        Select::make('proforma_invoice_item_id')
                             ->label('Shipment Item')
-                            ->options(function ($livewire, $record) {
+                            ->options(function ($livewire) {
                                 $container = $livewire->getOwnerRecord();
                                 $shipment = $container->shipment;
                                 
                                 // Get items that are not fully packed yet
                                 $availableItems = $shipment->items()
+                                    ->with('proformaInvoiceItem.proformaInvoice')
                                     ->whereColumn('quantity_packed', '<', 'quantity_to_ship')
                                     ->get();
                                 
                                 $options = [];
                                 foreach ($availableItems as $item) {
                                     $remaining = $item->quantity_to_ship - $item->quantity_packed;
-                                    $options[$item->id] = sprintf(
+                                    $options[$item->proforma_invoice_item_id] = sprintf(
                                         '%s - %s (Available: %d units)',
                                         $item->product_sku,
                                         $item->product_name,
@@ -58,29 +77,23 @@ class ContainerItemsRelationManager extends RelationManager
                                     );
                                 }
                                 
-                                // When editing, include the current shipment item even if fully packed
-                                if ($record && $record->shipmentItem) {
-                                    $currentItem = $record->shipmentItem;
-                                    if (!isset($options[$currentItem->id])) {
-                                        $options[$currentItem->id] = sprintf(
-                                            '%s - %s (Current item)',
-                                            $currentItem->product_sku,
-                                            $currentItem->product_name
-                                        );
-                                    }
-                                }
-                                
                                 return $options;
                             })
                             ->searchable()
                             ->required()
                             ->reactive()
-                            ->afterStateUpdated(function ($state, $set) {
+                            ->afterStateUpdated(function ($state, $set, $livewire) {
                                 if ($state) {
-                                    $shipmentItem = \App\Models\ShipmentItem::find($state);
+                                    $container = $livewire->getOwnerRecord();
+                                    $shipment = $container->shipment;
+                                    
+                                    // Find the shipment item by proforma_invoice_item_id
+                                    $shipmentItem = $shipment->items()
+                                        ->where('proforma_invoice_item_id', $state)
+                                        ->first();
+                                    
                                     if ($shipmentItem) {
                                         $set('product_id', $shipmentItem->product_id);
-                                        $set('proforma_invoice_item_id', $shipmentItem->proforma_invoice_item_id);
                                         $set('unit_weight', $shipmentItem->unit_weight);
                                         $set('unit_volume', $shipmentItem->unit_volume);
                                         $set('unit_price', $shipmentItem->unit_price);
@@ -90,7 +103,7 @@ class ContainerItemsRelationManager extends RelationManager
                                     }
                                 }
                             })
-                            ->disabled(fn ($record) => $record !== null)
+                            ->visible(fn ($record) => $record === null)
                             ->columnSpanFull(),
 
                         TextInput::make('quantity_available')
@@ -99,6 +112,7 @@ class ContainerItemsRelationManager extends RelationManager
                             ->disabled()
                             ->dehydrated(false)
                             ->suffix('units')
+                            ->visible(fn ($record) => $record === null)
                             ->columnSpanFull(),
 
                         TextInput::make('quantity')
