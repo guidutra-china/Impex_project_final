@@ -138,7 +138,7 @@ class RFQExcelService
                 
                 // Target price
                 $targetPrice = $item->requested_unit_price 
-                    ? number_format($item->requested_unit_price / 100, 2)
+                    ? number_format($item->requested_unit_price, 2)
                     : 'N/A';
                 $sheet->setCellValue('C' . $currentRow, $targetPrice);
                 

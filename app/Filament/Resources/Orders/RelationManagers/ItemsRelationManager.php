@@ -72,8 +72,6 @@ class ItemsRelationManager extends RelationManager
                     ->minValue(0)
                     ->prefix('$')
                     ->step(0.01)
-                    ->dehydrateStateUsing(fn ($state) => $state ? (int)($state * 100) : null)
-                    ->formatStateUsing(fn ($state) => $state ? $state / 100 : null)
                     ->columnSpan(1),
 
                 TextInput::make('commission_percent')
