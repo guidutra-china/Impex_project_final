@@ -117,7 +117,7 @@ class InvoicesRelationManager extends RelationManager
                         // 3. Have items
                         return $query->whereHas('items')
                             ->where('customer_id', $shipment->customer_id)
-                            ->whereIn('proforma_invoices.status', ['confirmed', 'approved']);
+                            ->whereIn('status', ['confirmed', 'approved']);
                     })
                     ->form(fn () => [
                         \Filament\Forms\Components\Toggle::make('add_all_items')
