@@ -57,6 +57,14 @@ class CommercialInvoice extends Model
         'status',
         'issued_at',
         'issued_by',
+        // Customs & Display
+        'customs_discount_percentage',
+        'display_options',
+        // Bank
+        'bank_name',
+        'bank_account_number',
+        'bank_swift_code',
+        'bank_address',
     ];
 
     protected $casts = [
@@ -67,6 +75,8 @@ class CommercialInvoice extends Model
         'other_costs' => 'integer',
         'total_value' => 'integer',
         'issued_at' => 'datetime',
+        'customs_discount_percentage' => 'decimal:2',
+        'display_options' => 'array',
     ];
 
     /**
@@ -189,11 +199,96 @@ class CommercialInvoice extends Model
     }
 
     /**
+     * Get subtotal with customs discount applied
+     */
+    public function getCustomsSubtotal(): float
+    {
+        $discount = $this->customs_discount_percentage / 100;
+        return $this->subtotal * (1 - $discount);
+    }
+
+    /**
+     * Get total value with customs discount applied
+     */
+    public function getCustomsTotalValue(): float
+    {
+        $customsSubtotal = $this->getCustomsSubtotal();
+        return $customsSubtotal + $this->freight_cost + $this->insurance_cost + $this->other_costs;
+    }
+
+    /**
+     * Get items with customs discount applied to unit prices
+     */
+    public function getItemsWithCustomsDiscount(): array
+    {
+        $items = $this->shipment->items;
+        $discount = $this->customs_discount_percentage / 100;
+        
+        return $items->map(function ($item) use ($discount) {
+            $customsUnitPrice = $item->unit_price * (1 - $discount);
+            $customsValue = $customsUnitPrice * $item->quantity_to_ship;
+            
+            return [
+                'product_sku' => $item->product_sku,
+                'product_name' => $item->product_name,
+                'product_description' => $item->product_description,
+                'hs_code' => $item->hs_code,
+                'country_of_origin' => $item->country_of_origin,
+                'quantity' => $item->quantity_to_ship,
+                'unit_price' => $item->unit_price,
+                'customs_unit_price' => $customsUnitPrice,
+                'total_value' => $item->unit_price * $item->quantity_to_ship,
+                'customs_total_value' => $customsValue,
+                'unit_weight' => $item->unit_weight,
+                'total_weight' => $item->unit_weight * $item->quantity_to_ship,
+                'unit_volume' => $item->unit_volume,
+                'total_volume' => $item->unit_volume * $item->quantity_to_ship,
+            ];
+        })->toArray();
+    }
+
+    /**
+     * Get default display options
+     */
+    public function getDefaultDisplayOptions(): array
+    {
+        return [
+            'show_exporter_tax_id' => true,
+            'show_exporter_phone' => true,
+            'show_exporter_email' => true,
+            'show_importer_tax_id' => true,
+            'show_importer_phone' => true,
+            'show_importer_email' => true,
+            'show_notify_party' => false,
+            'show_bank_info' => false,
+            'show_payment_terms' => true,
+            'show_terms_of_sale' => false,
+            'show_declaration' => true,
+            'show_additional_notes' => false,
+            'show_unit_weight' => true,
+            'show_unit_volume' => true,
+            'show_hs_code' => true,
+            'show_country_of_origin' => true,
+        ];
+    }
+
+    /**
      * Generate PDF (placeholder - will be implemented in Phase 4)
      */
-    public function generatePDF(): string
+    public function generatePDF(string $version = 'original'): string
     {
         // TODO: Implement in Phase 4
+        // version: 'original' or 'customs'
+        return '';
+    }
+
+    /**
+     * Generate Excel (placeholder - will be implemented in Phase 5)
+     */
+    public function generateExcel(string $version = 'original'): string
+    {
+        // TODO: Implement in Phase 5
+        // version: 'original' or 'customs'
         return '';
     }
 
