@@ -161,8 +161,10 @@ class ProformaInvoice extends Model
         $year = now()->year;
         $prefix = "PI-{$year}-";
         
-        // Get all proforma numbers for this year
-        $lastNumber = static::where('proforma_number', 'LIKE', $prefix . '%')
+        // Get all proforma numbers for this year (including soft deleted and all clients)
+        $lastNumber = static::withTrashed()
+            ->withoutGlobalScopes()
+            ->where('proforma_number', 'LIKE', $prefix . '%')
             ->orderByRaw('CAST(SUBSTRING(proforma_number, -4) AS UNSIGNED) DESC')
             ->value('proforma_number');
         
@@ -173,11 +175,14 @@ class ProformaInvoice extends Model
             $nextNumber = 1;
         }
         
-        // Ensure uniqueness by checking if number exists
+        // Ensure uniqueness by checking if number exists (including soft deleted)
         $attempts = 0;
         do {
             $proformaNumber = sprintf('PI-%d-%04d', $year, $nextNumber);
-            $exists = static::where('proforma_number', $proformaNumber)->exists();
+            $exists = static::withTrashed()
+                ->withoutGlobalScopes()
+                ->where('proforma_number', $proformaNumber)
+                ->exists();
             
             if ($exists) {
                 $nextNumber++;
