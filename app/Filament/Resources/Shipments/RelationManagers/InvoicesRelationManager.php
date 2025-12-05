@@ -125,7 +125,7 @@ class InvoicesRelationManager extends RelationManager
                             ->where('customer_id', $shipment->customer_id)
                             ->whereIn('status', ['confirmed', 'approved']);
                     })
-                    ->form(fn () => [
+                    ->formSchema(fn () => [
                         \Filament\Forms\Components\Toggle::make('add_all_items')
                             ->label('Automatically add all items from this Proforma Invoice')
                             ->helperText('All items will be added to Shipment Items with full quantities')
