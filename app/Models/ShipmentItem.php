@@ -256,5 +256,27 @@ class ShipmentItem extends Model
             // Recalculate shipment totals
             $item->shipment->calculateTotals();
         });
+
+        static::deleted(function ($item) {
+            // Recalculate shipment totals
+            if ($item->shipment) {
+                $item->shipment->calculateTotals();
+            }
+            
+            // Recalculate pivot totals for the proforma invoice
+            if ($item->proformaInvoiceItem && $item->proformaInvoiceItem->proformaInvoice) {
+                $proformaInvoice = $item->proformaInvoiceItem->proformaInvoice;
+                $shipment = $item->shipment;
+                
+                // Find the pivot record
+                $pivotRecord = $shipment->shipmentInvoices()
+                    ->where('proforma_invoice_id', $proformaInvoice->id)
+                    ->first();
+                
+                if ($pivotRecord) {
+                    $pivotRecord->calculateTotals();
+                }
+            }
+        });
     }
 }
