@@ -2,8 +2,7 @@
 
 namespace App\Filament\Resources\Orders\RelationManagers;
 
-use App\Repositories\OrderRepository;
-use App\Repositories\ProductRepository;
+
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
@@ -23,14 +22,7 @@ class ItemsRelationManager extends RelationManager
 
     protected static ?string $title = 'Order Items';
 
-    protected OrderRepository $orderRepository;
-    protected ProductRepository $productRepository;
 
-    public function mount(): void {
-        parent::mount();
-        $this->orderRepository = app(OrderRepository::class);
-        $this->productRepository = app(ProductRepository::class);
-    }
 
     public function form(Schema $schema): Schema
     {
@@ -114,9 +106,6 @@ class ItemsRelationManager extends RelationManager
     {
         return $table
             ->recordTitleAttribute('product.name')
-            ->query(
-                $this->orderRepository->getItemsQuery($this->getOwnerRecord()->id)
-            )
             ->columns([
                 TextColumn::make('product.code')
                     ->label('Code')
