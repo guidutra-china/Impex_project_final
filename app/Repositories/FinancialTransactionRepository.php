@@ -179,10 +179,10 @@ class FinancialTransactionRepository extends BaseRepository
      * 
      * @param int $id ID da transação
      * @param array $data Dados a atualizar
-     * @return FinancialTransaction
+     * @return bool
      * @throws \Exception
      */
-    public function update(int $id, array $data): FinancialTransaction
+    public function update(int|string $id, array $data): bool
     {
         try {
             $transaction = $this->findById($id);
@@ -200,9 +200,7 @@ class FinancialTransactionRepository extends BaseRepository
                 $data['paid_amount'] = (int)($data['paid_amount'] * 100);
             }
 
-            $transaction->update($data);
-
-            return $transaction->fresh();
+            return $transaction->update($data);
         } catch (\Exception $e) {
             \Log::error('Erro ao atualizar transação financeira', [
                 'id' => $id,
