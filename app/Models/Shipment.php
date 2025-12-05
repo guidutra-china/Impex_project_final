@@ -413,6 +413,39 @@ class Shipment extends Model
         ];
     }
 
+    /**
+     * Mark all items in this shipment as shipped
+     * Updates quantity_shipped in ProformaInvoiceItems
+     */
+    public function markItemsAsShipped(): void
+    {
+        // Get all shipment items
+        $shipmentItems = $this->items()->with('proformaInvoiceItem')->get();
+        
+        foreach ($shipmentItems as $shipmentItem) {
+            if ($shipmentItem->proformaInvoiceItem) {
+                $piItem = $shipmentItem->proformaInvoiceItem;
+                
+                // Add the shipped quantity
+                try {
+                    $piItem->addShipped($shipmentItem->quantity_to_ship);
+                } catch (\Exception $e) {
+                    // Log error but continue with other items
+                    \Log::error("Failed to mark item as shipped: {$e->getMessage()}", [
+                        'shipment_id' => $this->id,
+                        'shipment_item_id' => $shipmentItem->id,
+                        'proforma_invoice_item_id' => $piItem->id,
+                    ]);
+                }
+            }
+        }
+        
+        // Recalculate pivot totals for all attached invoices
+        foreach ($this->shipmentInvoices as $pivotRecord) {
+            $pivotRecord->calculateTotals();
+        }
+    }
+
     // Boot method
     protected static function boot()
     {
@@ -421,6 +454,14 @@ class Shipment extends Model
         static::creating(function ($shipment) {
             if (!$shipment->shipment_number) {
                 $shipment->shipment_number = static::generateShipmentNumber();
+            }
+        });
+
+        static::updating(function ($shipment) {
+            // Detect status change to 'on_board'
+            if ($shipment->isDirty('status') && $shipment->status === 'on_board') {
+                // Mark all items in this shipment as shipped
+                $shipment->markItemsAsShipped();
             }
         });
     }
