@@ -288,12 +288,17 @@ class ItemsRelationManager extends RelationManager
                                             ->maxLength(50),
                                     ])
                                     ->createOptionUsing(function (array $data) use ($shipment) {
+                                        $containerType = \App\Models\ContainerType::find($data['container_type_id']);
+                                        
                                         $container = \App\Models\ShipmentContainer::create([
                                             'shipment_id' => $shipment->id,
                                             'container_type_id' => $data['container_type_id'],
                                             'container_number' => $data['container_number'],
                                             'seal_number' => $data['seal_number'] ?? null,
                                             'status' => 'draft',
+                                            'max_weight' => $containerType->max_weight ?? 0,
+                                            'max_volume' => $containerType->max_volume ?? 0,
+                                            'created_by' => auth()->id(),
                                         ]);
                                         return $container->id;
                                     })
