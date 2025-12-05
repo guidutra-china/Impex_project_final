@@ -90,6 +90,8 @@ class CostHistoryRelationManager extends RelationManager
                         'increase' => 'Increases',
                         'decrease' => 'Decreases',
                     ])
+                    ->query(function ($query, $state) {
+                        if ($state['value'] === 'increase') {
                             return $query->increases();
                         } elseif ($state['value'] === 'decrease') {
                             return $query->decreases();
