@@ -243,52 +243,42 @@ class RFQExcelService
     {
         try {
             // Move file from temp to permanent storage
-            $permanentDir = storage_path('app/public/generated_documents');
-            if (!file_exists($permanentDir)) {
-                mkdir($permanentDir, 0755, true);
+            $directory = "documents/rfq/" . date('Y/m');
+            $storagePath = "{$directory}/{$fileName}";
+            
+            // Ensure directory exists
+            $fullDir = storage_path('app/' . $directory);
+            if (!is_dir($fullDir)) {
+                mkdir($fullDir, 0755, true);
             }
-
-            $permanentPath = $permanentDir . '/' . $fileName;
-            copy($filePath, $permanentPath);
-
-            // Get file size
-            $fileSize = filesize($permanentPath);
-
-            // Create database record
-            \App\Models\GeneratedDocument::create([
-                'document_type' => 'rfq',
-                'format' => 'excel',
-                'filename' => $fileName,
-                'file_path' => 'generated_documents/' . $fileName,
-                'file_size' => $fileSize,
-                'transactable_type' => Order::class,
-                'transactable_id' => $order->id,
-                'version' => $this->getNextVersion($order, 'rfq'),
-                'uploaded_by' => auth()->id(),
+            
+            // Copy file to permanent location
+            $fullPath = storage_path('app/' . $storagePath);
+            copy($filePath, $fullPath);
+            
+            // Create database record using the same pattern as PdfExportService
+            \App\Models\GeneratedDocument::createFromFile(
+                $order,
+                'rfq',
+                'excel',
+                $storagePath,
+                [
+                    'document_number' => $order->order_number,
+                    'filename' => $fileName,
+                ]
+            );
+            
+            \Log::info('RFQ Excel saved to document history', [
+                'order_id' => $order->id,
+                'file_path' => $storagePath,
             ]);
         } catch (\Exception $e) {
             \Log::error('Failed to save RFQ to document history', [
                 'order_id' => $order->id,
                 'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
             ]);
         }
-    }
-
-    /**
-     * Get next version number for document type
-     *
-     * @param Order $order
-     * @param string $documentType
-     * @return int
-     */
-    protected function getNextVersion(Order $order, string $documentType): int
-    {
-        $lastVersion = \App\Models\GeneratedDocument::where('transactable_type', Order::class)
-            ->where('transactable_id', $order->id)
-            ->where('document_type', $documentType)
-            ->max('version');
-
-        return ($lastVersion ?? 0) + 1;
     }
 
     /**
