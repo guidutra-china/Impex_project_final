@@ -108,8 +108,14 @@ class InvoicesRelationManager extends RelationManager
                     ->color('info')
                     ->icon(Heroicon::OutlinedPlusCircle)
                     ->preloadRecordSelect()
+                    ->recordSelectSearchColumns(['proforma_number', 'customer.name'])
                     ->recordSelectOptionsQuery(function ($query) {
                         $shipment = $this->getOwnerRecord();
+                        
+                        // Debug: Show all invoices first
+                        \Log::info('Shipment customer_id: ' . $shipment->customer_id);
+                        \Log::info('Total invoices in DB: ' . \App\Models\ProformaInvoice::count());
+                        \Log::info('Invoices for customer: ' . \App\Models\ProformaInvoice::where('customer_id', $shipment->customer_id)->count());
                         
                         // Only show proforma invoices that:
                         // 1. Belong to the same customer as the shipment
