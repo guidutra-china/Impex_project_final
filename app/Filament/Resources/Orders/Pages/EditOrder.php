@@ -21,14 +21,14 @@ class EditOrder extends EditRecord
 {
     protected static string $resource = OrderResource::class;
 
-    protected OrderRepository $orderRepository;
-    protected FinancialTransactionRepository $financialTransactionRepository;
-
-    public function __construct()
+    protected function getOrderRepository(): OrderRepository
     {
-        parent::__construct();
-        $this->orderRepository = app(OrderRepository::class);
-        $this->financialTransactionRepository = app(FinancialTransactionRepository::class);
+        return app(OrderRepository::class);
+    }
+
+    protected function getFinancialTransactionRepository(): FinancialTransactionRepository
+    {
+        return app(FinancialTransactionRepository::class);
     }
 
     protected function getHeaderActions(): array
@@ -183,7 +183,7 @@ class EditOrder extends EditRecord
             $amountInBaseCurrency = (int)($data['amount'] * $exchangeRate * 100);
 
             // Usar repository para criar transação
-            $this->financialTransactionRepository->create([
+            $this->getFinancialTransactionRepository()->create([
                 'project_id' => $order->id,
                 'transactable_id' => $order->id,
                 'transactable_type' => get_class($order),
