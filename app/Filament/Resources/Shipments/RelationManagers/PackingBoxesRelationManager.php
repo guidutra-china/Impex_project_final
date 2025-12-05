@@ -271,82 +271,58 @@ class PackingBoxesRelationManager extends RelationManager
                     ->modalWidth('6xl')
                     ->modalSubmitAction(false)
                     ->modalCancelActionLabel('Close')
-                    ->infolist([
-                        InfolistSection::make('Box Items')
-                            ->schema([
-                                RepeatableEntry::make('packingBoxItems')
-                                    ->label('')
-                                    ->schema([
-                                        TextEntry::make('shipmentItem.product_sku')
-                                            ->label('SKU'),
-                                        TextEntry::make('shipmentItem.product_name')
-                                            ->label('Product'),
-                                        TextEntry::make('quantity')
-                                            ->label('Quantity')
-                                            ->numeric(),
-                                        TextEntry::make('unit_weight')
-                                            ->label('Unit Weight')
-                                            ->suffix(' kg')
-                                            ->numeric(decimalPlaces: 2),
-                                        TextEntry::make('total_weight')
-                                            ->label('Total Weight')
-                                            ->suffix(' kg')
-                                            ->state(fn ($record) => $record->quantity * $record->unit_weight)
-                                            ->numeric(decimalPlaces: 2)
-                                            ->weight('bold'),
-                                        TextEntry::make('unit_volume')
-                                            ->label('Unit Volume')
-                                            ->suffix(' m³')
-                                            ->numeric(decimalPlaces: 4),
-                                        TextEntry::make('total_volume')
-                                            ->label('Total Volume')
-                                            ->suffix(' m³')
-                                            ->state(fn ($record) => $record->quantity * $record->unit_volume)
-                                            ->numeric(decimalPlaces: 4)
-                                            ->weight('bold'),
-                                    ])
-                                    ->columns(7)
-                                    ->grid(7),
-                            ]),
-                        InfolistSection::make('Box Summary')
-                            ->schema([
-                                TextEntry::make('box_type')
-                                    ->label('Box Type')
-                                    ->formatStateUsing(fn ($state) => ucfirst($state)),
-                                TextEntry::make('packing_status')
-                                    ->label('Status')
-                                    ->badge()
-                                    ->formatStateUsing(fn ($state) => ucfirst(str_replace('_', ' ', $state))),
-                                TextEntry::make('total_items')
-                                    ->label('Total Items'),
-                                TextEntry::make('total_quantity')
-                                    ->label('Total Quantity')
-                                    ->suffix(' units')
-                                    ->numeric(),
-                                TextEntry::make('net_weight')
-                                    ->label('Net Weight')
-                                    ->suffix(' kg')
-                                    ->numeric(decimalPlaces: 2)
-                                    ->weight('bold')
-                                    ->size('lg'),
-                                TextEntry::make('gross_weight')
-                                    ->label('Gross Weight')
-                                    ->suffix(' kg')
-                                    ->numeric(decimalPlaces: 2)
-                                    ->weight('bold')
-                                    ->size('lg'),
-                                TextEntry::make('volume')
-                                    ->label('Volume')
-                                    ->suffix(' m³')
-                                    ->numeric(decimalPlaces: 4)
-                                    ->weight('bold')
-                                    ->size('lg'),
-                                TextEntry::make('dimensions')
-                                    ->label('Dimensions (L×W×H)')
-                                    ->state(fn ($record) => $record->length . ' × ' . $record->width . ' × ' . $record->height . ' cm'),
-                            ])
-                            ->columns(4),
-                    ]),
+                    ->modalContent(function ($record) {
+                        $items = $record->packingBoxItems;
+                        $html = '<div class="space-y-4">';
+                        
+                        // Box Summary
+                        $html .= '<div class="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">';
+                        $html .= '<h3 class="text-lg font-semibold mb-2">Box Summary</h3>';
+                        $html .= '<div class="grid grid-cols-4 gap-4 text-sm">';
+                        $html .= '<div><span class="font-medium">Type:</span> ' . ucfirst($record->box_type) . '</div>';
+                        $html .= '<div><span class="font-medium">Status:</span> ' . ucfirst(str_replace('_', ' ', $record->packing_status)) . '</div>';
+                        $html .= '<div><span class="font-medium">Items:</span> ' . $record->total_items . '</div>';
+                        $html .= '<div><span class="font-medium">Quantity:</span> ' . $record->total_quantity . ' units</div>';
+                        $html .= '<div><span class="font-medium">Net Weight:</span> ' . number_format($record->net_weight, 2) . ' kg</div>';
+                        $html .= '<div><span class="font-medium">Gross Weight:</span> ' . number_format($record->gross_weight, 2) . ' kg</div>';
+                        $html .= '<div><span class="font-medium">Volume:</span> ' . number_format($record->volume, 4) . ' m³</div>';
+                        $html .= '<div><span class="font-medium">Dimensions:</span> ' . $record->length . '×' . $record->width . '×' . $record->height . ' cm</div>';
+                        $html .= '</div></div>';
+                        
+                        // Items Table
+                        if ($items->count() > 0) {
+                            $html .= '<div class="overflow-x-auto">';
+                            $html .= '<table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">';
+                            $html .= '<thead class="bg-gray-50 dark:bg-gray-800"><tr>';
+                            $html .= '<th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">SKU</th>';
+                            $html .= '<th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Product</th>';
+                            $html .= '<th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">Qty</th>';
+                            $html .= '<th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">Unit Wt (kg)</th>';
+                            $html .= '<th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">Total Wt (kg)</th>';
+                            $html .= '<th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">Unit Vol (m³)</th>';
+                            $html .= '<th class="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">Total Vol (m³)</th>';
+                            $html .= '</tr></thead><tbody class="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">';
+                            
+                            foreach ($items as $item) {
+                                $html .= '<tr>';
+                                $html .= '<td class="px-4 py-2 text-sm">' . $item->shipmentItem->product_sku . '</td>';
+                                $html .= '<td class="px-4 py-2 text-sm">' . $item->shipmentItem->product_name . '</td>';
+                                $html .= '<td class="px-4 py-2 text-sm text-right">' . $item->quantity . '</td>';
+                                $html .= '<td class="px-4 py-2 text-sm text-right">' . number_format($item->unit_weight, 2) . '</td>';
+                                $html .= '<td class="px-4 py-2 text-sm text-right font-semibold">' . number_format($item->quantity * $item->unit_weight, 2) . '</td>';
+                                $html .= '<td class="px-4 py-2 text-sm text-right">' . number_format($item->unit_volume, 4) . '</td>';
+                                $html .= '<td class="px-4 py-2 text-sm text-right font-semibold">' . number_format($item->quantity * $item->unit_volume, 4) . '</td>';
+                                $html .= '</tr>';
+                            }
+                            
+                            $html .= '</tbody></table></div>';
+                        } else {
+                            $html .= '<div class="text-center py-8 text-gray-500">No items in this box yet.</div>';
+                        }
+                        
+                        $html .= '</div>';
+                        return new \Illuminate\Support\HtmlString($html);
+                    }),
                 EditAction::make(),
                 DeleteAction::make()
                     ->requiresConfirmation()
