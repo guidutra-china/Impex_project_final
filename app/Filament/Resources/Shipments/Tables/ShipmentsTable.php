@@ -42,10 +42,10 @@ class ShipmentsTable
                     ->label('Status')
                     ->formatStateUsing(fn ($state) => str_replace('_', ' ', ucwords($state, '_')))
                     ->colors([
-                        'secondary' => 'draft',
+                        'secondary' => 'pending',
                         'warning' => ['preparing', 'ready_to_ship'],
-                        'info' => 'confirmed',
-                        'primary' => ['picked_up', 'in_transit'],
+                        'info' => ['picked_up', 'on_board'],
+                        'primary' => ['customs_clearance', 'out_for_delivery'],
                         'success' => 'delivered',
                         'danger' => ['cancelled', 'returned'],
                     ]),
@@ -193,12 +193,11 @@ class ShipmentsTable
                 SelectFilter::make('status')
                     ->label('Status')
                     ->options([
-                        'draft' => 'Draft',
+                        'pending' => 'Pending',
                         'preparing' => 'Preparing',
                         'ready_to_ship' => 'Ready to Ship',
-                        'confirmed' => 'Confirmed',
                         'picked_up' => 'Picked Up',
-                        'in_transit' => 'In Transit',
+                        'on_board' => 'On Board',
                         'customs_clearance' => 'Customs Clearance',
                         'out_for_delivery' => 'Out for Delivery',
                         'delivered' => 'Delivered',

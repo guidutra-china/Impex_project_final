@@ -49,19 +49,18 @@ class ShipmentForm
                                 Select::make('status')
                                     ->label('Status')
                                     ->options([
-                                        'draft' => 'Draft',
+                                        'pending' => 'Pending',
                                         'preparing' => 'Preparing',
                                         'ready_to_ship' => 'Ready to Ship',
-                                        'confirmed' => 'Confirmed',
                                         'picked_up' => 'Picked Up',
-                                        'in_transit' => 'In Transit',
+                                        'on_board' => 'On Board',
                                         'customs_clearance' => 'Customs Clearance',
                                         'out_for_delivery' => 'Out for Delivery',
                                         'delivered' => 'Delivered',
                                         'cancelled' => 'Cancelled',
                                         'returned' => 'Returned',
                                     ])
-                                    ->default('draft')
+                                    ->default('pending')
                                     ->required(),
 
                                 TextInput::make('reference_number')
