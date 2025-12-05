@@ -51,26 +51,41 @@ class ShipmentContainersRelationManager extends RelationManager
                                     ->unique(ignoreRecord: true)
                                     ->placeholder('e.g., MSCU1234567'),
 
-                                Select::make('container_type')
-                                    ->options([
-                                        '20ft' => '20ft',
-                                        '40ft' => '40ft',
-                                        '40hc' => '40hc',
-                                        'pallet' => 'Pallet',
-                                        'box' => 'Box',
-                                    ])
+                                Select::make('container_type_id')
+                                    ->label('Container Type')
+                                    ->options(function () {
+                                        return \App\Models\ContainerType::query()
+                                            ->orderBy('name')
+                                            ->pluck('name', 'id');
+                                    })
+                                    ->searchable()
                                     ->required()
-                                    ->default('40ft'),
+                                    ->reactive()
+                                    ->afterStateUpdated(function ($state, $set) {
+                                        if ($state) {
+                                            $containerType = \App\Models\ContainerType::find($state);
+                                            if ($containerType) {
+                                                $set('max_weight', $containerType->max_weight);
+                                                $set('max_volume', $containerType->max_volume);
+                                                $set('container_type', $containerType->type); // For backward compatibility
+                                            }
+                                        }
+                                    })
+                                    ->helperText('Select from predefined container types'),
 
                                 TextInput::make('max_weight')
+                                    ->label('Max Weight')
                                     ->numeric()
                                     ->required()
-                                    ->suffix('kg'),
+                                    ->suffix('kg')
+                                    ->helperText('Auto-filled from container type'),
 
                                 TextInput::make('max_volume')
+                                    ->label('Max Volume (CBM)')
                                     ->numeric()
                                     ->required()
-                                    ->suffix('m³'),
+                                    ->suffix('m³')
+                                    ->helperText('Auto-filled from container type'),
 
                                 TextInput::make('current_weight')
                                     ->numeric()

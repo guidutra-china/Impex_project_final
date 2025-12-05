@@ -16,6 +16,7 @@ class ShipmentContainer extends Model
         'shipment_id',
         'container_number',
         'container_type',
+        'container_type_id',
         'max_weight',
         'max_volume',
         'current_weight',
@@ -47,6 +48,11 @@ class ShipmentContainer extends Model
     public function items(): HasMany
     {
         return $this->hasMany(ShipmentContainerItem::class);
+    }
+
+    public function containerType(): BelongsTo
+    {
+        return $this->belongsTo(ContainerType::class);
     }
 
     public function trackingEvents(): HasMany
