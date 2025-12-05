@@ -358,15 +358,18 @@ class ItemsRelationManager extends RelationManager
                                 foreach ($records as $item) {
                                     $qty = $item->quantity_to_ship - $item->quantity_packed;
                                     if ($qty > 0) {
+                                        $unitWeight = $item->unit_weight ?? 0;
+                                        $unitVolume = $item->unit_volume ?? 0;
+                                        
                                         \App\Models\ShipmentContainerItem::create([
                                             'shipment_container_id' => $container->id,
                                             'proforma_invoice_item_id' => $item->proforma_invoice_item_id,
                                             'product_id' => $item->product_id,
                                             'quantity' => $qty,
-                                            'unit_weight' => $item->unit_weight,
-                                            'total_weight' => $qty * $item->unit_weight,
-                                            'unit_volume' => $item->unit_volume,
-                                            'total_volume' => $qty * $item->unit_volume,
+                                            'unit_weight' => $unitWeight,
+                                            'total_weight' => $qty * $unitWeight,
+                                            'unit_volume' => $unitVolume,
+                                            'total_volume' => $qty * $unitVolume,
                                             'unit_price' => $item->unit_price,
                                             'customs_value' => $qty * $item->unit_price,
                                             'hs_code' => $item->hs_code,
@@ -383,13 +386,16 @@ class ItemsRelationManager extends RelationManager
                                 foreach ($records as $item) {
                                     $qty = $item->quantity_to_ship - $item->quantity_packed;
                                     if ($qty > 0) {
+                                        $unitWeight = $item->unit_weight ?? 0;
+                                        $unitVolume = $item->unit_volume ?? 0;
+                                        
                                         \App\Models\PackingBoxItem::create([
                                             'packing_box_id' => $box->id,
                                             'shipment_item_id' => $item->id,
                                             'product_id' => $item->product_id,
                                             'quantity' => $qty,
-                                            'unit_weight' => $item->unit_weight,
-                                            'unit_volume' => $item->unit_volume,
+                                            'unit_weight' => $unitWeight,
+                                            'unit_volume' => $unitVolume,
                                         ]);
                                         $item->updatePackedQuantity();
                                     }
