@@ -4,7 +4,6 @@ namespace App\Filament\Resources\ProformaInvoice\RelationManagers;
 
 use App\Models\QuoteItem;
 use App\Models\SupplierQuote;
-use App\Repositories\ProformaInvoiceRepository;
 use App\Repositories\SupplierQuoteRepository;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
@@ -32,12 +31,10 @@ class ItemsRelationManager extends RelationManager
 
     protected static ?string $title = 'Proforma Items';
 
-    protected ProformaInvoiceRepository $proformaRepository;
     protected SupplierQuoteRepository $quoteRepository;
 
     public function mount(): void {
         parent::mount();
-        $this->proformaRepository = app(ProformaInvoiceRepository::class);
         $this->quoteRepository = app(SupplierQuoteRepository::class);
     }
 
@@ -225,9 +222,6 @@ class ItemsRelationManager extends RelationManager
     {
         return $table
             ->recordTitleAttribute('product.name')
-            ->query(
-                $this->proformaRepository->getItemsQuery($this->getOwnerRecord()->id)
-            )
             ->columns([
                 TextColumn::make('product.code')
                     ->label('Code')
