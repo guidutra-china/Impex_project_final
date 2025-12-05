@@ -14,12 +14,9 @@ class EditProformaInvoice extends EditRecord
 {
     protected static string $resource = ProformaInvoiceResource::class;
 
-    protected ?ProformaInvoiceRepository $proformaRepository = null;
-
-    public function mount(string|int $record): void
+    protected function getProformaRepository(): ProformaInvoiceRepository
     {
-        parent::mount($record);
-        $this->proformaRepository = app(ProformaInvoiceRepository::class);
+        return app(ProformaInvoiceRepository::class);
     }
 
     protected function getHeaderActions(): array
@@ -105,7 +102,7 @@ class EditProformaInvoice extends EditRecord
     protected function handleApprove($record): void
     {
         try {
-            $this->proformaRepository->approve($record->id, auth()->id());
+            $this->getProformaRepository()->approve($record->id, auth()->id());
             
             Notification::make()
                 ->success()
