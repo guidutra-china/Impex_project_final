@@ -159,14 +159,38 @@ class ProformaInvoice extends Model
     public static function generateProformaNumber(): string
     {
         $year = now()->year;
-        $lastProforma = static::whereYear('created_at', $year)
-            ->where('revision_number', 1)
-            ->orderBy('id', 'desc')
-            ->first();
-
-        $nextNumber = $lastProforma ? (int) substr($lastProforma->proforma_number, -4) + 1 : 1;
-
-        return sprintf('PI-%d-%04d', $year, $nextNumber);
+        $prefix = "PI-{$year}-";
+        
+        // Get all proforma numbers for this year
+        $lastNumber = static::where('proforma_number', 'LIKE', $prefix . '%')
+            ->orderByRaw('CAST(SUBSTRING(proforma_number, -4) AS UNSIGNED) DESC')
+            ->value('proforma_number');
+        
+        if ($lastNumber) {
+            // Extract the numeric part and increment
+            $nextNumber = (int) substr($lastNumber, -4) + 1;
+        } else {
+            $nextNumber = 1;
+        }
+        
+        // Ensure uniqueness by checking if number exists
+        $attempts = 0;
+        do {
+            $proformaNumber = sprintf('PI-%d-%04d', $year, $nextNumber);
+            $exists = static::where('proforma_number', $proformaNumber)->exists();
+            
+            if ($exists) {
+                $nextNumber++;
+                $attempts++;
+            }
+            
+            // Prevent infinite loop
+            if ($attempts > 100) {
+                throw new \Exception('Unable to generate unique proforma number after 100 attempts');
+            }
+        } while ($exists);
+        
+        return $proformaNumber;
     }
 
     /**
