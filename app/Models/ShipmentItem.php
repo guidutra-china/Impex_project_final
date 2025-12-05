@@ -15,6 +15,7 @@ class ShipmentItem extends Model
         'shipment_id',
         'sales_order_item_id',
         'sales_invoice_item_id',
+        'proforma_invoice_item_id',
         'product_id',
         'quantity_ordered',
         'quantity_to_ship',
@@ -84,11 +85,19 @@ class ShipmentItem extends Model
     }
 
     /**
-     * NEW: Relationship to SalesInvoiceItem
+     * Relationship to SalesInvoiceItem (legacy/backward compatibility)
      */
     public function salesInvoiceItem(): BelongsTo
     {
         return $this->belongsTo(SalesInvoiceItem::class);
+    }
+
+    /**
+     * Relationship to ProformaInvoiceItem (primary)
+     */
+    public function proformaInvoiceItem(): BelongsTo
+    {
+        return $this->belongsTo(ProformaInvoiceItem::class);
     }
 
     public function product(): BelongsTo
