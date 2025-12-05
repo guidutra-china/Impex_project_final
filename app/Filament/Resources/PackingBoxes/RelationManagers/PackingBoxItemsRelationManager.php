@@ -6,9 +6,10 @@ use BackedEnum;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables\Table;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Actions\CreateAction;
-use Filament\Tables\Actions\EditAction;
-use Filament\Tables\Actions\DeleteAction;
+use Filament\Actions\CreateAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\DeleteAction;
+use Filament\Tables\Actions\BulkActionGroup;
 use Filament\Tables\Actions\DeleteBulkAction;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -92,14 +93,16 @@ class PackingBoxItemsRelationManager extends RelationManager
                     }),
             ])
             ->bulkActions([
-                DeleteBulkAction::make()
-                    ->after(function ($records) {
-                        $box = $records->first()->packingBox;
-                        $box->recalculateTotals();
-                        foreach ($records as $record) {
-                            $record->shipmentItem->updatePackedQuantity();
-                        }
-                    }),
+                BulkActionGroup::make([
+                    DeleteBulkAction::make()
+                        ->after(function ($records) {
+                            $box = $records->first()->packingBox;
+                            $box->recalculateTotals();
+                            foreach ($records as $record) {
+                                $record->shipmentItem->updatePackedQuantity();
+                            }
+                        }),
+                ]),
             ]);
     }
 
