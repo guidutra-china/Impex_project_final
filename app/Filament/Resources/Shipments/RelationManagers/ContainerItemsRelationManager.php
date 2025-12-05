@@ -169,6 +169,31 @@ class ContainerItemsRelationManager extends RelationManager
                     ])
                     ->collapsible()
                     ->collapsed(),
+                
+                // Hidden fields to store unit values for calculations
+                TextInput::make('unit_weight')
+                    ->hidden()
+                    ->dehydrated(),
+                
+                TextInput::make('unit_volume')
+                    ->hidden()
+                    ->dehydrated(),
+                
+                TextInput::make('unit_price')
+                    ->hidden()
+                    ->dehydrated(),
+                
+                TextInput::make('product_id')
+                    ->hidden()
+                    ->dehydrated(),
+                
+                TextInput::make('hs_code')
+                    ->hidden()
+                    ->dehydrated(),
+                
+                TextInput::make('country_of_origin')
+                    ->hidden()
+                    ->dehydrated(),
             ]);
     }
 
