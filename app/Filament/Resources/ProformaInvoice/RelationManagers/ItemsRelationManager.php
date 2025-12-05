@@ -4,7 +4,7 @@ namespace App\Filament\Resources\ProformaInvoice\RelationManagers;
 
 use App\Models\QuoteItem;
 use App\Models\SupplierQuote;
-use App\Repositories\SupplierQuoteRepository;
+
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
@@ -31,11 +31,6 @@ class ItemsRelationManager extends RelationManager
 
     protected static ?string $title = 'Proforma Items';
 
-    protected function getQuoteRepository(): SupplierQuoteRepository
-    {
-        return app(SupplierQuoteRepository::class);
-    }
-
     public function form(Schema $schema): Schema
     {
         return $schema
@@ -46,7 +41,12 @@ class ItemsRelationManager extends RelationManager
                         Select::make('supplier_quote_id')
                             ->label('Source Supplier Quote')
                             ->options(function () {
-                                return $this->getQuoteRepository()->getSelectOptions();
+                                return SupplierQuote::query()
+                                    ->with('supplier')
+                                    ->get()
+                                    ->mapWithKeys(fn($quote) => [
+                                        $quote->id => $quote->supplier->name . ' - ' . $quote->quote_number
+                                    ]);
                             })
                             ->searchable()
                             ->preload()
