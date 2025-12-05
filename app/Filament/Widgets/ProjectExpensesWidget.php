@@ -21,18 +21,16 @@ class ProjectExpensesWidget extends BaseWidget
 
     protected static ?int $sort = 50;
 
-    protected FinancialTransactionRepository $repository;
-
-    public function mount(): void
+    protected function getRepository(): FinancialTransactionRepository
     {
-        $this->repository = app(FinancialTransactionRepository::class);
+        return app(FinancialTransactionRepository::class);
     }
 
     public function table(Table $table): Table
     {
         if (!$this->record instanceof Order) {
             return $table->query(
-                $this->repository->getModel()::query()->whereRaw('1 = 0')
+$this->getRepository()->getModel()::query()->whereRaw('1 = 0')
             );
         }
 
@@ -50,7 +48,11 @@ class ProjectExpensesWidget extends BaseWidget
                 $realMarginPercent
             ))
             ->query(
-                $this->repository->getProjectExpensesQuery($this->record->id)
+$this->getRepository()->getModel()::query()
+                    ->where('transactionable_type', Order::class)
+                    ->where('transactionable_id', $this->record->id)
+                    ->where('type', 'expense')
+                    ->orderBy('transaction_date', 'desc')
             )
             ->columns([
                 TextColumn::make('transaction_number')
