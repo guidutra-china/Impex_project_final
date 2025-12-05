@@ -37,7 +37,7 @@ class ItemsRelationManager extends RelationManager
                 Section::make('Item Selection')
                     ->schema([
                         Select::make('proforma_invoice_item_id')
-                            ->label('Proforma Invoice Item')
+                            ->label('Select Item from Proforma Invoice')
                             ->options(function ($livewire) {
                                 $shipment = $livewire->getOwnerRecord();
                                 $service = new ShipmentService();
@@ -46,11 +46,10 @@ class ItemsRelationManager extends RelationManager
                                 $options = [];
                                 foreach ($availableItems as $item) {
                                     $options[$item['item_id']] = sprintf(
-                                        '[%s] %s - %s (Remaining: %d)',
+                                        '[%s] %s - %s',
                                         $item['invoice_number'],
                                         $item['product_sku'],
-                                        $item['product_name'],
-                                        $item['quantity_remaining']
+                                        $item['product_name']
                                     );
                                 }
                                 
@@ -67,59 +66,55 @@ class ItemsRelationManager extends RelationManager
                                         $set('product_name', $invoiceItem->product_name);
                                         $set('product_sku', $invoiceItem->product_sku);
                                         $set('quantity_ordered', $invoiceItem->quantity);
+                                        $set('quantity_available', $invoiceItem->getQuantityRemaining());
                                         $set('unit_price', $invoiceItem->unit_price);
                                     }
                                 }
                             })
-                            ->disabled(fn ($record) => $record !== null),
+                            ->disabled(fn ($record) => $record !== null)
+                            ->columnSpanFull(),
 
-                        Grid::make(2)
-                            ->schema([
-                                TextInput::make('quantity_to_ship')
-                                    ->label('Quantity to Ship')
-                                    ->numeric()
-                                    ->required()
-                                    ->minValue(1)
-                                    ->helperText(function ($get) {
-                                        $invoiceItemId = $get('proforma_invoice_item_id');
-                                        if ($invoiceItemId) {
-                                            $invoiceItem = \App\Models\ProformaInvoiceItem::find($invoiceItemId);
-                                            if ($invoiceItem) {
-                                                return "Available: {$invoiceItem->quantity_remaining}";
-                                            }
-                                        }
-                                        return '';
-                                    }),
+                        TextInput::make('quantity_available')
+                            ->label('Quantity Available')
+                            ->numeric()
+                            ->disabled()
+                            ->dehydrated(false)
+                            ->suffix('units')
+                            ->helperText('Remaining quantity from this proforma invoice item')
+                            ->columnSpanFull(),
 
-                                TextInput::make('quantity_ordered')
-                                    ->label('Quantity Ordered')
-                                    ->numeric()
-                                    ->disabled()
-                                    ->dehydrated(false),
-                            ]),
+                        TextInput::make('quantity_to_ship')
+                            ->label('Quantity to Ship')
+                            ->numeric()
+                            ->required()
+                            ->minValue(1)
+                            ->suffix('units')
+                            ->helperText('Enter the quantity you want to ship')
+                            ->columnSpanFull(),
                     ]),
 
                 Section::make('Product Information')
+                    ->description('Auto-filled from selected item')
                     ->schema([
-                        Grid::make(2)
-                            ->schema([
-                                TextInput::make('product_name')
-                                    ->label('Product Name')
-                                    ->disabled()
-                                    ->dehydrated(false),
+                        TextInput::make('product_sku')
+                            ->label('Product SKU')
+                            ->disabled()
+                            ->dehydrated(false)
+                            ->columnSpanFull(),
 
-                                TextInput::make('product_sku')
-                                    ->label('SKU')
-                                    ->disabled()
-                                    ->dehydrated(false),
-                            ]),
+                        TextInput::make('product_name')
+                            ->label('Product Name')
+                            ->disabled()
+                            ->dehydrated(false)
+                            ->columnSpanFull(),
 
                         TextInput::make('unit_price')
                             ->label('Unit Price')
                             ->numeric()
                             ->prefix('$')
                             ->disabled()
-                            ->dehydrated(false),
+                            ->dehydrated(false)
+                            ->columnSpanFull(),
                     ])
                     ->collapsible()
                     ->collapsed(),
