@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\Shipments\RelationManagers;
 
-use App\Repositories\ShipmentRepository;
 use App\Services\Shipment\ShipmentService;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
@@ -30,13 +29,6 @@ class ItemsRelationManager extends RelationManager
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCube;
 
     protected static ?string $recordTitleAttribute = 'product_name';
-
-    protected ShipmentRepository $repository;
-
-    public function mount(): void {
-        parent::mount();
-        $this->repository = app(ShipmentRepository::class);
-    }
 
     public function form(Schema $schema): Schema
     {

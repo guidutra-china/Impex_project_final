@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\Products\RelationManagers;
 
-use App\Repositories\ProductRepository;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
@@ -18,19 +17,9 @@ class CostHistoryRelationManager extends RelationManager
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedClock;
 
-    protected ProductRepository $repository;
-
-    public function mount(): void {
-        parent::mount();
-        $this->repository = app(ProductRepository::class);
-    }
-
     public function table(Table $table): Table
     {
         return $table
-            ->query(
-                $this->repository->getCostHistoryQuery($this->getOwnerRecord()->id)
-            )
             ->columns([
                 TextColumn::make('cost_field_name')
                     ->label('Cost Field')

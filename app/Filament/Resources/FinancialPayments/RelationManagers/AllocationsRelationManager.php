@@ -2,7 +2,7 @@
 
 namespace App\Filament\Resources\FinancialPayments\RelationManagers;
 
-use App\Repositories\FinancialTransactionRepository;
+use App\Models\FinancialTransaction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
@@ -26,13 +26,6 @@ class AllocationsRelationManager extends RelationManager
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBanknotes;
 
     protected static ?string $recordTitleAttribute = 'id';
-
-    protected FinancialTransactionRepository $repository;
-
-    public function mount(): void {
-        parent::mount();
-        $this->repository = app(FinancialTransactionRepository::class);
-    }
 
     public function table(Table $table): Table
     {
@@ -108,7 +101,10 @@ class AllocationsRelationManager extends RelationManager
                                 // Get pending or partially paid transactions of the same type
                                 $type = $payment->type === 'debit' ? 'payable' : 'receivable';
                                 
-                                return $this->repository->getPendingTransactionsForAllocation($type)
+                                return FinancialTransaction::query()
+                                    ->where('type', $type)
+                                    ->whereIn('status', ['pending', 'partially_paid', 'overdue'])
+                                    ->orderBy('due_date', 'asc')
                                     ->get()
                                     ->mapWithKeys(function ($transaction) {
                                         $remaining = ($transaction->amount - $transaction->paid_amount) / 100;

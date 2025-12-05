@@ -4,99 +4,165 @@ namespace App\Filament\Pages;
 
 use App\Models\AvailableWidget;
 use App\Services\DashboardConfigurationService;
-use App\Services\WidgetRegistryService;
 use BackedEnum;
+use Filament\Actions\Action;
+use Filament\Forms\Components\CheckboxList;
+use Filament\Schemas\Components\Section;
+use Filament\Forms\Concerns\InteractsWithForms;
+use Filament\Forms\Contracts\HasForms;
+use Filament\Schemas\Schema;
+use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Illuminate\Support\Facades\Auth;
 use UnitEnum;
 
-class WidgetSelectorPage extends Page
+class WidgetSelectorPage extends Page implements HasForms
 {
+    use InteractsWithForms;
+
     protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-squares-2x2';
-
+    
     protected static UnitEnum|string|null $navigationGroup = 'Dashboard';
-
-    protected static ?string $navigationLabel = 'Personalizar Dashboard';
-
-    protected static ?string $title = 'Personalizar Dashboard';
-
+    
+    protected static ?string $navigationLabel = 'Customize Dashboard';
+    
+    protected static ?string $title = 'Customize Dashboard';
+    
     protected static bool $shouldRegisterNavigation = true;
-
-    public array $availableWidgets = [];
-
-    public array $selectedWidgets = [];
-
-    public array $widgetOrder = [];
-
+    
+    protected string $view = 'filament.pages.widget-selector-page';
+    
+    /**
+     * Controle de acesso à página
+     * 
+     * Permite acesso a:
+     * - Super admins (sempre)
+     * - Usuários com permissão específica (quando configurada)
+     * - Todos os usuários autenticados (fallback)
+     */
+    public static function canAccess(): bool
+    {
+        $user = auth()->user();
+        
+        if (!$user) {
+            return false;
+        }
+        
+        // Super admins sempre têm acesso
+        if (method_exists($user, 'hasRole') && $user->hasRole('super_admin')) {
+            return true;
+        }
+        
+        // Verificar permissão específica (se existir)
+        if (method_exists($user, 'can') && $user->can('page_WidgetSelectorPage')) {
+            return true;
+        }
+        
+        // Fallback: permitir acesso a todos os usuários autenticados
+        return true;
+    }
+    
+    public ?array $data = [];
+    
     protected ?DashboardConfigurationService $dashboardService = null;
-
-    protected ?WidgetRegistryService $widgetService = null;
-
+    
     public function mount(): void
     {
         $this->dashboardService = app(DashboardConfigurationService::class);
-        $this->widgetService = app(WidgetRegistryService::class);
-
         $user = Auth::user();
-
-        // Carregar widgets disponíveis
-        $this->availableWidgets = AvailableWidget::where('is_available', true)
+        
+        $config = $this->dashboardService->getOrCreateConfiguration($user);
+        
+        $this->form->fill([
+            'selected_widgets' => $config->visible_widgets ?? [],
+        ]);
+    }
+    
+    public function form(Schema $schema): Schema
+    {
+        $availableWidgets = AvailableWidget::where('is_available', true)
             ->get()
-            ->map(fn($w) => [
-                'id' => $w->widget_id,
-                'title' => $w->title,
-                'description' => $w->description,
-                'icon' => $w->icon,
+            ->mapWithKeys(fn($w) => [
+                $w->widget_id => $w->title . ' - ' . $w->description
             ])
             ->toArray();
-
-        // Carregar configuração do usuário
-        $config = $this->dashboardService->getOrCreateConfiguration($user);
-
-        $this->selectedWidgets = $config->visible_widgets ?? [];
-        $this->widgetOrder = $config->widget_order ?? [];
+        
+        return $schema
+            ->components([
+                Section::make('Available Widgets')
+                    ->description('Select the widgets you want to display on your dashboard')
+                    ->icon('heroicon-o-squares-2x2')
+                    ->schema([
+                        CheckboxList::make('selected_widgets')
+                            ->label('')
+                            ->options($availableWidgets)
+                            ->columns(2)
+                            ->gridDirection('row')
+                            ->bulkToggleable()
+                            ->required(false)
+                            ->live(),
+                    ])
+                    ->collapsible(),
+            ])
+            ->statePath('data');
     }
-
+    
+    protected function getFormActions(): array
+    {
+        return [
+            Action::make('save')
+                ->label('Save Configuration')
+                ->action('saveConfiguration')
+                ->color('primary')
+                ->icon('heroicon-o-check')
+                ->size('lg'),
+            
+            Action::make('reset')
+                ->label('Reset to Default')
+                ->action('resetToDefault')
+                ->color('gray')
+                ->icon('heroicon-o-arrow-path')
+                ->size('lg')
+                ->requiresConfirmation()
+                ->modalHeading('Reset Dashboard')
+                ->modalDescription('Are you sure you want to reset the dashboard to the default configuration?')
+                ->modalSubmitActionLabel('Yes, reset'),
+        ];
+    }
+    
     public function saveConfiguration(): void
     {
         $user = Auth::user();
-
-        // Lazy initialize if not already done
+        
         if (!isset($this->dashboardService)) {
             $this->dashboardService = app(DashboardConfigurationService::class);
         }
-
-        // Obter configuração atual
-        $config = $this->dashboardService->getOrCreateConfiguration($user);
         
-        // Atualizar widgets visíveis e ordem
-        $config->visible_widgets = $this->selectedWidgets;
-        $config->widget_order = $this->widgetOrder;
+        $config = $this->dashboardService->getOrCreateConfiguration($user);
+        $config->visible_widgets = $this->data['selected_widgets'] ?? [];
         $config->save();
-
-        \Filament\Notifications\Notification::make()
-            ->title('Sucesso')
-            ->body('Configuração do dashboard atualizada com sucesso')
+        
+        Notification::make()
+            ->title('Success!')
+            ->body('Dashboard configuration updated successfully')
             ->success()
             ->send();
     }
-
+    
     public function resetToDefault(): void
     {
         $user = Auth::user();
-
-        // Lazy initialize if not already done
+        
         if (!isset($this->dashboardService)) {
             $this->dashboardService = app(DashboardConfigurationService::class);
         }
-
+        
         $this->dashboardService->resetToDefault($user);
-
         $this->mount();
-
-        \Filament\Notifications\Notification::make()
-            ->title('Sucesso')
-            ->body('Dashboard resetado para a configuração padrão')
+        
+        Notification::make()
+            ->title('Success!')
+            ->body('Dashboard reset to default configuration')
             ->success()
             ->send();
     }

@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\Shipments\RelationManagers;
 
-use App\Repositories\ShipmentRepository;
 use App\Services\Shipment\PackingService;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
@@ -32,13 +31,6 @@ class PackingBoxesRelationManager extends RelationManager
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedArchiveBox;
 
     protected static ?string $recordTitleAttribute = 'box_number';
-
-    protected ShipmentRepository $repository;
-
-    public function mount(): void {
-        parent::mount();
-        $this->repository = app(ShipmentRepository::class);
-    }
 
     public function form(Schema $schema): Schema
     {

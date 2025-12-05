@@ -10,58 +10,58 @@ use Exception;
 class ShipmentContainerService
 {
     /**
-     * Adicionar item ao container com validações
+     * Add item to container with validations
      */
     public function addItemToContainer(
         ShipmentContainer $container,
         ProformaInvoiceItem $piItem,
         int $quantity
     ): ShipmentContainerItem {
-        // V1: Validar quantidade disponível
+        // V1: Validate available quantity
         if (!$piItem->canShip($quantity)) {
             throw new Exception(
-                "Quantidade insuficiente para {$piItem->product_name}. " .
-                "Restante: {$piItem->getQuantityRemaining()}, " .
-                "Solicitado: {$quantity}"
+                "Insufficient quantity for {$piItem->product_name}. " .
+                "Remaining: {$piItem->getQuantityRemaining()}, " .
+                "Requested: {$quantity}"
             );
         }
 
-        // V2: Validar capacidade do container
+        // V2: Validate container capacity
         $totalWeight = $quantity * $piItem->product->weight;
         $totalVolume = $quantity * $piItem->product->volume;
 
         if (!$container->canFit($totalWeight, $totalVolume)) {
             throw new Exception(
-                "Container {$container->container_number} sem capacidade. " .
-                "Peso: {$totalWeight}kg / {$container->getRemainingWeight()}kg, " .
+                "Container {$container->container_number} has insufficient capacity. " .
+                "Weight: {$totalWeight}kg / {$container->getRemainingWeight()}kg, " .
                 "Volume: {$totalVolume}m³ / {$container->getRemainingVolume()}m³"
             );
         }
 
-        // V3: Validar que PI está neste shipment
+        // V3: Validate that PI is in this shipment
         if (!$container->shipment->shipmentInvoices()
             ->where('proforma_invoice_id', $piItem->proforma_invoice_id)
             ->exists()) {
             throw new Exception(
-                "ProformaInvoice {$piItem->proforma_invoice_id} não está neste shipment"
+                "ProformaInvoice {$piItem->proforma_invoice_id} is not in this shipment"
             );
         }
 
-        // V4: Validar status do shipment
+        // V4: Validate shipment status
         if (!in_array($container->shipment->status, ['draft', 'preparing'])) {
             throw new Exception(
-                "Shipment {$container->shipment->shipment_number} não permite adições (status: {$container->shipment->status})"
+                "Shipment {$container->shipment->shipment_number} does not allow additions (status: {$container->shipment->status})"
             );
         }
 
-        // V5: Validar status do container
+        // V5: Validate container status
         if (!in_array($container->status, ['draft', 'packed'])) {
             throw new Exception(
-                "Container {$container->container_number} não permite adições (status: {$container->status})"
+                "Container {$container->container_number} does not allow additions (status: {$container->status})"
             );
         }
 
-        // Criar item
+        // Create item
         return ShipmentContainerItem::create([
             'shipment_container_id' => $container->id,
             'proforma_invoice_item_id' => $piItem->id,
@@ -79,62 +79,62 @@ class ShipmentContainerService
     }
 
     /**
-     * Remover item do container com validações
+     * Remove item from container with validations
      */
     public function removeItemFromContainer(ShipmentContainerItem $item): void
     {
-        // V1: Validar status do shipment
+        // V1: Validate shipment status
         if (!in_array($item->container->shipment->status, ['draft', 'preparing'])) {
             throw new Exception(
-                "Não pode remover itens de shipment em status {$item->container->shipment->status}"
+                "Cannot remove items from shipment with status {$item->container->shipment->status}"
             );
         }
 
-        // V2: Validar status do container
+        // V2: Validate container status
         if (!in_array($item->container->status, ['draft', 'packed'])) {
             throw new Exception(
-                "Não pode remover itens de container em status {$item->container->status}"
+                "Cannot remove items from container with status {$item->container->status}"
             );
         }
 
-        // Remover (os hooks vão decrementar quantity_shipped)
+        // Remove (hooks will decrement quantity_shipped)
         $item->delete();
     }
 
     /**
-     * Selar container
+     * Seal container
      */
     public function sealContainer(ShipmentContainer $container, string $sealNumber, int $userId): void
     {
-        // V1: Validar que container tem itens
+        // V1: Validate that container has items
         if ($container->items()->count() === 0) {
-            throw new Exception("Container não pode estar vazio");
+            throw new Exception("Container cannot be empty");
         }
 
-        // V2: Validar que todos os itens estão packed
+        // V2: Validate that all items are packed
         if ($container->items()->where('status', '!=', 'packed')->exists()) {
-            throw new Exception("Nem todos os itens estão packed");
+            throw new Exception("Not all items are packed");
         }
 
-        // V3: Validar que seal_number é único
+        // V3: Validate that seal_number is unique
         if (ShipmentContainer::where('seal_number', $sealNumber)
             ->where('id', '!=', $container->id)
             ->exists()) {
-            throw new Exception("Seal number {$sealNumber} já está em uso");
+            throw new Exception("Seal number {$sealNumber} is already in use");
         }
 
         $container->seal($sealNumber, $userId);
     }
 
     /**
-     * Desselar container
+     * Unseal container
      */
     public function unsealContainer(ShipmentContainer $container): void
     {
-        // V1: Validar que shipment não foi confirmado
+        // V1: Validate that shipment was not confirmed
         if ($container->shipment->status !== 'preparing') {
             throw new Exception(
-                "Não pode desselar container de shipment em status {$container->shipment->status}"
+                "Cannot unseal container from shipment with status {$container->shipment->status}"
             );
         }
 
@@ -142,7 +142,7 @@ class ShipmentContainerService
     }
 
     /**
-     * Calcular totais do container
+     * Calculate container totals
      */
     public function calculateContainerTotals(ShipmentContainer $container): void
     {
@@ -150,7 +150,7 @@ class ShipmentContainerService
     }
 
     /**
-     * Obter resumo do container
+     * Get container summary
      */
     public function getContainerSummary(ShipmentContainer $container): array
     {

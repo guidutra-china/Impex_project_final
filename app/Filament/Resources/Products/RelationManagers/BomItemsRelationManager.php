@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\Products\RelationManagers;
 
-use App\Repositories\ProductRepository;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
@@ -32,20 +31,10 @@ class BomItemsRelationManager extends RelationManager
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedQueueList;
 
-    protected ProductRepository $repository;
-
-    public function mount(): void {
-        parent::mount();
-        $this->repository = app(ProductRepository::class);
-    }
-
     public function table(Table $table): Table
     {
         return $table
             ->recordTitleAttribute('componentProduct.name')
-            ->query(
-                $this->repository->getBomItemsQuery($this->getOwnerRecord()->id)
-            )
             ->columns([
                 TextColumn::make('componentProduct.sku')
                     ->label('SKU')
