@@ -3,7 +3,6 @@
 namespace App\Filament\Resources\Products\RelationManagers;
 
 use App\Models\WhatIfScenario;
-use App\Repositories\ProductRepository;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
@@ -31,19 +30,9 @@ class WhatIfScenariosRelationManager extends RelationManager
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBeaker;
 
-    protected ProductRepository $repository;
-
-    public function mount(): void {
-        parent::mount();
-        $this->repository = app(ProductRepository::class);
-    }
-
     public function table(Table $table): Table
     {
         return $table
-            ->query(
-                $this->repository->getWhatIfScenariosQuery($this->getOwnerRecord()->id)
-            )
             ->recordTitleAttribute('name')
             ->columns([
                 TextColumn::make('name')
