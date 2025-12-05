@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
@@ -11,41 +12,58 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('shipment_invoices', function (Blueprint $table) {
-            // 1. Drop the unique index first (it's not used by FK)
-            $table->dropUnique('idx_shipment_invoice_unique');
-        });
+        // Get the actual foreign key name
+        $foreignKeys = DB::select("
+            SELECT CONSTRAINT_NAME 
+            FROM information_schema.KEY_COLUMN_USAGE 
+            WHERE TABLE_SCHEMA = DATABASE() 
+            AND TABLE_NAME = 'shipment_invoices' 
+            AND COLUMN_NAME = 'sales_invoice_id'
+            AND REFERENCED_TABLE_NAME IS NOT NULL
+        ");
         
-        Schema::table('shipment_invoices', function (Blueprint $table) {
-            // 2. Drop the foreign key constraint
-            $table->dropForeign(['sales_invoice_id']);
-        });
+        $fkName = $foreignKeys[0]->CONSTRAINT_NAME ?? null;
         
-        Schema::table('shipment_invoices', function (Blueprint $table) {
-            // 3. Drop the regular index
-            $table->dropIndex('idx_sales_invoice');
-        });
+        if ($fkName) {
+            // Drop the foreign key first
+            DB::statement("ALTER TABLE shipment_invoices DROP FOREIGN KEY `{$fkName}`");
+        }
         
-        Schema::table('shipment_invoices', function (Blueprint $table) {
-            // 4. Modify column to be nullable
-            $table->foreignId('sales_invoice_id')->nullable()->change();
-        });
+        // Drop the unique index
+        DB::statement("ALTER TABLE shipment_invoices DROP INDEX `idx_shipment_invoice_unique`");
         
-        Schema::table('shipment_invoices', function (Blueprint $table) {
-            // 5. Re-add foreign key constraint (nullable)
-            $table->foreign('sales_invoice_id')
-                ->references('id')
-                ->on('sales_invoices')
-                ->onDelete('cascade');
-            
-            // 6. Re-add index for sales_invoice_id
-            $table->index('sales_invoice_id', 'idx_sales_invoice');
-            
-            // 7. Add new unique constraints
-            // MySQL allows multiple NULL values in unique constraints
-            $table->unique(['shipment_id', 'sales_invoice_id'], 'idx_shipment_sales_invoice_unique');
-            $table->unique(['shipment_id', 'proforma_invoice_id'], 'idx_shipment_proforma_invoice_unique');
-        });
+        // Drop the regular index if it exists
+        try {
+            DB::statement("ALTER TABLE shipment_invoices DROP INDEX `idx_sales_invoice`");
+        } catch (\Exception $e) {
+            // Index might not exist or already dropped
+        }
+        
+        // Modify column to be nullable
+        DB::statement("ALTER TABLE shipment_invoices MODIFY COLUMN sales_invoice_id BIGINT UNSIGNED NULL");
+        
+        // Re-add foreign key constraint
+        DB::statement("
+            ALTER TABLE shipment_invoices 
+            ADD CONSTRAINT `shipment_invoices_sales_invoice_id_foreign` 
+            FOREIGN KEY (`sales_invoice_id`) 
+            REFERENCES `sales_invoices`(`id`) 
+            ON DELETE CASCADE
+        ");
+        
+        // Add index for sales_invoice_id
+        DB::statement("ALTER TABLE shipment_invoices ADD INDEX `idx_sales_invoice` (`sales_invoice_id`)");
+        
+        // Add new unique constraints
+        DB::statement("
+            ALTER TABLE shipment_invoices 
+            ADD UNIQUE KEY `idx_shipment_sales_invoice_unique` (`shipment_id`, `sales_invoice_id`)
+        ");
+        
+        DB::statement("
+            ALTER TABLE shipment_invoices 
+            ADD UNIQUE KEY `idx_shipment_proforma_invoice_unique` (`shipment_id`, `proforma_invoice_id`)
+        ");
     }
 
     /**
@@ -53,33 +71,34 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('shipment_invoices', function (Blueprint $table) {
-            // Drop new unique constraints
-            $table->dropUnique('idx_shipment_sales_invoice_unique');
-            $table->dropUnique('idx_shipment_proforma_invoice_unique');
-        });
+        // Drop new unique constraints
+        DB::statement("ALTER TABLE shipment_invoices DROP INDEX `idx_shipment_sales_invoice_unique`");
+        DB::statement("ALTER TABLE shipment_invoices DROP INDEX `idx_shipment_proforma_invoice_unique`");
         
-        Schema::table('shipment_invoices', function (Blueprint $table) {
-            // Drop foreign key and index
-            $table->dropForeign(['sales_invoice_id']);
-            $table->dropIndex('idx_sales_invoice');
-        });
+        // Drop foreign key
+        DB::statement("ALTER TABLE shipment_invoices DROP FOREIGN KEY `shipment_invoices_sales_invoice_id_foreign`");
         
-        Schema::table('shipment_invoices', function (Blueprint $table) {
-            // Make sales_invoice_id NOT NULL again
-            $table->foreignId('sales_invoice_id')->nullable(false)->change();
-        });
+        // Drop index
+        DB::statement("ALTER TABLE shipment_invoices DROP INDEX `idx_sales_invoice`");
         
-        Schema::table('shipment_invoices', function (Blueprint $table) {
-            // Re-add original foreign key
-            $table->foreign('sales_invoice_id')
-                ->references('id')
-                ->on('sales_invoices')
-                ->onDelete('cascade');
-            
-            // Re-add original unique index
-            $table->unique(['shipment_id', 'sales_invoice_id'], 'idx_shipment_invoice_unique');
-            $table->index('sales_invoice_id', 'idx_sales_invoice');
-        });
+        // Make sales_invoice_id NOT NULL again
+        DB::statement("ALTER TABLE shipment_invoices MODIFY COLUMN sales_invoice_id BIGINT UNSIGNED NOT NULL");
+        
+        // Re-add original foreign key
+        DB::statement("
+            ALTER TABLE shipment_invoices 
+            ADD CONSTRAINT `shipment_invoices_sales_invoice_id_foreign` 
+            FOREIGN KEY (`sales_invoice_id`) 
+            REFERENCES `sales_invoices`(`id`) 
+            ON DELETE CASCADE
+        ");
+        
+        // Re-add original unique index
+        DB::statement("
+            ALTER TABLE shipment_invoices 
+            ADD UNIQUE KEY `idx_shipment_invoice_unique` (`shipment_id`, `sales_invoice_id`)
+        ");
+        
+        DB::statement("ALTER TABLE shipment_invoices ADD INDEX `idx_sales_invoice` (`sales_invoice_id`)");
     }
 };
