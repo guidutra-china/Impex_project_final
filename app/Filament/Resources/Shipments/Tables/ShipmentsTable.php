@@ -10,6 +10,7 @@ use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreBulkAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\BadgeColumn;
+use Filament\Tables\Columns\SelectColumn;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -38,17 +39,22 @@ class ShipmentsTable
                         'success' => 'inbound',
                     ]),
 
-                BadgeColumn::make('status')
+                SelectColumn::make('status')
                     ->label('Status')
-                    ->formatStateUsing(fn ($state) => str_replace('_', ' ', ucwords($state, '_')))
-                    ->colors([
-                        'secondary' => 'pending',
-                        'warning' => ['preparing', 'ready_to_ship'],
-                        'info' => ['picked_up', 'on_board'],
-                        'primary' => ['customs_clearance', 'out_for_delivery'],
-                        'success' => 'delivered',
-                        'danger' => ['cancelled', 'returned'],
-                    ]),
+                    ->options([
+                        'pending' => 'Pending',
+                        'preparing' => 'Preparing',
+                        'ready_to_ship' => 'Ready to Ship',
+                        'picked_up' => 'Picked Up',
+                        'on_board' => 'On Board',
+                        'customs_clearance' => 'Customs Clearance',
+                        'out_for_delivery' => 'Out for Delivery',
+                        'delivered' => 'Delivered',
+                        'cancelled' => 'Cancelled',
+                        'returned' => 'Returned',
+                    ])
+                    ->selectablePlaceholder(false)
+                    ->sortable(),
 
                 TextColumn::make('shipping_method')
                     ->label('Method')
