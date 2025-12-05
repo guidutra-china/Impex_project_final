@@ -97,14 +97,6 @@ class PackingBoxTypesTable
                     ->sortable()
                     ->alignCenter(),
 
-                TextColumn::make('packingBoxes_count')
-                    ->label('Usage')
-                    ->counts('packingBoxes')
-                    ->badge()
-                    ->color('success')
-                    ->alignCenter()
-                    ->toggleable(),
-
                 TextColumn::make('created_at')
                     ->label('Created')
                     ->dateTime('Y-m-d H:i')

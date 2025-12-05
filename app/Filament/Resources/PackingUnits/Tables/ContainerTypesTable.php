@@ -80,14 +80,6 @@ class ContainerTypesTable
                     ->sortable()
                     ->alignCenter(),
 
-                TextColumn::make('shipmentContainers_count')
-                    ->label('Usage')
-                    ->counts('shipmentContainers')
-                    ->badge()
-                    ->color('success')
-                    ->alignCenter()
-                    ->toggleable(),
-
                 TextColumn::make('created_at')
                     ->label('Created')
                     ->dateTime('Y-m-d H:i')
