@@ -294,8 +294,20 @@ class ContainerItemsRelationManager extends RelationManager
             ])
             ->actions([
                 EditAction::make()
-                    ->modalWidth('2xl'),
+                    ->modalWidth('2xl')
+                    ->hidden(function ($livewire) {
+                        $container = $livewire->getOwnerRecord();
+                        $shipment = $container->shipment;
+                        // Block editing if shipment is on_board or later
+                        return in_array($shipment->status, ['on_board', 'customs_clearance', 'out_for_delivery', 'delivered']);
+                    }),
                 DeleteAction::make()
+                    ->hidden(function ($livewire) {
+                        $container = $livewire->getOwnerRecord();
+                        $shipment = $container->shipment;
+                        // Block deleting if shipment is on_board or later
+                        return in_array($shipment->status, ['on_board', 'customs_clearance', 'out_for_delivery', 'delivered']);
+                    })
                     ->after(function ($record, $livewire) {
                         // Update container totals
                         $container = $livewire->getOwnerRecord();
@@ -318,6 +330,16 @@ class ContainerItemsRelationManager extends RelationManager
             ])
             ->emptyStateHeading('No items in this container')
             ->emptyStateDescription('Add shipment items to this container to start packing.')
+            ->heading(function ($livewire) {
+                $container = $livewire->getOwnerRecord();
+                $shipment = $container->shipment;
+                
+                if (in_array($shipment->status, ['on_board', 'customs_clearance', 'out_for_delivery', 'delivered'])) {
+                    return 'Container Items (Read-only - Shipment is ' . str_replace('_', ' ', ucwords($shipment->status, '_')) . ')';
+                }
+                
+                return 'Container Items';
+            })
             ->emptyStateIcon(Heroicon::OutlinedCube);
     }
 }
