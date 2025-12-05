@@ -14,8 +14,6 @@ class ShipmentsRelationManager extends RelationManager
 
     protected static ?string $title = 'Related Shipments';
 
-    protected static ?string $icon = 'heroicon-o-truck';
-
     public function table(Table $table): Table
     {
         return $table
