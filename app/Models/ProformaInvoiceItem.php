@@ -183,4 +183,12 @@ class ProformaInvoiceItem extends Model
     {
         return $this->quantity_shipped > 0 && $this->quantity_shipped < $this->quantity;
     }
+
+    /**
+     * Check if item can be shipped (has remaining quantity)
+     */
+    public function canBeShipped(): bool
+    {
+        return $this->getQuantityRemaining() > 0;
+    }
 }
