@@ -293,7 +293,7 @@ class ItemsRelationManager extends RelationManager
                                             'container_type_id' => $data['container_type_id'],
                                             'container_number' => $data['container_number'],
                                             'seal_number' => $data['seal_number'] ?? null,
-                                            'status' => 'loading',
+                                            'status' => 'draft',
                                         ]);
                                         return $container->id;
                                     })
