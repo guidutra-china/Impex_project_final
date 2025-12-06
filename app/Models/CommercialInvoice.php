@@ -420,6 +420,18 @@ class CommercialInvoice extends Model
                 $invoice->invoice_number = static::generateInvoiceNumber();
             }
         });
+        
+        // Validate client_id matches shipment->customer_id
+        static::saving(function ($invoice) {
+            if ($invoice->shipment_id && $invoice->client_id) {
+                $shipment = Shipment::find($invoice->shipment_id);
+                if ($shipment && $invoice->client_id !== $shipment->customer_id) {
+                    throw new \Exception(
+                        "Client ID ({$invoice->client_id}) must match Shipment's customer ID ({$shipment->customer_id})"
+                    );
+                }
+            }
+        });
     }
 
     public static function generateInvoiceNumber(): string
