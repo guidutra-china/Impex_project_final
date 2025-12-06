@@ -49,6 +49,19 @@ class EditShipment extends EditRecord
 
     protected array $commercialInvoiceData = [];
 
+    /**
+     * Load commercialInvoice data into form
+     */
+    protected function mutateFormDataBeforeFill(array $data): array
+    {
+        // Load commercialInvoice data if exists
+        if ($this->record->commercialInvoice) {
+            $data['commercialInvoice'] = $this->record->commercialInvoice->toArray();
+        }
+        
+        return $data;
+    }
+
     protected function getHeaderActions(): array
     {
         return [
