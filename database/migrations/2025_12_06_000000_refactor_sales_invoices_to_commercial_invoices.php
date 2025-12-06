@@ -12,10 +12,20 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // Step 0: Clean existing data (fresh start)
+        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+        DB::table('sales_invoice_items')->truncate();
+        DB::table('sales_invoice_purchase_orders')->truncate();
+        DB::table('sales_invoices')->truncate();
+        if (Schema::hasTable('shipment_invoices')) {
+            DB::table('shipment_invoices')->where('sales_invoice_id', '!=', null)->delete();
+        }
+        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+        
         // Step 1: Add new fields to sales_invoices before renaming
         Schema::table('sales_invoices', function (Blueprint $table) {
-            // Shipment relationship (nullable for existing records, required for new ones)
-            $table->foreignId('shipment_id')->nullable()->after('client_id')->constrained()->cascadeOnDelete();
+            // Shipment relationship (REQUIRED - CI always linked to shipment)
+            $table->foreignId('shipment_id')->after('client_id')->constrained()->cascadeOnDelete();
             
             // Proforma Invoice reference (optional)
             $table->foreignId('proforma_invoice_id')->nullable()->after('shipment_id')->constrained()->nullOnDelete();
