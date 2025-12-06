@@ -36,7 +36,7 @@ class EditShipment extends EditRecord
                             ->body('Commercial Invoice PDF (Original) generated successfully')
                             ->send();
                         
-                        return response()->download(Storage::disk('local')->path($path));
+                        return response()->download(storage_path('app/' . $path));
                         
                     } catch (\Exception $e) {
                         Notification::make()
@@ -63,7 +63,7 @@ class EditShipment extends EditRecord
                             ->body('Commercial Invoice PDF (Customs) generated successfully')
                             ->send();
                         
-                        return response()->download(Storage::disk('local')->path($path));
+                        return response()->download(storage_path('app/' . $path));
                         
                     } catch (\Exception $e) {
                         Notification::make()
