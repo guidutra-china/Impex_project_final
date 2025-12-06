@@ -110,12 +110,20 @@ class ProformaInvoiceTable
                     ->color('gray')
                     ->action(function ($record) {
                         $pdfService = app(PdfExportService::class);
+                        
+                        // Calculate next revision number
+                        $revisionNumber = \App\Models\GeneratedDocument::where('documentable_type', get_class($record))
+                            ->where('documentable_id', $record->id)
+                            ->where('document_type', 'proforma_invoice')
+                            ->max('revision_number') ?? 0;
+                        $revisionNumber++;
+                        
                         $document = $pdfService->generate(
                             $record,
                             'proforma_invoice',
                             'pdf.proforma-invoice.template',
                             [],
-                            ['revision_number' => $record->revision_number]
+                            ['revision_number' => $revisionNumber]
                         );
                         
                         Notification::make()
@@ -135,10 +143,18 @@ class ProformaInvoiceTable
                     ->color('success')
                     ->action(function ($record) {
                         $excelService = app(ExcelExportService::class);
+                        
+                        // Calculate next revision number
+                        $revisionNumber = \App\Models\GeneratedDocument::where('documentable_type', get_class($record))
+                            ->where('documentable_id', $record->id)
+                            ->where('document_type', 'proforma_invoice')
+                            ->max('revision_number') ?? 0;
+                        $revisionNumber++;
+                        
                         $document = $excelService->generate(
                             $record,
                             'proforma_invoice',
-                            ['revision_number' => $record->revision_number]
+                            ['revision_number' => $revisionNumber]
                         );
                         
                         Notification::make()

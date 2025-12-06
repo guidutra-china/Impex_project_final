@@ -3,7 +3,6 @@
 namespace App\Filament\Widgets;
 
 use App\Models\GeneratedDocument;
-use App\Repositories\DocumentRepository;
 use Filament\Actions\DeleteAction;
 use Filament\Notifications\Notification;
 use Filament\Tables;
@@ -21,21 +20,17 @@ class RelatedDocumentsWidget extends BaseWidget
 
     protected static ?int $sort = 99;
 
-    protected function getRepository(): DocumentRepository
-    {
-        return app(DocumentRepository::class);
-    }
-
     public function table(Table $table): Table
     {
         return $table
             ->heading('Generated Documents History')
             ->description('All PDF and Excel documents generated for this record')
             ->query(
-                $this->getRepository()->getTransactableDocumentsQuery(
-                    get_class($this->record),
-                    $this->record->id
-                )
+                GeneratedDocument::query()
+                    ->where('documentable_type', get_class($this->record))
+                    ->where('documentable_id', $this->record->id)
+                    ->with(['uploader'])
+                    ->orderBy('created_at', 'desc')
             )
             ->columns([
                 TextColumn::make('document_type')
@@ -138,7 +133,13 @@ class RelatedDocumentsWidget extends BaseWidget
                     ->modalSubmitActionLabel('Yes, delete it')
                     ->action(function (GeneratedDocument $record) {
                         try {
-                            $this->getRepository()->delete($record->id);
+                            // Delete file from storage
+                            if ($record->exists()) {
+                                \Storage::delete($record->file_path);
+                            }
+                            
+                            // Delete database record
+                            $record->delete();
                             
                             Notification::make()
                                 ->title('Document deleted successfully')
