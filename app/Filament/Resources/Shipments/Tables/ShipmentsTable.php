@@ -236,16 +236,34 @@ class ShipmentsTable
                 ViewAction::make(),
                 EditAction::make(),
                 \Filament\Actions\Action::make('commercialInvoice')
-                    ->label('Commercial Invoice')
+                    ->label('Generate CI')
                     ->icon('heroicon-o-document-text')
                     ->color('success')
-                    ->visible(fn ($record) => $record->status !== 'draft' && $record->total_items > 0)
+                    ->visible(fn ($record) => in_array($record->status, ['on_board', 'in_transit', 'customs_clearance', 'delivered']))
+                    ->disabled(fn ($record) => $record->commercialInvoices()->exists())
+                    ->tooltip(fn ($record) => $record->commercialInvoices()->exists() 
+                        ? 'Commercial Invoice already exists' 
+                        : 'Generate Commercial Invoice from shipment')
                     ->action(function ($record) {
-                        \Filament\Notifications\Notification::make()
-                            ->title('Feature Coming Soon')
-                            ->body('Commercial Invoice generation will be implemented soon.')
-                            ->info()
-                            ->send();
+                        try {
+                            $invoice = \App\Models\CommercialInvoice::generateFromShipment($record);
+                            
+                            \Filament\Notifications\Notification::make()
+                                ->success()
+                                ->title('Commercial Invoice Created')
+                                ->body("Invoice {$invoice->invoice_number} created successfully")
+                                ->send();
+                            
+                            // Redirect to edit the new invoice
+                            return redirect()->route('filament.admin.resources.commercial-invoices.edit', $invoice);
+                            
+                        } catch (\Exception $e) {
+                            \Filament\Notifications\Notification::make()
+                                ->danger()
+                                ->title('Error Creating Commercial Invoice')
+                                ->body($e->getMessage())
+                                ->send();
+                        }
                     }),
             ])
             ->toolbarActions([
