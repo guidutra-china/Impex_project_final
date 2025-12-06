@@ -242,21 +242,49 @@ class RFQExcelService
     protected function saveToDocumentHistory(Order $order, string $filePath, string $fileName): void
     {
         try {
+            \Log::info('RFQ: Starting saveToDocumentHistory', [
+                'order_id' => $order->id,
+                'temp_file_path' => $filePath,
+                'temp_file_exists' => file_exists($filePath),
+                'temp_file_size' => file_exists($filePath) ? filesize($filePath) : 0,
+            ]);
+            
             // Move file from temp to permanent storage using Storage facade
             $directory = "documents/rfq/" . date('Y/m');
             $storagePath = "{$directory}/{$fileName}";
             
+            \Log::info('RFQ: Calculated storage path', [
+                'directory' => $directory,
+                'storage_path' => $storagePath,
+                'filename' => $fileName,
+            ]);
+            
             // Read file content and store using Storage facade
             $fileContent = file_get_contents($filePath);
+            \Log::info('RFQ: File content read', [
+                'content_size' => strlen($fileContent),
+            ]);
+            
             \Illuminate\Support\Facades\Storage::put($storagePath, $fileContent);
+            \Log::info('RFQ: Storage::put() called', [
+                'storage_path' => $storagePath,
+            ]);
             
             // Verify file was saved
-            if (!\Illuminate\Support\Facades\Storage::exists($storagePath)) {
+            $exists = \Illuminate\Support\Facades\Storage::exists($storagePath);
+            \Log::info('RFQ: Checking if file exists', [
+                'storage_path' => $storagePath,
+                'exists' => $exists,
+                'full_path' => storage_path('app/' . $storagePath),
+                'full_path_exists' => file_exists(storage_path('app/' . $storagePath)),
+            ]);
+            
+            if (!$exists) {
                 throw new \Exception("Failed to save file to storage: {$storagePath}");
             }
             
             // Create database record using the same pattern as PdfExportService
-            \App\Models\GeneratedDocument::createFromFile(
+            $document = \App\Models\GeneratedDocument::createFromFile(
                 $order,
                 'rfq',
                 'excel',
@@ -270,6 +298,7 @@ class RFQExcelService
             \Log::info('RFQ Excel saved to document history', [
                 'order_id' => $order->id,
                 'file_path' => $storagePath,
+                'document_id' => $document->id,
             ]);
         } catch (\Exception $e) {
             \Log::error('Failed to save RFQ to document history', [
