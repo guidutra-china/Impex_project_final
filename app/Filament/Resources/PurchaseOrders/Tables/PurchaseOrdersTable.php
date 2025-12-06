@@ -338,52 +338,18 @@ class PurchaseOrdersTable
                     ->requiresConfirmation()
                     ->visible(fn ($record) => $record->status === 'received'),
                 
-                \Filament\Actions\Action::make('create_invoice')
-                    ->label('Create Invoice')
-                    ->icon('heroicon-o-document-text')
-                    ->color('success')
-                    ->action(function ($record) {
-                        $invoice = \App\Models\PurchaseInvoice::create([
-                            'invoice_number' => \App\Models\PurchaseInvoice::generateInvoiceNumber(),
-                            'purchase_order_id' => $record->id,
-                            'supplier_id' => $record->supplier_id,
-                            'currency_id' => $record->currency_id,
-                            'base_currency_id' => $record->base_currency_id,
-                            'exchange_rate' => $record->exchange_rate,
-                            'invoice_date' => now(),
-                            'due_date' => now()->addDays(30),
-                            'status' => 'draft',
-                        ]);
-
-                        // Copy items from PO
-                        foreach ($record->items as $item) {
-                            $invoice->items()->create([
-                                'product_id' => $item->product_id,
-                                'product_name' => $item->product_name,
-                                'product_sku' => $item->product_sku,
-                                'quantity' => $item->quantity,
-                                'unit_cost' => $item->unit_cost,
-                                'total_cost' => $item->total_cost,
-                                'purchase_order_item_id' => $item->id,
-                                'notes' => $item->notes,
-                            ]);
-                        }
-
-                        // Recalculate totals
-                        $invoice->recalculateTotals();
-
-                        \Filament\Notifications\Notification::make()
-                            ->success()
-                            ->title('Invoice created')
-                            ->body("Purchase Invoice {$invoice->invoice_number} has been created from PO {$record->po_number}.")
-                            ->send();
-
-                        return redirect()->route('filament.admin.resources.purchase-invoices.edit', ['record' => $invoice->id]);
-                    })
-                    ->requiresConfirmation()
-                    ->modalHeading('Create Invoice from PO')
-                    ->modalDescription('This will create a new Purchase Invoice with all items from this PO.')
-                    ->visible(fn ($record) => in_array($record->status, ['confirmed', 'received', 'paid'])),
+                // TODO: Implement PurchaseInvoice model and functionality
+                // \Filament\Actions\Action::make('create_invoice')
+                //     ->label('Create Invoice')
+                //     ->icon('heroicon-o-document-text')
+                //     ->color('success')
+                //     ->action(function ($record) {
+                //         // Feature not implemented yet - requires PurchaseInvoice model
+                //     })
+                //     ->requiresConfirmation()
+                //     ->modalHeading('Create Invoice from PO')
+                //     ->modalDescription('This will create a new Purchase Invoice with all items from this PO.')
+                //     ->visible(fn ($record) => in_array($record->status, ['confirmed', 'received', 'paid'])),
                 
                 \Filament\Actions\Action::make('cancel_po')
                     ->label('Cancel')
