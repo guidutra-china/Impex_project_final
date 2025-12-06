@@ -41,9 +41,6 @@ class FeaturesRelationManager extends RelationManager
     {
         return $table
             ->recordTitleAttribute('feature_name')
-            ->query(
-                $this->productRepository->getFeaturesQuery($this->getOwnerRecord()->id)
-            )
             ->columns([
                 TextColumn::make('feature_name')
                     ->label('Feature Name')
