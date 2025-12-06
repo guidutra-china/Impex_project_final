@@ -20,6 +20,12 @@ class RFQMatchingService
      */
     public function matchSuppliersToProducts(Order $order): array
     {
+        \Log::info('RFQMatching: Starting matchSuppliersToProducts', [
+            'order_id' => $order->id,
+            'order_number' => $order->order_number,
+            'items_count' => $order->items->count(),
+        ]);
+        
         $productSuppliers = [];  // product_id => [supplier_ids]
         $supplierProducts = [];  // supplier_id => [product_ids]
         
@@ -28,6 +34,12 @@ class RFQMatchingService
             
             // Obter tags do produto
             $productTags = $product->tags()->pluck('tags.id')->toArray();
+            
+            \Log::info('RFQMatching: Processing product', [
+                'product_id' => $product->id,
+                'product_name' => $product->name,
+                'product_tags' => $productTags,
+            ]);
             
             if (empty($productTags)) {
                 // Produto sem tags, não pode ser matched
@@ -41,6 +53,12 @@ class RFQMatchingService
             })
             ->where('status', 'active')  // Apenas fornecedores ativos
             ->get();
+            
+            \Log::info('RFQMatching: Found matching suppliers', [
+                'product_id' => $product->id,
+                'matching_suppliers_count' => $matchingSuppliers->count(),
+                'matching_supplier_ids' => $matchingSuppliers->pluck('id')->toArray(),
+            ]);
             
             // Armazenar matching
             $productSuppliers[$product->id] = $matchingSuppliers->pluck('id')->toArray();
