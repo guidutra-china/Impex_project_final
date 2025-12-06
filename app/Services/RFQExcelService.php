@@ -109,6 +109,45 @@ class RFQExcelService
         $sheet->getRowDimension($currentRow)->setRowHeight(60);
         $currentRow += 2;
 
+        // QUOTATION DETAILS Section (To be filled by Supplier)
+        $sheet->setCellValue('A' . $currentRow, 'QUOTATION DETAILS (To be filled by Supplier)');
+        $sheet->mergeCells('A' . $currentRow . ':E' . $currentRow);
+        $sheet->getStyle('A' . $currentRow)->applyFromArray($headerStyle);
+        $sheet->getRowDimension($currentRow)->setRowHeight(25);
+        $currentRow++;
+
+        // MOQ
+        $sheet->setCellValue('A' . $currentRow, 'MOQ (Minimum Order Quantity):');
+        $sheet->setCellValue('B' . $currentRow, '');
+        $sheet->mergeCells('B' . $currentRow . ':E' . $currentRow);
+        $sheet->getStyle('A' . $currentRow)->applyFromArray($labelStyle);
+        $sheet->getStyle('B' . $currentRow)->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB('FFFFCC'); // Yellow
+        $currentRow++;
+
+        // Lead Time
+        $sheet->setCellValue('A' . $currentRow, 'Lead Time (days):');
+        $sheet->setCellValue('B' . $currentRow, '');
+        $sheet->mergeCells('B' . $currentRow . ':E' . $currentRow);
+        $sheet->getStyle('A' . $currentRow)->applyFromArray($labelStyle);
+        $sheet->getStyle('B' . $currentRow)->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB('FFFFCC');
+        $currentRow++;
+
+        // Incoterm
+        $sheet->setCellValue('A' . $currentRow, 'Incoterm (FOB/CIF/EXW/DDP/etc):');
+        $sheet->setCellValue('B' . $currentRow, '');
+        $sheet->mergeCells('B' . $currentRow . ':E' . $currentRow);
+        $sheet->getStyle('A' . $currentRow)->applyFromArray($labelStyle);
+        $sheet->getStyle('B' . $currentRow)->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB('FFFFCC');
+        $currentRow++;
+
+        // Payment Terms
+        $sheet->setCellValue('A' . $currentRow, 'Payment Terms:');
+        $sheet->setCellValue('B' . $currentRow, '');
+        $sheet->mergeCells('B' . $currentRow . ':E' . $currentRow);
+        $sheet->getStyle('A' . $currentRow)->applyFromArray($labelStyle);
+        $sheet->getStyle('B' . $currentRow)->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB('FFFFCC');
+        $currentRow += 2;
+
         // Order Items
         // If supplier is provided, filter items to only include products matching supplier's tags
         if ($supplier) {

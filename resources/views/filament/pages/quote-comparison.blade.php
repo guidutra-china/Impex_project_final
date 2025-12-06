@@ -85,10 +85,14 @@
                     <table class="w-full table-fixed divide-y divide-gray-200 dark:divide-white/10 text-base">
                         <thead class="bg-gray-50 dark:bg-white/5 sticky top-0 z-10">
                         <tr>
-                            <th scope="col" class="w-[35%] px-8 py-6 text-left font-semibold text-gray-900 dark:text-white text-lg">Supplier</th>
-                            <th scope="col" class="w-[25%] px-8 py-6 text-right font-semibold text-gray-900 dark:text-white text-lg">Total Price ({{ $order->currency->code }})</th>
-                            <th scope="col" class="w-[15%] px-8 py-6 text-center font-semibold text-gray-900 dark:text-white text-lg">Status</th>
-                            <th scope="col" class="w-[25%] px-8 py-6 text-right font-semibold text-gray-900 dark:text-white text-lg">vs. Best Price</th>
+                            <th scope="col" class="px-6 py-4 text-left font-semibold text-gray-900 dark:text-white">Supplier</th>
+                            <th scope="col" class="px-6 py-4 text-right font-semibold text-gray-900 dark:text-white">Total Price</th>
+                            <th scope="col" class="px-6 py-4 text-center font-semibold text-gray-900 dark:text-white">MOQ</th>
+                            <th scope="col" class="px-6 py-4 text-center font-semibold text-gray-900 dark:text-white">Lead Time</th>
+                            <th scope="col" class="px-6 py-4 text-center font-semibold text-gray-900 dark:text-white">Incoterm</th>
+                            <th scope="col" class="px-6 py-4 text-center font-semibold text-gray-900 dark:text-white">Payment</th>
+                            <th scope="col" class="px-6 py-4 text-center font-semibold text-gray-900 dark:text-white">Status</th>
+                            <th scope="col" class="px-6 py-4 text-right font-semibold text-gray-900 dark:text-white">vs. Best</th>
                         </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-100 dark:divide-white/5 bg-white dark:bg-transparent">
@@ -101,41 +105,74 @@
                                 $priceDiff = $quote['total_after_commission'] - $cheapestTotal;
                             @endphp
                             <tr class="{{ $isCheapest ? 'bg-success-50 dark:bg-success-500/10 font-semibold' : 'hover:bg-gray-50 dark:hover:bg-white/5' }}">
-                                <td class="px-8 py-6 whitespace-nowrap">
-                                    <div class="flex items-center gap-4">
-                                        <span class="text-gray-900 dark:text-white text-lg">{{ $quote['supplier'] }}</span>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-gray-900 dark:text-white">{{ $quote['supplier'] }}</span>
                                         @if($isCheapest)
-                                            <x-filament::badge color="success" class="px-4 py-2 text-base">
-                                                ⭐ Best Price
+                                            <x-filament::badge color="success" size="sm">
+                                                ⭐ Best
                                             </x-filament::badge>
                                         @endif
                                     </div>
                                 </td>
-                                <td class="px-8 py-6 text-right whitespace-nowrap">
-                                        <span class="font-mono text-lg {{ $isCheapest ? 'text-success-700 dark:text-success-300 font-bold' : 'text-gray-900 dark:text-white' }}">
-                                            {{ $order->currency->symbol }}{{ number_format($quote['total_after_commission'] / 100, 2) }}
-                                        </span>
+                                <td class="px-6 py-4 text-right whitespace-nowrap">
+                                    <span class="font-mono {{ $isCheapest ? 'text-success-700 dark:text-success-300 font-bold' : 'text-gray-900 dark:text-white' }}">
+                                        {{ $order->currency->symbol }}{{ number_format($quote['total_after_commission'] / 100, 2) }}
+                                    </span>
                                 </td>
-                                <td class="px-8 py-6 text-center whitespace-nowrap">
+                                <td class="px-6 py-4 text-center whitespace-nowrap">
+                                    @if($quote['moq'])
+                                        <span class="text-gray-900 dark:text-white">{{ number_format($quote['moq']) }}</span>
+                                    @else
+                                        <span class="text-gray-400">N/A</span>
+                                    @endif
+                                </td>
+                                <td class="px-6 py-4 text-center whitespace-nowrap">
+                                    @if($quote['lead_time_days'])
+                                        <span class="text-gray-900 dark:text-white">{{ $quote['lead_time_days'] }}d</span>
+                                        @if($quote['lead_time_days'] > 60)
+                                            <x-filament::badge color="danger" size="sm">⚠️</x-filament::badge>
+                                        @endif
+                                    @else
+                                        <span class="text-gray-400">N/A</span>
+                                    @endif
+                                </td>
+                                <td class="px-6 py-4 text-center whitespace-nowrap">
+                                    @if($quote['incoterm'])
+                                        <x-filament::badge color="info" size="sm">
+                                            {{ $quote['incoterm'] }}
+                                        </x-filament::badge>
+                                    @else
+                                        <span class="text-gray-400">N/A</span>
+                                    @endif
+                                </td>
+                                <td class="px-6 py-4 text-center text-sm whitespace-nowrap">
+                                    @if($quote['payment_terms'])
+                                        <span class="text-gray-900 dark:text-white">{{ str_replace('_', ' ', ucwords($quote['payment_terms'], '_')) }}</span>
+                                    @else
+                                        <span class="text-gray-400">N/A</span>
+                                    @endif
+                                </td>
+                                <td class="px-6 py-4 text-center whitespace-nowrap">
                                     <x-filament::badge
-                                            :color="match($quote['status']) {
-                                                'accepted' => 'success',
-                                                'sent' => 'warning',
-                                                'rejected' => 'danger',
-                                                default => 'gray'
-                                            }"
-                                            class="px-4 py-2 text-base"
+                                        :color="match($quote['status']) {
+                                            'accepted' => 'success',
+                                            'sent' => 'warning',
+                                            'rejected' => 'danger',
+                                            default => 'gray'
+                                        }"
+                                        size="sm"
                                     >
                                         {{ ucfirst($quote['status']) }}
                                     </x-filament::badge>
                                 </td>
-                                <td class="px-8 py-6 text-right whitespace-nowrap">
+                                <td class="px-6 py-4 text-right whitespace-nowrap">
                                     @if($isCheapest)
-                                        <span class="text-gray-500 dark:text-gray-400 text-lg">-</span>
+                                        <span class="text-gray-500 dark:text-gray-400">-</span>
                                     @else
-                                        <span class="text-danger-600 dark:text-danger-400 font-semibold text-lg">
-                                                +{{ $order->currency->symbol }}{{ number_format($priceDiff / 100, 2) }}
-                                            </span>
+                                        <span class="text-danger-600 dark:text-danger-400 font-semibold">
+                                            +{{ $order->currency->symbol }}{{ number_format($priceDiff / 100, 2) }}
+                                        </span>
                                     @endif
                                 </td>
                             </tr>

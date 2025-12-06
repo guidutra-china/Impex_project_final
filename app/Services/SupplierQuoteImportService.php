@@ -48,11 +48,22 @@ class SupplierQuoteImportService
                 );
             }
             
+            // Extract procurement details
+            $procurementDetails = $this->extractProcurementDetails($worksheet);
+            
+            // Update supplier quote with procurement details
+            $supplierQuote->moq = $procurementDetails['moq'];
+            $supplierQuote->lead_time_days = $procurementDetails['lead_time_days'];
+            $supplierQuote->incoterm = $procurementDetails['incoterm'];
+            $supplierQuote->payment_terms = $procurementDetails['payment_terms'];
+            $supplierQuote->save();
+            
             // No need to validate supplier code - quote is already selected
             Log::info('Importing supplier quote', [
                 'supplier_quote_id' => $supplierQuote->id,
                 'supplier_id' => $supplierQuote->supplier_id,
                 'supplier_name' => $supplierQuote->supplier->name,
+                'procurement_details' => $procurementDetails,
             ]);
             
             $rows = $this->extractDataRows($worksheet);
@@ -580,5 +591,54 @@ class SupplierQuoteImportService
         ]);
         
         return $orderItem;
+    }
+
+    /**
+     * Extract procurement details from worksheet
+     *
+     * @param Worksheet $sheet
+     * @return array
+     */
+    protected function extractProcurementDetails(Worksheet $sheet): array
+    {
+        $details = [
+            'moq' => null,
+            'lead_time_days' => null,
+            'incoterm' => null,
+            'payment_terms' => null,
+        ];
+        
+        // Look for QUOTATION DETAILS section
+        for ($row = 1; $row <= min(50, $sheet->getHighestRow()); $row++) {
+            $cellValue = trim($sheet->getCell('A' . $row)->getValue() ?? '');
+            
+            // MOQ
+            if (stripos($cellValue, 'MOQ') !== false && stripos($cellValue, 'Minimum Order Quantity') !== false) {
+                $value = trim($sheet->getCell('B' . $row)->getValue() ?? '');
+                $details['moq'] = is_numeric($value) ? (int) $value : null;
+            }
+            
+            // Lead Time
+            if (stripos($cellValue, 'Lead Time') !== false && stripos($cellValue, 'days') !== false) {
+                $value = trim($sheet->getCell('B' . $row)->getValue() ?? '');
+                $details['lead_time_days'] = is_numeric($value) ? (int) $value : null;
+            }
+            
+            // Incoterm
+            if (stripos($cellValue, 'Incoterm') !== false) {
+                $value = trim($sheet->getCell('B' . $row)->getValue() ?? '');
+                $details['incoterm'] = !empty($value) ? $value : null;
+            }
+            
+            // Payment Terms
+            if (stripos($cellValue, 'Payment Terms') !== false) {
+                $value = trim($sheet->getCell('B' . $row)->getValue() ?? '');
+                $details['payment_terms'] = !empty($value) ? $value : null;
+            }
+        }
+        
+        Log::info('Extracted procurement details', $details);
+        
+        return $details;
     }
 }

@@ -157,6 +157,55 @@ class SupplierQuoteForm
                     ->columns(2)
                     ->collapsible(),
 
+                Section::make('Procurement Details')
+                    ->schema([
+                        TextInput::make('moq')
+                            ->label('MOQ (Minimum Order Quantity)')
+                            ->numeric()
+                            ->helperText('Minimum quantity required by supplier')
+                            ->columnSpan(1),
+
+                        TextInput::make('lead_time_days')
+                            ->label('Lead Time (days)')
+                            ->numeric()
+                            ->helperText('Production + shipping time in days')
+                            ->columnSpan(1),
+
+                        Select::make('incoterm')
+                            ->label('Incoterm')
+                            ->options([
+                                'FOB' => 'FOB - Free On Board',
+                                'CIF' => 'CIF - Cost, Insurance & Freight',
+                                'EXW' => 'EXW - Ex Works',
+                                'DDP' => 'DDP - Delivered Duty Paid',
+                                'FCA' => 'FCA - Free Carrier',
+                                'CPT' => 'CPT - Carriage Paid To',
+                                'CIP' => 'CIP - Carriage & Insurance Paid',
+                                'DAP' => 'DAP - Delivered At Place',
+                                'DPU' => 'DPU - Delivered At Place Unloaded',
+                            ])
+                            ->searchable()
+                            ->helperText('International Commercial Terms')
+                            ->columnSpan(1),
+
+                        Select::make('payment_terms')
+                            ->label('Payment Terms')
+                            ->options([
+                                'advance_100' => '100% Advance Payment',
+                                'advance_50_balance_50' => '50% Advance, 50% Before Shipment',
+                                'advance_30_balance_70' => '30% Advance, 70% Before Shipment',
+                                'net_30' => 'Net 30 days',
+                                'net_60' => 'Net 60 days',
+                                'lc_at_sight' => 'L/C at Sight',
+                                'lc_90_days' => 'L/C 90 days',
+                            ])
+                            ->searchable()
+                            ->helperText('Payment conditions')
+                            ->columnSpan(1),
+                    ])
+                    ->columns(2)
+                    ->collapsible(),
+
                 Section::make('Notes')
                     ->schema([
                         Textarea::make('supplier_notes')

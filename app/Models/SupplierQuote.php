@@ -41,6 +41,10 @@ class SupplierQuote extends Model
         'notes',
         'created_by',
         'updated_by',
+        'moq',
+        'lead_time_days',
+        'incoterm',
+        'payment_terms',
     ];
 
     protected $casts = [
@@ -53,6 +57,8 @@ class SupplierQuote extends Model
         'validity_days' => 'integer',
         'is_latest' => 'boolean',
         'valid_until' => 'date',
+        'moq' => 'integer',
+        'lead_time_days' => 'integer',
     ];
 
     /**

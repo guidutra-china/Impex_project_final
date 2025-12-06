@@ -205,6 +205,11 @@ class QuoteComparisonService
                 'order_currency' => $order->currency->symbol,
                 'exchange_rate' => $quote->locked_exchange_rate,
                 'status' => $quote->status,
+                // Procurement details
+                'moq' => $quote->moq,
+                'lead_time_days' => $quote->lead_time_days,
+                'incoterm' => $quote->incoterm,
+                'payment_terms' => $quote->payment_terms,
             ];
         })->toArray();
 
