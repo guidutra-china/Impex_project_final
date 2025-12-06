@@ -12,23 +12,24 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Drop old foreign key that points to sales_invoices
-        Schema::table('commercial_invoice_items', function (Blueprint $table) {
-            // Try to drop the old foreign key if it exists
-            try {
-                $table->dropForeign('sales_invoice_items_sales_invoice_id_foreign');
-            } catch (\Exception $e) {
-                // Foreign key might not exist or have different name
-            }
-        });
+        // Drop old foreign key that points to sales_invoices (if exists)
+        try {
+            DB::statement('ALTER TABLE `commercial_invoice_items` DROP FOREIGN KEY `sales_invoice_items_sales_invoice_id_foreign`');
+        } catch (\Exception $e) {
+            // Foreign key doesn't exist, that's ok
+        }
         
-        // Add correct foreign key pointing to commercial_invoices
-        Schema::table('commercial_invoice_items', function (Blueprint $table) {
-            $table->foreign('commercial_invoice_id')
-                ->references('id')
-                ->on('commercial_invoices')
-                ->onDelete('cascade');
-        });
+        // Add correct foreign key pointing to commercial_invoices (if not exists)
+        try {
+            Schema::table('commercial_invoice_items', function (Blueprint $table) {
+                $table->foreign('commercial_invoice_id')
+                    ->references('id')
+                    ->on('commercial_invoices')
+                    ->onDelete('cascade');
+            });
+        } catch (\Exception $e) {
+            // Foreign key already exists, that's ok
+        }
     }
 
     /**
