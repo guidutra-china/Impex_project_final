@@ -51,7 +51,6 @@ class RFQMatchingService
             $matchingSuppliers = Supplier::whereHas('tags', function($q) use ($productTags) {
                 $q->whereIn('tags.id', $productTags);
             })
-            ->where('status', 'active')  // Apenas fornecedores ativos
             ->get();
             
             \Log::info('RFQMatching: Found matching suppliers', [
