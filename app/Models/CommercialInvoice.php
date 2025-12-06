@@ -415,7 +415,8 @@ class CommercialInvoice extends Model
             $invoiceItem = new CommercialInvoiceItem();
             $invoiceItem->commercial_invoice_id = $invoice->id;
             $invoiceItem->product_id = $shipmentItem->product_id;
-            $invoiceItem->description = $shipmentItem->product->name ?? '';
+            $invoiceItem->product_name = $shipmentItem->product->name ?? 'Unknown Product';
+            $invoiceItem->description = $shipmentItem->product->description ?? $shipmentItem->product->name ?? '';
             $invoiceItem->quantity = $shipmentItem->quantity_to_ship;
             $invoiceItem->unit_price = $shipmentItem->unit_price ?? 0;
             $invoiceItem->total = ($shipmentItem->unit_price ?? 0) * $shipmentItem->quantity_to_ship;
