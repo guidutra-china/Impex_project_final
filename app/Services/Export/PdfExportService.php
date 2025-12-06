@@ -151,7 +151,8 @@ class PdfExportService
             'supplier_quote' => $model->quote_number ?? null,
             'proforma_invoice' => $model->proforma_number ?? null,
             'purchase_order' => $model->po_number ?? null,
-            'commercial_invoice' => $model->invoice_number ?? null,
+            'commercial_invoice' => $model->commercialInvoice?->invoice_number ?? "CI-{$model->shipment_number}",
+            'commercial_invoice_customs' => $model->commercialInvoice?->invoice_number ?? "CI-{$model->shipment_number}",
             default => null,
         };
     }

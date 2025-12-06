@@ -56,6 +56,12 @@ class EditShipment extends EditRecord
             
             // Fill data
             $commercialInvoice->fill($this->commercialInvoiceData);
+            
+            // Ensure invoice_number is generated if not exists
+            if (!$commercialInvoice->invoice_number) {
+                $commercialInvoice->invoice_number = CommercialInvoice::generateInvoiceNumber();
+            }
+            
             $commercialInvoice->save();
             
             // DEBUG: Log what was saved

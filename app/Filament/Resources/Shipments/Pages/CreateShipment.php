@@ -36,6 +36,12 @@ class CreateShipment extends CreateRecord
             
             // Fill data
             $commercialInvoice->fill($this->commercialInvoiceData);
+            
+            // Ensure invoice_number is generated if not exists
+            if (!$commercialInvoice->invoice_number) {
+                $commercialInvoice->invoice_number = CommercialInvoice::generateInvoiceNumber();
+            }
+            
             $commercialInvoice->save();
         }
     }

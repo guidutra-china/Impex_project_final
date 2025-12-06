@@ -29,6 +29,9 @@ class CommercialInvoicePdfService
 
         $documentType = $version === 'customs' ? 'commercial_invoice_customs' : 'commercial_invoice';
         
+        // Calculate next revision number
+        $revisionNumber = $this->getNextRevisionNumber($shipment, $documentType);
+        
         $generatedDocument = $this->pdfExportService->generate(
             model: $shipment,
             documentType: $documentType,
@@ -46,6 +49,7 @@ class CommercialInvoicePdfService
             options: [
                 'paper' => 'a4',
                 'orientation' => 'portrait',
+                'revision_number' => $revisionNumber,
                 'notes' => $version === 'customs' 
                     ? "Customs Commercial Invoice - {$this->getCustomsDiscount($shipment)}% discount applied"
                     : 'Original Commercial Invoice - For payment and official records',
@@ -104,5 +108,21 @@ class CommercialInvoicePdfService
     protected function getCustomsDiscount(Shipment $shipment): float
     {
         return $shipment->commercialInvoice?->customs_discount_percentage ?? 0;
+    }
+
+    /**
+     * Get next revision number for this document type
+     */
+    protected function getNextRevisionNumber(Shipment $shipment, string $documentType): int
+    {
+        // Get the latest generated document for this shipment and document type
+        $latestDocument = GeneratedDocument::where('documentable_type', get_class($shipment))
+            ->where('documentable_id', $shipment->id)
+            ->where('document_type', $documentType)
+            ->orderBy('revision_number', 'desc')
+            ->first();
+
+        // Return next revision number (starting from 1)
+        return ($latestDocument?->revision_number ?? 0) + 1;
     }
 }
