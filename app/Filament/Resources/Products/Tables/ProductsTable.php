@@ -44,7 +44,26 @@ class ProductsTable
                     ->copyMessage('SKU copied')
                     ->copyMessageDuration(1500)
                     ->badge()
-                    ->color('gray'),
+                    ->color('gray')
+                    ->toggleable(isToggledHiddenByDefault: true), // Hidden by default
+
+                TextColumn::make('supplier_code')
+                    ->label('Supplier Code')
+                    ->searchable()
+                    ->sortable()
+                    ->copyable()
+                    ->badge()
+                    ->color('info')
+                    ->default('-'),
+
+                TextColumn::make('customer_code')
+                    ->label('Customer Code')
+                    ->searchable()
+                    ->sortable()
+                    ->copyable()
+                    ->badge()
+                    ->color('success')
+                    ->default('-'),
 
                 TextColumn::make('category.name')
                     ->label('Category')

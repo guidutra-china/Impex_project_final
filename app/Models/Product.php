@@ -265,4 +265,56 @@ class Product extends Model
     {
         return app(ProductFormatter::class)->formatPrice($this->price);
     }
+
+    /**
+     * Boot method - auto-generate SKU on creation
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($product) {
+            if (!$product->sku) {
+                $product->sku = static::generateSku($product->category_id);
+            }
+        });
+    }
+
+    /**
+     * Generate SKU based on category
+     * Format: [3 letters from category] + [sequential number]
+     * Example: ELE-0001, FUR-0023
+     * 
+     * @param int|null $categoryId
+     * @return string
+     */
+    public static function generateSku(?int $categoryId = null): string
+    {
+        // Get category prefix (3 letters)
+        $prefix = 'PRD'; // Default prefix
+        
+        if ($categoryId) {
+            $category = \App\Models\Category::find($categoryId);
+            if ($category && $category->name) {
+                // Get first 3 letters of category name (uppercase)
+                $prefix = strtoupper(substr(preg_replace('/[^A-Za-z]/', '', $category->name), 0, 3));
+                
+                // If category name is too short, pad with 'X'
+                $prefix = str_pad($prefix, 3, 'X');
+            }
+        }
+        
+        // Get next sequential number for this prefix
+        $lastProduct = static::where('sku', 'like', $prefix . '-%')
+            ->orderByRaw('CAST(SUBSTRING(sku, 5) AS UNSIGNED) DESC')
+            ->first();
+        
+        $nextNumber = 1;
+        if ($lastProduct && preg_match('/' . $prefix . '-(\d+)/', $lastProduct->sku, $matches)) {
+            $nextNumber = intval($matches[1]) + 1;
+        }
+        
+        // Format: PREFIX-0001
+        return $prefix . '-' . str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
+    }
 }

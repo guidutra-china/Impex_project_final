@@ -76,9 +76,9 @@ class ProductDuplicator
             // Modifica o nome para indicar que é uma cópia
             $newProductData['name'] = $product->name . ' (Copy)';
             
-            // Gera um SKU temporário (SKU original + -COPY- + timestamp)
-            // O usuário pode alterá-lo depois para um SKU apropriado
-            $newProductData['sku'] = $product->sku . '-COPY-' . now()->timestamp;
+            // Gera um novo SKU automaticamente baseado na categoria
+            // Usa o mesmo padrão de geração automática (PREFIX-0001)
+            $newProductData['sku'] = Product::generateSku($product->category_id);
 
             // Duplica o avatar se a opção estiver habilitada
             if ($options['avatar'] && $product->avatar) {
