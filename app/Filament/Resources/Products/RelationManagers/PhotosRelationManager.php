@@ -45,9 +45,6 @@ class PhotosRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         return $table
-            ->query(
-                $this->documentRepository->getProductPhotosQuery($this->getOwnerRecord()->id)
-            )
             ->recordTitleAttribute('original_filename')
             ->columns([
                 ImageColumn::make('file_path')

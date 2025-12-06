@@ -44,9 +44,6 @@ class DocumentsRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         return $table
-            ->query(
-                $this->documentRepository->getProductDocumentsQuery($this->getOwnerRecord()->id)
-            )
             ->recordTitleAttribute('original_filename')
             ->columns([
                 TextColumn::make('original_filename')
