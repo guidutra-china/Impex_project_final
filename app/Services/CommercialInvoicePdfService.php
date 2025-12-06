@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Models\CommercialInvoice;
+use App\Models\Shipment;
 use App\Models\GeneratedDocument;
 use App\Services\Export\PdfExportService;
 
@@ -13,66 +13,97 @@ class CommercialInvoicePdfService
     ) {}
 
     /**
-     * Generate Original PDF (with real values)
+     * Generate PDF from Shipment (accepts 'original' or 'customs' version)
      */
-    public function generateOriginalPdf(CommercialInvoice $invoice): GeneratedDocument
+    public function generate(Shipment $shipment, string $version = 'original'): string
     {
-        return $this->pdfExportService->generate(
-            model: $invoice,
-            documentType: 'commercial_invoice',
+        // Validate version
+        if (!in_array($version, ['original', 'customs'])) {
+            throw new \Exception('Invalid version. Must be "original" or "customs"');
+        }
+
+        // Check if customs version is requested but no discount configured
+        if ($version === 'customs' && !$this->hasCustomsDiscount($shipment)) {
+            throw new \Exception('Cannot generate customs PDF: No customs discount configured');
+        }
+
+        $documentType = $version === 'customs' ? 'commercial_invoice_customs' : 'commercial_invoice';
+        
+        $generatedDocument = $this->pdfExportService->generate(
+            model: $shipment,
+            documentType: $documentType,
             view: 'pdf.invoices.commercial-invoice',
             data: [
-                'invoice' => $invoice->load(['items', 'client', 'currency', 'paymentTerm', 'shipment']),
-                'version' => 'original',
+                'shipment' => $shipment->load([
+                    'customer',
+                    'items.product',
+                    'containers',
+                    'proformaInvoices.currency',
+                    'proformaInvoices.paymentTerm',
+                    'commercialInvoice',
+                ]),
+                'version' => $version,
             ],
             options: [
                 'paper' => 'a4',
                 'orientation' => 'portrait',
-                'notes' => 'Original Commercial Invoice - For payment and official records',
+                'notes' => $version === 'customs' 
+                    ? "Customs Commercial Invoice - {$this->getCustomsDiscount($shipment)}% discount applied"
+                    : 'Original Commercial Invoice - For payment and official records',
             ]
         );
+
+        return $generatedDocument->file_path;
+    }
+
+    /**
+     * Generate Original PDF (with real values)
+     */
+    public function generateOriginalPdf(Shipment $shipment): string
+    {
+        return $this->generate($shipment, 'original');
     }
 
     /**
      * Generate Customs PDF (with customs discount applied)
      */
-    public function generateCustomsPdf(CommercialInvoice $invoice): GeneratedDocument
+    public function generateCustomsPdf(Shipment $shipment): string
     {
-        if (!$invoice->hasCustomsDiscount()) {
-            throw new \Exception('Cannot generate customs PDF: No customs discount configured');
-        }
-
-        return $this->pdfExportService->generate(
-            model: $invoice,
-            documentType: 'commercial_invoice_customs',
-            view: 'pdf.invoices.commercial-invoice',
-            data: [
-                'invoice' => $invoice->load(['items', 'client', 'currency', 'paymentTerm', 'shipment']),
-                'version' => 'customs',
-            ],
-            options: [
-                'paper' => 'a4',
-                'orientation' => 'portrait',
-                'notes' => "Customs Commercial Invoice - {$invoice->customs_discount_percentage}% discount applied for customs purposes only",
-            ]
-        );
+        return $this->generate($shipment, 'customs');
     }
 
     /**
      * Generate both versions (Original + Customs)
      */
-    public function generateBothVersions(CommercialInvoice $invoice): array
+    public function generateBothVersions(Shipment $shipment): array
     {
-        $documents = [];
+        $paths = [];
 
         // Always generate original
-        $documents['original'] = $this->generateOriginalPdf($invoice);
+        $paths['original'] = $this->generateOriginalPdf($shipment);
 
         // Generate customs if discount is configured
-        if ($invoice->hasCustomsDiscount()) {
-            $documents['customs'] = $this->generateCustomsPdf($invoice);
+        if ($this->hasCustomsDiscount($shipment)) {
+            $paths['customs'] = $this->generateCustomsPdf($shipment);
         }
 
-        return $documents;
+        return $paths;
+    }
+
+    /**
+     * Check if shipment has customs discount configured
+     */
+    protected function hasCustomsDiscount(Shipment $shipment): bool
+    {
+        $commercialInvoice = $shipment->commercialInvoice;
+        return $commercialInvoice && $commercialInvoice->customs_discount_percentage > 0;
+    }
+
+    /**
+     * Get customs discount percentage
+     */
+    protected function getCustomsDiscount(Shipment $shipment): float
+    {
+        return $shipment->commercialInvoice?->customs_discount_percentage ?? 0;
     }
 }

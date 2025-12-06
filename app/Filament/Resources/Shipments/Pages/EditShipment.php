@@ -4,12 +4,14 @@ namespace App\Filament\Resources\Shipments\Pages;
 
 use App\Filament\Resources\Shipments\ShipmentResource;
 use App\Models\CommercialInvoice;
+use App\Services\CommercialInvoicePdfService;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ForceDeleteAction;
 use Filament\Actions\RestoreAction;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
+use Illuminate\Support\Facades\Storage;
 
 class EditShipment extends EditRecord
 {
@@ -18,32 +20,55 @@ class EditShipment extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            Action::make('generate_commercial_invoice')
-                ->label('Generate Commercial Invoice')
-                ->icon('heroicon-o-document-text')
-                ->color('success')
-                ->visible(fn () => in_array($this->record->status, ['on_board', 'in_transit', 'delivered']))
-                ->disabled(fn () => $this->record->commercialInvoices()->exists())
-                ->tooltip(fn () => $this->record->commercialInvoices()->exists() 
-                    ? 'Commercial Invoice already exists for this shipment' 
-                    : 'Generate Commercial Invoice from shipment data')
+            Action::make('pdf_original')
+                ->label('PDF Original')
+                ->icon('heroicon-o-document-arrow-down')
+                ->color('primary')
+                ->visible(fn () => in_array($this->record->status, ['on_board', 'in_transit', 'customs_clearance', 'delivered']))
                 ->action(function () {
                     try {
-                        $invoice = CommercialInvoice::generateFromShipment($this->record);
+                        $pdfService = app(CommercialInvoicePdfService::class);
+                        $path = $pdfService->generate($this->record, 'original');
                         
                         Notification::make()
                             ->success()
-                            ->title('Commercial Invoice Created')
-                            ->body("Invoice {$invoice->invoice_number} created successfully")
+                            ->title('PDF Generated')
+                            ->body('Commercial Invoice PDF (Original) generated successfully')
                             ->send();
                         
-                        // Redirect to edit the new invoice
-                        return redirect()->route('filament.admin.resources.commercial-invoices.edit', $invoice);
+                        return response()->download(Storage::disk('local')->path($path));
                         
                     } catch (\Exception $e) {
                         Notification::make()
                             ->danger()
-                            ->title('Error Creating Commercial Invoice')
+                            ->title('Error Generating PDF')
+                            ->body($e->getMessage())
+                            ->send();
+                    }
+                }),
+            
+            Action::make('pdf_customs')
+                ->label('PDF Customs')
+                ->icon('heroicon-o-document-arrow-down')
+                ->color('warning')
+                ->visible(fn () => in_array($this->record->status, ['on_board', 'in_transit', 'customs_clearance', 'delivered']) && $this->record->commercialInvoice?->customs_discount_percentage > 0)
+                ->action(function () {
+                    try {
+                        $pdfService = app(CommercialInvoicePdfService::class);
+                        $path = $pdfService->generate($this->record, 'customs');
+                        
+                        Notification::make()
+                            ->success()
+                            ->title('PDF Generated')
+                            ->body('Commercial Invoice PDF (Customs) generated successfully')
+                            ->send();
+                        
+                        return response()->download(Storage::disk('local')->path($path));
+                        
+                    } catch (\Exception $e) {
+                        Notification::make()
+                            ->danger()
+                            ->title('Error Generating PDF')
                             ->body($e->getMessage())
                             ->send();
                     }
