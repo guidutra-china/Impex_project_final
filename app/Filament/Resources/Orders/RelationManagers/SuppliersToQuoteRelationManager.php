@@ -54,20 +54,20 @@ class SuppliersToQuoteRelationManager extends RelationManager
                 /** @var Order $owner */
                 $owner = $this->getOwnerRecord();
 
-                // Use RFQMatchingService to find suppliers matching product tags
-                $matchingService = new RFQMatchingService();
-                $matchingSuppliers = $matchingService->getMatchingSuppliers($owner);
+                // Get tags from Order (Tags for Suppliers field)
+                $orderTagIds = $owner->tags()->pluck('tags.id')->toArray();
                 
-                $supplierIds = $matchingSuppliers->pluck('id')->toArray();
-                
-                if (empty($supplierIds)) {
-                    // No matching suppliers, return empty query
+                if (empty($orderTagIds)) {
+                    // No tags selected in Order, return empty query
                     return Supplier::query()->whereRaw('1 = 0');
                 }
 
-                // Return query with matching suppliers
+                // Find suppliers that have at least one matching tag
                 return Supplier::query()
-                    ->whereIn('id', $supplierIds)
+                    ->whereHas('tags', function ($q) use ($orderTagIds) {
+                        $q->whereIn('tags.id', $orderTagIds);
+                    })
+                    ->where('status', 'active')
                     ->with('tags');
             })
             ->columns([
@@ -86,14 +86,29 @@ class SuppliersToQuoteRelationManager extends RelationManager
                 TextColumn::make('matched_products')
                     ->label('Matched Products')
                     ->state(function (Supplier $record) {
-                        $matchingService = new RFQMatchingService();
-                        $products = $matchingService->getProductsForSupplier($this->getOwnerRecord(), $record);
+                        $owner = $this->getOwnerRecord();
                         
-                        if ($products->isEmpty()) {
+                        // Get tags from Order (Tags for Suppliers field)
+                        $orderTagIds = $owner->tags()->pluck('tags.id')->toArray();
+                        
+                        if (empty($orderTagIds)) {
                             return 'None';
                         }
                         
-                        return $products->pluck('name')->join(', ');
+                        // Get products from Order items that have matching tags
+                        $productIds = $owner->items()->pluck('product_id')->toArray();
+                        
+                        $matchedProducts = \App\Models\Product::whereIn('id', $productIds)
+                            ->whereHas('tags', function ($q) use ($orderTagIds) {
+                                $q->whereIn('tags.id', $orderTagIds);
+                            })
+                            ->get();
+                        
+                        if ($matchedProducts->isEmpty()) {
+                            return 'None';
+                        }
+                        
+                        return $matchedProducts->pluck('name')->join(', ');
                     })
                     ->wrap()
                     ->searchable(false)
