@@ -35,9 +35,14 @@ class ItemsRelationManager extends RelationManager
                         modifyQueryUsing: function ($query) {
                             $order = $this->getOwnerRecord();
                             
-                            // If order has a category, filter products by that category
-                            if ($order->category_id) {
-                                $query->where('category_id', $order->category_id);
+                            // Get tags from Order (Tags for Suppliers field)
+                            $orderTagIds = $order->tags()->pluck('tags.id')->toArray();
+                            
+                            // If order has tags, filter products by those tags
+                            if (!empty($orderTagIds)) {
+                                $query->whereHas('tags', function ($q) use ($orderTagIds) {
+                                    $q->whereIn('tags.id', $orderTagIds);
+                                });
                             }
                             
                             return $query;
@@ -49,12 +54,14 @@ class ItemsRelationManager extends RelationManager
                     ->helperText(function () {
                         $order = $this->getOwnerRecord();
                         
-                        if (!$order->category_id) {
-                            return 'No category selected. All products are available.';
+                        $orderTagIds = $order->tags()->pluck('tags.id')->toArray();
+                        
+                        if (empty($orderTagIds)) {
+                            return 'No tags selected. All products are available.';
                         }
                         
-                        $categoryName = $order->category?->name;
-                        return "Filtered by category: {$categoryName}";
+                        $tagNames = $order->tags()->pluck('tags.name')->join(', ');
+                        return "Filtered by tags: {$tagNames}";
                     })
                     ->columnSpan(2),
 
