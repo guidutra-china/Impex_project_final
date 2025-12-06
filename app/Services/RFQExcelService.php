@@ -242,19 +242,18 @@ class RFQExcelService
     protected function saveToDocumentHistory(Order $order, string $filePath, string $fileName): void
     {
         try {
-            // Move file from temp to permanent storage
+            // Move file from temp to permanent storage using Storage facade
             $directory = "documents/rfq/" . date('Y/m');
             $storagePath = "{$directory}/{$fileName}";
             
-            // Ensure directory exists
-            $fullDir = storage_path('app/' . $directory);
-            if (!is_dir($fullDir)) {
-                mkdir($fullDir, 0755, true);
-            }
+            // Read file content and store using Storage facade
+            $fileContent = file_get_contents($filePath);
+            \Illuminate\Support\Facades\Storage::put($storagePath, $fileContent);
             
-            // Copy file to permanent location
-            $fullPath = storage_path('app/' . $storagePath);
-            copy($filePath, $fullPath);
+            // Verify file was saved
+            if (!\Illuminate\Support\Facades\Storage::exists($storagePath)) {
+                throw new \Exception("Failed to save file to storage: {$storagePath}");
+            }
             
             // Create database record using the same pattern as PdfExportService
             \App\Models\GeneratedDocument::createFromFile(
