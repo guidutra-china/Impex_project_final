@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Order;
+use App\Models\Supplier;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
@@ -16,9 +17,10 @@ class RFQExcelService
      * Generate RFQ Excel file
      *
      * @param Order $order
+     * @param \App\Models\Supplier|null $supplier If provided, generates RFQ only with products matching this supplier's tags
      * @return string Path to generated file
      */
-    public function generateRFQ(Order $order): string
+    public function generateRFQ(Order $order, $supplier = null): string
     {
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
@@ -98,7 +100,14 @@ class RFQExcelService
         $currentRow += 2;
 
         // Order Items
-        $items = $order->items()->with(['product', 'product.features'])->get();
+        // If supplier is provided, filter items to only include products matching supplier's tags
+        if ($supplier) {
+            $matchingService = new RFQMatchingService();
+            $items = $matchingService->getOrderItemsForSupplier($order, $supplier);
+            $items->load(['product', 'product.features']);
+        } else {
+            $items = $order->items()->with(['product', 'product.features'])->get();
+        }
 
         // Always add ORDER ITEMS section
         // Items header
@@ -209,7 +218,8 @@ class RFQExcelService
         $sheet->getColumnDimension('E')->setWidth(40);
 
         // Generate file
-        $fileName = 'RFQ_' . $order->order_number . '_' . time() . '.xlsx';
+        $supplierSuffix = $supplier ? '_' . str_replace(' ', '-', $supplier->name) : '';
+        $fileName = 'RFQ_' . $order->order_number . $supplierSuffix . '_' . time() . '.xlsx';
         $filePath = storage_path('app/temp/' . $fileName);
 
         // Ensure temp directory exists

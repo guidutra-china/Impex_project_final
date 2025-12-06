@@ -9,6 +9,7 @@ use App\Models\RFQSupplierStatus;
 use App\Repositories\OrderRepository;
 use App\Repositories\SupplierRepository;
 use App\Services\RFQExcelService;
+use App\Services\RFQMatchingService;
 use App\Services\SupplierQuoteImportService;
 use Filament\Forms\Components\FileUpload;
 use Filament\Actions\Action;
@@ -53,20 +54,21 @@ class SuppliersToQuoteRelationManager extends RelationManager
                 /** @var Order $owner */
                 $owner = $this->getOwnerRecord();
 
-                // Get tag IDs from the RFQ
-                $tagIds = $owner->tags()->pluck('id');
-
-                if (empty($tagIds)) {
-                    // No tags, return empty query
+                // Use RFQMatchingService to find suppliers matching product tags
+                $matchingService = new RFQMatchingService();
+                $matchingSuppliers = $matchingService->getMatchingSuppliers($owner);
+                
+                $supplierIds = $matchingSuppliers->pluck('id')->toArray();
+                
+                if (empty($supplierIds)) {
+                    // No matching suppliers, return empty query
                     return Supplier::query()->whereRaw('1 = 0');
                 }
 
-                // Find suppliers with matching tags
+                // Return query with matching suppliers
                 return Supplier::query()
-                    ->whereHas('tags', function ($q) use ($tagIds) {
-                        $q->whereIn('tags.id', $tagIds);
-                    })
-                    ->distinct();
+                    ->whereIn('id', $supplierIds)
+                    ->with('tags');
             })
             ->columns([
                 TextColumn::make('name')
@@ -80,6 +82,24 @@ class SuppliersToQuoteRelationManager extends RelationManager
                     ->badge()
                     ->separator(',')
                     ->color('info'),
+
+                TextColumn::make('matched_products')
+                    ->label('Matched Products')
+                    ->state(function (Supplier $record) {
+                        $matchingService = new RFQMatchingService();
+                        $products = $matchingService->getProductsForSupplier($this->getOwnerRecord(), $record);
+                        
+                        if ($products->isEmpty()) {
+                            return 'None';
+                        }
+                        
+                        return $products->pluck('name')->join(', ');
+                    })
+                    ->wrap()
+                    ->searchable(false)
+                    ->sortable(false)
+                    ->badge()
+                    ->color('success'),
 
                 TextColumn::make('rfq_status')
                     ->label('Send Status')
@@ -280,8 +300,8 @@ class SuppliersToQuoteRelationManager extends RelationManager
                                 throw new \Exception('No contacts selected');
                             }
 
-                            // Generate and send Excel file
-                            $filePath = $rfqService->generateRFQ($owner);
+                            // Generate and send Excel file (personalized for this supplier)
+                            $filePath = $rfqService->generateRFQ($owner, $record);
                             
                             foreach ($contacts as $contact) {
                                 if ($contact->email) {
