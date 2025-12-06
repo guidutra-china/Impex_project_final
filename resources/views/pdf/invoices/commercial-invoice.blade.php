@@ -373,7 +373,7 @@
                     @if($shipment->commercialInvoice->display_options ?? []['show_country_of_origin'] ?? true)
                     <td>{{ $item->country_of_origin }}</td>
                     @endif
-                    <td class="text-right">{{ number_format($item->quantity, 0) }}</td>
+                    <td class="text-right">{{ number_format($item->quantity_shipped ?? $item->quantity_to_ship ?? $item->quantity_ordered, 0) }}</td>
                     <td>{{ $item->unit ?? 'pcs' }}</td>
                     <td class="text-right">
                         @if($version === 'customs' && $shipment->commercialInvoice->customs_discount_percentage ?? 0 > 0)
