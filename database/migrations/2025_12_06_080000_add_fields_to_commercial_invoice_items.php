@@ -35,6 +35,11 @@ return new class extends Migration
             if (!Schema::hasColumn('commercial_invoice_items', 'volume')) {
                 $table->decimal('volume', 10, 2)->nullable()->after('weight')->comment('Volume in m³');
             }
+            
+            // Unit of measurement
+            if (!Schema::hasColumn('commercial_invoice_items', 'unit')) {
+                $table->string('unit', 20)->nullable()->after('quantity')->comment('Unit of measurement (pcs, kg, m, etc.)');
+            }
         });
     }
 
@@ -50,6 +55,7 @@ return new class extends Migration
                 'country_of_origin',
                 'weight',
                 'volume',
+                'unit',
             ];
             
             foreach ($columns as $column) {
