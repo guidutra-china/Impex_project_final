@@ -322,6 +322,7 @@ class CommercialInvoice extends Model
 
     /**
      * Generate Commercial Invoice from Shipment
+     * Auto-fills all data including Exporter, Importer, Items, Shipping Details
      */
     public static function generateFromShipment(Shipment $shipment, array $additionalData = []): self
     {
@@ -332,6 +333,7 @@ class CommercialInvoice extends Model
         $invoice->client_id = $shipment->customer_id;
         $invoice->invoice_date = now();
         $invoice->shipment_date = $shipment->actual_departure_date ?? $shipment->estimated_departure_date;
+        $invoice->status = 'draft';
         
         // Get proforma invoice from shipment if exists
         $proformaInvoice = $shipment->proformaInvoices()->first();
@@ -347,10 +349,41 @@ class CommercialInvoice extends Model
         $invoice->port_of_loading = $shipment->port_of_loading;
         $invoice->port_of_discharge = $shipment->port_of_discharge;
         $invoice->final_destination = $shipment->final_destination;
+        $invoice->bl_number = $shipment->bl_number ?? '';
         
         // Container numbers from shipment
         $containerNumbers = $shipment->containers()->pluck('container_number')->join(', ');
         $invoice->container_numbers = $containerNumbers;
+        
+        // Exporter details from Company Settings
+        $companySettings = CompanySetting::current();
+        if ($companySettings) {
+            $invoice->exporter_name = $companySettings->company_name;
+            $invoice->exporter_address = $companySettings->full_address;
+            $invoice->exporter_tax_id = $companySettings->tax_id;
+            $invoice->exporter_country = $companySettings->country;
+            
+            // Bank details
+            $invoice->bank_name = $companySettings->bank_name;
+            $invoice->bank_account = $companySettings->bank_account_number;
+            $invoice->bank_swift = $companySettings->bank_swift_code;
+        }
+        
+        // Importer details from Customer
+        $customer = $shipment->customer;
+        if ($customer) {
+            $invoice->importer_name = $customer->name;
+            // Build full address from customer fields
+            $addressParts = array_filter([
+                $customer->address,
+                $customer->city,
+                $customer->state . ' ' . $customer->zip,
+                $customer->country,
+            ]);
+            $invoice->importer_address = implode(', ', $addressParts);
+            $invoice->importer_tax_id = $customer->tax_number ?? '';
+            $invoice->importer_country = $customer->country ?? '';
+        }
         
         // Merge additional data
         $invoice->fill($additionalData);

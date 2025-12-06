@@ -78,11 +78,19 @@ class CommercialInvoiceForm
                     if ($state) {
                         $shipment = Shipment::find($state);
                         if ($shipment) {
+                            // Basic info
                             $set('client_id', $shipment->customer_id);
                             $set('shipment_date', $shipment->actual_departure_date ?? $shipment->estimated_departure_date);
+                            
+                            // Shipping details
                             $set('port_of_loading', $shipment->port_of_loading);
                             $set('port_of_discharge', $shipment->port_of_discharge);
                             $set('final_destination', $shipment->final_destination);
+                            $set('bl_number', $shipment->bl_number ?? '');
+                            
+                            // Container numbers
+                            $containerNumbers = $shipment->containers()->pluck('container_number')->join(', ');
+                            $set('container_numbers', $containerNumbers);
                             
                             // Get proforma invoice if exists
                             $proforma = $shipment->proformaInvoices()->first();
@@ -92,6 +100,36 @@ class CommercialInvoiceForm
                                 $set('payment_term_id', $proforma->payment_term_id);
                                 $set('incoterm', $proforma->incoterm);
                                 $set('incoterm_location', $proforma->incoterm_location);
+                            }
+                            
+                            // Exporter details from Company Settings
+                            $companySettings = \App\Models\CompanySetting::current();
+                            if ($companySettings) {
+                                $set('exporter_name', $companySettings->company_name);
+                                $set('exporter_address', $companySettings->full_address);
+                                $set('exporter_tax_id', $companySettings->tax_id);
+                                $set('exporter_country', $companySettings->country);
+                                
+                                // Bank details
+                                $set('bank_name', $companySettings->bank_name);
+                                $set('bank_account', $companySettings->bank_account_number);
+                                $set('bank_swift', $companySettings->bank_swift_code);
+                            }
+                            
+                            // Importer details from Customer
+                            $customer = $shipment->customer;
+                            if ($customer) {
+                                $set('importer_name', $customer->name);
+                                // Build full address
+                                $addressParts = array_filter([
+                                    $customer->address,
+                                    $customer->city,
+                                    $customer->state . ' ' . $customer->zip,
+                                    $customer->country,
+                                ]);
+                                $set('importer_address', implode(', ', $addressParts));
+                                $set('importer_tax_id', $customer->tax_number ?? '');
+                                $set('importer_country', $customer->country ?? '');
                             }
                         }
                     }
