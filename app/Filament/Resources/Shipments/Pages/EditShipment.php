@@ -25,7 +25,19 @@ class EditShipment extends EditRecord
         // Extract commercialInvoice data before saving Shipment
         if (isset($data['commercialInvoice'])) {
             $this->commercialInvoiceData = $data['commercialInvoice'];
+            
+            // DEBUG: Log what we're about to save
+            \Log::info('EditShipment: commercialInvoice data extracted', [
+                'shipment_id' => $this->record->id,
+                'data' => $this->commercialInvoiceData,
+            ]);
+            
             unset($data['commercialInvoice']);
+        } else {
+            \Log::warning('EditShipment: No commercialInvoice data in form', [
+                'shipment_id' => $this->record->id,
+                'form_keys' => array_keys($data),
+            ]);
         }
         
         return $data;
@@ -39,11 +51,25 @@ class EditShipment extends EditRecord
         if (isset($this->commercialInvoiceData)) {
             // Get or create CommercialInvoice
             $commercialInvoice = $this->record->commercialInvoice ?? new CommercialInvoice();
+            $isNew = !$commercialInvoice->exists;
             $commercialInvoice->shipment_id = $this->record->id;
             
             // Fill data
             $commercialInvoice->fill($this->commercialInvoiceData);
             $commercialInvoice->save();
+            
+            // DEBUG: Log what was saved
+            \Log::info('EditShipment: commercialInvoice saved', [
+                'action' => $isNew ? 'created' : 'updated',
+                'commercial_invoice_id' => $commercialInvoice->id,
+                'shipment_id' => $this->record->id,
+                'customs_discount' => $commercialInvoice->customs_discount_percentage,
+                'display_options' => $commercialInvoice->display_options,
+            ]);
+        } else {
+            \Log::warning('EditShipment: No commercialInvoiceData to save', [
+                'shipment_id' => $this->record->id,
+            ]);
         }
     }
 
