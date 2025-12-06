@@ -32,39 +32,21 @@ class ProductForm
                             ->columns(2)
                             ->columnSpan(2)
                             ->schema([
-                                Select::make('category_id')
-                                    ->label('Category')
-                                    ->relationship('category', 'name', fn($query) => $query->active()->ordered())
+                                Select::make('tags')
+                                    ->label('Tag')
+                                    ->relationship('tags', 'name')
                                     ->searchable()
                                     ->preload()
                                     ->required()
-                                    ->live()
-                                    ->afterStateUpdated(function ($state, Set $set, Get $get, ?Product $record) {
-                                        // Only auto-populate features when creating a new product
-                                        if ($record !== null) {
-                                            return;
-                                        }
-
-                                        if (!$state) {
-                                            return;
-                                        }
-
-                                        // Get category with feature templates
-                                        $category = Category::with('categoryFeatures')->find($state);
-
-                                        if (!$category || $category->categoryFeatures->isEmpty()) {
-                                            return;
-                                        }
-
-                                        // Show notification
-                                        Notification::make()
-                                            ->title('Features loaded')
-                                            ->body("Loaded {$category->categoryFeatures->count()} feature templates from {$category->name}")
-                                            ->success()
-                                            ->send();
-                                    })
-                                    ->helperText('Select a category to auto-populate feature templates')
-                                    ->columnSpan(1),
+                                    ->helperText('Select ONE tag for this product (used for supplier matching)')
+                                    ->columnSpan(1)
+                                    ->rules([
+                                        fn(): \Closure => function (string $attribute, $value, \Closure $fail) {
+                                            if (is_array($value) && count($value) > 1) {
+                                                $fail('Product can have only ONE tag.');
+                                            }
+                                        },
+                                    ]),
 
                                 TextInput::make('name')
                                     ->label('Product Name')

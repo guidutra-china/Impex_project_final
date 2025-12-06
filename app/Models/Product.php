@@ -275,31 +275,36 @@ class Product extends Model
 
         static::creating(function ($product) {
             if (!$product->sku) {
-                $product->sku = static::generateSku($product->category_id);
+                // Get first tag (product should have only 1 tag)
+                $tagId = null;
+                if ($product->tags && $product->tags->isNotEmpty()) {
+                    $tagId = $product->tags->first()->id;
+                }
+                $product->sku = static::generateSku($tagId);
             }
         });
     }
 
     /**
-     * Generate SKU based on category
-     * Format: [3 letters from category] + [sequential number]
+     * Generate SKU based on tag
+     * Format: [3 letters from tag] + [sequential number]
      * Example: ELE-0001, FUR-0023
      * 
-     * @param int|null $categoryId
+     * @param int|null $tagId
      * @return string
      */
-    public static function generateSku(?int $categoryId = null): string
+    public static function generateSku(?int $tagId = null): string
     {
-        // Get category prefix (3 letters)
+        // Get tag prefix (3 letters)
         $prefix = 'PRD'; // Default prefix
         
-        if ($categoryId) {
-            $category = \App\Models\Category::find($categoryId);
-            if ($category && $category->name) {
-                // Get first 3 letters of category name (uppercase)
-                $prefix = strtoupper(substr(preg_replace('/[^A-Za-z]/', '', $category->name), 0, 3));
+        if ($tagId) {
+            $tag = \App\Models\Tag::find($tagId);
+            if ($tag && $tag->name) {
+                // Get first 3 letters of tag name (uppercase)
+                $prefix = strtoupper(substr(preg_replace('/[^A-Za-z]/', '', $tag->name), 0, 3));
                 
-                // If category name is too short, pad with 'X'
+                // If tag name is too short, pad with 'X'
                 $prefix = str_pad($prefix, 3, 'X');
             }
         }
