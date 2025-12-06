@@ -159,7 +159,8 @@ class RFQExcelService
                 $features = $item->product->features ?? collect();
                 if ($features->isNotEmpty()) {
                     $featuresList = $features->map(function ($feature) {
-                        return "• {$feature->name}: {$feature->value}";
+                        $unit = $feature->unit ? " {$feature->unit}" : '';
+                        return "• {$feature->feature_name}: {$feature->feature_value}{$unit}";
                     })->implode("\n");
                     $sheet->setCellValue('E' . $currentRow, $featuresList);
                     $sheet->getStyle('E' . $currentRow)->getAlignment()->setWrapText(true);
