@@ -32,11 +32,34 @@ trait HasProductDimensions
 
     /**
      * Auto-calcula o CBM do carton se as dimensões forem fornecidas
+     * Auto-calcula pcs_per_carton quando inner boxes são usados
      */
     protected static function bootHasProductDimensions()
     {
         static::saving(function ($product) {
-            app(ProductDimensionCalculator::class)->updateCartonCbm($product);
+            $calculator = app(ProductDimensionCalculator::class);
+            
+            // Auto-calcula CBM
+            $calculator->updateCartonCbm($product);
+            
+            // Auto-calcula pcs_per_carton se inner boxes forem usados
+            $calculator->updatePcsPerCarton($product);
         });
+    }
+
+    /**
+     * Obtém peso estimado do carton
+     */
+    public function getEstimatedCartonWeightAttribute(): ?float
+    {
+        return app(ProductDimensionCalculator::class)->estimateCartonWeight($this);
+    }
+
+    /**
+     * Valida consistência de embalagem
+     */
+    public function getPackagingWarningsAttribute(): array
+    {
+        return app(ProductDimensionCalculator::class)->validatePackaging($this);
     }
 }

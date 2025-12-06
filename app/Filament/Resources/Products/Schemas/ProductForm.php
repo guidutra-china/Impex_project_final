@@ -240,36 +240,42 @@ class ProductForm
 
                 // Product Dimensions & Weight
                 Section::make('Product Dimensions & Weight')
+                    ->description('Dimensions and weight of a single product unit with individual packaging')
                     ->schema([
                         TextInput::make('product_length')
                             ->label('Length (cm)')
                             ->numeric()
                             ->step(0.01)
-                            ->suffix('cm'),
+                            ->suffix('cm')
+                            ->helperText('Length of 1 unit'),
 
                         TextInput::make('product_width')
                             ->label('Width (cm)')
                             ->numeric()
                             ->step(0.01)
-                            ->suffix('cm'),
+                            ->suffix('cm')
+                            ->helperText('Width of 1 unit'),
 
                         TextInput::make('product_height')
                             ->label('Height (cm)')
                             ->numeric()
                             ->step(0.01)
-                            ->suffix('cm'),
+                            ->suffix('cm')
+                            ->helperText('Height of 1 unit'),
 
                         TextInput::make('net_weight')
                             ->label('Net Weight (kg)')
                             ->numeric()
                             ->step(0.001)
-                            ->suffix('kg'),
+                            ->suffix('kg')
+                            ->helperText('Weight without packaging'),
 
                         TextInput::make('gross_weight')
-                            ->label('Gross Weight (kg)')
+                            ->label('Unit Gross Weight (kg)')
                             ->numeric()
                             ->step(0.001)
-                            ->suffix('kg'),
+                            ->suffix('kg')
+                            ->helperText('Weight of 1 piece with individual packaging'),
                     ])
                     ->columns(5)
                     ->columnSpan(['lg' => 3])
@@ -277,35 +283,41 @@ class ProductForm
 
                 // Inner Box Packing
                 Section::make('Inner Box Packing')
+                    ->description('Optional: For products with double packaging (inner box + master carton)')
                     ->schema([
                         TextInput::make('pcs_per_inner_box')
                             ->label('Pieces per Inner Box')
                             ->numeric()
-                            ->minValue(1),
+                            ->minValue(1)
+                            ->helperText('How many units in 1 inner box'),
 
                         TextInput::make('inner_box_length')
                             ->label('Length (cm)')
                             ->numeric()
                             ->step(0.01)
-                            ->suffix('cm'),
+                            ->suffix('cm')
+                            ->helperText('Inner box length'),
 
                         TextInput::make('inner_box_width')
                             ->label('Width (cm)')
                             ->numeric()
                             ->step(0.01)
-                            ->suffix('cm'),
+                            ->suffix('cm')
+                            ->helperText('Inner box width'),
 
                         TextInput::make('inner_box_height')
                             ->label('Height (cm)')
                             ->numeric()
                             ->step(0.01)
-                            ->suffix('cm'),
+                            ->suffix('cm')
+                            ->helperText('Inner box height'),
 
                         TextInput::make('inner_box_weight')
-                            ->label('Weight (kg)')
+                            ->label('Inner Box Gross Weight (kg)')
                             ->numeric()
                             ->step(0.001)
-                            ->suffix('kg'),
+                            ->suffix('kg')
+                            ->helperText('Total weight of 1 inner box with all pieces'),
                     ])
                     ->columns(5)
                     ->columnSpan(['lg' => 3])
@@ -314,51 +326,67 @@ class ProductForm
 
                 // Master Carton Packing
                 Section::make('Master Carton Packing')
+                    ->description('Standard shipping unit for sea freight - used for packing lists and CBM calculations')
                     ->schema([
                         TextInput::make('pcs_per_carton')
                             ->label('Pieces per Carton')
                             ->numeric()
                             ->minValue(1)
-                            ->live(onBlur: true),
+                            ->live(onBlur: true)
+                            ->helperText('Total units in 1 master carton'),
 
                         TextInput::make('inner_boxes_per_carton')
                             ->label('Inner Boxes per Carton')
                             ->numeric()
-                            ->minValue(1),
+                            ->minValue(1)
+                            ->helperText('Leave 0 if no inner boxes'),
 
                         TextInput::make('carton_length')
                             ->label('Length (cm)')
                             ->numeric()
                             ->step(0.01)
                             ->suffix('cm')
-                            ->live(onBlur: true),
+                            ->live(onBlur: true)
+                            ->helperText('Master carton length'),
 
                         TextInput::make('carton_width')
                             ->label('Width (cm)')
                             ->numeric()
                             ->step(0.01)
                             ->suffix('cm')
-                            ->live(onBlur: true),
+                            ->live(onBlur: true)
+                            ->helperText('Master carton width'),
 
                         TextInput::make('carton_height')
                             ->label('Height (cm)')
                             ->numeric()
                             ->step(0.01)
                             ->suffix('cm')
-                            ->live(onBlur: true),
+                            ->live(onBlur: true)
+                            ->helperText('Master carton height'),
 
                         TextInput::make('carton_weight')
-                            ->label('Gross Weight (kg)')
+                            ->label('Carton Gross Weight (kg)')
                             ->numeric()
                             ->step(0.001)
-                            ->suffix('kg'),
+                            ->suffix('kg')
+                            ->helperText('Total weight of master carton with all pieces')
+                            ->placeholder(function ($get) {
+                                $unitWeight = $get('gross_weight');
+                                $pcsPerCarton = $get('pcs_per_carton');
+                                if ($unitWeight && $pcsPerCarton) {
+                                    $estimated = round(($unitWeight * $pcsPerCarton) * 1.10, 3);
+                                    return "Est: {$estimated} kg";
+                                }
+                                return null;
+                            }),
 
                         TextInput::make('carton_cbm')
                             ->label('CBM (m³)')
                             ->numeric()
                             ->step(0.0001)
                             ->suffix('m³')
-                            ->helperText('Auto-calculated from dimensions')
+                            ->helperText('Auto-calculated: (L × W × H) / 1,000,000')
                             ->disabled()
                             ->dehydrated(),
                     ])
@@ -369,21 +397,25 @@ class ProductForm
 
                 // Container Loading Information
                 Section::make('Container Loading Capacity')
+                    ->description('Maximum cartons that fit in each container type - useful for quick quotations and production planning')
                     ->schema([
                         TextInput::make('cartons_per_20ft')
                             ->label('Cartons per 20\' Container')
                             ->numeric()
-                            ->minValue(0),
+                            ->minValue(0)
+                            ->helperText('20\' container capacity (~28 CBM)'),
 
                         TextInput::make('cartons_per_40ft')
                             ->label('Cartons per 40\' Container')
                             ->numeric()
-                            ->minValue(0),
+                            ->minValue(0)
+                            ->helperText('40\' container capacity (~58 CBM)'),
 
                         TextInput::make('cartons_per_40hq')
                             ->label('Cartons per 40\' HQ Container')
                             ->numeric()
-                            ->minValue(0),
+                            ->minValue(0)
+                            ->helperText('40\' HQ container capacity (~68 CBM)'),
                     ])
                     ->columns(3)
                     ->columnSpan(['lg' => 3])
