@@ -67,7 +67,6 @@ class SuppliersToQuoteRelationManager extends RelationManager
                     ->whereHas('tags', function ($q) use ($orderTagIds) {
                         $q->whereIn('tags.id', $orderTagIds);
                     })
-                    ->where('status', 'active')
                     ->with('tags');
             })
             ->columns([
