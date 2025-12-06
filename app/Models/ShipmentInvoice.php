@@ -45,10 +45,12 @@ class ShipmentInvoice extends Model
         return $this->belongsTo(Shipment::class);
     }
 
-    public function salesInvoice(): BelongsTo
-    {
-        return $this->belongsTo(SalesInvoice::class);
-    }
+    // Legacy: This pivot table is deprecated
+    // Commercial Invoices now have direct relationship with Shipment
+    // public function salesInvoice(): BelongsTo
+    // {
+    //     return $this->belongsTo(SalesInvoice::class);
+    // }
 
     /**
      * Calculate totals from shipment items

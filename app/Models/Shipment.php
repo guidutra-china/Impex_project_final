@@ -149,13 +149,11 @@ class Shipment extends Model
     }
 
     /**
-     * NEW: Many-to-Many relationship with SalesInvoice
+     * Commercial Invoices generated from this shipment
      */
-    public function salesInvoices(): BelongsToMany
+    public function commercialInvoices(): HasMany
     {
-        return $this->belongsToMany(SalesInvoice::class, 'shipment_invoices')
-            ->withPivot(['total_items', 'total_quantity', 'total_value', 'notes'])
-            ->withTimestamps();
+        return $this->hasMany(CommercialInvoice::class);
     }
 
     /**
@@ -334,8 +332,8 @@ class Shipment extends Model
                 $item->quantity_shipped = $item->quantity_to_ship;
                 $item->save();
                 
-                // Update the sales invoice item
-                $item->updateSalesInvoiceItem();
+                // TODO: Update commercial invoice item if needed
+                // $item->updateCommercialInvoiceItem();
             }
             
             // Recalculate totals

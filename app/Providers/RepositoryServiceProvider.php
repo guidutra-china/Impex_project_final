@@ -11,7 +11,7 @@ use App\Repositories\SupplierRepository;
 use App\Repositories\FinancialTransactionRepository;
 use App\Repositories\ProformaInvoiceRepository;
 use App\Repositories\SupplierQuoteRepository;
-use App\Repositories\SalesInvoiceRepository;
+// use App\Repositories\SalesInvoiceRepository; // Deprecated - replaced by CommercialInvoice
 use App\Repositories\PurchaseOrderRepository;
 use App\Repositories\DocumentRepository;
 use App\Repositories\RFQRepository;
@@ -61,9 +61,10 @@ class RepositoryServiceProvider extends ServiceProvider
             return new SupplierQuoteRepository();
         });
 
-        $this->app->singleton(SalesInvoiceRepository::class, function ($app) {
-            return new SalesInvoiceRepository();
-        });
+        // SalesInvoiceRepository removed - replaced by CommercialInvoice
+        // $this->app->singleton(SalesInvoiceRepository::class, function ($app) {
+        //     return new SalesInvoiceRepository();
+        // });
 
         $this->app->singleton(PurchaseOrderRepository::class, function ($app) {
             return new PurchaseOrderRepository();

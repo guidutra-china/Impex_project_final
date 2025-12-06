@@ -50,8 +50,8 @@ class ClientOwnershipScope implements Scope
             return;
         }
 
-        // For SalesInvoice (uses client_id -> Client)
-        if ($model instanceof \App\Models\SalesInvoice) {
+        // For CommercialInvoice (uses client_id -> Client)
+        if ($model instanceof \App\Models\CommercialInvoice) {
             $builder->whereHas('client', function ($query) use ($user) {
                 $query->where('user_id', $user->id);
             });
