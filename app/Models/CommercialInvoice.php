@@ -12,7 +12,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class CommercialInvoice extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory;
+    // SoftDeletes removed - not needed for CommercialInvoice
 
     protected $table = 'commercial_invoices';
 
