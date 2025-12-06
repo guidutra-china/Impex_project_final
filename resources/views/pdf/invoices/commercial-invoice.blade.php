@@ -377,16 +377,16 @@
                     <td>{{ $item->unit ?? 'pcs' }}</td>
                     <td class="text-right">
                         @if($version === 'customs' && $invoice->customs_discount_percentage > 0)
-                            {{ $invoice->currency->symbol }}{{ number_format(($item->unit_price / 100) * (1 - $invoice->customs_discount_percentage / 100), 2) }}
+                            {{ $invoice->currency->symbol }}{{ number_format($item->unit_price * (1 - $invoice->customs_discount_percentage / 100), 2) }}
                         @else
-                            {{ $invoice->currency->symbol }}{{ number_format($item->unit_price / 100, 2) }}
+                            {{ $invoice->currency->symbol }}{{ number_format($item->unit_price, 2) }}
                         @endif
                     </td>
                     <td class="text-right">
                         @if($version === 'customs' && $invoice->customs_discount_percentage > 0)
-                            {{ $invoice->currency->symbol }}{{ number_format(($item->total / 100) * (1 - $invoice->customs_discount_percentage / 100), 2) }}
+                            {{ $invoice->currency->symbol }}{{ number_format($item->total * (1 - $invoice->customs_discount_percentage / 100), 2) }}
                         @else
-                            {{ $invoice->currency->symbol }}{{ number_format($item->total / 100, 2) }}
+                            {{ $invoice->currency->symbol }}{{ number_format($item->total, 2) }}
                         @endif
                     </td>
                 </tr>

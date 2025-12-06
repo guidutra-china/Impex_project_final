@@ -230,7 +230,7 @@ class CommercialInvoice extends Model
      */
     public function getCustomsSubtotalCents(): int
     {
-        $originalCents = $this->getRawOriginal('subtotal') ?? 0;
+        $originalCents = $this->getSubtotalCents();
         $discountMultiplier = 1 - ($this->customs_discount_percentage / 100);
         return (int) round($originalCents * $discountMultiplier);
     }
@@ -248,9 +248,8 @@ class CommercialInvoice extends Model
      */
     public function getCustomsTotalCents(): int
     {
-        $customsSubtotalCents = $this->getCustomsSubtotalCents();
-        $taxCents = $this->getRawOriginal('tax') ?? 0;
-        return $customsSubtotalCents + $taxCents;
+        // Commercial Invoice doesn't have separate tax, total = subtotal
+        return $this->getCustomsSubtotalCents();
     }
 
     /**
