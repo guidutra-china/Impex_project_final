@@ -232,6 +232,19 @@
     </style>
 </head>
 <body>
+    @php
+        // Get display options with defaults
+        $displayOptions = $shipment->commercialInvoice->display_options ?? [];
+        $showPaymentTerms = $displayOptions['show_payment_terms'] ?? true;
+        $showBankInfo = $displayOptions['show_bank_info'] ?? true;
+        $showExporterDetails = $displayOptions['show_exporter_details'] ?? true;
+        $showImporterDetails = $displayOptions['show_importer_details'] ?? true;
+        $showShippingDetails = $displayOptions['show_shipping_details'] ?? true;
+        $showSupplierCode = $displayOptions['show_supplier_code'] ?? false;
+        $showHsCodes = $displayOptions['show_hs_codes'] ?? true;
+        $showCountryOfOrigin = $displayOptions['show_country_of_origin'] ?? true;
+        $showWeightVolume = $displayOptions['show_weight_volume'] ?? true;
+    @endphp
     <div class="container">
         <!-- Header -->
         <div class="header">
@@ -254,9 +267,11 @@
         </div>
 
         <!-- Parties -->
+        @if($showExporterDetails || $showImporterDetails)
         <div class="info-section">
             <table class="info-row" cellpadding="0" cellspacing="0">
                 <tr>
+                    @if($showExporterDetails)
                     <td class="info-box">
                         <div class="info-box-title">Exporter:</div>
                         <div class="info-box-content">
@@ -272,7 +287,11 @@
                             @endif
                         </div>
                     </td>
+                    @endif
+                    @if($showExporterDetails && $showImporterDetails)
                     <td style="width: 4%;"></td>
+                    @endif
+                    @if($showImporterDetails)
                     <td class="info-box">
                         <div class="info-box-title">Importer / Consignee:</div>
                         <div class="info-box-content">
@@ -288,9 +307,11 @@
                             @endif
                         </div>
                     </td>
+                    @endif
                 </tr>
             </table>
         </div>
+        @endif
 
         <!-- Invoice & Shipping Details -->
         <div class="info-section">
@@ -315,6 +336,7 @@
                         </div>
                     </td>
                     <td style="width: 4%;"></td>
+                    @if($showShippingDetails)
                     <td class="info-box">
                         <div class="info-box-title">Shipping Details:</div>
                         <div class="info-box-content">
@@ -335,6 +357,11 @@
                             @endif
                         </div>
                     </td>
+                    @else
+                    <td class="info-box">
+                        <!-- Empty space if shipping details hidden -->
+                    </td>
+                    @endif
                 </tr>
             </table>
         </div>
@@ -345,14 +372,14 @@
                 <tr>
                     <th style="width: 5%;">#</th>
                     <th style="width: 10%;">Customer Code</th>
-                    @if($shipment->commercialInvoice->display_options ?? []['show_supplier_code'] ?? false)
+                    @if($showSupplierCode)
                     <th style="width: 10%;">Supplier Code</th>
                     @endif
                     <th style="width: 25%;">Description</th>
-                    @if($shipment->commercialInvoice->display_options ?? []['show_hs_codes'] ?? true)
+                    @if($showHsCodes)
                     <th style="width: 10%;">HS Code</th>
                     @endif
-                    @if($shipment->commercialInvoice->display_options ?? []['show_country_of_origin'] ?? true)
+                    @if($showCountryOfOrigin)
                     <th style="width: 8%;">Origin</th>
                     @endif
                     <th style="width: 6%;" class="text-right">Qty</th>
@@ -366,16 +393,16 @@
                 <tr>
                     <td class="text-center">{{ $index + 1 }}</td>
                     <td>{{ $item['customer_code'] }}</td>
-                    @if($shipment->commercialInvoice->display_options ?? []['show_supplier_code'] ?? false)
+                    @if($showSupplierCode)
                     <td>{{ $item['supplier_code'] }}</td>
                     @endif
                     <td>
                         <strong>{{ $item['display_name'] }}</strong>
                     </td>
-                    @if($shipment->commercialInvoice->display_options ?? []['show_hs_codes'] ?? true)
+                    @if($showHsCodes)
                     <td>{{ $item['hs_code'] }}</td>
                     @endif
-                    @if($shipment->commercialInvoice->display_options ?? []['show_country_of_origin'] ?? true)
+                    @if($showCountryOfOrigin)
                     <td>{{ $item['country_of_origin'] }}</td>
                     @endif
                     <td class="text-right">{{ number_format($item['quantity'], 0) }}</td>
@@ -446,16 +473,16 @@
         </div>
 
         <!-- Payment Information -->
-        @if(($shipment->commercialInvoice->display_options ?? []['show_payment_terms'] ?? true) || ($shipment->commercialInvoice->display_options ?? []['show_bank_info'] ?? true))
+        @if($showPaymentTerms || $showBankInfo)
         <div class="payment-section">
             <div class="payment-title">Payment Information:</div>
-            @if($shipment->proformaInvoices->first()?->paymentTerm && ($shipment->commercialInvoice->display_options ?? []['show_payment_terms'] ?? true))
+            @if($shipment->proformaInvoices->first()?->paymentTerm && $showPaymentTerms)
             <div class="payment-row">
                 <span class="payment-label">Payment Terms:</span>
                 <span>{{ $shipment->proformaInvoices->first()?->paymentTerm->name }}</span>
             </div>
             @endif
-            @if(($shipment->commercialInvoice->display_options ?? []['show_bank_info'] ?? true) && $shipment->commercialInvoice->bank_name ?? "")
+            @if($showBankInfo && ($shipment->commercialInvoice->bank_name ?? ""))
             <div class="payment-row">
                 <span class="payment-label">Bank Name:</span>
                 <span>{{ $shipment->commercialInvoice->bank_name ?? "" }}</span>
