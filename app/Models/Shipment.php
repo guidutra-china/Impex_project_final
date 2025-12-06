@@ -216,15 +216,23 @@ class Shipment extends Model
                 $productId = $item->product_id;
                 
                 if (!isset($aggregated[$productId])) {
+                    $product = $item->product;
+                    $hasCustomerCode = !empty($product->customer_code);
+                    
                     $aggregated[$productId] = [
                         'product_id' => $item->product_id,
-                        'product' => $item->product,
-                        'product_name' => $item->product->name ?? 'Unknown',
-                        'hs_code' => $item->hs_code,
-                        'country_of_origin' => $item->country_of_origin,
+                        'product' => $product,
+                        'product_name' => $product->name ?? 'Unknown',
+                        'customer_code' => $product->customer_code ?? '',
+                        'supplier_code' => $product->supplier_code ?? '',
+                        // If customer_code exists, use description as "customer description", else use product name
+                        'display_name' => $hasCustomerCode ? ($product->description ?? $product->name) : $product->name,
+                        'description' => $product->description ?? '',
+                        'hs_code' => $item->hs_code ?? $product->hs_code ?? '',
+                        'country_of_origin' => $item->country_of_origin ?? $product->origin_country ?? '',
                         'unit_price' => $item->unit_price,
                         'quantity' => 0,
-                        'unit' => $item->product->unit ?? 'pcs',
+                        'unit' => $product->moq_unit ?? 'pcs',
                     ];
                 }
                 

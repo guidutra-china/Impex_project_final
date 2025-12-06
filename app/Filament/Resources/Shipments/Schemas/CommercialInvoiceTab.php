@@ -161,6 +161,11 @@ class CommercialInvoiceTab
                             ->default(true)
                             ->inline(false),
                         
+                        Toggle::make('commercialInvoice.display_options.show_supplier_code')
+                            ->label('Show Supplier Product Code')
+                            ->default(false)
+                            ->inline(false),
+                        
                         Toggle::make('commercialInvoice.display_options.show_hs_codes')
                             ->label('Show HS Codes')
                             ->default(true)

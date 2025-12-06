@@ -344,50 +344,59 @@
             <thead>
                 <tr>
                     <th style="width: 5%;">#</th>
-                    <th style="width: 30%;">Description</th>
+                    <th style="width: 10%;">Customer Code</th>
+                    @if($shipment->commercialInvoice->display_options ?? []['show_supplier_code'] ?? false)
+                    <th style="width: 10%;">Supplier Code</th>
+                    @endif
+                    <th style="width: 25%;">Description</th>
                     @if($shipment->commercialInvoice->display_options ?? []['show_hs_codes'] ?? true)
                     <th style="width: 10%;">HS Code</th>
                     @endif
                     @if($shipment->commercialInvoice->display_options ?? []['show_country_of_origin'] ?? true)
-                    <th style="width: 10%;">Origin</th>
+                    <th style="width: 8%;">Origin</th>
                     @endif
-                    <th style="width: 8%;" class="text-right">Qty</th>
+                    <th style="width: 6%;" class="text-right">Qty</th>
                     <th style="width: 5%;">Unit</th>
-                    <th style="width: 12%;" class="text-right">Unit Price</th>
-                    <th style="width: 12%;" class="text-right">Total</th>
+                    <th style="width: 10%;" class="text-right">Unit Price</th>
+                    <th style="width: 10%;" class="text-right">Total</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach($shipment->getAggregatedItems() as $index => $item)
                 <tr>
                     <td class="text-center">{{ $index + 1 }}</td>
+                    <td>{{ $item['customer_code'] }}</td>
+                    @if($shipment->commercialInvoice->display_options ?? []['show_supplier_code'] ?? false)
+                    <td>{{ $item['supplier_code'] }}</td>
+                    @endif
                     <td>
-                        <strong>{{ $item['product_name'] }}</strong>
-                        @if(isset($item['description']) && $item['description'])
-                        <br><span style="font-size: 7pt; color: #666;">{{ $item['description'] }}</span>
-                        @endif
+                        <strong>{{ $item['display_name'] }}</strong>
                     </td>
                     @if($shipment->commercialInvoice->display_options ?? []['show_hs_codes'] ?? true)
-                    <td>{{ $item['hs_code'] ?? '' }}</td>
+                    <td>{{ $item['hs_code'] }}</td>
                     @endif
                     @if($shipment->commercialInvoice->display_options ?? []['show_country_of_origin'] ?? true)
-                    <td>{{ $item['country_of_origin'] ?? '' }}</td>
+                    <td>{{ $item['country_of_origin'] }}</td>
                     @endif
                     <td class="text-right">{{ number_format($item['quantity'], 0) }}</td>
                     <td>{{ $item['unit'] ?? 'pcs' }}</td>
                     <td class="text-right">
-                        @if($version === 'customs' && $shipment->commercialInvoice->customs_discount_percentage ?? 0 > 0)
-                            {{ $shipment->proformaInvoices->first()?->currency->symbol }}{{ number_format($item['unit_price'] * (1 - ($shipment->commercialInvoice->customs_discount_percentage ?? 0) / 100), 2) }}
-                        @else
-                            {{ $shipment->proformaInvoices->first()?->currency->symbol }}{{ number_format($item['unit_price'], 2) }}
-                        @endif
+                        @php
+                            $discount = ($version === 'customs' && $shipment->commercialInvoice && $shipment->commercialInvoice->customs_discount_percentage > 0) 
+                                ? $shipment->commercialInvoice->customs_discount_percentage 
+                                : 0;
+                            $unitPrice = $item['unit_price'] * (1 - $discount / 100);
+                        @endphp
+                        {{ $shipment->proformaInvoices->first()?->currency->symbol }}{{ number_format($unitPrice, 2) }}
                     </td>
                     <td class="text-right">
-                        @if($version === 'customs' && $shipment->commercialInvoice->customs_discount_percentage ?? 0 > 0)
-                            {{ $shipment->proformaInvoices->first()?->currency->symbol }}{{ number_format(($item['quantity'] * $item['unit_price']) * (1 - ($shipment->commercialInvoice->customs_discount_percentage ?? 0) / 100), 2) }}
-                        @else
-                            {{ $shipment->proformaInvoices->first()?->currency->symbol }}{{ number_format($item['quantity'] * $item['unit_price'], 2) }}
-                        @endif
+                        @php
+                            $discount = ($version === 'customs' && $shipment->commercialInvoice && $shipment->commercialInvoice->customs_discount_percentage > 0) 
+                                ? $shipment->commercialInvoice->customs_discount_percentage 
+                                : 0;
+                            $lineTotal = ($item['quantity'] * $item['unit_price']) * (1 - $discount / 100);
+                        @endphp
+                        {{ $shipment->proformaInvoices->first()?->currency->symbol }}{{ number_format($lineTotal, 2) }}
                     </td>
                 </tr>
                 @endforeach
