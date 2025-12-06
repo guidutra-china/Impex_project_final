@@ -241,6 +241,12 @@ class RFQExcelService
      */
     protected function saveToDocumentHistory(Order $order, string $filePath, string $fileName): void
     {
+        \Log::info('RFQ: saveToDocumentHistory() METHOD CALLED', [
+            'order_id' => $order->id,
+            'file_path' => $filePath,
+            'filename' => $fileName,
+        ]);
+        
         try {
             \Log::info('RFQ: Starting saveToDocumentHistory', [
                 'order_id' => $order->id,
