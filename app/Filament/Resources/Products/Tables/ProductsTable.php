@@ -65,13 +65,12 @@ class ProductsTable
                     ->color('success')
                     ->default('-'),
 
-                TextColumn::make('category.name')
-                    ->label('Category')
+                TextColumn::make('tags.name')
+                    ->label('Tag')
                     ->searchable()
                     ->sortable()
                     ->badge()
-                    ->color(fn ($record) => $record->category?->color ?? 'gray')
-                    ->icon(fn ($record) => $record->category?->icon)
+                    ->color('primary')
                     ->default('-'),
 
                 TextColumn::make('brand')
@@ -183,10 +182,11 @@ class ProductsTable
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                SelectFilter::make('category')
-                    ->relationship('category', 'name')
+                SelectFilter::make('tags')
+                    ->relationship('tags', 'name')
                     ->searchable()
-                    ->preload(),
+                    ->preload()
+                    ->multiple(),
 
                 SelectFilter::make('status')
                     ->options([
