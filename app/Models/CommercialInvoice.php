@@ -272,37 +272,57 @@ class CommercialInvoice extends Model
     // Helper methods
     public function recalculateTotals(): void
     {
-        // Use raw SQL to bypass Attribute getters
-        $subtotalCents = \DB::table('commercial_invoice_items')
-            ->where('commercial_invoice_id', $this->id)
-            ->sum('total');
-        
-        $commissionCents = \DB::table('commercial_invoice_items')
-            ->where('commercial_invoice_id', $this->id)
-            ->sum('commission');
-        
-        // Get tax in cents (raw value from database)
-        $taxCents = $this->getRawOriginal('tax') ?? 0;
-        
-        // Calculate total in cents
-        $totalCents = $subtotalCents + $taxCents;
-        
-        // Calculate total in base currency (in cents)
-        $totalBaseCurrencyCents = $totalCents * ($this->exchange_rate ?? 1);
-        
-        // Use raw SQL update to bypass Eloquent casting
-        \DB::table('commercial_invoices')
-            ->where('id', $this->id)
-            ->update([
-                'subtotal' => $subtotalCents,
-                'commission' => $commissionCents,
-                'total' => $totalCents,
-                'total_base_currency' => $totalBaseCurrencyCents,
-                'updated_at' => now(),
-            ]);
-        
-        // Refresh the model to get the updated values
-        $this->refresh();
+        // Commercial Invoice doesn't store financial totals
+        // Totals are calculated from items on-the-fly or from Proforma Invoice
+        // This method is kept for compatibility but does nothing
+    }
+    
+    /**
+     * Get subtotal from items (in cents)
+     */
+    public function getSubtotalCents(): int
+    {
+        return $this->items()->sum('total');
+    }
+    
+    /**
+     * Get subtotal from items (in decimal)
+     */
+    public function getSubtotal(): float
+    {
+        return $this->getSubtotalCents() / 100;
+    }
+    
+    /**
+     * Get total from items (in cents)
+     */
+    public function getTotalCents(): int
+    {
+        return $this->getSubtotalCents();
+    }
+    
+    /**
+     * Get total from items (in decimal)
+     */
+    public function getTotal(): float
+    {
+        return $this->getTotalCents() / 100;
+    }
+    
+    /**
+     * Get currency from Proforma Invoice
+     */
+    public function getCurrency()
+    {
+        return $this->proformaInvoice?->currency ?? $this->currency;
+    }
+    
+    /**
+     * Get payment terms from Proforma Invoice
+     */
+    public function getPaymentTerms()
+    {
+        return $this->proformaInvoice?->paymentTerm ?? $this->paymentTerm;
     }
 
     public function isOverdue(): bool

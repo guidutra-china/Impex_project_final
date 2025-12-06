@@ -16,8 +16,8 @@ class CommercialInvoiceObserver
 
     public function created(CommercialInvoice $commercialInvoice): void
     {
-        // Recalculate totals after creation
-        $commercialInvoice->recalculateTotals();
+        // Commercial Invoice totals are calculated from items, not stored separately
+        // No need to recalculate here
     }
 
     public function updated(CommercialInvoice $commercialInvoice): void
