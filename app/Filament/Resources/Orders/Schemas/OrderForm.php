@@ -115,16 +115,6 @@ class OrderForm
                                     ->helperText('Tags help match suppliers with this RFQ')
                                     ->columnSpan(1),
 
-                                // Coluna 1 - Tags (for matching suppliers and filtering products)
-                                Select::make('tags')
-                                    ->label('Tags')
-                                    ->relationship('tags', 'name')
-                                    ->multiple()
-                                    ->preload()
-                                    ->searchable()
-                                    ->helperText('Tags are used to match suppliers with relevant products')
-                                    ->columnSpan(1),
-
                                 // Coluna 2 - Commission Type
                                 Select::make('commission_type')
                                     ->options([
