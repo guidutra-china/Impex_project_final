@@ -36,8 +36,7 @@ class CommercialInvoicePdfService
             data: [
                 'shipment' => $shipment->load([
                     'customer',
-                    'items.product',
-                    'containers',
+                    'containers.items.product',
                     'proformaInvoices.currency',
                     'proformaInvoices.paymentTerm',
                     'commercialInvoice',

@@ -204,6 +204,38 @@ class Shipment extends Model
     }
 
     /**
+     * Get aggregated items from all containers
+     * Groups by product and sums quantities
+     */
+    public function getAggregatedItems()
+    {
+        $aggregated = [];
+        
+        foreach ($this->containers as $container) {
+            foreach ($container->items as $item) {
+                $productId = $item->product_id;
+                
+                if (!isset($aggregated[$productId])) {
+                    $aggregated[$productId] = [
+                        'product_id' => $item->product_id,
+                        'product' => $item->product,
+                        'product_name' => $item->product->name ?? 'Unknown',
+                        'hs_code' => $item->hs_code,
+                        'country_of_origin' => $item->country_of_origin,
+                        'unit_price' => $item->unit_price,
+                        'quantity' => 0,
+                        'unit' => $item->product->unit ?? 'pcs',
+                    ];
+                }
+                
+                $aggregated[$productId]['quantity'] += $item->quantity;
+            }
+        }
+        
+        return collect(array_values($aggregated));
+    }
+
+    /**
      * NEW: Commercial invoice
      */
     public function commercialInvoice(): HasOne
