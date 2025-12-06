@@ -258,22 +258,24 @@ class SuppliersToQuoteRelationManager extends RelationManager
                     ->label(function (Supplier $record): string {
                         $status = $this->getSupplierStatus($record);
                         return $status && $status->isSent()
-                            ? 'Sent on ' . $status->sent_at->format('M d')
+                            ? 'Resend RFQ'
                             : 'Send Quotation';
                     })
                     ->icon(function (Supplier $record): string {
                         $status = $this->getSupplierStatus($record);
                         return $status && $status->isSent()
-                            ? 'heroicon-o-check-circle'
+                            ? 'heroicon-o-arrow-path'
                             : 'heroicon-o-paper-airplane';
                     })
                     ->color(function (Supplier $record): string {
                         $status = $this->getSupplierStatus($record);
-                        return $status && $status->isSent() ? 'success' : 'primary';
+                        return $status && $status->isSent() ? 'warning' : 'primary';
                     })
-                    ->disabled(function (Supplier $record): bool {
+                    ->tooltip(function (Supplier $record): ?string {
                         $status = $this->getSupplierStatus($record);
-                        return $status && $status->isSent();
+                        return $status && $status->isSent()
+                            ? 'Last sent: ' . $status->sent_at->format('M d, Y H:i')
+                            : null;
                     })
                     ->form(function (Supplier $record) {
                         $contacts = $record->suppliercontacts()
@@ -373,8 +375,22 @@ class SuppliersToQuoteRelationManager extends RelationManager
                         }
                     })
                     ->requiresConfirmation()
-                    ->modalHeading('Send Quotation Request')
-                    ->modalSubmitActionLabel('Send'),
+                    ->modalHeading(function (Supplier $record): string {
+                        $status = $this->getSupplierStatus($record);
+                        return $status && $status->isSent()
+                            ? 'Resend RFQ to Supplier'
+                            : 'Send Quotation Request';
+                    })
+                    ->modalDescription(function (Supplier $record): ?string {
+                        $status = $this->getSupplierStatus($record);
+                        return $status && $status->isSent()
+                            ? 'This RFQ was already sent on ' . $status->sent_at->format('M d, Y \a\t H:i') . '. Are you sure you want to resend it?'
+                            : null;
+                    })
+                    ->modalSubmitActionLabel(function (Supplier $record): string {
+                        $status = $this->getSupplierStatus($record);
+                        return $status && $status->isSent() ? 'Resend' : 'Send';
+                    }),
 
                 Action::make('send_all')
                     ->label('Send All')
