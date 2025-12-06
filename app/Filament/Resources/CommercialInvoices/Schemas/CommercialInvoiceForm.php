@@ -192,9 +192,9 @@ class CommercialInvoiceForm
                         ->maxLength(100),
 
                     TextInput::make('exporter_country')
-                        ->label('Country Code (ISO 2)')
-                        ->maxLength(2)
-                        ->placeholder('US, CN, BR, etc.'),
+                        ->label('Country')
+                        ->maxLength(100)
+                        ->placeholder('Hong Kong, China, Brazil, etc.'),
                 ])
                 ->columns(1)
                 ->collapsible(),
@@ -214,9 +214,9 @@ class CommercialInvoiceForm
                         ->maxLength(100),
 
                     TextInput::make('importer_country')
-                        ->label('Country Code (ISO 2)')
-                        ->maxLength(2)
-                        ->placeholder('US, CN, BR, etc.'),
+                        ->label('Country')
+                        ->maxLength(100)
+                        ->placeholder('Portugal, United States, etc.'),
                 ])
                 ->columns(1)
                 ->collapsible(),
