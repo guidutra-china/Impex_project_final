@@ -88,6 +88,16 @@ class RFQExcelService
         $sheet->getStyle('A' . $currentRow)->applyFromArray($labelStyle);
         $currentRow++;
 
+        // Supplier (if provided)
+        if ($supplier) {
+            $sheet->setCellValue('A' . $currentRow, 'Supplier:');
+            $supplierInfo = $supplier->supplier_code ? "{$supplier->supplier_code} - {$supplier->name}" : $supplier->name;
+            $sheet->setCellValue('B' . $currentRow, $supplierInfo);
+            $sheet->mergeCells('B' . $currentRow . ':E' . $currentRow);
+            $sheet->getStyle('A' . $currentRow)->applyFromArray($labelStyle);
+            $currentRow++;
+        }
+
         // Customer Request
         $sheet->setCellValue('A' . $currentRow, 'Customer Request:');
         $sheet->getStyle('A' . $currentRow)->applyFromArray($labelStyle);
