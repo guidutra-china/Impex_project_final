@@ -24,94 +24,37 @@ class CommercialInvoice extends Model
 
     protected $fillable = [
         'invoice_number',
-        'revision_number',
-        'client_id',
-        'shipment_id',
-        'proforma_invoice_id',
-        'payment_term_id',
-        'currency_id',
-        'base_currency_id',
+        'shipment_id', // REQUIRED - link to Shipment
         
-        // Dates
-        'invoice_date',
-        'shipment_date',
-        'due_date',
-        'payment_date',
-        
-        // Financial (stored in cents)
-        'exchange_rate',
+        // Customs discount
         'customs_discount_percentage',
-        'subtotal',
-        'commission',
-        'tax',
-        'total',
-        'total_base_currency',
         
-        // Incoterms
-        'incoterm',
-        'incoterm_location',
-        
-        // Exporter details
+        // Exporter details (auto-filled from Company Settings)
         'exporter_name',
         'exporter_address',
         'exporter_tax_id',
         'exporter_country',
         
-        // Importer details
+        // Importer details (auto-filled from Customer)
         'importer_name',
         'importer_address',
         'importer_tax_id',
         'importer_country',
         
-        // Shipping details
-        'port_of_loading',
-        'port_of_discharge',
-        'final_destination',
-        'bl_number',
-        'container_numbers',
-        
-        // Payment details
-        'payment_method',
-        'payment_reference',
+        // Bank details (auto-filled from Company Settings)
         'bank_name',
         'bank_account',
         'bank_swift',
         'bank_address',
         
-        // Status and additional info
-        'status',
+        // Additional info
         'notes',
         'terms_and_conditions',
-        'display_options',
-        
-        // Timestamps
-        'sent_at',
-        'paid_at',
-        'cancelled_at',
-        'cancellation_reason',
-        
-        // Deposit fields (kept for compatibility, can be removed later)
-        'deposit_required',
-        'deposit_amount',
-        'deposit_received',
-        'deposit_received_at',
-        'deposit_payment_method',
-        'deposit_payment_reference',
+        'display_options', // JSON for PDF/Excel display options
     ];
 
     protected $casts = [
-        'invoice_date' => 'date',
-        'shipment_date' => 'date',
-        'due_date' => 'date',
-        'payment_date' => 'date',
-        'exchange_rate' => 'decimal:6',
         'customs_discount_percentage' => 'decimal:2',
-        'sent_at' => 'datetime',
-        'paid_at' => 'datetime',
-        'cancelled_at' => 'datetime',
-        'deposit_received' => 'boolean',
-        'deposit_required' => 'boolean',
-        'deposit_received_at' => 'datetime',
         'display_options' => 'array',
     ];
 
