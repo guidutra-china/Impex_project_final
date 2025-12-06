@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Commercial Invoice {{ $invoice->invoice_number }}</title>
+    <title>Commercial Invoice {{ $shipment->commercialInvoice->invoice_number ?? "CI-" . $shipment->shipment_number }}</title>
     <style>
         * {
             margin: 0;
@@ -247,7 +247,7 @@
                     </td>
                     <td style="width: 50%; vertical-align: top; text-align: right;">
                         <div class="document-title">COMMERCIAL INVOICE</div>
-                        <div class="document-number">{{ $invoice->invoice_number }}</div>
+                        <div class="document-number">{{ $shipment->commercialInvoice->invoice_number ?? "CI-" . $shipment->shipment_number }}</div>
                     </td>
                 </tr>
             </table>
@@ -260,15 +260,15 @@
                     <td class="info-box">
                         <div class="info-box-title">Exporter:</div>
                         <div class="info-box-content">
-                            <p><strong>{{ $invoice->exporter_name ?? ($companySettings->company_name ?? config('app.name')) }}</strong></p>
-                            @if($invoice->exporter_address)
-                            <p>{{ $invoice->exporter_address }}</p>
+                            <p><strong>{{ $shipment->commercialInvoice->exporter_name ?? "" ?? ($companySettings->company_name ?? config('app.name')) }}</strong></p>
+                            @if($shipment->commercialInvoice->exporter_address ?? "")
+                            <p>{{ $shipment->commercialInvoice->exporter_address ?? "" }}</p>
                             @endif
-                            @if($invoice->exporter_country)
-                            <p>{{ $invoice->exporter_country }}</p>
+                            @if($shipment->commercialInvoice->exporter_country ?? "")
+                            <p>{{ $shipment->commercialInvoice->exporter_country ?? "" }}</p>
                             @endif
-                            @if($invoice->exporter_tax_id)
-                            <p>Tax ID: {{ $invoice->exporter_tax_id }}</p>
+                            @if($shipment->commercialInvoice->exporter_tax_id ?? "")
+                            <p>Tax ID: {{ $shipment->commercialInvoice->exporter_tax_id ?? "" }}</p>
                             @endif
                         </div>
                     </td>
@@ -276,15 +276,15 @@
                     <td class="info-box">
                         <div class="info-box-title">Importer / Consignee:</div>
                         <div class="info-box-content">
-                            <p><strong>{{ $invoice->importer_name ?? $invoice->client->name }}</strong></p>
-                            @if($invoice->importer_address)
-                            <p>{{ $invoice->importer_address }}</p>
+                            <p><strong>{{ $shipment->commercialInvoice->importer_name ?? "" ?? $shipment->customer->name }}</strong></p>
+                            @if($shipment->commercialInvoice->importer_address ?? "")
+                            <p>{{ $shipment->commercialInvoice->importer_address ?? "" }}</p>
                             @endif
-                            @if($invoice->importer_country)
-                            <p>{{ $invoice->importer_country }}</p>
+                            @if($shipment->commercialInvoice->importer_country ?? "")
+                            <p>{{ $shipment->commercialInvoice->importer_country ?? "" }}</p>
                             @endif
-                            @if($invoice->importer_tax_id)
-                            <p>Tax ID: {{ $invoice->importer_tax_id }}</p>
+                            @if($shipment->commercialInvoice->importer_tax_id ?? "")
+                            <p>Tax ID: {{ $shipment->commercialInvoice->importer_tax_id ?? "" }}</p>
                             @endif
                         </div>
                     </td>
@@ -299,18 +299,18 @@
                     <td class="info-box">
                         <div class="info-box-title">Invoice Details:</div>
                         <div class="info-box-content">
-                            <p><strong>Invoice Date:</strong> {{ $invoice->invoice_date?->format('M d, Y') ?? date('M d, Y') }}</p>
-                            @if($invoice->shipment_date)
-                            <p><strong>Shipment Date:</strong> {{ $invoice->shipment_date->format('M d, Y') }}</p>
+                            <p><strong>Invoice Date:</strong> {{ $shipment->actual_departure_date ?? $shipment->estimated_departure_date?->format('M d, Y') ?? date('M d, Y') }}</p>
+                            @if($shipment->actual_departure_date ?? $shipment->estimated_departure_date)
+                            <p><strong>Shipment Date:</strong> {{ $shipment->actual_departure_date ?? $shipment->estimated_departure_date->format('M d, Y') }}</p>
                             @endif
-                            @if($invoice->due_date)
-                            <p><strong>Due Date:</strong> {{ $invoice->due_date->format('M d, Y') }}</p>
+                            @if($shipment->commercialInvoice->due_date ?? null)
+                            <p><strong>Due Date:</strong> {{ $shipment->commercialInvoice->due_date ?? null->format('M d, Y') }}</p>
                             @endif
-                            @if($invoice->currency)
-                            <p><strong>Currency:</strong> {{ $invoice->currency->code }}</p>
+                            @if($shipment->proformaInvoices->first()?->currency)
+                            <p><strong>Currency:</strong> {{ $shipment->proformaInvoices->first()?->currency->code }}</p>
                             @endif
-                            @if($invoice->incoterm)
-                            <p><strong>INCOTERMS:</strong> {{ $invoice->incoterm }}@if($invoice->incoterm_location) - {{ $invoice->incoterm_location }}@endif</p>
+                            @if($shipment->incoterm)
+                            <p><strong>INCOTERMS:</strong> {{ $shipment->incoterm }}@if($shipment->incoterm_location) - {{ $shipment->incoterm_location }}@endif</p>
                             @endif
                         </div>
                     </td>
@@ -318,20 +318,20 @@
                     <td class="info-box">
                         <div class="info-box-title">Shipping Details:</div>
                         <div class="info-box-content">
-                            @if($invoice->port_of_loading)
-                            <p><strong>Port of Loading:</strong> {{ $invoice->port_of_loading }}</p>
+                            @if($shipment->origin_port)
+                            <p><strong>Port of Loading:</strong> {{ $shipment->origin_port }}</p>
                             @endif
-                            @if($invoice->port_of_discharge)
-                            <p><strong>Port of Discharge:</strong> {{ $invoice->port_of_discharge }}</p>
+                            @if($shipment->destination_port)
+                            <p><strong>Port of Discharge:</strong> {{ $shipment->destination_port }}</p>
                             @endif
-                            @if($invoice->final_destination)
-                            <p><strong>Final Destination:</strong> {{ $invoice->final_destination }}</p>
+                            @if($shipment->destination_address)
+                            <p><strong>Final Destination:</strong> {{ $shipment->destination_address }}</p>
                             @endif
-                            @if($invoice->bl_number)
-                            <p><strong>B/L Number:</strong> {{ $invoice->bl_number }}</p>
+                            @if($shipment->bill_of_lading_number)
+                            <p><strong>B/L Number:</strong> {{ $shipment->bill_of_lading_number }}</p>
                             @endif
-                            @if($invoice->container_numbers)
-                            <p><strong>Container(s):</strong> {{ $invoice->container_numbers }}</p>
+                            @if($shipment->containers->pluck("container_number")->join(", "))
+                            <p><strong>Container(s):</strong> {{ $shipment->containers->pluck("container_number")->join(", ") }}</p>
                             @endif
                         </div>
                     </td>
@@ -345,10 +345,10 @@
                 <tr>
                     <th style="width: 5%;">#</th>
                     <th style="width: 30%;">Description</th>
-                    @if($invoice->display_options['show_hs_codes'] ?? true)
+                    @if($shipment->commercialInvoice->display_options ?? []['show_hs_codes'] ?? true)
                     <th style="width: 10%;">HS Code</th>
                     @endif
-                    @if($invoice->display_options['show_country_of_origin'] ?? true)
+                    @if($shipment->commercialInvoice->display_options ?? []['show_country_of_origin'] ?? true)
                     <th style="width: 10%;">Origin</th>
                     @endif
                     <th style="width: 8%;" class="text-right">Qty</th>
@@ -358,7 +358,7 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach($invoice->items as $index => $item)
+                @foreach($shipment->items as $index => $item)
                 <tr>
                     <td class="text-center">{{ $index + 1 }}</td>
                     <td>
@@ -367,26 +367,26 @@
                         <br><span style="font-size: 7pt; color: #666;">{{ $item->description }}</span>
                         @endif
                     </td>
-                    @if($invoice->display_options['show_hs_codes'] ?? true)
+                    @if($shipment->commercialInvoice->display_options ?? []['show_hs_codes'] ?? true)
                     <td>{{ $item->hs_code }}</td>
                     @endif
-                    @if($invoice->display_options['show_country_of_origin'] ?? true)
+                    @if($shipment->commercialInvoice->display_options ?? []['show_country_of_origin'] ?? true)
                     <td>{{ $item->country_of_origin }}</td>
                     @endif
                     <td class="text-right">{{ number_format($item->quantity, 0) }}</td>
                     <td>{{ $item->unit ?? 'pcs' }}</td>
                     <td class="text-right">
-                        @if($version === 'customs' && $invoice->customs_discount_percentage > 0)
-                            {{ $invoice->currency->symbol }}{{ number_format($item->unit_price * (1 - $invoice->customs_discount_percentage / 100), 2) }}
+                        @if($version === 'customs' && $shipment->commercialInvoice->customs_discount_percentage ?? 0 > 0)
+                            {{ $shipment->proformaInvoices->first()?->currency->symbol }}{{ number_format($item->unit_price * (1 - $shipment->commercialInvoice->customs_discount_percentage ?? 0 / 100), 2) }}
                         @else
-                            {{ $invoice->currency->symbol }}{{ number_format($item->unit_price, 2) }}
+                            {{ $shipment->proformaInvoices->first()?->currency->symbol }}{{ number_format($item->unit_price, 2) }}
                         @endif
                     </td>
                     <td class="text-right">
-                        @if($version === 'customs' && $invoice->customs_discount_percentage > 0)
-                            {{ $invoice->currency->symbol }}{{ number_format($item->total * (1 - $invoice->customs_discount_percentage / 100), 2) }}
+                        @if($version === 'customs' && $shipment->commercialInvoice->customs_discount_percentage ?? 0 > 0)
+                            {{ $shipment->proformaInvoices->first()?->currency->symbol }}{{ number_format($item->total * (1 - $shipment->commercialInvoice->customs_discount_percentage ?? 0 / 100), 2) }}
                         @else
-                            {{ $invoice->currency->symbol }}{{ number_format($item->total, 2) }}
+                            {{ $shipment->proformaInvoices->first()?->currency->symbol }}{{ number_format($item->total, 2) }}
                         @endif
                     </td>
                 </tr>
@@ -401,10 +401,10 @@
                     <tr>
                         <td class="total-label">Subtotal:</td>
                         <td class="text-right">
-                            @if($version === 'customs' && $invoice->customs_discount_percentage > 0)
-                                {{ $invoice->currency->symbol }}{{ number_format($invoice->getCustomsSubtotal(), 2) }}
+                            @if($version === 'customs' && $shipment->commercialInvoice->customs_discount_percentage ?? 0 > 0)
+                                {{ $shipment->proformaInvoices->first()?->currency->symbol }}{{ number_format($shipment->items->sum("total") * (1 - ($shipment->commercialInvoice->customs_discount_percentage ?? 0) / 100), 2) }}
                             @else
-                                {{ $invoice->currency->symbol }}{{ number_format($invoice->getSubtotal(), 2) }}
+                                {{ $shipment->proformaInvoices->first()?->currency->symbol }}{{ number_format($shipment->items->sum("total"), 2) }}
                             @endif
                         </td>
                     </tr>
@@ -415,10 +415,10 @@
                     <tr>
                         <td>TOTAL:</td>
                         <td class="text-right">
-                            @if($version === 'customs' && $invoice->customs_discount_percentage > 0)
-                                {{ $invoice->currency->symbol }}{{ number_format($invoice->getCustomsTotal(), 2) }}
+                            @if($version === 'customs' && $shipment->commercialInvoice->customs_discount_percentage ?? 0 > 0)
+                                {{ $shipment->proformaInvoices->first()?->currency->symbol }}{{ number_format($shipment->items->sum("total") * (1 - ($shipment->commercialInvoice->customs_discount_percentage ?? 0) / 100), 2) }}
                             @else
-                                {{ $invoice->currency->symbol }}{{ number_format($invoice->getTotal(), 2) }}
+                                {{ $shipment->proformaInvoices->first()?->currency->symbol }}{{ number_format($shipment->items->sum("total"), 2) }}
                             @endif
                         </td>
                     </tr>
@@ -427,36 +427,36 @@
         </div>
 
         <!-- Payment Information -->
-        @if(($invoice->display_options['show_payment_terms'] ?? true) || ($invoice->display_options['show_bank_info'] ?? true))
+        @if(($shipment->commercialInvoice->display_options ?? []['show_payment_terms'] ?? true) || ($shipment->commercialInvoice->display_options ?? []['show_bank_info'] ?? true))
         <div class="payment-section">
             <div class="payment-title">Payment Information:</div>
-            @if($invoice->paymentTerm && ($invoice->display_options['show_payment_terms'] ?? true))
+            @if($shipment->proformaInvoices->first()?->paymentTerm && ($shipment->commercialInvoice->display_options ?? []['show_payment_terms'] ?? true))
             <div class="payment-row">
                 <span class="payment-label">Payment Terms:</span>
-                <span>{{ $invoice->paymentTerm->name }}</span>
+                <span>{{ $shipment->proformaInvoices->first()?->paymentTerm->name }}</span>
             </div>
             @endif
-            @if(($invoice->display_options['show_bank_info'] ?? true) && $invoice->bank_name)
+            @if(($shipment->commercialInvoice->display_options ?? []['show_bank_info'] ?? true) && $shipment->commercialInvoice->bank_name ?? "")
             <div class="payment-row">
                 <span class="payment-label">Bank Name:</span>
-                <span>{{ $invoice->bank_name }}</span>
+                <span>{{ $shipment->commercialInvoice->bank_name ?? "" }}</span>
             </div>
-            @if($invoice->bank_account)
+            @if($shipment->commercialInvoice->bank_account ?? "")
             <div class="payment-row">
                 <span class="payment-label">Account Number:</span>
-                <span>{{ $invoice->bank_account }}</span>
+                <span>{{ $shipment->commercialInvoice->bank_account ?? "" }}</span>
             </div>
             @endif
-            @if($invoice->bank_swift)
+            @if($shipment->commercialInvoice->bank_swift ?? "")
             <div class="payment-row">
                 <span class="payment-label">SWIFT Code:</span>
-                <span>{{ $invoice->bank_swift }}</span>
+                <span>{{ $shipment->commercialInvoice->bank_swift ?? "" }}</span>
             </div>
             @endif
-            @if($invoice->bank_address)
+            @if($shipment->commercialInvoice->bank_address ?? "")
             <div class="payment-row">
                 <span class="payment-label">Bank Address:</span>
-                <span>{{ $invoice->bank_address }}</span>
+                <span>{{ $shipment->commercialInvoice->bank_address ?? "" }}</span>
             </div>
             @endif
             @endif
@@ -464,18 +464,18 @@
         @endif
 
         <!-- Notes -->
-        @if($invoice->notes)
+        @if($shipment->commercialInvoice->notes ?? "")
         <div class="notes-section">
             <div class="notes-title">Notes:</div>
-            <div class="notes-content">{{ $invoice->notes }}</div>
+            <div class="notes-content">{{ $shipment->commercialInvoice->notes ?? "" }}</div>
         </div>
         @endif
 
         <!-- Terms and Conditions -->
-        @if($invoice->terms_and_conditions)
+        @if($shipment->commercialInvoice->terms_and_conditions ?? "")
         <div class="notes-section">
             <div class="notes-title">Terms and Conditions:</div>
-            <div class="notes-content">{{ $invoice->terms_and_conditions }}</div>
+            <div class="notes-content">{{ $shipment->commercialInvoice->terms_and_conditions ?? "" }}</div>
         </div>
         @endif
 
