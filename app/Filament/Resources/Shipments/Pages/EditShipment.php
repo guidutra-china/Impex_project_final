@@ -17,6 +17,38 @@ class EditShipment extends EditRecord
 {
     protected static string $resource = ShipmentResource::class;
 
+    /**
+     * Handle saving of commercialInvoice relationship data
+     */
+    protected function mutateFormDataBeforeSave(array $data): array
+    {
+        // Extract commercialInvoice data before saving Shipment
+        if (isset($data['commercialInvoice'])) {
+            $this->commercialInvoiceData = $data['commercialInvoice'];
+            unset($data['commercialInvoice']);
+        }
+        
+        return $data;
+    }
+
+    /**
+     * Save commercialInvoice after Shipment is saved
+     */
+    protected function afterSave(): void
+    {
+        if (isset($this->commercialInvoiceData)) {
+            // Get or create CommercialInvoice
+            $commercialInvoice = $this->record->commercialInvoice ?? new CommercialInvoice();
+            $commercialInvoice->shipment_id = $this->record->id;
+            
+            // Fill data
+            $commercialInvoice->fill($this->commercialInvoiceData);
+            $commercialInvoice->save();
+        }
+    }
+
+    protected array $commercialInvoiceData = [];
+
     protected function getHeaderActions(): array
     {
         return [
