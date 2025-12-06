@@ -401,10 +401,15 @@
                     <tr>
                         <td class="total-label">Subtotal:</td>
                         <td class="text-right">
+                            @php
+                                $itemsTotal = $shipment->getAggregatedItems()->sum(function($item) {
+                                    return $item['quantity'] * $item['unit_price'];
+                                });
+                            @endphp
                             @if($version === 'customs' && $shipment->commercialInvoice->customs_discount_percentage ?? 0 > 0)
-                                {{ $shipment->proformaInvoices->first()?->currency->symbol }}{{ number_format($shipment->items->sum("total") * (1 - ($shipment->commercialInvoice->customs_discount_percentage ?? 0) / 100), 2) }}
+                                {{ $shipment->proformaInvoices->first()?->currency->symbol }}{{ number_format($itemsTotal * (1 - ($shipment->commercialInvoice->customs_discount_percentage ?? 0) / 100), 2) }}
                             @else
-                                {{ $shipment->proformaInvoices->first()?->currency->symbol }}{{ number_format($shipment->items->sum("total"), 2) }}
+                                {{ $shipment->proformaInvoices->first()?->currency->symbol }}{{ number_format($itemsTotal, 2) }}
                             @endif
                         </td>
                     </tr>
@@ -415,10 +420,15 @@
                     <tr>
                         <td>TOTAL:</td>
                         <td class="text-right">
+                            @php
+                                $itemsTotal = $shipment->getAggregatedItems()->sum(function($item) {
+                                    return $item['quantity'] * $item['unit_price'];
+                                });
+                            @endphp
                             @if($version === 'customs' && $shipment->commercialInvoice->customs_discount_percentage ?? 0 > 0)
-                                {{ $shipment->proformaInvoices->first()?->currency->symbol }}{{ number_format($shipment->items->sum("total") * (1 - ($shipment->commercialInvoice->customs_discount_percentage ?? 0) / 100), 2) }}
+                                {{ $shipment->proformaInvoices->first()?->currency->symbol }}{{ number_format($itemsTotal * (1 - ($shipment->commercialInvoice->customs_discount_percentage ?? 0) / 100), 2) }}
                             @else
-                                {{ $shipment->proformaInvoices->first()?->currency->symbol }}{{ number_format($shipment->items->sum("total"), 2) }}
+                                {{ $shipment->proformaInvoices->first()?->currency->symbol }}{{ number_format($itemsTotal, 2) }}
                             @endif
                         </td>
                     </tr>
