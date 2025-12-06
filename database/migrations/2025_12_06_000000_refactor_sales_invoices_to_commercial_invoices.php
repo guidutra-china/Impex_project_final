@@ -14,8 +14,11 @@ return new class extends Migration
     {
         // Step 1: Add new fields to sales_invoices before renaming
         Schema::table('sales_invoices', function (Blueprint $table) {
-            // Shipment relationship (REQUIRED - CI always linked to shipment)
-            $table->foreignId('shipment_id')->after('client_id')->constrained()->cascadeOnDelete();
+            // Shipment relationship (nullable for existing records, required for new ones)
+            $table->foreignId('shipment_id')->nullable()->after('client_id')->constrained()->cascadeOnDelete();
+            
+            // Proforma Invoice reference (optional)
+            $table->foreignId('proforma_invoice_id')->nullable()->after('shipment_id')->constrained()->nullOnDelete();
             
             // Customs and shipping fields
             $table->decimal('customs_discount_percentage', 5, 2)->default(0)->after('exchange_rate')
