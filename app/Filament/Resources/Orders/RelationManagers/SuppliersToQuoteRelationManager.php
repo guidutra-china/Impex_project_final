@@ -87,19 +87,23 @@ class SuppliersToQuoteRelationManager extends RelationManager
                     ->state(function (Supplier $record) {
                         $owner = $this->getOwnerRecord();
                         
-                        // Get tags from Order (Tags for Suppliers field)
-                        $orderTagIds = $owner->tags()->pluck('tags.id')->toArray();
+                        // Get tags from this specific Supplier
+                        $supplierTagIds = $record->tags()->pluck('tags.id')->toArray();
                         
-                        if (empty($orderTagIds)) {
+                        if (empty($supplierTagIds)) {
                             return 'None';
                         }
                         
-                        // Get products from Order items that have matching tags
+                        // Get products from Order items that have tags matching this supplier's tags
                         $productIds = $owner->items()->pluck('product_id')->toArray();
                         
+                        if (empty($productIds)) {
+                            return 'None';
+                        }
+                        
                         $matchedProducts = \App\Models\Product::whereIn('id', $productIds)
-                            ->whereHas('tags', function ($q) use ($orderTagIds) {
-                                $q->whereIn('tags.id', $orderTagIds);
+                            ->whereHas('tags', function ($q) use ($supplierTagIds) {
+                                $q->whereIn('tags.id', $supplierTagIds);
                             })
                             ->get();
                         
