@@ -35,18 +35,13 @@ class ProductForm
                                 Select::make('tags')
                                     ->label('Tag')
                                     ->relationship('tags', 'name')
+                                    ->multiple()
                                     ->searchable()
                                     ->preload()
                                     ->required()
+                                    ->maxItems(1)
                                     ->helperText('Select ONE tag for this product (used for supplier matching)')
-                                    ->columnSpan(1)
-                                    ->rules([
-                                        fn(): \Closure => function (string $attribute, $value, \Closure $fail) {
-                                            if (is_array($value) && count($value) > 1) {
-                                                $fail('Product can have only ONE tag.');
-                                            }
-                                        },
-                                    ]),
+                                    ->columnSpan(1),
 
                                 TextInput::make('name')
                                     ->label('Product Name')
