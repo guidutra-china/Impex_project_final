@@ -32,7 +32,7 @@
         .document-title {
             font-size: 16pt;
             font-weight: bold;
-            color: #059669;
+            color: #2563eb;
             margin-bottom: 5px;
         }
         
@@ -81,8 +81,8 @@
         .shipping-section {
             margin: 15px 0;
             padding: 10px;
-            background: #ecfdf5;
-            border: 1px solid #059669;
+            background: #eff6ff;
+            border: 1px solid #2563eb;
         }
         
         .shipping-row {
@@ -94,7 +94,7 @@
             display: inline-block;
             width: 140px;
             font-weight: bold;
-            color: #047857;
+            color: #1e40af;
         }
         
         /* Table */
@@ -105,7 +105,7 @@
         }
         
         .items-table thead {
-            background: #047857;
+            background: #1f2937;
             color: white;
         }
         
@@ -190,7 +190,12 @@
     <div class="container">
         @php
             $packingList = $shipment->packingList;
+            $commercialInvoice = $shipment->commercialInvoice;
             $displayOptions = $packingList->display_options ?? [];
+            
+            // Use Commercial Invoice number and date
+            $invoiceNumber = $commercialInvoice?->invoice_number ?? 'N/A';
+            $invoiceDate = $commercialInvoice?->invoice_date ?? now();
             
             // Fallback to Company Settings for Exporter
             $exporterName = $packingList->exporter_name ?? $companySettings?->company_name ?? 'N/A';
@@ -212,9 +217,9 @@
         <!-- Header -->
         <div class="header">
             <div class="document-title">PACKING LIST</div>
-            <div class="document-number">{{ $packingList->packing_list_number ?? 'PL-' . $shipment->shipment_number }}</div>
+            <div class="document-number">{{ $invoiceNumber }}</div>
             <div style="font-size: 8pt; margin-top: 5px;">
-                <strong>Date:</strong> {{ $packingList->packing_date?->format('d/m/Y') ?? now()->format('d/m/Y') }}
+                <strong>Date:</strong> {{ $invoiceDate->format('d/m/Y') }}
             </div>
         </div>
 
@@ -326,10 +331,17 @@
                         @php
                             $product = $item->product;
                             $qty = $item->quantity ?? 0;
-                            $cartons = $item->cartons ?? 0;
+                            
+                            // Calculate cartons: quantity / pcs_per_carton (rounded up)
+                            $pcsPerCarton = $product->pcs_per_carton ?? 1;
+                            $cartons = $pcsPerCarton > 0 ? ceil($qty / $pcsPerCarton) : 0;
+                            
+                            // Use total_volume from item (already calculated) or calculate from product
+                            $volume = $item->total_volume ?? (($product->volume ?? 0) * $qty);
+                            
+                            // Calculate weights
                             $netWeight = ($product->net_weight ?? 0) * $qty;
                             $grossWeight = ($product->gross_weight ?? 0) * $qty;
-                            $volume = ($product->volume ?? 0) * $qty;
                             
                             $totalQty += $qty;
                             $totalCartons += $cartons;

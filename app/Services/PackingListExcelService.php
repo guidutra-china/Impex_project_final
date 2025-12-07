@@ -34,7 +34,7 @@ class PackingListExcelService
         // Styling
         $headerStyle = [
             'font' => ['bold' => true, 'size' => 16, 'color' => ['rgb' => 'FFFFFF']],
-            'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '059669']], // Green
+            'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '2563eb']], // Blue
             'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER],
         ];
 
@@ -45,7 +45,7 @@ class PackingListExcelService
 
         $tableHeaderStyle = [
             'font' => ['bold' => true, 'size' => 10, 'color' => ['rgb' => 'FFFFFF']],
-            'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '047857']],
+            'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '1f2937']],
             'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER],
             'borders' => [
                 'allBorders' => ['borderStyle' => Border::BORDER_THIN, 'color' => ['rgb' => '000000']],
@@ -69,14 +69,18 @@ class PackingListExcelService
         $sheet->getRowDimension($currentRow)->setRowHeight(35);
         $currentRow += 2;
 
-        // Packing List Information
-        $sheet->setCellValue('A' . $currentRow, 'Packing List Number:');
-        $sheet->setCellValue('B' . $currentRow, $packingList->packing_list_number ?? 'PL-' . $shipment->shipment_number);
+        // Packing List Information - Use Commercial Invoice number and date
+        $commercialInvoice = $shipment->commercialInvoice;
+        $invoiceNumber = $commercialInvoice?->invoice_number ?? 'N/A';
+        $invoiceDate = $commercialInvoice?->invoice_date ?? now();
+        
+        $sheet->setCellValue('A' . $currentRow, 'Invoice Number:');
+        $sheet->setCellValue('B' . $currentRow, $invoiceNumber);
         $sheet->getStyle('A' . $currentRow)->applyFromArray($labelStyle);
         $currentRow++;
 
         $sheet->setCellValue('A' . $currentRow, 'Date:');
-        $sheet->setCellValue('B' . $currentRow, $packingList->packing_date?->format('d/m/Y') ?? now()->format('d/m/Y'));
+        $sheet->setCellValue('B' . $currentRow, $invoiceDate->format('d/m/Y'));
         $sheet->getStyle('A' . $currentRow)->applyFromArray($labelStyle);
         $currentRow += 2;
 
@@ -209,10 +213,17 @@ class PackingListExcelService
             foreach ($container->items as $item) {
                 $product = $item->product;
                 $qty = $item->quantity ?? 0;
-                $cartons = $item->cartons ?? 0;
+                
+                // Calculate cartons: quantity / pcs_per_carton (rounded up)
+                $pcsPerCarton = $product->pcs_per_carton ?? 1;
+                $cartons = $pcsPerCarton > 0 ? ceil($qty / $pcsPerCarton) : 0;
+                
+                // Use total_volume from item (already calculated) or calculate from product
+                $volume = $item->total_volume ?? (($product->volume ?? 0) * $qty);
+                
+                // Calculate weights
                 $netWeight = ($product->net_weight ?? 0) * $qty;
                 $grossWeight = ($product->gross_weight ?? 0) * $qty;
-                $volume = ($product->volume ?? 0) * $qty;
                 
                 $totalQty += $qty;
                 $totalCartons += $cartons;
