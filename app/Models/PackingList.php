@@ -111,7 +111,7 @@ class PackingList extends Model
         
         // Basic info
         $packingList->shipment_id = $shipment->id;
-        $packingList->client_id = $shipment->customer->client_id ?? auth()->user()->client_id;
+        $packingList->client_id = $shipment->customer_id;
         $packingList->packing_date = now();
         
         // Shipping details from shipment
