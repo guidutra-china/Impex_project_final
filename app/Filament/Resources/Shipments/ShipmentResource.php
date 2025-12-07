@@ -6,6 +6,7 @@ use App\Filament\Resources\Shipments\Pages\CreateShipment;
 use App\Filament\Resources\Shipments\Pages\EditShipment;
 use App\Filament\Resources\Shipments\Pages\ListShipments;
 use App\Filament\Resources\Shipments\Pages\ViewShipment;
+use App\Filament\Resources\Shipments\Pages\ViewContainerItems;
 use App\Filament\Resources\Shipments\RelationManagers\InvoicesRelationManager;
 use App\Filament\Resources\Shipments\RelationManagers\ItemsRelationManager;
 use App\Filament\Resources\Shipments\RelationManagers\PackingBoxesRelationManager;
@@ -59,6 +60,7 @@ class ShipmentResource extends Resource
             'create' => CreateShipment::route('/create'),
             'view' => ViewShipment::route('/{record}'),
             'edit' => EditShipment::route('/{record}/edit'),
+            'container-items' => ViewContainerItems::route('/{record}/container-items'),
         ];
     }
 
