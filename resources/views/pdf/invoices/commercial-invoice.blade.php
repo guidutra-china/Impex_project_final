@@ -498,9 +498,9 @@
             @if($showBankInfo)
             @php
                 $bankName = $shipment->commercialInvoice->bank_name ?? $companySettings->bank_name ?? '';
-                $bankAccount = $shipment->commercialInvoice->bank_account ?? $companySettings->bank_account ?? '';
-                $bankSwift = $shipment->commercialInvoice->bank_swift ?? $companySettings->bank_swift ?? '';
-                $bankAddress = $shipment->commercialInvoice->bank_address ?? $companySettings->bank_address ?? '';
+                $bankAccount = $shipment->commercialInvoice->bank_account ?? $companySettings->bank_account_number ?? '';
+                $bankSwift = $shipment->commercialInvoice->bank_swift ?? $companySettings->bank_swift_code ?? '';
+                $bankAddress = $shipment->commercialInvoice->bank_address ?? '';
             @endphp
             @if($bankName)
             <div class="payment-row">
