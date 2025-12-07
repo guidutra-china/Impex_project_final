@@ -163,10 +163,14 @@ class PackingListExcelService
         $headers[] = ['col' => $col++, 'label' => 'Cartons', 'width' => 10];
         
         if ($displayOptions['show_weight_volume'] ?? true) {
+            $nwUnitCol = $col;
+            $headers[] = ['col' => $col++, 'label' => 'N.W. Unit (kg)', 'width' => 12];
+            $gwUnitCol = $col;
+            $headers[] = ['col' => $col++, 'label' => 'G.W. Unit (kg)', 'width' => 12];
             $nwCol = $col;
-            $headers[] = ['col' => $col++, 'label' => 'N.W. (kg)', 'width' => 12];
+            $headers[] = ['col' => $col++, 'label' => 'Total N.W. (kg)', 'width' => 12];
             $gwCol = $col;
-            $headers[] = ['col' => $col++, 'label' => 'G.W. (kg)', 'width' => 12];
+            $headers[] = ['col' => $col++, 'label' => 'Total G.W. (kg)', 'width' => 12];
             $cbmCol = $col;
             $headers[] = ['col' => $col++, 'label' => 'CBM', 'width' => 12];
         }
@@ -222,6 +226,8 @@ class PackingListExcelService
                 
                 // Weights and Volume
                 if ($displayOptions['show_weight_volume'] ?? true) {
+                    $sheet->setCellValue($col++ . $currentRow, $product->net_weight ?? 0);
+                    $sheet->setCellValue($col++ . $currentRow, $product->gross_weight ?? 0);
                     $sheet->setCellValue($col++ . $currentRow, $netWeight);
                     $sheet->setCellValue($col++ . $currentRow, $grossWeight);
                     $sheet->setCellValue($col++ . $currentRow, $volume);
@@ -259,6 +265,11 @@ class PackingListExcelService
         
         // Weights and Volume Totals (SUM formulas)
         if ($displayOptions['show_weight_volume'] ?? true) {
+            // Unit weights: no total (dash)
+            $sheet->setCellValue($nwUnitCol . $currentRow, '-');
+            $sheet->setCellValue($gwUnitCol . $currentRow, '-');
+            
+            // Total weights: SUM formulas
             $sheet->setCellValue($nwCol . $currentRow, "=SUM({$nwCol}{$itemStartRow}:{$nwCol}{$itemEndRow})");
             $sheet->setCellValue($gwCol . $currentRow, "=SUM({$gwCol}{$itemStartRow}:{$gwCol}{$itemEndRow})");
             $sheet->setCellValue($cbmCol . $currentRow, "=SUM({$cbmCol}{$itemStartRow}:{$cbmCol}{$itemEndRow})");

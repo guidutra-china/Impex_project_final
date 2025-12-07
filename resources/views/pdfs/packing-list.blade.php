@@ -305,9 +305,11 @@
                     <th style="width: 8%;" class="text-center">Qty/Carton</th>
                     <th style="width: 8%;" class="text-center">Cartons</th>
                     @if($displayOptions['show_weight_volume'] ?? true)
-                    <th style="width: 10%;" class="text-right">N.W. (kg)</th>
-                    <th style="width: 10%;" class="text-right">G.W. (kg)</th>
-                    <th style="width: 10%;" class="text-right">CBM</th>
+                    <th style="width: 8%;" class="text-right">N.W. Unit (kg)</th>
+                    <th style="width: 8%;" class="text-right">G.W. Unit (kg)</th>
+                    <th style="width: 8%;" class="text-right">Total N.W. (kg)</th>
+                    <th style="width: 8%;" class="text-right">Total G.W. (kg)</th>
+                    <th style="width: 8%;" class="text-right">CBM</th>
                     @endif
                 </tr>
             </thead>
@@ -359,6 +361,8 @@
                             <td class="text-center">{{ number_format($pcsPerCarton, 0) }}</td>
                             <td class="text-center">{{ number_format($cartons, 0) }}</td>
                             @if($displayOptions['show_weight_volume'] ?? true)
+                            <td class="text-right">{{ number_format($product->net_weight ?? 0, 2) }}</td>
+                            <td class="text-right">{{ number_format($product->gross_weight ?? 0, 2) }}</td>
                             <td class="text-right">{{ number_format($netWeight, 2) }}</td>
                             <td class="text-right">{{ number_format($grossWeight, 2) }}</td>
                             <td class="text-right">{{ number_format($volume, 3) }}</td>
@@ -380,6 +384,8 @@
                     <td class="text-center">-</td>
                     <td class="text-center">{{ number_format($totalCartons, 0) }}</td>
                     @if($displayOptions['show_weight_volume'] ?? true)
+                    <td class="text-right">-</td>
+                    <td class="text-right">-</td>
                     <td class="text-right">{{ number_format($totalNetWeight, 2) }}</td>
                     <td class="text-right">{{ number_format($totalGrossWeight, 2) }}</td>
                     <td class="text-right">{{ number_format($totalVolume, 3) }}</td>
