@@ -148,6 +148,17 @@ class ShipmentForm
 
             Grid::make(2)
                 ->schema([
+                    TextInput::make('origin_port')
+                        ->label('Port of Loading')
+                        ->placeholder('e.g., Hong Kong, Shanghai, Shenzhen'),
+
+                    TextInput::make('destination_port')
+                        ->label('Port of Discharge')
+                        ->placeholder('e.g., Santos, Los Angeles, Rotterdam'),
+                ]),
+
+            Grid::make(2)
+                ->schema([
                     Textarea::make('origin_address')
                         ->label('Origin Address')
                         ->rows(3)
