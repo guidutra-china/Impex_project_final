@@ -1,86 +1,63 @@
 <?php
 
-namespace App\Filament\Resources\Shipments\Pages;
+namespace App\Filament\Resources\Shipments\RelationManagers;
 
-use App\Filament\Resources\Shipments\ShipmentResource;
-use App\Models\Shipment;
 use App\Models\ShipmentContainer;
-use Filament\Resources\Pages\Page;
+use App\Models\ShipmentContainerItem;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Concerns\InteractsWithForms;
-use Filament\Forms\Contracts\HasForms;
+use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Concerns\InteractsWithTable;
-use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Table;
-use Filament\Support\Icons\Heroicon;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 
-class ViewContainerItems extends Page implements HasForms, HasTable
+class AllContainerItemsRelationManager extends RelationManager
 {
-    use InteractsWithForms;
-    use InteractsWithTable;
-
-    protected static string $resource = ShipmentResource::class;
-
-    protected string $view = 'filament.resources.shipments.pages.view-container-items';
+    protected static string $relationship = 'containers';
 
     protected static ?string $title = 'Container Items';
 
-    protected static ?string $navigationLabel = 'Container Items';
+    protected static ?string $icon = 'heroicon-o-cube-transparent';
 
-    public ?array $data = [];
-    
     public $selectedContainerId = null;
 
     public function mount(): void
     {
+        parent::mount();
+        
         // Select first container by default
-        $firstContainer = $this->record->containers()->first();
+        $firstContainer = $this->getOwnerRecord()->containers()->first();
         if ($firstContainer) {
             $this->selectedContainerId = $firstContainer->id;
         }
-        
-        $this->form->fill([
-            'container_id' => $this->selectedContainerId,
-        ]);
-    }
-
-    protected function getFormSchema(): array
-    {
-        return [
-            Select::make('container_id')
-                ->label('Select Container')
-                ->options(function () {
-                    return $this->record->containers()
-                        ->get()
-                        ->mapWithKeys(function ($container) {
-                            return [
-                                $container->id => sprintf(
-                                    '%s (%s) - %.0f kg / %.2f m³ - %s',
-                                    $container->container_number,
-                                    $container->containerType->name ?? 'N/A',
-                                    $container->current_weight ?? 0,
-                                    $container->current_volume ?? 0,
-                                    strtoupper($container->status)
-                                )
-                            ];
-                        });
-                })
-                ->searchable()
-                ->reactive()
-                ->afterStateUpdated(function ($state) {
-                    $this->selectedContainerId = $state;
-                })
-                ->columnSpanFull(),
-        ];
     }
 
     public function table(Table $table): Table
     {
         return $table
-            ->query($this->getTableQuery())
+            ->query($this->getContainerItemsQuery())
             ->heading($this->getTableHeading())
+            ->headerActions([
+                \Filament\Tables\Actions\Action::make('selectContainer')
+                    ->label('Select Container')
+                    ->icon('heroicon-o-adjustments-horizontal')
+                    ->form([
+                        Select::make('container_id')
+                            ->label('Container')
+                            ->options($this->getContainerOptions())
+                            ->default($this->selectedContainerId)
+                            ->required()
+                            ->searchable()
+                            ->reactive(),
+                    ])
+                    ->action(function (array $data) {
+                        $this->selectedContainerId = $data['container_id'];
+                        // Force table refresh
+                        $this->dispatch('$refresh');
+                    })
+                    ->modalWidth('md')
+                    ->modalSubmitActionLabel('View Container'),
+            ])
             ->columns([
                 TextColumn::make('product.sku')
                     ->label('SKU')
@@ -108,6 +85,7 @@ class ViewContainerItems extends Page implements HasForms, HasTable
                 
                 TextColumn::make('total_weight')
                     ->label('Total Weight')
+                    ->state(fn ($record) => $record->quantity * $record->unit_weight)
                     ->numeric(2)
                     ->suffix(' kg')
                     ->sortable()
@@ -122,6 +100,7 @@ class ViewContainerItems extends Page implements HasForms, HasTable
                 
                 TextColumn::make('total_volume')
                     ->label('Total Volume')
+                    ->state(fn ($record) => $record->quantity * $record->unit_volume)
                     ->numeric(3)
                     ->suffix(' m³')
                     ->sortable()
@@ -147,21 +126,40 @@ class ViewContainerItems extends Page implements HasForms, HasTable
             ->emptyStateDescription('Use "Pack Selected Items" in the Shipment Items tab to add items to containers.');
     }
 
-    protected function getTableQuery(): Builder
+    protected function getContainerItemsQuery(): Builder
     {
         if (!$this->selectedContainerId) {
-            return \App\Models\ShipmentContainerItem::query()->whereRaw('1 = 0');
+            return ShipmentContainerItem::query()->whereRaw('1 = 0');
         }
 
-        return \App\Models\ShipmentContainerItem::query()
+        return ShipmentContainerItem::query()
             ->where('shipment_container_id', $this->selectedContainerId)
             ->with(['product', 'proformaInvoiceItem']);
+    }
+
+    protected function getContainerOptions(): array
+    {
+        return $this->getOwnerRecord()->containers()
+            ->get()
+            ->mapWithKeys(function ($container) {
+                return [
+                    $container->id => sprintf(
+                        '%s (%s) - %.0f kg / %.2f m³ - %s',
+                        $container->container_number,
+                        $container->containerType->name ?? 'N/A',
+                        $container->current_weight ?? 0,
+                        $container->current_volume ?? 0,
+                        strtoupper($container->status)
+                    )
+                ];
+            })
+            ->toArray();
     }
 
     protected function getTableHeading(): ?string
     {
         if (!$this->selectedContainerId) {
-            return 'No containers available';
+            return 'No containers available - Please create containers first';
         }
 
         $container = ShipmentContainer::find($this->selectedContainerId);
@@ -183,5 +181,23 @@ class ViewContainerItems extends Page implements HasForms, HasTable
             $volumePercent,
             strtoupper($container->status)
         );
+    }
+
+    // Dummy method to satisfy RelationManager requirements
+    public function form(\Filament\Forms\Form $form): \Filament\Forms\Form
+    {
+        return $form->schema([]);
+    }
+
+    // Override to prevent default relationship query
+    protected function getTableQuery(): ?Builder
+    {
+        return $this->getContainerItemsQuery();
+    }
+
+    // This is needed to make it work as a relation manager
+    public static function canViewForRecord(Model $ownerRecord, string $pageClass): bool
+    {
+        return true;
     }
 }
