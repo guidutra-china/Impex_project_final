@@ -12,6 +12,7 @@ use Filament\Actions\RestoreAction;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
 use Illuminate\Support\Facades\Storage;
+use Filament\Resources\Pages\Page;
 
 class EditShipment extends EditRecord
 {
@@ -155,5 +156,14 @@ class EditShipment extends EditRecord
             ForceDeleteAction::make(),
             RestoreAction::make(),
         ];
+    }
+
+    public function getSubNavigation(): array
+    {
+        if (filled($cluster = static::getCluster())) {
+            return $this->generateNavigationItems($cluster::getClusteredPages());
+        }
+
+        return $this->generateNavigationItems(static::getResource()::getPages());
     }
 }
