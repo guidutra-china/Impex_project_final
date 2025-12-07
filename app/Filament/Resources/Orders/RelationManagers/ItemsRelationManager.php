@@ -16,6 +16,7 @@ use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Notifications\Notification;
+use Filament\Notifications\Actions\Action as NotificationAction;
 
 class ItemsRelationManager extends RelationManager
 {
@@ -82,7 +83,7 @@ class ItemsRelationManager extends RelationManager
                                     ->body("**{$product->name}** (Code: {$product->code}) is already in this order with quantity {$existingItem->quantity}.\n\nYou can either:\n- **Cancel** and increase the quantity of the existing item, OR\n- **Continue** to add this as a separate line (if it has different specifications)")
                                     ->persistent()
                                     ->actions([
-                                        \Filament\Notifications\Actions\Action::make('understood')
+                                        NotificationAction::make('understood')
                                             ->label('OK, I Understand')
                                             ->button()
                                             ->close(),
