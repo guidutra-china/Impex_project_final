@@ -236,6 +236,7 @@ class ItemsRelationManager extends RelationManager
     {
         return $table
             ->recordTitleAttribute('product.name')
+            ->modifyQueryUsing(fn ($query) => $query->with(['supplierQuote.supplier', 'product']))
             ->columns([
                 TextColumn::make('product.code')
                     ->label('Code')
@@ -251,10 +252,10 @@ class ItemsRelationManager extends RelationManager
 
                 TextColumn::make('supplierQuote.supplier.code')
                     ->label('Supplier')
-                    ->searchable()
-                    ->sortable()
                     ->badge()
-                    ->color('info'),
+                    ->color('info')
+                    ->default('N/A')
+                    ->placeholder('N/A'),
 
                 TextInputColumn::make('quantity')
                     ->label('Qty')
