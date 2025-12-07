@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Shipments\Schemas;
 use App\Models\CommercialInvoice;
 use App\Models\CompanySetting;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
@@ -22,102 +23,46 @@ class CommercialInvoiceTab
     {
         return Tabs\Tab::make('Commercial Invoice')
             ->schema([
-                Section::make('Configuration')
-                    ->description('Configure customs discount and display options for PDF/Excel generation')
+                // Row 1: Order Info + Configuration (2 columns)
+                Grid::make(2)
                     ->schema([
-                        TextInput::make('commercialInvoice.customs_discount_percentage')
-                            ->label('Customs Discount (%)')
-                            ->numeric()
-                            ->suffix('%')
-                            ->minValue(0)
-                            ->maxValue(100)
-                            ->default(0)
-                            ->helperText('Percentage to reduce values in Customs version of PDF/Excel'),
+                        Section::make('Order')
+                            ->description('Order reference information')
+                            ->schema([
+                                Placeholder::make('order_number')
+                                    ->label('Order Number')
+                                    ->content(fn ($record) => $record?->order?->order_number ?? 'N/A'),
+                                
+                                Placeholder::make('proforma_invoices')
+                                    ->label('Proforma Invoices')
+                                    ->content(fn ($record) => $record?->proformaInvoices->pluck('proforma_number')->join(', ') ?? 'N/A'),
+                            ])
+                            ->collapsible()
+                            ->collapsed(false),
                         
-                        Placeholder::make('customs_info')
-                            ->label('')
-                            ->content('The customs discount will only affect the "Customs" version of PDF/Excel. The "Original" version will always show real values.')
-                            ->columnSpanFull(),
-                    ])
-                    ->columns(2)
-                    ->collapsible(),
+                        Section::make('Configuration')
+                            ->description('Customs discount settings')
+                            ->schema([
+                                TextInput::make('commercialInvoice.customs_discount_percentage')
+                                    ->label('Customs Discount (%)')
+                                    ->numeric()
+                                    ->suffix('%')
+                                    ->minValue(0)
+                                    ->maxValue(100)
+                                    ->default(0)
+                                    ->helperText('Percentage to reduce values in Customs version'),
+                                
+                                Placeholder::make('customs_info')
+                                    ->label('')
+                                    ->content('The customs discount will only affect the "Customs" version. The "Original" version will always show real values.')
+                                    ->columnSpanFull(),
+                            ])
+                            ->columns(1)
+                            ->collapsible()
+                            ->collapsed(false),
+                    ]),
                 
-                Section::make('Exporter Details')
-                    ->description('Information about the exporter (your company)')
-                    ->schema([
-                        TextInput::make('commercialInvoice.exporter_name')
-                            ->label('Company Name')
-                            ->maxLength(255)
-                            ->default(fn () => CompanySetting::current()?->company_name),
-                        
-                        Textarea::make('commercialInvoice.exporter_address')
-                            ->label('Address')
-                            ->rows(3)
-                            ->default(fn () => CompanySetting::current()?->full_address),
-                        
-                        TextInput::make('commercialInvoice.exporter_tax_id')
-                            ->label('Tax ID / VAT Number')
-                            ->maxLength(100)
-                            ->default(fn () => CompanySetting::current()?->tax_id),
-                        
-                        TextInput::make('commercialInvoice.exporter_country')
-                            ->label('Country')
-                            ->maxLength(100)
-                            ->placeholder('Hong Kong, China, Brazil, etc.')
-                            ->default(fn () => CompanySetting::current()?->country),
-                    ])
-                    ->columns(2)
-                    ->collapsible(),
-                
-                Section::make('Importer Details')
-                    ->description('Information about the importer (customer)')
-                    ->schema([
-                        TextInput::make('commercialInvoice.importer_name')
-                            ->label('Company Name')
-                            ->maxLength(255),
-                        
-                        Textarea::make('commercialInvoice.importer_address')
-                            ->label('Address')
-                            ->rows(3),
-                        
-                        TextInput::make('commercialInvoice.importer_tax_id')
-                            ->label('Tax ID / VAT Number')
-                            ->maxLength(100),
-                        
-                        TextInput::make('commercialInvoice.importer_country')
-                            ->label('Country')
-                            ->maxLength(100)
-                            ->placeholder('Portugal, United States, etc.'),
-                    ])
-                    ->columns(2)
-                    ->collapsible(),
-                
-                Section::make('Bank Information')
-                    ->description('Bank details for payment')
-                    ->schema([
-                        TextInput::make('commercialInvoice.bank_name')
-                            ->label('Bank Name')
-                            ->maxLength(255)
-                            ->default(fn () => CompanySetting::current()?->bank_name),
-                        
-                        TextInput::make('commercialInvoice.bank_account')
-                            ->label('Account Number')
-                            ->maxLength(100)
-                            ->default(fn () => CompanySetting::current()?->bank_account_number),
-                        
-                        TextInput::make('commercialInvoice.bank_swift')
-                            ->label('SWIFT Code')
-                            ->maxLength(20)
-                            ->default(fn () => CompanySetting::current()?->bank_swift_code),
-                        
-                        Textarea::make('commercialInvoice.bank_address')
-                            ->label('Bank Address')
-                            ->rows(2)
-                            ->default(fn () => CompanySetting::current()?->bank_address),
-                    ])
-                    ->columns(2)
-                    ->collapsible(),
-                
+                // Row 2: Additional Information (full width, 2 columns inside)
                 Section::make('Additional Information')
                     ->schema([
                         Textarea::make('commercialInvoice.notes')
@@ -131,8 +76,10 @@ class CommercialInvoiceTab
                             ->placeholder('Terms and conditions for this invoice'),
                     ])
                     ->columns(2)
-                    ->collapsible(),
+                    ->collapsible()
+                    ->collapsed(false),
                 
+                // Row 3: Display Options (full width, single column)
                 Section::make('Display Options')
                     ->description('Control what information appears in the PDF/Excel')
                     ->schema([
@@ -183,8 +130,93 @@ class CommercialInvoiceTab
                             ->default(false)
                             ->inline(false),
                     ])
-                    ->columns(4)
-                    ->collapsible(),
+                    ->columns(1)
+                    ->collapsible()
+                    ->collapsed(false),
+                
+                // Row 4: Exporter Details (collapsed by default)
+                Section::make('Exporter Details')
+                    ->description('Information about the exporter (your company) - Leave empty to use Company Settings')
+                    ->schema([
+                        TextInput::make('commercialInvoice.exporter_name')
+                            ->label('Company Name')
+                            ->maxLength(255)
+                            ->placeholder(fn () => CompanySetting::current()?->company_name ?? 'From Company Settings'),
+                        
+                        Textarea::make('commercialInvoice.exporter_address')
+                            ->label('Address')
+                            ->rows(3)
+                            ->placeholder(fn () => CompanySetting::current()?->full_address ?? 'From Company Settings'),
+                        
+                        TextInput::make('commercialInvoice.exporter_tax_id')
+                            ->label('Tax ID / VAT Number')
+                            ->maxLength(100)
+                            ->placeholder(fn () => CompanySetting::current()?->tax_id ?? 'From Company Settings'),
+                        
+                        TextInput::make('commercialInvoice.exporter_country')
+                            ->label('Country')
+                            ->maxLength(100)
+                            ->placeholder(fn () => CompanySetting::current()?->country ?? 'From Company Settings'),
+                    ])
+                    ->columns(2)
+                    ->collapsible()
+                    ->collapsed(true),
+                
+                // Row 5: Importer Details (collapsed by default)
+                Section::make('Importer Details')
+                    ->description('Information about the importer (customer) - Leave empty to use Customer data')
+                    ->schema([
+                        TextInput::make('commercialInvoice.importer_name')
+                            ->label('Company Name')
+                            ->maxLength(255)
+                            ->placeholder('From Customer'),
+                        
+                        Textarea::make('commercialInvoice.importer_address')
+                            ->label('Address')
+                            ->rows(3)
+                            ->placeholder('From Customer'),
+                        
+                        TextInput::make('commercialInvoice.importer_tax_id')
+                            ->label('Tax ID / VAT Number')
+                            ->maxLength(100)
+                            ->placeholder('From Customer'),
+                        
+                        TextInput::make('commercialInvoice.importer_country')
+                            ->label('Country')
+                            ->maxLength(100)
+                            ->placeholder('From Customer'),
+                    ])
+                    ->columns(2)
+                    ->collapsible()
+                    ->collapsed(true),
+                
+                // Row 6: Bank Information (collapsed by default)
+                Section::make('Bank Information')
+                    ->description('Bank details for payment - Leave empty to use Company Settings')
+                    ->schema([
+                        TextInput::make('commercialInvoice.bank_name')
+                            ->label('Bank Name')
+                            ->maxLength(255)
+                            ->placeholder(fn () => CompanySetting::current()?->bank_name ?? 'From Company Settings'),
+                        
+                        TextInput::make('commercialInvoice.bank_account')
+                            ->label('Account Number')
+                            ->maxLength(100)
+                            ->placeholder(fn () => CompanySetting::current()?->bank_account_number ?? 'From Company Settings'),
+                        
+                        TextInput::make('commercialInvoice.bank_swift')
+                            ->label('SWIFT Code')
+                            ->maxLength(20)
+                            ->placeholder(fn () => CompanySetting::current()?->bank_swift_code ?? 'From Company Settings'),
+                        
+                        Textarea::make('commercialInvoice.bank_address')
+                            ->label('Bank Address')
+                            ->rows(2)
+                            ->placeholder('Bank address (optional)'),
+                    ])
+                    ->columns(2)
+                    ->collapsible()
+                    ->collapsed(true),
             ])
             ->visible(fn ($record) => $record && in_array($record->status, ['on_board', 'in_transit', 'customs_clearance', 'delivered']));
     }
