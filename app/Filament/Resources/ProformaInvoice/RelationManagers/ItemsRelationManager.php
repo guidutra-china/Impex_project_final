@@ -429,28 +429,24 @@ class ItemsRelationManager extends RelationManager
             $supplier = $items->first()->supplierQuote->supplier;
             $itemCount = $items->count();
             
-            // Check if PO already exists for this supplier
-            $existingPO = \App\Models\PurchaseOrder::where('supplier_id', $supplierId)
-                ->whereHas('items.product', function ($query) use ($items) {
-                    $productIds = $items->pluck('product_id')->toArray();
-                    $query->whereIn('id', $productIds);
-                })
+            // Check if PO already exists for this supplier (simple check by supplier only)
+            $lastPO = \App\Models\PurchaseOrder::where('supplier_id', $supplierId)
                 ->orderBy('revision_number', 'desc')
                 ->first();
             
-            $nextRevision = $existingPO ? ($existingPO->revision_number + 1) : 1;
-            $label = $existingPO 
+            $nextRevision = $lastPO ? ($lastPO->revision_number + 1) : 1;
+            $label = $lastPO 
                 ? "Create PO for {$supplier->supplier_code} (Rev. {$nextRevision})"
                 : "Create PO for {$supplier->supplier_code}";
             
             $actions[] = Action::make("create_po_{$supplierId}")
                 ->label($label)
                 ->icon('heroicon-o-document-plus')
-                ->color($existingPO ? 'warning' : 'success')
+                ->color($lastPO ? 'warning' : 'success')
                 ->badge($itemCount)
                 ->requiresConfirmation()
                 ->modalHeading("Create Purchase Order for {$supplier->name}")
-                ->modalDescription("This will create a Purchase Order with {$itemCount} item(s) for {$supplier->name}." . ($existingPO ? " This will be revision {$nextRevision}." : ""))
+                ->modalDescription("This will create a Purchase Order with {$itemCount} item(s) for {$supplier->name}." . ($lastPO ? " This will be revision {$nextRevision}." : ""))
                 ->modalSubmitActionLabel('Create PO')
                 ->action(function () use ($supplierId, $items, $proformaInvoice, $nextRevision) {
                     $supplier = $items->first()->supplierQuote->supplier;
@@ -461,6 +457,7 @@ class ItemsRelationManager extends RelationManager
                         'supplier_id' => $supplierId,
                         'supplier_quote_id' => $supplierQuoteId,
                         'currency_id' => $proformaInvoice->currency_id,
+                        'exchange_rate' => $proformaInvoice->exchange_rate ?? 1.0,
                         'payment_term_id' => $proformaInvoice->payment_term_id,
                         'incoterm' => $proformaInvoice->incoterm,
                         'incoterm_location' => $proformaInvoice->incoterm_location,
