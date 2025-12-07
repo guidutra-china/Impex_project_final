@@ -5,7 +5,7 @@ namespace App\Services\Shipment;
 use App\Models\Shipment;
 use App\Models\ShipmentItem;
 use App\Models\SalesInvoice;
-use App\Models\SalesInvoiceItem;
+// use App\Models\SalesInvoiceItem; // DEPRECATED: Refactored to CommercialInvoice
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -114,9 +114,13 @@ class ShipmentService
 
     /**
      * Validate item quantity against remaining quantity in invoice
+     * DEPRECATED: SalesInvoiceItem no longer exists
      */
     protected function validateItemQuantity(array $itemData): void
     {
+        // Method deprecated - SalesInvoiceItem no longer exists
+        return;
+        /*
         if (!isset($itemData['sales_invoice_item_id'])) {
             return; // Skip validation if no invoice item
         }
@@ -139,6 +143,7 @@ class ShipmentService
         if ($quantityToShip <= 0) {
             throw new \Exception('Quantity to ship must be greater than 0');
         }
+        */
     }
 
     /**

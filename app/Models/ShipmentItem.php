@@ -86,11 +86,12 @@ class ShipmentItem extends Model
 
     /**
      * Relationship to SalesInvoiceItem (legacy/backward compatibility)
+     * DEPRECATED: SalesInvoice was refactored to CommercialInvoice
      */
-    public function salesInvoiceItem(): BelongsTo
-    {
-        return $this->belongsTo(SalesInvoiceItem::class);
-    }
+    // public function salesInvoiceItem(): BelongsTo
+    // {
+    //     return $this->belongsTo(SalesInvoiceItem::class);
+    // }
 
     /**
      * Relationship to ProformaInvoiceItem (primary)
@@ -158,9 +159,13 @@ class ShipmentItem extends Model
 
     /**
      * Update the related sales invoice item quantities
+     * DEPRECATED: SalesInvoice was refactored to CommercialInvoice
      */
     public function updateSalesInvoiceItem(): void
     {
+        // Method deprecated - SalesInvoiceItem no longer exists
+        return;
+        /*
         if (!$this->salesInvoiceItem) {
             return;
         }
@@ -181,6 +186,7 @@ class ShipmentItem extends Model
         }
         
         $invoiceItem->save();
+        */
     }
 
     /**

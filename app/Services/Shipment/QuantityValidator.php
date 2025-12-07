@@ -2,7 +2,7 @@
 
 namespace App\Services\Shipment;
 
-use App\Models\SalesInvoiceItem;
+// use App\Models\SalesInvoiceItem; // DEPRECATED: Refactored to CommercialInvoice
 use App\Models\ShipmentItem;
 use App\Models\Shipment;
 
@@ -10,7 +10,9 @@ class QuantityValidator
 {
     /**
      * Validate if quantity can be shipped from invoice item
+     * DEPRECATED: SalesInvoiceItem no longer exists
      */
+    /*
     public function validateShipmentQuantity(SalesInvoiceItem $invoiceItem, int $quantityToShip): array
     {
         $errors = [];
@@ -42,6 +44,7 @@ class QuantityValidator
             'available_quantity' => $invoiceItem->quantity_remaining,
         ];
     }
+    */
 
     /**
      * Validate if quantity can be packed
