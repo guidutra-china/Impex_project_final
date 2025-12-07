@@ -42,6 +42,7 @@
             border-radius: 10px;
             padding: 16px;
             box-shadow: 0 1px 6px rgba(2,6,23,0.06);
+            margin-bottom: 20px;
         }
         .compare-grid {
             display: grid;
@@ -133,12 +134,52 @@
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
-        .toolbar {
-            display: flex;
-            gap: 8px;
-            align-items: center;
-            margin-top: 12px;
+        
+        /* Products Grid */
+        .products-section {
+            background: white;
+            border-radius: 10px;
+            padding: 16px;
+            box-shadow: 0 1px 6px rgba(2,6,23,0.06);
         }
+        .products-grid {
+            display: grid;
+            gap: 1px;
+            background: #e5e7eb;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .products-header {
+            display: contents;
+        }
+        .product-cell {
+            background: white;
+            padding: 12px;
+            font-size: 13px;
+        }
+        .product-cell.header {
+            background: #f9fafb;
+            font-weight: 700;
+            color: #374151;
+        }
+        .product-cell.product-name {
+            font-weight: 600;
+            color: #0f172a;
+        }
+        .product-cell.price {
+            text-align: center;
+            font-weight: 600;
+        }
+        .product-cell.price.best {
+            background: rgba(34,197,94,0.08);
+            color: #16a34a;
+            font-weight: 700;
+        }
+        .product-cell.price.not-quoted {
+            color: #9ca3af;
+            font-style: italic;
+        }
+        
         .empty-state {
             padding: 60px 20px;
             text-align: center;
@@ -207,11 +248,12 @@
                 $cheapestSelected = $selectedQuotesData->sortBy('total_after_commission')->first();
                 
                 // Find best values for highlighting
-                $bestMOQ = $selectedQuotesData->filter(fn($q) => isset($q['moq']))->min('moq');
-                $bestLeadTime = $selectedQuotesData->filter(fn($q) => isset($q['lead_time_days']))->min('lead_time_days');
+                $bestMOQ = $selectedQuotesData->filter(fn($q) => isset($q['moq']) && $q['moq'])->min('moq');
+                $bestLeadTime = $selectedQuotesData->filter(fn($q) => isset($q['lead_time_days']) && $q['lead_time_days'])->min('lead_time_days');
             @endphp
 
             @if($selectedQuotesData->isNotEmpty())
+                {{-- Supplier Cards (without products) --}}
                 <div class="compare-area">
                     <div class="compare-grid">
                         @foreach($selectedQuotesData as $quote)
@@ -249,15 +291,15 @@
                                 
                                 <div class="spec-row">
                                     <div class="spec-key">MOQ</div>
-                                    <div class="spec-val {{ isset($quote['moq']) && $quote['moq'] == $bestMOQ ? 'highlight' : '' }} {{ isset($quote['moq']) && $quote['moq'] > 500 ? 'warning' : '' }}">
-                                        {{ isset($quote['moq']) ? number_format($quote['moq']) : 'N/A' }}
+                                    <div class="spec-val {{ isset($quote['moq']) && $quote['moq'] && $quote['moq'] == $bestMOQ ? 'highlight' : '' }} {{ isset($quote['moq']) && $quote['moq'] > 500 ? 'warning' : '' }}">
+                                        {{ isset($quote['moq']) && $quote['moq'] ? number_format($quote['moq']) : 'N/A' }}
                                     </div>
                                 </div>
 
                                 <div class="spec-row">
                                     <div class="spec-key">Lead Time</div>
-                                    <div class="spec-val {{ isset($quote['lead_time_days']) && $quote['lead_time_days'] == $bestLeadTime ? 'highlight' : '' }} {{ isset($quote['lead_time_days']) && $quote['lead_time_days'] > 60 ? 'warning' : '' }}">
-                                        {{ isset($quote['lead_time_days']) ? $quote['lead_time_days'] . ' days' : 'N/A' }}
+                                    <div class="spec-val {{ isset($quote['lead_time_days']) && $quote['lead_time_days'] && $quote['lead_time_days'] == $bestLeadTime ? 'highlight' : '' }} {{ isset($quote['lead_time_days']) && $quote['lead_time_days'] > 60 ? 'warning' : '' }}">
+                                        {{ isset($quote['lead_time_days']) && $quote['lead_time_days'] ? $quote['lead_time_days'] . ' days' : 'N/A' }}
                                     </div>
                                 </div>
 
@@ -278,35 +320,6 @@
                                         @endif
                                     </div>
                                 </div>
-
-                                {{-- Products --}}
-                                @if(isset($comparison['by_product']) && count($comparison['by_product']) > 0)
-                                    <div class="section-header">📦 Products</div>
-                                    
-                                    @foreach($comparison['by_product'] as $productComparison)
-                                        @php
-                                            $productPrice = collect($productComparison['all_prices'])
-                                                ->firstWhere('supplier_id', $quote['supplier_id']);
-                                            
-                                            $isCheapestProduct = isset($productComparison['cheapest']) && 
-                                                $productPrice && 
-                                                $productPrice['supplier_id'] === $productComparison['cheapest']['supplier_id'];
-                                        @endphp
-                                        
-                                        <div class="spec-row">
-                                            <div class="spec-key" style="max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="{{ $productComparison['product'] ?? 'Unknown' }}">
-                                                {{ $productComparison['product'] ?? 'Unknown' }}
-                                            </div>
-                                            <div class="spec-val {{ $isCheapestProduct ? 'highlight' : '' }}">
-                                                @if($productPrice && $productPrice['price'])
-                                                    {{ $order->currency->symbol }}{{ number_format($productPrice['converted_price'] / 100, 2) }}
-                                                @else
-                                                    <span style="color: #9ca3af;">Not quoted</span>
-                                                @endif
-                                            </div>
-                                        </div>
-                                    @endforeach
-                                @endif
 
                                 {{-- Additional Info --}}
                                 <div class="section-header">ℹ️ Details</div>
@@ -331,6 +344,61 @@
                         @endforeach
                     </div>
                 </div>
+
+                {{-- Products Grid (Separate, Aligned) --}}
+                @if(isset($comparison['by_product']) && count($comparison['by_product']) > 0)
+                    <div class="products-section">
+                        <div style="font-size: 16px; font-weight: 700; color: #0f172a; margin-bottom: 16px;">
+                            📦 Products Comparison (Unit Prices)
+                        </div>
+                        
+                        @php
+                            $colCount = $selectedQuotesData->count() + 1; // +1 for product name column
+                        @endphp
+                        
+                        <div class="products-grid" style="grid-template-columns: 200px repeat({{ $selectedQuotesData->count() }}, 1fr);">
+                            {{-- Header Row --}}
+                            <div class="product-cell header">Product</div>
+                            @foreach($selectedQuotesData as $quote)
+                                <div class="product-cell header" style="text-align: center;">{{ $quote['supplier'] }}</div>
+                            @endforeach
+                            
+                            {{-- Product Rows --}}
+                            @foreach($comparison['by_product'] as $productComparison)
+                                {{-- Product Name --}}
+                                <div class="product-cell product-name" title="{{ $productComparison['product'] ?? 'Unknown' }}">
+                                    {{ $productComparison['product'] ?? 'Unknown' }}
+                                    @if(isset($productComparison['product_code']))
+                                        <div style="font-size: 11px; color: #6b7280; font-weight: 400;">{{ $productComparison['product_code'] }}</div>
+                                    @endif
+                                </div>
+                                
+                                {{-- Prices for each supplier --}}
+                                @foreach($selectedQuotesData as $quote)
+                                    @php
+                                        $productPrice = collect($productComparison['all_prices'])
+                                            ->firstWhere('supplier_id', $quote['supplier_id']);
+                                        
+                                        $isCheapestProduct = isset($productComparison['cheapest']) && 
+                                            $productPrice && 
+                                            $productPrice['supplier_id'] === $productComparison['cheapest']['supplier_id'];
+                                    @endphp
+                                    
+                                    <div class="product-cell price {{ $isCheapestProduct ? 'best' : '' }} {{ !$productPrice || !$productPrice['price'] ? 'not-quoted' : '' }}">
+                                        @if($productPrice && $productPrice['price'])
+                                            {{ $order->currency->symbol }}{{ number_format($productPrice['price'] / 100, 2) }}
+                                            @if($isCheapestProduct)
+                                                <span style="margin-left: 4px;">⭐</span>
+                                            @endif
+                                        @else
+                                            Not quoted
+                                        @endif
+                                    </div>
+                                @endforeach
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
             @else
                 <div class="empty-state">
                     <div style="font-size: 48px; margin-bottom: 16px;">👆</div>
