@@ -19,6 +19,13 @@ class PurchaseOrder extends Model
     protected static function booted(): void
     {
         static::addGlobalScope(new ClientOwnershipScope());
+        
+        // Auto-generate po_number if not provided
+        static::creating(function ($model) {
+            if (empty($model->po_number)) {
+                $model->po_number = static::generatePoNumber();
+            }
+        });
     }
 
     protected $fillable = [
@@ -280,5 +287,51 @@ class PurchaseOrder extends Model
         return $query->where('expected_delivery_date', '<', now())
             ->whereNull('actual_delivery_date')
             ->whereIn('status', ['sent', 'confirmed']);
+    }
+
+    /**
+     * Generate unique PO number
+     * Format: PO-YY-NNNN
+     */
+    public static function generatePoNumber(): string
+    {
+        $year = now()->format('y'); // 2-digit year
+        $prefix = "PO-{$year}-";
+        
+        // Get the last PO number for this year (including soft deleted and all clients)
+        $lastNumber = static::withTrashed()
+            ->withoutGlobalScopes()
+            ->where('po_number', 'LIKE', $prefix . '%')
+            ->orderByRaw('CAST(SUBSTRING(po_number, -4) AS UNSIGNED) DESC')
+            ->value('po_number');
+        
+        if ($lastNumber) {
+            // Extract the numeric part and increment
+            $nextNumber = (int) substr($lastNumber, -4) + 1;
+        } else {
+            $nextNumber = 1;
+        }
+        
+        // Ensure uniqueness by checking if number exists (including soft deleted)
+        $attempts = 0;
+        do {
+            $poNumber = sprintf('PO-%s-%04d', $year, $nextNumber);
+            $exists = static::withTrashed()
+                ->withoutGlobalScopes()
+                ->where('po_number', $poNumber)
+                ->exists();
+            
+            if ($exists) {
+                $nextNumber++;
+                $attempts++;
+            }
+            
+            // Prevent infinite loop
+            if ($attempts > 100) {
+                throw new \Exception('Unable to generate unique PO number after 100 attempts');
+            }
+        } while ($exists);
+        
+        return $poNumber;
     }
 }
