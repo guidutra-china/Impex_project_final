@@ -220,9 +220,11 @@ class ItemsRelationManager extends RelationManager
                                 $existingItem->quantity += $data['quantity'];
                                 $existingItem->save();
                                 
+                                $oldQuantity = $existingItem->quantity - $data['quantity'];
+                                
                                 Notification::make()
                                     ->title('✅ Quantity Updated')
-                                    ->body("Product quantity increased from {$existingItem->quantity - $data['quantity']} to {$existingItem->quantity}")
+                                    ->body("Product quantity increased from {$oldQuantity} to {$existingItem->quantity}")
                                     ->success()
                                     ->send();
                                 
