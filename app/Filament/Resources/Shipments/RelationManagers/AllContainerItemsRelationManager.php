@@ -185,9 +185,9 @@ class AllContainerItemsRelationManager extends RelationManager
     }
 
     // Dummy method to satisfy RelationManager requirements
-    public function form(\Filament\Forms\Form $form): \Filament\Forms\Form
+    public function form(\Filament\Schemas\Schema $schema): \Filament\Schemas\Schema
     {
-        return $form->schema([]);
+        return $schema->schema([]);
     }
 
     // Override to prevent default relationship query
