@@ -346,6 +346,9 @@ class ItemsRelationManager extends RelationManager
             ->headerActions([
                 CreateAction::make()
                     ->icon('heroicon-o-plus-circle'),
+                
+                // Dynamic PO creation buttons - one per supplier
+                ...$this->getPurchaseOrderActions(),
             ])
             ->actions([
                 Action::make('view_shipments')
@@ -398,5 +401,101 @@ class ItemsRelationManager extends RelationManager
                 ]),
             ])
             ->defaultSort('created_at', 'desc');
+    }
+
+    /**
+     * Generate dynamic PO creation actions - one button per supplier
+     */
+    protected function getPurchaseOrderActions(): array
+    {
+        $proformaInvoice = $this->getOwnerRecord();
+        
+        // Group items by supplier
+        $itemsBySupplier = $proformaInvoice->items()
+            ->with(['supplierQuote.supplier', 'product'])
+            ->get()
+            ->groupBy(function ($item) {
+                return $item->supplierQuote?->supplier_id;
+            })
+            ->filter(fn ($items, $supplierId) => $supplierId !== null);
+        
+        if ($itemsBySupplier->isEmpty()) {
+            return [];
+        }
+        
+        $actions = [];
+        
+        foreach ($itemsBySupplier as $supplierId => $items) {
+            $supplier = $items->first()->supplierQuote->supplier;
+            $itemCount = $items->count();
+            
+            // Check if PO already exists for this supplier
+            $existingPO = \App\Models\PurchaseOrder::where('supplier_id', $supplierId)
+                ->whereHas('items.product', function ($query) use ($items) {
+                    $productIds = $items->pluck('product_id')->toArray();
+                    $query->whereIn('id', $productIds);
+                })
+                ->orderBy('revision_number', 'desc')
+                ->first();
+            
+            $nextRevision = $existingPO ? ($existingPO->revision_number + 1) : 1;
+            $label = $existingPO 
+                ? "Create PO for {$supplier->supplier_code} (Rev. {$nextRevision})"
+                : "Create PO for {$supplier->supplier_code}";
+            
+            $actions[] = Action::make("create_po_{$supplierId}")
+                ->label($label)
+                ->icon('heroicon-o-document-plus')
+                ->color($existingPO ? 'warning' : 'success')
+                ->badge($itemCount)
+                ->requiresConfirmation()
+                ->modalHeading("Create Purchase Order for {$supplier->name}")
+                ->modalDescription("This will create a Purchase Order with {$itemCount} item(s) for {$supplier->name}." . ($existingPO ? " This will be revision {$nextRevision}." : ""))
+                ->modalSubmitActionLabel('Create PO')
+                ->action(function () use ($supplierId, $items, $proformaInvoice, $nextRevision) {
+                    $supplier = $items->first()->supplierQuote->supplier;
+                    $supplierQuoteId = $items->first()->supplier_quote_id;
+                    
+                    // Create Purchase Order
+                    $po = \App\Models\PurchaseOrder::create([
+                        'supplier_id' => $supplierId,
+                        'supplier_quote_id' => $supplierQuoteId,
+                        'currency_id' => $proformaInvoice->currency_id,
+                        'payment_term_id' => $proformaInvoice->payment_term_id,
+                        'incoterm' => $proformaInvoice->incoterm,
+                        'incoterm_location' => $proformaInvoice->incoterm_location,
+                        'status' => 'draft',
+                        'revision_number' => $nextRevision,
+                        'po_date' => now(),
+                        'created_by' => auth()->id(),
+                        'notes' => "Generated from Proforma Invoice {$proformaInvoice->proforma_number}",
+                    ]);
+                    
+                    // Create PO Items
+                    foreach ($items as $item) {
+                        \App\Models\PurchaseOrderItem::create([
+                            'purchase_order_id' => $po->id,
+                            'product_id' => $item->product_id,
+                            'quantity' => $item->quantity,
+                            'unit_cost' => $item->unit_price,
+                            'total_cost' => $item->total,
+                            'product_name' => $item->product->name,
+                            'product_sku' => $item->product->code ?? $item->product->sku,
+                            'notes' => $item->notes,
+                        ]);
+                    }
+                    
+                    Notification::make()
+                        ->success()
+                        ->title('Purchase Order Created')
+                        ->body("PO for {$supplier->name} created successfully (Revision {$nextRevision}).")
+                        ->send();
+                    
+                    // Redirect to the created PO
+                    return redirect()->route('filament.admin.resources.purchase-orders.edit', ['record' => $po->id]);
+                });
+        }
+        
+        return $actions;
     }
 }
