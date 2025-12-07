@@ -297,15 +297,12 @@
             <thead>
                 <tr>
                     <th style="width: 5%;">No.</th>
-                    <th style="width: 25%;">Product Description</th>
-                    @if($displayOptions['show_supplier_code'] ?? false)
-                    <th style="width: 10%;">Supplier Code</th>
-                    @endif
                     @if($displayOptions['show_customer_code'] ?? true)
-                    <th style="width: 10%;">Customer Code</th>
+                    <th style="width: 12%;">Customer Code</th>
                     @endif
-                    <th style="width: 8%;" class="text-center">Qty/Carton</th>
+                    <th style="width: 28%;">Product Description</th>
                     <th style="width: 8%;" class="text-center">Qty</th>
+                    <th style="width: 8%;" class="text-center">Qty/Carton</th>
                     <th style="width: 8%;" class="text-center">Cartons</th>
                     @if($displayOptions['show_weight_volume'] ?? true)
                     <th style="width: 10%;" class="text-right">N.W. (kg)</th>
@@ -349,20 +346,17 @@
                         @endphp
                         <tr>
                             <td class="text-center">{{ $itemNumber++ }}</td>
+                            @if($displayOptions['show_customer_code'] ?? true)
+                            <td>{{ $product->customer_code ?? 'N/A' }}</td>
+                            @endif
                             <td>
                                 <strong>{{ $product->name }}</strong>
                                 @if($product->description)
                                 <br><small style="color: #666;">{{ $product->description }}</small>
                                 @endif
                             </td>
-                            @if($displayOptions['show_supplier_code'] ?? false)
-                            <td>{{ $product->supplier_code ?? 'N/A' }}</td>
-                            @endif
-                            @if($displayOptions['show_customer_code'] ?? true)
-                            <td>{{ $product->customer_code ?? 'N/A' }}</td>
-                            @endif
-                            <td class="text-center">{{ number_format($pcsPerCarton, 0) }}</td>
                             <td class="text-center">{{ number_format($qty, 0) }}</td>
+                            <td class="text-center">{{ number_format($pcsPerCarton, 0) }}</td>
                             <td class="text-center">{{ number_format($cartons, 0) }}</td>
                             @if($displayOptions['show_weight_volume'] ?? true)
                             <td class="text-right">{{ number_format($netWeight, 2) }}</td>
@@ -376,13 +370,14 @@
                 <!-- Totals Row -->
                 <tr style="background: #e5e7eb; font-weight: bold;">
                     @php
-                        // Calculate colspan: No. (1) + Product Description (1) + optional columns
-                        $colspan = 2; // No. + Product Description
-                        if ($displayOptions['show_supplier_code'] ?? false) $colspan++;
+                        // Calculate colspan: No. (1) + Customer Code (1 if shown) + Product Description (1)
+                        $colspan = 1; // No.
                         if ($displayOptions['show_customer_code'] ?? true) $colspan++;
+                        $colspan++; // Product Description
                     @endphp
                     <td colspan="{{ $colspan }}" class="text-right">TOTAL:</td>
                     <td class="text-center">{{ number_format($totalQty, 0) }}</td>
+                    <td class="text-center">-</td>
                     <td class="text-center">{{ number_format($totalCartons, 0) }}</td>
                     @if($displayOptions['show_weight_volume'] ?? true)
                     <td class="text-right">{{ number_format($totalNetWeight, 2) }}</td>

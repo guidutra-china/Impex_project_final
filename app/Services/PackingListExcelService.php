@@ -152,28 +152,22 @@ class PackingListExcelService
         $sheet->getColumnDimension($col)->setWidth(6);
         $col++;
         
-        $sheet->setCellValue($col . $currentRow, 'Product Description');
-        $sheet->getColumnDimension($col)->setWidth(35);
-        $col++;
-        
-        if ($displayOptions['show_supplier_code'] ?? false) {
-            $sheet->setCellValue($col . $currentRow, 'Supplier Code');
-            $sheet->getColumnDimension($col)->setWidth(15);
-            $col++;
-        }
-        
         if ($displayOptions['show_customer_code'] ?? true) {
             $sheet->setCellValue($col . $currentRow, 'Customer Code');
             $sheet->getColumnDimension($col)->setWidth(15);
             $col++;
         }
         
-        $sheet->setCellValue($col . $currentRow, 'Qty/Carton');
-        $sheet->getColumnDimension($col)->setWidth(12);
+        $sheet->setCellValue($col . $currentRow, 'Product Description');
+        $sheet->getColumnDimension($col)->setWidth(35);
         $col++;
         
         $sheet->setCellValue($col . $currentRow, 'Qty');
         $sheet->getColumnDimension($col)->setWidth(10);
+        $col++;
+        
+        $sheet->setCellValue($col . $currentRow, 'Qty/Carton');
+        $sheet->getColumnDimension($col)->setWidth(12);
         $col++;
         
         $sheet->setCellValue($col . $currentRow, 'Cartons');
@@ -233,23 +227,18 @@ class PackingListExcelService
                 $sheet->setCellValue($col . $currentRow, $itemNumber++);
                 $col++;
                 
-                $sheet->setCellValue($col . $currentRow, $product->name);
-                $col++;
-                
-                if ($displayOptions['show_supplier_code'] ?? false) {
-                    $sheet->setCellValue($col . $currentRow, $product->supplier_code ?? 'N/A');
-                    $col++;
-                }
-                
                 if ($displayOptions['show_customer_code'] ?? true) {
                     $sheet->setCellValue($col . $currentRow, $product->customer_code ?? 'N/A');
                     $col++;
                 }
                 
-                $sheet->setCellValue($col . $currentRow, $pcsPerCarton);
+                $sheet->setCellValue($col . $currentRow, $product->name);
                 $col++;
                 
                 $sheet->setCellValue($col . $currentRow, $qty);
+                $col++;
+                
+                $sheet->setCellValue($col . $currentRow, $pcsPerCarton);
                 $col++;
                 
                 $sheet->setCellValue($col . $currentRow, $cartons);
