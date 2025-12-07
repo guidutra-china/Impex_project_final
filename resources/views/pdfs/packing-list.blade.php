@@ -216,6 +216,11 @@
 
         <!-- Header -->
         <div class="header">
+            @if($companySettings?->logo_full_path && file_exists($companySettings->logo_full_path))
+            <div style="text-align: center; margin-bottom: 15px;">
+                <img src="{{ $companySettings->logo_full_path }}" alt="Company Logo" style="max-height: 60px; max-width: 200px;">
+            </div>
+            @endif
             <div class="document-title">PACKING LIST</div>
             <div class="document-number">{{ $invoiceNumber }}</div>
             <div style="font-size: 8pt; margin-top: 5px;">
