@@ -30,6 +30,7 @@ class EditShipment extends EditRecord
             \Log::info('EditShipment: commercialInvoice data extracted', [
                 'shipment_id' => $this->record->id,
                 'data' => $this->commercialInvoiceData,
+                'display_options' => $this->commercialInvoiceData['display_options'] ?? 'NOT SET',
             ]);
             
             unset($data['commercialInvoice']);

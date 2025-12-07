@@ -235,15 +235,16 @@
     @php
         // Get display options with defaults
         $displayOptions = $shipment->commercialInvoice->display_options ?? [];
-        $showPaymentTerms = $displayOptions['show_payment_terms'] ?? true;
-        $showBankInfo = $displayOptions['show_bank_info'] ?? true;
-        $showExporterDetails = $displayOptions['show_exporter_details'] ?? true;
-        $showImporterDetails = $displayOptions['show_importer_details'] ?? true;
-        $showShippingDetails = $displayOptions['show_shipping_details'] ?? true;
-        $showSupplierCode = $displayOptions['show_supplier_code'] ?? false;
-        $showHsCodes = $displayOptions['show_hs_codes'] ?? true;
-        $showCountryOfOrigin = $displayOptions['show_country_of_origin'] ?? true;
-        $showWeightVolume = $displayOptions['show_weight_volume'] ?? true;
+        // Use array_key_exists to properly handle false values
+        $showPaymentTerms = array_key_exists('show_payment_terms', $displayOptions) ? (bool)$displayOptions['show_payment_terms'] : true;
+        $showBankInfo = array_key_exists('show_bank_info', $displayOptions) ? (bool)$displayOptions['show_bank_info'] : true;
+        $showExporterDetails = array_key_exists('show_exporter_details', $displayOptions) ? (bool)$displayOptions['show_exporter_details'] : true;
+        $showImporterDetails = array_key_exists('show_importer_details', $displayOptions) ? (bool)$displayOptions['show_importer_details'] : true;
+        $showShippingDetails = array_key_exists('show_shipping_details', $displayOptions) ? (bool)$displayOptions['show_shipping_details'] : true;
+        $showSupplierCode = array_key_exists('show_supplier_code', $displayOptions) ? (bool)$displayOptions['show_supplier_code'] : false;
+        $showHsCodes = array_key_exists('show_hs_codes', $displayOptions) ? (bool)$displayOptions['show_hs_codes'] : true;
+        $showCountryOfOrigin = array_key_exists('show_country_of_origin', $displayOptions) ? (bool)$displayOptions['show_country_of_origin'] : true;
+        $showWeightVolume = array_key_exists('show_weight_volume', $displayOptions) ? (bool)$displayOptions['show_weight_volume'] : true;
     @endphp
     <div class="container">
         <!-- Header -->

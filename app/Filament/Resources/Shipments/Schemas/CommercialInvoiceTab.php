@@ -149,11 +149,13 @@ class CommercialInvoiceTab
                         Toggle::make('commercialInvoice.display_options.show_exporter_details')
                             ->label('Show Exporter Details')
                             ->default(true)
+                            ->dehydrated()
                             ->inline(false),
                         
                         Toggle::make('commercialInvoice.display_options.show_importer_details')
                             ->label('Show Importer Details')
                             ->default(true)
+                            ->dehydrated()
                             ->inline(false),
                         
                         Toggle::make('commercialInvoice.display_options.show_shipping_details')
