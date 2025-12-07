@@ -251,6 +251,11 @@ class ContainerItemsRelationManager extends RelationManager
                     ->modalWidth('2xl')
                     ->mutateFormDataUsing(function (array $data): array {
                         // Load data from shipment item
+                        // Check if shipment_item_id exists (may not exist if using proforma_invoice_item_id)
+                        if (!isset($data['shipment_item_id'])) {
+                            return $data;
+                        }
+                        
                         $shipmentItem = \App\Models\ShipmentItem::find($data['shipment_item_id']);
                         
                         if ($shipmentItem) {
