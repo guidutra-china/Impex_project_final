@@ -36,6 +36,9 @@ class PackingListExcelService
         $styles = $this->getStyles();
         
         $currentRow = 1;
+        $logoRow = $currentRow; // Save for logo (will add after we know lastCol)
+        $currentRow++;
+        
         $titleRow = $currentRow; // Save for later update after we know last column
         $currentRow += 2;
 
@@ -148,6 +151,40 @@ class PackingListExcelService
         }
         
         $lastCol = chr(ord($col) - 1);
+        
+        // ==================== ADD LOGO NOW ====================
+        $companySettings = \App\Models\CompanySetting::first();
+        $logoPath = $companySettings?->logo_full_path;
+        
+        if ($logoPath && file_exists($logoPath)) {
+            try {
+                $drawing = new \PhpOffice\PhpSpreadsheet\Worksheet\Drawing();
+                $drawing->setName('Company Logo');
+                $drawing->setDescription('Company Logo');
+                $drawing->setPath($logoPath);
+                $drawing->setHeight(60); // Logo height in pixels
+                
+                // Calculate center position
+                // Each column is approximately 8.43 characters wide
+                $totalCols = ord($lastCol) - ord('A') + 1;
+                $centerCol = chr(ord('A') + floor($totalCols / 2));
+                
+                $drawing->setCoordinates($centerCol . $logoRow);
+                $drawing->setOffsetX(10); // Small offset for better centering
+                $drawing->setWorksheet($sheet);
+                
+                $sheet->getRowDimension($logoRow)->setRowHeight(50);
+            } catch (\Exception $e) {
+                // If logo fails, just skip it
+            }
+        } else {
+            // No logo, reduce row height
+            $sheet->getRowDimension($logoRow)->setRowHeight(15);
+        }
+        
+        // Merge logo row for consistent styling
+        $sheet->mergeCells('A' . $logoRow . ':' . $lastCol . $logoRow);
+        $sheet->getStyle('A' . $logoRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
         
         // Update title merge now that we know the last column
         $sheet->mergeCells('A' . $titleRow . ':' . $lastCol . $titleRow);
