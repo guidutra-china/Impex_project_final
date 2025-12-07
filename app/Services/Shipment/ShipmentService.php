@@ -61,11 +61,12 @@ class ShipmentService
     {
         DB::transaction(function () use ($shipment, $invoiceId) {
             // Remove any shipment items from this invoice
-            $shipment->items()
-                ->whereHas('salesInvoiceItem', function ($query) use ($invoiceId) {
-                    $query->where('sales_invoice_id', $invoiceId);
-                })
-                ->delete();
+            // DEPRECATED: salesInvoiceItem no longer exists
+            // $shipment->items()
+            //     ->whereHas('salesInvoiceItem', function ($query) use ($invoiceId) {
+            //         $query->where('sales_invoice_id', $invoiceId);
+            //     })
+            //     ->delete();
 
             // Detach invoice
             $shipment->salesInvoices()->detach($invoiceId);
@@ -241,9 +242,13 @@ class ShipmentService
 
     /**
      * Reverse invoice quantities (when cancelling a confirmed shipment)
+     * DEPRECATED: salesInvoiceItem no longer exists
      */
     protected function reverseInvoiceQuantities(Shipment $shipment): void
     {
+        // Method deprecated - salesInvoiceItem no longer exists
+        return;
+        /*
         foreach ($shipment->items as $item) {
             if ($item->quantity_shipped > 0 && $item->salesInvoiceItem) {
                 $invoiceItem = $item->salesInvoiceItem;
@@ -262,6 +267,7 @@ class ShipmentService
                 $invoiceItem->save();
             }
         }
+        */
     }
 
     /**

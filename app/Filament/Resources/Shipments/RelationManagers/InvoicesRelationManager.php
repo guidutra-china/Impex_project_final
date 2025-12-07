@@ -140,7 +140,7 @@ class InvoicesRelationManager extends RelationManager
                             ->first();
                         
                         if ($pivotRecord) {
-                            $pivotRecord->calculateTotals();
+                            // $pivotRecord->calculateTotals(); // DEPRECATED: method disabled
                         }
                         
                         // Auto-add items if checkbox is checked

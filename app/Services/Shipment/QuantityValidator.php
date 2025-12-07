@@ -95,6 +95,8 @@ class QuantityValidator
         }
 
         // Check if all items are from attached invoices
+        // DEPRECATED: salesInvoiceItem no longer exists
+        /*
         foreach ($shipment->items as $item) {
             if ($item->salesInvoiceItem) {
                 $invoiceId = $item->salesInvoiceItem->sales_invoice_id;
@@ -107,6 +109,7 @@ class QuantityValidator
                 }
             }
         }
+        */
 
         // If there are packing boxes, all items must be fully packed
         if ($shipment->packingBoxes()->count() > 0) {

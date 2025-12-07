@@ -208,9 +208,10 @@ class ShipmentItem extends Model
         $this->unit_volume = $product->volume;
         
         // Get price from sales invoice item if available
-        if ($this->salesInvoiceItem) {
-            $this->unit_price = $this->salesInvoiceItem->unit_price;
-        }
+        // DEPRECATED: salesInvoiceItem no longer exists
+        // if ($this->salesInvoiceItem) {
+        //     $this->unit_price = $this->salesInvoiceItem->unit_price;
+        // }
         
         // Don't save here - let the creating observer finish and save automatically
     }

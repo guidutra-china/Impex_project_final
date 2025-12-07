@@ -54,9 +54,13 @@ class ShipmentInvoice extends Model
 
     /**
      * Calculate totals from shipment items
+     * DEPRECATED: salesInvoiceItem relationship no longer exists
      */
     public function calculateTotals(): void
     {
+        // Method deprecated - salesInvoiceItem no longer exists
+        return;
+        /*
         $shipmentItems = $this->shipment->items()
             ->whereHas('salesInvoiceItem', function ($query) {
                 $query->where('sales_invoice_id',
@@ -68,5 +72,6 @@ class ShipmentInvoice extends Model
         $this->total_quantity = $shipmentItems->sum('quantity_to_ship');
         $this->total_value = $shipmentItems->sum('customs_value');
         $this->save();
+        */
     }
 }
