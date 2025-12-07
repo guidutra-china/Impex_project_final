@@ -5,6 +5,9 @@ namespace App\Filament\Resources\Shipments\Pages;
 use App\Filament\Resources\Shipments\ShipmentResource;
 use App\Models\CommercialInvoice;
 use App\Services\CommercialInvoicePdfService;
+use App\Services\PackingListPdfService;
+use App\Services\PackingListExcelService;
+use App\Models\PackingList;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ForceDeleteAction;
@@ -147,6 +150,72 @@ class EditShipment extends EditRecord
                         Notification::make()
                             ->danger()
                             ->title('Error Generating PDF')
+                            ->body($e->getMessage())
+                            ->send();
+                    }
+                }),
+            
+            Action::make('packing_list_pdf')
+                ->label('Packing List PDF')
+                ->icon('heroicon-o-document-text')
+                ->color('success')
+                ->visible(fn () => in_array($this->record->status, ['on_board', 'in_transit', 'customs_clearance', 'delivered']))
+                ->action(function () {
+                    try {
+                        // Create or get PackingList
+                        $packingList = $this->record->packingList;
+                        if (!$packingList) {
+                            $packingList = PackingList::generateFromShipment($this->record);
+                        }
+                        
+                        $pdfService = app(PackingListPdfService::class);
+                        $path = $pdfService->generate($this->record);
+                        
+                        Notification::make()
+                            ->success()
+                            ->title('PDF Generated')
+                            ->body('Packing List PDF generated successfully')
+                            ->send();
+                        
+                        return response()->download(storage_path('app/' . $path));
+                        
+                    } catch (\Exception $e) {
+                        Notification::make()
+                            ->danger()
+                            ->title('Error Generating PDF')
+                            ->body($e->getMessage())
+                            ->send();
+                    }
+                }),
+            
+            Action::make('packing_list_excel')
+                ->label('Packing List Excel')
+                ->icon('heroicon-o-table-cells')
+                ->color('success')
+                ->visible(fn () => in_array($this->record->status, ['on_board', 'in_transit', 'customs_clearance', 'delivered']))
+                ->action(function () {
+                    try {
+                        // Create or get PackingList
+                        $packingList = $this->record->packingList;
+                        if (!$packingList) {
+                            $packingList = PackingList::generateFromShipment($this->record);
+                        }
+                        
+                        $excelService = app(PackingListExcelService::class);
+                        $path = $excelService->generate($this->record);
+                        
+                        Notification::make()
+                            ->success()
+                            ->title('Excel Generated')
+                            ->body('Packing List Excel generated successfully')
+                            ->send();
+                        
+                        return response()->download($path);
+                        
+                    } catch (\Exception $e) {
+                        Notification::make()
+                            ->danger()
+                            ->title('Error Generating Excel')
                             ->body($e->getMessage())
                             ->send();
                     }

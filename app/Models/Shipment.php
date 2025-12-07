@@ -251,6 +251,14 @@ class Shipment extends Model
         return $this->hasOne(CommercialInvoice::class);
     }
 
+    /**
+     * Packing List
+     */
+    public function packingList(): HasOne
+    {
+        return $this->hasOne(PackingList::class);
+    }
+
     public function trackingEvents(): HasMany
     {
         return $this->hasMany(TrackingEvent::class)->orderBy('event_date', 'desc');
