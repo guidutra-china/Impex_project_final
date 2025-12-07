@@ -35,10 +35,10 @@ class PackingListPdfService
                 'companySettings' => \App\Models\CompanySetting::first(),
             ],
             options: [
-                'format' => 'A4',
+                'paper' => 'a4',
                 'orientation' => 'portrait',
-            ],
-            revisionNumber: $revisionNumber
+                'revision_number' => $revisionNumber,
+            ]
         );
 
         return $generatedDocument->file_path;
