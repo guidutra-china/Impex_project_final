@@ -276,15 +276,21 @@
                     <td class="info-box">
                         <div class="info-box-title">Exporter:</div>
                         <div class="info-box-content">
-                            <p><strong>{{ $shipment->commercialInvoice->exporter_name ?? "" ?? ($companySettings->company_name ?? config('app.name')) }}</strong></p>
-                            @if($shipment->commercialInvoice->exporter_address ?? "")
-                            <p>{{ $shipment->commercialInvoice->exporter_address ?? "" }}</p>
+                            @php
+                                $exporterName = $shipment->commercialInvoice->exporter_name ?? $companySettings->company_name ?? config('app.name');
+                                $exporterAddress = $shipment->commercialInvoice->exporter_address ?? $companySettings->address ?? '';
+                                $exporterCountry = $shipment->commercialInvoice->exporter_country ?? $companySettings->country ?? '';
+                                $exporterTaxId = $shipment->commercialInvoice->exporter_tax_id ?? $companySettings->tax_id ?? '';
+                            @endphp
+                            <p><strong>{{ $exporterName }}</strong></p>
+                            @if($exporterAddress)
+                            <p>{{ $exporterAddress }}</p>
                             @endif
-                            @if($shipment->commercialInvoice->exporter_country ?? "")
-                            <p>{{ $shipment->commercialInvoice->exporter_country ?? "" }}</p>
+                            @if($exporterCountry)
+                            <p>{{ $exporterCountry }}</p>
                             @endif
-                            @if($shipment->commercialInvoice->exporter_tax_id ?? "")
-                            <p>Tax ID: {{ $shipment->commercialInvoice->exporter_tax_id ?? "" }}</p>
+                            @if($exporterTaxId)
+                            <p>Tax ID: {{ $exporterTaxId }}</p>
                             @endif
                         </div>
                     </td>
@@ -296,15 +302,21 @@
                     <td class="info-box">
                         <div class="info-box-title">Importer / Consignee:</div>
                         <div class="info-box-content">
-                            <p><strong>{{ $shipment->commercialInvoice->importer_name ?? "" ?? $shipment->customer->name }}</strong></p>
-                            @if($shipment->commercialInvoice->importer_address ?? "")
-                            <p>{{ $shipment->commercialInvoice->importer_address ?? "" }}</p>
+                            @php
+                                $importerName = $shipment->commercialInvoice->importer_name ?? $shipment->customer->name ?? '';
+                                $importerAddress = $shipment->commercialInvoice->importer_address ?? $shipment->customer->address ?? '';
+                                $importerCountry = $shipment->commercialInvoice->importer_country ?? $shipment->customer->country ?? '';
+                                $importerTaxId = $shipment->commercialInvoice->importer_tax_id ?? $shipment->customer->tax_id ?? '';
+                            @endphp
+                            <p><strong>{{ $importerName }}</strong></p>
+                            @if($importerAddress)
+                            <p>{{ $importerAddress }}</p>
                             @endif
-                            @if($shipment->commercialInvoice->importer_country ?? "")
-                            <p>{{ $shipment->commercialInvoice->importer_country ?? "" }}</p>
+                            @if($importerCountry)
+                            <p>{{ $importerCountry }}</p>
                             @endif
-                            @if($shipment->commercialInvoice->importer_tax_id ?? "")
-                            <p>Tax ID: {{ $shipment->commercialInvoice->importer_tax_id ?? "" }}</p>
+                            @if($importerTaxId)
+                            <p>Tax ID: {{ $importerTaxId }}</p>
                             @endif
                         </div>
                     </td>

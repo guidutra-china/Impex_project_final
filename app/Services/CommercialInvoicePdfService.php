@@ -45,6 +45,7 @@ class CommercialInvoicePdfService
                     'commercialInvoice',
                 ]),
                 'version' => $version,
+                'companySettings' => \App\Models\CompanySetting::first(),
             ],
             options: [
                 'paper' => 'a4',
