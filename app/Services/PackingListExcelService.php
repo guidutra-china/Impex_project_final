@@ -59,47 +59,29 @@ class PackingListExcelService
         // ==================== EXPORTER & IMPORTER ====================
         $infoStartRow = $currentRow;
         
-        // Exporter (Left side)
+        // Prepare Exporter data
+        $exporterData = [];
         if ($displayOptions['show_exporter_details'] ?? true) {
             $companySettings = \App\Models\CompanySetting::first();
-            $exporterName = $packingList->exporter_name ?? $companySettings?->company_name ?? 'N/A';
-            $exporterAddress = $packingList->exporter_address ?? $companySettings?->full_address ?? 'N/A';
-            
-            $sheet->setCellValue('A' . $currentRow, 'EXPORTER (SHIPPER):');
-            $sheet->mergeCells('A' . $currentRow . ':D' . $currentRow);
-            $sheet->getStyle('A' . $currentRow)->applyFromArray($styles['sectionHeader']);
-            $currentRow++;
-            
-            $sheet->setCellValue('A' . $currentRow, $exporterName);
-            $sheet->mergeCells('A' . $currentRow . ':D' . $currentRow);
-            $currentRow++;
-            
-            $sheet->setCellValue('A' . $currentRow, $exporterAddress);
-            $sheet->mergeCells('A' . $currentRow . ':D' . $currentRow);
-            $sheet->getStyle('A' . $currentRow)->getAlignment()->setWrapText(true);
-            $currentRow++;
+            $exporterData = [
+                'name' => $packingList->exporter_name ?? $companySettings?->company_name ?? 'N/A',
+                'address' => $packingList->exporter_address ?? $companySettings?->full_address ?? 'N/A',
+            ];
         }
         
-        // Importer (Right side)
-        $currentRow = $infoStartRow;
+        // Prepare Importer data
+        $importerData = [];
         if ($displayOptions['show_importer_details'] ?? true) {
             $customer = $shipment->customer;
-            $importerName = $packingList->importer_name ?? $customer?->name ?? 'N/A';
-            $importerAddress = $packingList->importer_address ?? $customer?->address ?? 'N/A';
-            
-            $sheet->setCellValue('F' . $currentRow, 'IMPORTER (CONSIGNEE):');
-            $sheet->mergeCells('F' . $currentRow . ':I' . $currentRow);
-            $sheet->getStyle('F' . $currentRow)->applyFromArray($styles['sectionHeader']);
-            $currentRow++;
-            
-            $sheet->setCellValue('F' . $currentRow, $importerName);
-            $sheet->mergeCells('F' . $currentRow . ':I' . $currentRow);
-            $currentRow++;
-            
-            $sheet->setCellValue('F' . $currentRow, $importerAddress);
-            $sheet->mergeCells('F' . $currentRow . ':I' . $currentRow);
-            $sheet->getStyle('F' . $currentRow)->getAlignment()->setWrapText(true);
-            $currentRow += 2;
+            $importerData = [
+                'name' => $packingList->importer_name ?? $customer?->name ?? 'N/A',
+                'address' => $packingList->importer_address ?? $customer?->address ?? 'N/A',
+            ];
+        }
+        
+        // Reserve space for exporter/importer (3 rows each)
+        if (!empty($exporterData) || !empty($importerData)) {
+            $currentRow += 3;
         }
         
         $currentRow = max($currentRow, $infoStartRow + 4);
@@ -171,6 +153,49 @@ class PackingListExcelService
         $sheet->mergeCells('A' . $titleRow . ':' . $lastCol . $titleRow);
         $sheet->getStyle('A' . $titleRow)->applyFromArray($styles['title']);
         $sheet->getRowDimension($titleRow)->setRowHeight(40);
+        
+        // ==================== FILL EXPORTER & IMPORTER NOW ====================
+        // Calculate middle column for splitting
+        $midCol = chr(ord('A') + floor((ord($lastCol) - ord('A')) / 2));
+        
+        if (!empty($exporterData) || !empty($importerData)) {
+            $currentInfoRow = $infoStartRow;
+            
+            // Exporter (Left side: A to midCol)
+            if (!empty($exporterData)) {
+                $sheet->setCellValue('A' . $currentInfoRow, 'EXPORTER (SHIPPER):');
+                $sheet->mergeCells('A' . $currentInfoRow . ':' . $midCol . $currentInfoRow);
+                $sheet->getStyle('A' . $currentInfoRow)->applyFromArray($styles['sectionHeader']);
+                $currentInfoRow++;
+                
+                $sheet->setCellValue('A' . $currentInfoRow, $exporterData['name']);
+                $sheet->mergeCells('A' . $currentInfoRow . ':' . $midCol . $currentInfoRow);
+                $currentInfoRow++;
+                
+                $sheet->setCellValue('A' . $currentInfoRow, $exporterData['address']);
+                $sheet->mergeCells('A' . $currentInfoRow . ':' . $midCol . $currentInfoRow);
+                $sheet->getStyle('A' . $currentInfoRow)->getAlignment()->setWrapText(true);
+            }
+            
+            // Importer (Right side: after midCol to lastCol)
+            $importerStartCol = chr(ord($midCol) + 1);
+            $currentInfoRow = $infoStartRow;
+            
+            if (!empty($importerData)) {
+                $sheet->setCellValue($importerStartCol . $currentInfoRow, 'IMPORTER (CONSIGNEE):');
+                $sheet->mergeCells($importerStartCol . $currentInfoRow . ':' . $lastCol . $currentInfoRow);
+                $sheet->getStyle($importerStartCol . $currentInfoRow)->applyFromArray($styles['sectionHeader']);
+                $currentInfoRow++;
+                
+                $sheet->setCellValue($importerStartCol . $currentInfoRow, $importerData['name']);
+                $sheet->mergeCells($importerStartCol . $currentInfoRow . ':' . $lastCol . $currentInfoRow);
+                $currentInfoRow++;
+                
+                $sheet->setCellValue($importerStartCol . $currentInfoRow, $importerData['address']);
+                $sheet->mergeCells($importerStartCol . $currentInfoRow . ':' . $lastCol . $currentInfoRow);
+                $sheet->getStyle($importerStartCol . $currentInfoRow)->getAlignment()->setWrapText(true);
+            }
+        }
         
         // ==================== FILL SHIPPING DETAILS NOW ====================
         if (!empty($shippingDetailsData)) {
