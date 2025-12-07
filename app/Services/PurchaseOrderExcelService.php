@@ -303,6 +303,9 @@ class PurchaseOrderExcelService
             @unlink($logoPngPath);
         }
 
+        // Save to Documents History
+        $this->saveToDocumentHistory($po, $filepath, $filename);
+
         return $filepath;
     }
 
@@ -338,6 +341,65 @@ class PurchaseOrderExcelService
         } catch (\Exception $e) {
             \Log::warning('SVG to PNG conversion failed: ' . $e->getMessage());
             return null;
+        }
+    }
+
+    /**
+     * Save generated document to history
+     *
+     * @param PurchaseOrder $po
+     * @param string $filePath
+     * @param string $fileName
+     * @return void
+     */
+    protected function saveToDocumentHistory(PurchaseOrder $po, string $filePath, string $fileName): void
+    {
+        try {
+            \Log::info('PO Excel: Starting saveToDocumentHistory', [
+                'po_id' => $po->id,
+                'temp_file_path' => $filePath,
+                'temp_file_exists' => file_exists($filePath),
+                'temp_file_size' => file_exists($filePath) ? filesize($filePath) : 0,
+            ]);
+            
+            // Move file from temp to permanent storage using Storage facade
+            $directory = "documents/purchase_orders/" . date('Y/m');
+            $storagePath = "{$directory}/{$fileName}";
+            
+            // Read file content and store using Storage facade
+            $fileContent = file_get_contents($filePath);
+            \Illuminate\Support\Facades\Storage::put($storagePath, $fileContent);
+            
+            // Verify file was saved
+            $exists = \Illuminate\Support\Facades\Storage::exists($storagePath);
+            
+            if (!$exists) {
+                throw new \Exception("Failed to save file to storage: {$storagePath}");
+            }
+            
+            // Create database record using the same pattern as RFQExcelService
+            $document = \App\Models\GeneratedDocument::createFromFile(
+                $po,
+                'purchase_order',
+                'excel',
+                $storagePath,
+                [
+                    'document_number' => $po->po_number,
+                    'filename' => $fileName,
+                ]
+            );
+            
+            \Log::info('PO Excel saved to document history', [
+                'po_id' => $po->id,
+                'file_path' => $storagePath,
+                'document_id' => $document->id,
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Failed to save PO Excel to document history', [
+                'po_id' => $po->id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
         }
     }
 }
