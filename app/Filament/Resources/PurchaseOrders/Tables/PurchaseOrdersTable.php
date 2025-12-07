@@ -236,21 +236,29 @@ class PurchaseOrdersTable
                     ->icon('heroicon-o-table-cells')
                     ->color('success')
                     ->action(function ($record) {
-                        $excelService = app(\App\Services\Export\ExcelExportService::class);
-                        $document = $excelService->generate(
-                            $record,
-                            'purchase_order'
-                        );
-                        
-                        Notification::make()
-                            ->success()
-                            ->title('Purchase Order Excel generated successfully')
-                            ->send();
-                        
-                        return response()->download(
-                            storage_path('app/' . $document->file_path),
-                            $document->filename
-                        );
+                        try {
+                            $poExcelService = app(\App\Services\PurchaseOrderExcelService::class);
+                            $filePath = $poExcelService->generatePO($record);
+                            
+                            Notification::make()
+                                ->success()
+                                ->title('Purchase Order Excel generated successfully')
+                                ->body('Professional Excel document with formatted layout')
+                                ->send();
+                            
+                            return response()->download($filePath, basename($filePath))->deleteFileAfterSend(true);
+                        } catch (\Exception $e) {
+                            Notification::make()
+                                ->danger()
+                                ->title('Excel Generation Failed')
+                                ->body($e->getMessage())
+                                ->send();
+                            
+                            \Log::error('PO Excel generation failed', [
+                                'po_id' => $record->id,
+                                'error' => $e->getMessage(),
+                            ]);
+                        }
                     }),
                 
                 // Status Transition Actions
