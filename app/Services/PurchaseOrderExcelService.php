@@ -32,7 +32,7 @@ class PurchaseOrderExcelService
         // Styling
         $headerStyle = [
             'font' => ['bold' => true, 'size' => 14, 'color' => ['rgb' => 'FFFFFF']],
-            'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '2E7D32']], // Green
+            'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '4472C4']], // Blue
             'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER],
         ];
 
@@ -257,7 +257,7 @@ class PurchaseOrderExcelService
         $sheet->setCellValue('F' . $currentRow, number_format($po->total ?? 0, 2));
         $sheet->getStyle('E' . $currentRow . ':F' . $currentRow)->applyFromArray([
             'font' => ['bold' => true, 'size' => 12],
-            'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '2E7D32']], // Green
+            'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '4472C4']], // Blue
             'borders' => [
                 'allBorders' => ['borderStyle' => Border::BORDER_THICK, 'color' => ['rgb' => '000000']],
             ],
