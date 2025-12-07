@@ -232,7 +232,7 @@
                                         <tbody class="divide-y divide-gray-100 dark:divide-white/5">
                                         @foreach($productComparison['all_prices'] as $price)
                                             @php
-                                                $isCheapest = $price['supplier_id'] === $productComparison['cheapest']['supplier_id'];
+                                                $isCheapest = isset($productComparison['cheapest']) && $price['supplier_id'] === $productComparison['cheapest']['supplier_id'];
                                             @endphp
                                             <tr class="{{ $isCheapest ? 'bg-success-50 dark:bg-success-500/10 font-semibold' : 'hover:bg-gray-50 dark:hover:bg-white/5' }}">
                                                 <td class="px-6 py-4 whitespace-nowrap text-gray-900 dark:text-white text-base">
