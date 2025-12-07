@@ -8,13 +8,16 @@ use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Actions\Action;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Radio;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Filament\Notifications\Notification;
 
 class ItemsRelationManager extends RelationManager
 {
@@ -155,7 +158,83 @@ class ItemsRelationManager extends RelationManager
                 //
             ])
             ->headerActions([
-                CreateAction::make(),
+                CreateAction::make()
+                    ->before(function (CreateAction $action, array $data) {
+                        $order = $this->getOwnerRecord();
+                        $productId = $data['product_id'];
+                        
+                        // Check if product already exists
+                        $existingItem = $order->items()
+                            ->where('product_id', $productId)
+                            ->first();
+                        
+                        if ($existingItem) {
+                            $product = \App\Models\Product::find($productId);
+                            
+                            // Show confirmation modal with options
+                            $action->requiresConfirmation();
+                            $action->modalHeading('⚠️ Product Already Exists');
+                            $action->modalDescription(
+                                "**{$product->name}** (Code: {$product->code}) is already in this order.\n\n" .
+                                "**Existing item:** Quantity {$existingItem->quantity}\n" .
+                                "**Adding:** Quantity {$data['quantity']}\n\n" .
+                                "What would you like to do?"
+                            );
+                            $action->modalIcon('heroicon-o-exclamation-triangle');
+                            $action->modalIconColor('warning');
+                            
+                            // Replace form with action selection
+                            $action->form([
+                                Radio::make('duplicate_action')
+                                    ->label('Choose Action')
+                                    ->options([
+                                        'merge' => "Merge quantities (Total: " . ($existingItem->quantity + $data['quantity']) . ")",
+                                        'separate' => "Add as separate line (for different color/specs/etc.)",
+                                    ])
+                                    ->descriptions([
+                                        'merge' => '✅ Recommended for identical products',
+                                        'separate' => '⚠️ Only if product has different characteristics',
+                                    ])
+                                    ->required()
+                                    ->default('merge')
+                                    ->live(),
+                            ]);
+                            
+                            $action->modalSubmitActionLabel('Confirm');
+                        }
+                    })
+                    ->using(function (array $data, CreateAction $action): ?\Illuminate\Database\Eloquent\Model {
+                        $order = $this->getOwnerRecord();
+                        $productId = $data['product_id'];
+                        
+                        // Check if product already exists
+                        $existingItem = $order->items()
+                            ->where('product_id', $productId)
+                            ->first();
+                        
+                        if ($existingItem && isset($data['duplicate_action'])) {
+                            $duplicateAction = $data['duplicate_action'];
+                            
+                            if ($duplicateAction === 'merge') {
+                                // Merge quantities
+                                $existingItem->quantity += $data['quantity'];
+                                $existingItem->save();
+                                
+                                Notification::make()
+                                    ->title('✅ Quantity Updated')
+                                    ->body("Product quantity increased from {$existingItem->quantity - $data['quantity']} to {$existingItem->quantity}")
+                                    ->success()
+                                    ->send();
+                                
+                                // Return existing item (don't create new)
+                                return null;
+                            }
+                            // If 'separate', continue with normal creation below
+                        }
+                        
+                        // Normal creation (no duplicate or user chose 'separate')
+                        return $order->items()->create($data);
+                    }),
             ])
             ->actions([
                 EditAction::make(),
