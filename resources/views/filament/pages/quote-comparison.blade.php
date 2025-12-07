@@ -310,7 +310,10 @@
                                     {{-- Product Name --}}
                                     <div class="bg-gray-50 dark:bg-gray-800 p-4 font-semibold text-gray-900 dark:text-white" 
                                          style="grid-column: 1 / -1;">
-                                        {{ $productComparison['product_name'] }}
+                                        {{ $productComparison['product'] ?? 'Unknown Product' }}
+                                        @if(isset($productComparison['product_code']))
+                                            <span class="text-sm text-gray-500 dark:text-gray-400 ml-2">({{ $productComparison['product_code'] }})</span>
+                                        @endif
                                     </div>
 
                                     {{-- Unit Price Label --}}
