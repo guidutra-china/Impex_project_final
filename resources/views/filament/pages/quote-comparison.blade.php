@@ -1,159 +1,290 @@
-<<x-filament-panels::page>
-    @if($order)
-        {{-- 1. Header Section: Order Information + Quote Statistics --}}
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
-            {{-- Order Information Card --}}
-            <x-filament::section class="lg:col-span-2">
-                <x-slot name="heading">
-                    Order Information
-                </x-slot>
+<x-filament-panels::page>
+    @if(!$order)
+        <x-filament::section>
+            <x-slot name="heading">
+                No Order Selected
+            </x-slot>
 
-                <div class="text-sm space-y-1">
-                    <span class="font-medium text-gray-900 dark:text-white">Order Number:</span>
-                    <span class="ml-2 text-gray-700 dark:text-gray-300">{{ $order->order_number }}</span>
-                    <span class="mx-4">|</span>
-                    <span class="font-medium text-gray-900 dark:text-white">Customer:</span>
-                    <span class="ml-2 text-gray-700 dark:text-gray-300">{{ $order->customer->name }}</span>
-                    <span class="mx-4">|</span>
-                    <span class="font-medium text-gray-900 dark:text-white">Currency:</span>
-                    <span class="ml-2 text-gray-700 dark:text-gray-300">{{ $order->currency->symbol }} {{ $order->currency->code }}</span>
-                    <span class="mx-4">|</span>
-                    <span class="font-medium text-gray-900 dark:text-white">Commission:</span>
-                    <span class="ml-2 text-gray-700 dark:text-gray-300">{{ $order->commission_percent }}% ({{ ucfirst($order->commission_type) }})</span>
-                </div>
-            </x-filament::section>
+            <div class="text-center py-12">
+                <p class="text-gray-500 dark:text-gray-400">
+                    Please select an order to compare quotes.
+                </p>
+            </div>
+        </x-filament::section>
+    @elseif(empty($comparison['overall']['all_quotes']))
+        <x-filament::section>
+            <x-slot name="heading">
+                No Quotes Available
+            </x-slot>
 
-            {{-- Quote Statistics Card --}}
-            @if($summary)
-                <x-filament::section class="flex flex-col justify-center">
-                    <x-slot name="heading">
-                        Quote Statistics
-                    </x-slot>
+            <div class="text-center py-12">
+                <p class="text-gray-500 dark:text-gray-400">
+                    No supplier quotes found for this order.
+                </p>
+            </div>
+        </x-filament::section>
+    @else
+        {{-- Quote Selector --}}
+        <x-filament::section>
+            <x-slot name="heading">
+                📋 Select Quotes to Compare
+            </x-slot>
+            
+            <x-slot name="description">
+                Choose 2-4 quotes to compare side-by-side. Click on cards to select/deselect.
+            </x-slot>
 
-                    <div class="flex flex-wrap gap-4 text-sm">
-                        <x-filament::badge color="primary" class="px-4 py-2 text-base">
-                            Total: {{ $summary['total_quotes'] ?? 0 }}
-                        </x-filament::badge>
-                        <x-filament::badge color="gray" class="px-4 py-2 text-base">
-                            Draft: {{ $summary['draft_quotes'] ?? 0 }}
-                        </x-filament::badge>
-                        <x-filament::badge color="warning" class="px-4 py-2 text-base">
-                            Sent: {{ $summary['sent_quotes'] ?? 0 }}
-                        </x-filament::badge>
-                        <x-filament::badge color="success" class="px-4 py-2 text-base">
-                            Accepted: {{ $summary['accepted_quotes'] ?? 0 }}
-                        </x-filament::badge>
-                    </div>
-                </x-filament::section>
-            @endif
-        </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                @foreach($comparison['overall']['all_quotes'] as $quote)
+                    <button
+                        wire:click="toggleQuote({{ $quote['quote_id'] }})"
+                        class="relative p-6 rounded-lg border-2 transition-all duration-200 text-left
+                            {{ in_array($quote['quote_id'], $selectedQuotes) 
+                                ? 'border-primary-500 bg-primary-50 dark:bg-primary-500/10 shadow-lg' 
+                                : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600' }}"
+                    >
+                        {{-- Checkbox --}}
+                        <div class="absolute top-4 right-4">
+                            @if(in_array($quote['quote_id'], $selectedQuotes))
+                                <div class="w-6 h-6 rounded bg-primary-500 flex items-center justify-center">
+                                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                </div>
+                            @else
+                                <div class="w-6 h-6 rounded border-2 border-gray-300 dark:border-gray-600"></div>
+                            @endif
+                        </div>
 
-        @if(!empty($comparison['overall']))
-            {{-- 2. Savings Highlight --}}
-            @if($comparison['overall']['savings'] > 0)
-                <div class="mb-8">
-                    <div class="rounded-lg bg-gradient-to-r from-success-50 to-success-100 dark:from-success-500/10 dark:to-success-500/5 p-8 border border-success-200 dark:border-success-500/20">
-                        <div class="flex items-center gap-6">
-                            <div class="flex-shrink-0 text-5xl">
-                                💰
-                            </div>
-                            <div class="flex-1">
-                                <p class="text-xl font-semibold text-success-900 dark:text-success-200">
-                                    Best Supplier: <span class="text-success-700 dark:text-success-300">{{ $comparison['overall']['cheapest_supplier'] }}</span>
-                                </p>
-                                <p class="text-lg text-success-800 dark:text-success-300 mt-2">
-                                    Potential Savings:
-                                    <span class="font-bold text-2xl mx-2">{{ $order->currency->symbol }}{{ number_format($comparison['overall']['savings'] / 100, 2) }}</span>
-                                    <span class="font-semibold text-xl">({{ number_format($comparison['overall']['savings_percent'], 2) }}%)</span>
-                                </p>
+                        {{-- Supplier Name --}}
+                        <div class="mb-3">
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white pr-8">
+                                {{ $quote['supplier'] }}
+                            </h3>
+                        </div>
+
+                        {{-- Total Price --}}
+                        <div class="mb-2">
+                            <div class="text-2xl font-bold text-gray-900 dark:text-white">
+                                {{ $order->currency->symbol }}{{ number_format($quote['total_after_commission'] / 100, 2) }}
                             </div>
                         </div>
-                    </div>
-                </div>
-            @endif
 
-            {{-- 3. Overall Supplier Comparison Table --}}
-            <x-filament::section class="mb-8">
+                        {{-- Best Price Badge --}}
+                        @if($quote['quote_id'] === $comparison['overall']['cheapest_quote_id'])
+                            <x-filament::badge color="success" size="sm">
+                                ⭐ Best Price
+                            </x-filament::badge>
+                        @endif
+
+                        {{-- Status --}}
+                        <div class="mt-3">
+                            <x-filament::badge
+                                :color="match($quote['status']) {
+                                    'accepted' => 'success',
+                                    'sent' => 'warning',
+                                    'rejected' => 'danger',
+                                    default => 'gray'
+                                }"
+                                size="sm"
+                            >
+                                {{ ucfirst($quote['status']) }}
+                            </x-filament::badge>
+                        </div>
+
+                        {{-- Quick Info --}}
+                        <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700 text-sm text-gray-600 dark:text-gray-400 space-y-1">
+                            @if($quote['moq'])
+                                <div>MOQ: {{ number_format($quote['moq']) }}</div>
+                            @endif
+                            @if($quote['lead_time_days'])
+                                <div>Lead: {{ $quote['lead_time_days'] }}d</div>
+                            @endif
+                        </div>
+                    </button>
+                @endforeach
+            </div>
+
+            <div class="mt-4 text-sm text-gray-500 dark:text-gray-400">
+                {{ count($selectedQuotes) }} of {{ count($comparison['overall']['all_quotes']) }} quotes selected
+                (min: 1, max: 4)
+            </div>
+        </x-filament::section>
+
+        {{-- Side-by-Side Comparison --}}
+        @php
+            $selectedQuotesData = collect($comparison['overall']['all_quotes'])
+                ->filter(fn($q) => in_array($q['quote_id'], $selectedQuotes))
+                ->values();
+            
+            $cheapestSelected = $selectedQuotesData->sortBy('total_after_commission')->first();
+        @endphp
+
+        @if($selectedQuotesData->isNotEmpty())
+            <x-filament::section class="mt-6">
                 <x-slot name="heading">
-                    Overall Supplier Comparison
-                </x-slot>
-                <x-slot name="description">
-                    All prices converted to {{ $order->currency->code }} for fair comparison
+                    🔍 Side-by-Side Comparison
                 </x-slot>
 
                 <div class="overflow-x-auto">
-                    <table class="w-full table-fixed divide-y divide-gray-200 dark:divide-white/10 text-base">
-                        <thead class="bg-gray-50 dark:bg-white/5 sticky top-0 z-10">
-                        <tr>
-                            <th scope="col" class="px-6 py-4 text-left font-semibold text-gray-900 dark:text-white">Supplier</th>
-                            <th scope="col" class="px-6 py-4 text-right font-semibold text-gray-900 dark:text-white">Total Price</th>
-                            <th scope="col" class="px-6 py-4 text-center font-semibold text-gray-900 dark:text-white">MOQ</th>
-                            <th scope="col" class="px-6 py-4 text-center font-semibold text-gray-900 dark:text-white">Lead Time</th>
-                            <th scope="col" class="px-6 py-4 text-center font-semibold text-gray-900 dark:text-white">Incoterm</th>
-                            <th scope="col" class="px-6 py-4 text-center font-semibold text-gray-900 dark:text-white">Payment</th>
-                            <th scope="col" class="px-6 py-4 text-center font-semibold text-gray-900 dark:text-white">Status</th>
-                            <th scope="col" class="px-6 py-4 text-right font-semibold text-gray-900 dark:text-white">vs. Best</th>
-                        </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-100 dark:divide-white/5 bg-white dark:bg-transparent">
-                        @php
-                            $cheapestTotal = collect($comparison['overall']['all_quotes'])->firstWhere('quote_id', $comparison['overall']['cheapest_quote_id'])['total_after_commission'] ?? 0;
-                        @endphp
-                        @foreach($comparison['overall']['all_quotes'] as $quote)
-                            @php
-                                $isCheapest = $quote['quote_id'] === $comparison['overall']['cheapest_quote_id'];
-                                $priceDiff = $quote['total_after_commission'] - $cheapestTotal;
-                            @endphp
-                            <tr class="{{ $isCheapest ? 'bg-success-50 dark:bg-success-500/10 font-semibold' : 'hover:bg-gray-50 dark:hover:bg-white/5' }}">
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="flex items-center gap-2">
-                                        <span class="text-gray-900 dark:text-white">{{ $quote['supplier'] }}</span>
-                                        @if($isCheapest)
-                                            <x-filament::badge color="success" size="sm">
-                                                ⭐ Best
-                                            </x-filament::badge>
-                                        @endif
+                    <div class="inline-flex min-w-full">
+                        {{-- Comparison Table --}}
+                        <div class="flex-1 grid gap-px bg-gray-200 dark:bg-gray-700" 
+                             style="grid-template-columns: 200px repeat({{ $selectedQuotesData->count() }}, 1fr);">
+                            
+                            {{-- Header Row --}}
+                            <div class="bg-gray-50 dark:bg-gray-800 p-4 font-semibold text-gray-900 dark:text-white">
+                                Criteria
+                            </div>
+                            @foreach($selectedQuotesData as $quote)
+                                <div class="bg-gray-50 dark:bg-gray-800 p-4 text-center">
+                                    <div class="font-semibold text-gray-900 dark:text-white mb-2">
+                                        {{ $quote['supplier'] }}
                                     </div>
-                                </td>
-                                <td class="px-6 py-4 text-right whitespace-nowrap">
-                                    <span class="font-mono {{ $isCheapest ? 'text-success-700 dark:text-success-300 font-bold' : 'text-gray-900 dark:text-white' }}">
+                                    @if($quote['quote_id'] === $cheapestSelected['quote_id'])
+                                        <x-filament::badge color="success" size="sm">
+                                            ⭐ Best Price
+                                        </x-filament::badge>
+                                    @endif
+                                </div>
+                            @endforeach
+
+                            {{-- PRICING SECTION --}}
+                            <div class="bg-primary-50 dark:bg-primary-900/20 p-3 font-bold text-primary-700 dark:text-primary-300" 
+                                 style="grid-column: 1 / -1;">
+                                💰 PRICING
+                            </div>
+
+                            {{-- Total Price --}}
+                            <div class="bg-white dark:bg-gray-900 p-4 font-medium text-gray-700 dark:text-gray-300">
+                                Total Price
+                            </div>
+                            @foreach($selectedQuotesData as $quote)
+                                @php
+                                    $isCheapest = $quote['quote_id'] === $cheapestSelected['quote_id'];
+                                    $priceDiff = $quote['total_after_commission'] - $cheapestSelected['total_after_commission'];
+                                @endphp
+                                <div class="bg-white dark:bg-gray-900 p-4 text-center {{ $isCheapest ? 'bg-success-50 dark:bg-success-900/20' : '' }}">
+                                    <div class="text-xl font-bold {{ $isCheapest ? 'text-success-700 dark:text-success-300' : 'text-gray-900 dark:text-white' }}">
                                         {{ $order->currency->symbol }}{{ number_format($quote['total_after_commission'] / 100, 2) }}
-                                    </span>
-                                </td>
-                                <td class="px-6 py-4 text-center whitespace-nowrap">
-                                    @if($quote['moq'])
-                                        <span class="text-gray-900 dark:text-white">{{ number_format($quote['moq']) }}</span>
+                                    </div>
+                                    @if(!$isCheapest && $priceDiff > 0)
+                                        <div class="text-sm text-danger-600 dark:text-danger-400 mt-1">
+                                            +{{ $order->currency->symbol }}{{ number_format($priceDiff / 100, 2) }}
+                                        </div>
+                                    @endif
+                                </div>
+                            @endforeach
+
+                            {{-- PROCUREMENT SECTION --}}
+                            <div class="bg-primary-50 dark:bg-primary-900/20 p-3 font-bold text-primary-700 dark:text-primary-300" 
+                                 style="grid-column: 1 / -1;">
+                                📦 PROCUREMENT DETAILS
+                            </div>
+
+                            {{-- MOQ --}}
+                            <div class="bg-white dark:bg-gray-900 p-4 font-medium text-gray-700 dark:text-gray-300">
+                                MOQ
+                            </div>
+                            @foreach($selectedQuotesData as $quote)
+                                @php
+                                    $moq = $quote['moq'] ?? null;
+                                    $isHigh = $moq && $moq > 500;
+                                @endphp
+                                <div class="bg-white dark:bg-gray-900 p-4 text-center">
+                                    @if($moq)
+                                        <div class="text-gray-900 dark:text-white">
+                                            {{ number_format($moq) }}
+                                            @if($isHigh)
+                                                <x-filament::badge color="warning" size="sm">⚠️</x-filament::badge>
+                                            @else
+                                                <x-filament::badge color="success" size="sm">✅</x-filament::badge>
+                                            @endif
+                                        </div>
                                     @else
                                         <span class="text-gray-400">N/A</span>
                                     @endif
-                                </td>
-                                <td class="px-6 py-4 text-center whitespace-nowrap">
-                                    @if($quote['lead_time_days'])
-                                        <span class="text-gray-900 dark:text-white">{{ $quote['lead_time_days'] }}d</span>
-                                        @if($quote['lead_time_days'] > 60)
-                                            <x-filament::badge color="danger" size="sm">⚠️</x-filament::badge>
-                                        @endif
+                                </div>
+                            @endforeach
+
+                            {{-- Lead Time --}}
+                            <div class="bg-white dark:bg-gray-900 p-4 font-medium text-gray-700 dark:text-gray-300">
+                                Lead Time
+                            </div>
+                            @foreach($selectedQuotesData as $quote)
+                                @php
+                                    $leadTime = $quote['lead_time_days'] ?? null;
+                                    $isLong = $leadTime && $leadTime > 60;
+                                @endphp
+                                <div class="bg-white dark:bg-gray-900 p-4 text-center">
+                                    @if($leadTime)
+                                        <div class="text-gray-900 dark:text-white">
+                                            {{ $leadTime }} days
+                                            @if($isLong)
+                                                <x-filament::badge color="danger" size="sm">⚠️</x-filament::badge>
+                                            @else
+                                                <x-filament::badge color="success" size="sm">✅</x-filament::badge>
+                                            @endif
+                                        </div>
                                     @else
                                         <span class="text-gray-400">N/A</span>
                                     @endif
-                                </td>
-                                <td class="px-6 py-4 text-center whitespace-nowrap">
+                                </div>
+                            @endforeach
+
+                            {{-- Incoterm --}}
+                            <div class="bg-white dark:bg-gray-900 p-4 font-medium text-gray-700 dark:text-gray-300">
+                                Incoterm
+                            </div>
+                            @foreach($selectedQuotesData as $quote)
+                                <div class="bg-white dark:bg-gray-900 p-4 text-center">
                                     @if($quote['incoterm'])
-                                        <x-filament::badge color="info" size="sm">
+                                        <x-filament::badge 
+                                            :color="in_array($quote['incoterm'], ['DDP', 'DAP']) ? 'success' : 'info'" 
+                                            size="sm"
+                                        >
                                             {{ $quote['incoterm'] }}
                                         </x-filament::badge>
+                                        @if(in_array($quote['incoterm'], ['DDP', 'DAP']))
+                                            <div class="text-xs text-success-600 dark:text-success-400 mt-1">All-inclusive</div>
+                                        @endif
                                     @else
                                         <span class="text-gray-400">N/A</span>
                                     @endif
-                                </td>
-                                <td class="px-6 py-4 text-center text-sm whitespace-nowrap">
-                                    @if($quote['payment_terms'])
-                                        <span class="text-gray-900 dark:text-white">{{ str_replace('_', ' ', ucwords($quote['payment_terms'], '_')) }}</span>
+                                </div>
+                            @endforeach
+
+                            {{-- Payment Terms --}}
+                            <div class="bg-white dark:bg-gray-900 p-4 font-medium text-gray-700 dark:text-gray-300">
+                                Payment Terms
+                            </div>
+                            @foreach($selectedQuotesData as $quote)
+                                @php
+                                    $payment = $quote['payment_terms'] ?? null;
+                                    $isGood = $payment && !str_contains($payment, '100');
+                                @endphp
+                                <div class="bg-white dark:bg-gray-900 p-4 text-center text-sm">
+                                    @if($payment)
+                                        <div class="text-gray-900 dark:text-white">
+                                            {{ str_replace('_', ' ', ucwords($payment, '_')) }}
+                                        </div>
+                                        @if($isGood)
+                                            <x-filament::badge color="success" size="sm">✅</x-filament::badge>
+                                        @else
+                                            <x-filament::badge color="warning" size="sm">⚠️</x-filament::badge>
+                                        @endif
                                     @else
                                         <span class="text-gray-400">N/A</span>
                                     @endif
-                                </td>
-                                <td class="px-6 py-4 text-center whitespace-nowrap">
+                                </div>
+                            @endforeach
+
+                            {{-- STATUS --}}
+                            <div class="bg-white dark:bg-gray-900 p-4 font-medium text-gray-700 dark:text-gray-300">
+                                Status
+                            </div>
+                            @foreach($selectedQuotesData as $quote)
+                                <div class="bg-white dark:bg-gray-900 p-4 text-center">
                                     <x-filament::badge
                                         :color="match($quote['status']) {
                                             'accepted' => 'success',
@@ -165,158 +296,57 @@
                                     >
                                         {{ ucfirst($quote['status']) }}
                                     </x-filament::badge>
-                                </td>
-                                <td class="px-6 py-4 text-right whitespace-nowrap">
-                                    @if($isCheapest)
-                                        <span class="text-gray-500 dark:text-gray-400">-</span>
-                                    @else
-                                        <span class="text-danger-600 dark:text-danger-400 font-semibold">
-                                            +{{ $order->currency->symbol }}{{ number_format($priceDiff / 100, 2) }}
-                                        </span>
-                                    @endif
-                                </td>
-                            </tr>
-                        @endforeach
-                        </tbody>
-                    </table>
-                </div>
-            </x-filament::section>
+                                </div>
+                            @endforeach
 
-            {{-- 4. Product-by-Product Detailed Comparison --}}
-            @if(count($comparison['by_product']) > 0)
-                <x-filament::section>
-                    <x-slot name="heading">
-                        Product-by-Product Comparison
-                    </x-slot>
-                    <x-slot name="description">
-                        Detailed price breakdown for each product
-                    </x-slot>
+                            {{-- PRODUCTS SECTION --}}
+                            @if(isset($comparison['by_product']) && count($comparison['by_product']) > 0)
+                                <div class="bg-primary-50 dark:bg-primary-900/20 p-3 font-bold text-primary-700 dark:text-primary-300" 
+                                     style="grid-column: 1 / -1;">
+                                    📦 PRODUCTS
+                                </div>
 
-                    <div class="space-y-8">
-                        @foreach($comparison['by_product'] as $productComparison)
-                            <div class="rounded-lg border border-gray-200 dark:border-white/10 overflow-hidden bg-white dark:bg-transparent">
-                                {{-- Product Header --}}
-                                <div class="bg-gray-50 dark:bg-white/5 px-8 py-6 border-b border-gray-200 dark:border-white/10">
-                                    <div class="flex items-center justify-between gap-6">
-                                        <div class="flex items-center gap-4 flex-1">
-                                            <span class="text-xl font-bold text-gray-900 dark:text-white whitespace-nowrap">
-                                                {{ $productComparison['product'] }} ({{ $productComparison['product_code'] }})
-                                            </span>
-                                            <span class="text-gray-400 dark:text-gray-500">|</span>
-                                            <span class="text-base text-gray-600 dark:text-gray-400 whitespace-nowrap">
-                                                Quantity: <strong class="text-gray-900 dark:text-white">{{ $productComparison['quantity'] }}</strong>
-                                            </span>
-                                            @if($productComparison['savings'] > 0)
-                                                <span class="text-gray-400 dark:text-gray-500">|</span>
-                                                <span class="text-base font-bold text-success-700 dark:text-success-300 bg-success-50 dark:bg-success-500/10 px-4 py-2 rounded-lg whitespace-nowrap">
-                                                    💰 Savings: {{ $order->currency->symbol }}{{ number_format($productComparison['savings'] / 100, 2) }}
-                                                </span>
+                                @foreach($comparison['by_product'] as $productComparison)
+                                    {{-- Product Name --}}
+                                    <div class="bg-gray-50 dark:bg-gray-800 p-4 font-semibold text-gray-900 dark:text-white" 
+                                         style="grid-column: 1 / -1;">
+                                        {{ $productComparison['product_name'] }}
+                                    </div>
+
+                                    {{-- Unit Price Label --}}
+                                    <div class="bg-white dark:bg-gray-900 p-4 font-medium text-gray-700 dark:text-gray-300 pl-8">
+                                        Unit Price
+                                    </div>
+
+                                    @foreach($selectedQuotesData as $quote)
+                                        @php
+                                            $productPrice = collect($productComparison['all_prices'])
+                                                ->firstWhere('supplier_id', $quote['supplier_id']);
+                                            
+                                            $isCheapestProduct = isset($productComparison['cheapest']) && 
+                                                $productPrice && 
+                                                $productPrice['supplier_id'] === $productComparison['cheapest']['supplier_id'];
+                                        @endphp
+                                        <div class="bg-white dark:bg-gray-900 p-4 text-center {{ $isCheapestProduct ? 'bg-success-50 dark:bg-success-900/20' : '' }}">
+                                            @if($productPrice && $productPrice['price'])
+                                                <div class="font-mono {{ $isCheapestProduct ? 'text-success-700 dark:text-success-300 font-bold' : 'text-gray-900 dark:text-white' }}">
+                                                    {{ $order->currency->symbol }}{{ number_format($productPrice['converted_price'] / 100, 2) }}
+                                                </div>
+                                                @if($isCheapestProduct)
+                                                    <x-filament::badge color="success" size="sm">⭐</x-filament::badge>
+                                                @endif
+                                            @else
+                                                <span class="text-gray-400">Not quoted</span>
                                             @endif
                                         </div>
-                                    </div>
-                                </div>
+                                    @endforeach
+                                @endforeach
+                            @endif
 
-                                {{-- Product Prices Table --}}
-                                <div class="overflow-x-auto">
-                                    <table class="w-full divide-y divide-gray-200 dark:divide-white/10 text-base">
-                                        <thead class="bg-gray-100 dark:bg-white/5">
-                                        <tr>
-                                            <th scope="col" class="px-6 py-4 text-left font-semibold text-gray-900 dark:text-white w-[22%]">Supplier</th>
-                                            <th scope="col" class="px-4 py-4 text-right font-semibold text-gray-900 dark:text-white w-[16%]">Unit Price</th>
-                                            <th scope="col" class="px-4 py-4 text-right font-semibold text-gray-900 dark:text-white w-[18%]">Total (Original)</th>
-                                            <th scope="col" class="px-4 py-4 text-right font-semibold text-gray-900 dark:text-white w-[18%]">Price ({{ $order->currency->code }})</th>
-                                            <th scope="col" class="px-4 py-4 text-center font-semibold text-gray-900 dark:text-white w-[13%]">Status</th>
-                                            <th scope="col" class="px-4 py-4 text-center font-semibold text-gray-900 dark:text-white w-[13%]">Best</th>
-                                        </tr>
-                                        </thead>
-                                        <tbody class="divide-y divide-gray-100 dark:divide-white/5">
-                                        @foreach($productComparison['all_prices'] as $price)
-                                            @php
-                                                $isCheapest = isset($productComparison['cheapest']) && $price['supplier_id'] === $productComparison['cheapest']['supplier_id'];
-                                            @endphp
-                                            <tr class="{{ $isCheapest ? 'bg-success-50 dark:bg-success-500/10 font-semibold' : 'hover:bg-gray-50 dark:hover:bg-white/5' }}">
-                                                <td class="px-6 py-4 whitespace-nowrap text-gray-900 dark:text-white text-base">
-                                                    {{ $price['supplier'] }}
-                                                </td>
-                                                <td class="px-4 py-4 text-right whitespace-nowrap text-gray-700 dark:text-gray-300">
-                                                    <span class="font-mono text-base">
-                                                        @if($price['price'])
-                                                            {{ $price['currency'] ?? '' }} {{ number_format($price['price'] / 100, 2) }}
-                                                        @else
-                                                            <span class="text-gray-400">N/A</span>
-                                                        @endif
-                                                    </span>
-                                                </td>
-                                                <td class="px-4 py-4 text-right whitespace-nowrap text-gray-700 dark:text-gray-300">
-                                                    <span class="font-mono text-base">
-                                                        @if(isset($price['total']) && $price['total'])
-                                                            {{ $price['currency'] ?? '' }} {{ number_format($price['total'] / 100, 2) }}
-                                                        @else
-                                                            <span class="text-gray-400">N/A</span>
-                                                        @endif
-                                                    </span>
-                                                </td>
-                                                <td class="px-4 py-4 text-right whitespace-nowrap">
-                                                    <span class="font-mono text-lg {{ $isCheapest ? 'text-success-700 dark:text-success-300 font-bold' : 'text-gray-900 dark:text-white' }}">
-                                                        @if($price['converted_price'])
-                                                            {{ $order->currency->symbol }}{{ number_format($price['converted_price'] / 100, 2) }}
-                                                        @else
-                                                            <span class="text-gray-400">N/A</span>
-                                                        @endif
-                                                    </span>
-                                                </td>
-                                                <td class="px-4 py-4 text-center whitespace-nowrap">
-                                                    <x-filament::badge
-                                                            :color="match($price['status']) {
-                                                            'accepted' => 'success',
-                                                            'sent' => 'warning',
-                                                            'rejected' => 'danger',
-                                                            default => 'gray'
-                                                        }"
-                                                            class="px-4 py-2 text-base"
-                                                    >
-                                                        {{ ucfirst($price['status']) }}
-                                                    </x-filament::badge>
-                                                </td>
-                                                <td class="px-4 py-4 text-center whitespace-nowrap">
-                                                    @if($isCheapest)
-                                                        <x-filament::badge color="success" class="px-4 py-2 text-base">⭐ Best</x-filament::badge>
-                                                    @else
-                                                        <span class="text-gray-400 dark:text-gray-600 text-lg">-</span>
-                                                    @endif
-                                                </td>
-                                            </tr>
-                                        @endforeach
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        @endforeach
+                        </div>
                     </div>
-                </x-filament::section>
-            @endif
-        @else
-            {{-- No Comparison Data --}}
-            <x-filament::section>
-                <div class="text-center py-16">
-                    <div class="text-6xl mb-6">📊</div>
-                    <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">No Quotes Available</h3>
-                    <p class="text-base text-gray-600 dark:text-gray-400">
-                        Add supplier quotes to this order to see the comparison analysis.
-                    </p>
                 </div>
             </x-filament::section>
         @endif
-    @else
-        {{-- No Order Selected --}}
-        <x-filament::section>
-            <div class="text-center py-16">
-                <div class="text-6xl mb-6">🔍</div>
-                <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">No Order Selected</h3>
-                <p class="text-base text-gray-600 dark:text-gray-400">
-                    Please select an order from the dropdown above to view quote comparisons.
-                </p>
-            </div>
-        </x-filament::section>
     @endif
 </x-filament-panels::page>

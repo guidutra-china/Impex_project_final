@@ -35,6 +35,8 @@ class QuoteComparison extends Page
 
     public ?array $summary = null;
 
+    public array $selectedQuotes = [];
+
     public function mount(): void
     {
         $this->orderId = request()->query('order');
@@ -52,6 +54,27 @@ class QuoteComparison extends Page
             $comparisonService = new QuoteComparisonService();
             $this->comparison = $comparisonService->compareQuotes($this->order);
             $this->summary = $comparisonService->getSummary($this->order);
+            
+            // Select all quotes by default (max 4)
+            $this->selectedQuotes = collect($this->comparison['overall']['all_quotes'] ?? [])
+                ->take(4)
+                ->pluck('quote_id')
+                ->toArray();
+        }
+    }
+
+    public function toggleQuote(int $quoteId): void
+    {
+        if (in_array($quoteId, $this->selectedQuotes)) {
+            // Deselect (but keep at least 1)
+            if (count($this->selectedQuotes) > 1) {
+                $this->selectedQuotes = array_values(array_diff($this->selectedQuotes, [$quoteId]));
+            }
+        } else {
+            // Select (max 4)
+            if (count($this->selectedQuotes) < 4) {
+                $this->selectedQuotes[] = $quoteId;
+            }
         }
     }
 
@@ -75,6 +98,7 @@ class QuoteComparison extends Page
             'order' => $this->order,
             'comparison' => $this->comparison,
             'summary' => $this->summary,
+            'selectedQuotes' => $this->selectedQuotes,
         ];
     }
 }
