@@ -66,6 +66,14 @@ class Order extends Model
                 $order->order_number = $generator->generate($client);
             }
         });
+
+        // Sync commission_type to quotes when Order is updated
+        static::updated(function ($order) {
+            // Check if commission_type or commission_percent changed
+            if ($order->isDirty('commission_type') || $order->isDirty('commission_percent')) {
+                $order->syncCommissionToQuotes();
+            }
+        });
     }
 
     /**
@@ -304,5 +312,71 @@ class Order extends Model
             $this->commission_percent_average = $average;
             $this->save();
         }
+    }
+
+    /**
+     * Sync commission_type and commission_percent to all related quotes
+     * Called automatically when Order's commission settings change
+     */
+    public function syncCommissionToQuotes(): void
+    {
+        $commissionType = $this->commission_type ?? 'embedded';
+        $commissionPercent = $this->commission_percent ?? 0;
+
+        \Log::info('Syncing commission to quotes', [
+            'order_id' => $this->id,
+            'order_number' => $this->order_number,
+            'commission_type' => $commissionType,
+            'commission_percent' => $commissionPercent,
+        ]);
+
+        // Update all OrderItems first
+        foreach ($this->items as $orderItem) {
+            $orderItem->commission_type = $commissionType;
+            $orderItem->commission_percent = $commissionPercent;
+            $orderItem->save();
+        }
+
+        // Update all SupplierQuotes and their items
+        foreach ($this->supplierQuotes as $quote) {
+            \Log::info('Processing quote', [
+                'quote_id' => $quote->id,
+                'supplier' => $quote->supplier->name,
+            ]);
+
+            // Update all QuoteItems
+            foreach ($quote->items as $item) {
+                $item->commission_type = $commissionType;
+                $item->commission_percent = $commissionPercent;
+                
+                // Recalculate prices based on new type
+                $item->total_price_before_commission = $item->unit_price_before_commission * $item->quantity;
+                
+                if ($commissionType === 'embedded') {
+                    $commissionMultiplier = 1 + ($commissionPercent / 100);
+                    $item->total_price_after_commission = (int) ($item->total_price_before_commission * $commissionMultiplier);
+                    $item->unit_price_after_commission = (int) ($item->total_price_after_commission / $item->quantity);
+                } else {
+                    // Separate - prices stay the same
+                    $item->unit_price_after_commission = $item->unit_price_before_commission;
+                    $item->total_price_after_commission = $item->total_price_before_commission;
+                }
+                
+                $item->save();
+            }
+
+            // Recalculate quote totals
+            $quote->calculateCommission();
+
+            \Log::info('Quote updated', [
+                'quote_id' => $quote->id,
+                'items_updated' => $quote->items->count(),
+            ]);
+        }
+
+        \Log::info('Commission sync completed', [
+            'order_id' => $this->id,
+            'quotes_updated' => $this->supplierQuotes->count(),
+        ]);
     }
 }
