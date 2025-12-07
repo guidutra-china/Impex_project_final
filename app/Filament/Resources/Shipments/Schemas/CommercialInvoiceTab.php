@@ -130,7 +130,7 @@ class CommercialInvoiceTab
                             ->default(false)
                             ->inline(false),
                     ])
-                    ->columns(1)
+                    ->columns(3)
                     ->collapsible()
                     ->collapsed(false),
                 
