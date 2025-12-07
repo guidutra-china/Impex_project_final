@@ -155,8 +155,7 @@ class PackingList extends Model
             'show_importer_details' => true,
             'show_shipping_details' => true,
             'show_supplier_code' => false,
-            'show_hs_codes' => true,
-            'show_country_of_origin' => true,
+            'show_customer_code' => true, // Customer's product code
             'show_weight_volume' => true, // Important for packing list
         ];
         

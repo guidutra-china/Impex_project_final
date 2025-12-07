@@ -162,17 +162,15 @@ class PackingListExcelService
             $col++;
         }
         
-        if ($displayOptions['show_hs_codes'] ?? true) {
-            $sheet->setCellValue($col . $currentRow, 'HS Code');
-            $sheet->getColumnDimension($col)->setWidth(12);
+        if ($displayOptions['show_customer_code'] ?? true) {
+            $sheet->setCellValue($col . $currentRow, 'Customer Code');
+            $sheet->getColumnDimension($col)->setWidth(15);
             $col++;
         }
         
-        if ($displayOptions['show_country_of_origin'] ?? true) {
-            $sheet->setCellValue($col . $currentRow, 'Origin');
-            $sheet->getColumnDimension($col)->setWidth(12);
-            $col++;
-        }
+        $sheet->setCellValue($col . $currentRow, 'Qty/Carton');
+        $sheet->getColumnDimension($col)->setWidth(12);
+        $col++;
         
         $sheet->setCellValue($col . $currentRow, 'Qty');
         $sheet->getColumnDimension($col)->setWidth(10);
@@ -243,15 +241,13 @@ class PackingListExcelService
                     $col++;
                 }
                 
-                if ($displayOptions['show_hs_codes'] ?? true) {
-                    $sheet->setCellValue($col . $currentRow, $product->hs_code ?? 'N/A');
+                if ($displayOptions['show_customer_code'] ?? true) {
+                    $sheet->setCellValue($col . $currentRow, $product->customer_code ?? 'N/A');
                     $col++;
                 }
                 
-                if ($displayOptions['show_country_of_origin'] ?? true) {
-                    $sheet->setCellValue($col . $currentRow, $product->country_of_origin ?? 'N/A');
-                    $col++;
-                }
+                $sheet->setCellValue($col . $currentRow, $pcsPerCarton);
+                $col++;
                 
                 $sheet->setCellValue($col . $currentRow, $qty);
                 $col++;

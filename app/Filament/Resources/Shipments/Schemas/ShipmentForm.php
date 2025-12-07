@@ -146,7 +146,7 @@ class ShipmentForm
                         ->label('Voyage/Flight Number'),
                 ]),
 
-            Grid::make(2)
+            Grid::make(3)
                 ->schema([
                     TextInput::make('origin_port')
                         ->label('Port of Loading')
@@ -155,6 +155,10 @@ class ShipmentForm
                     TextInput::make('destination_port')
                         ->label('Port of Discharge')
                         ->placeholder('e.g., Santos, Los Angeles, Rotterdam'),
+
+                    TextInput::make('final_destination')
+                        ->label('Final Destination')
+                        ->placeholder('e.g., São Paulo, New York, London'),
                 ]),
 
             Grid::make(2)

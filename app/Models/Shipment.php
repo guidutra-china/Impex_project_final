@@ -33,6 +33,7 @@ class Shipment extends Model
         'destination_address',
         'origin_port',
         'destination_port',
+        'final_destination',
         'notify_party_address',
         'shipment_date',
         'estimated_delivery_date',

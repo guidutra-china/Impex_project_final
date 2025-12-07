@@ -297,16 +297,14 @@
             <thead>
                 <tr>
                     <th style="width: 5%;">No.</th>
-                    <th style="width: 35%;">Product Description</th>
+                    <th style="width: 25%;">Product Description</th>
                     @if($displayOptions['show_supplier_code'] ?? false)
-                    <th style="width: 12%;">Supplier Code</th>
+                    <th style="width: 10%;">Supplier Code</th>
                     @endif
-                    @if($displayOptions['show_hs_codes'] ?? true)
-                    <th style="width: 10%;">HS Code</th>
+                    @if($displayOptions['show_customer_code'] ?? true)
+                    <th style="width: 10%;">Customer Code</th>
                     @endif
-                    @if($displayOptions['show_country_of_origin'] ?? true)
-                    <th style="width: 10%;">Origin</th>
-                    @endif
+                    <th style="width: 8%;" class="text-center">Qty/Carton</th>
                     <th style="width: 8%;" class="text-center">Qty</th>
                     <th style="width: 8%;" class="text-center">Cartons</th>
                     @if($displayOptions['show_weight_volume'] ?? true)
@@ -360,12 +358,10 @@
                             @if($displayOptions['show_supplier_code'] ?? false)
                             <td>{{ $product->supplier_code ?? 'N/A' }}</td>
                             @endif
-                            @if($displayOptions['show_hs_codes'] ?? true)
-                            <td>{{ $product->hs_code ?? 'N/A' }}</td>
+                            @if($displayOptions['show_customer_code'] ?? true)
+                            <td>{{ $product->customer_code ?? 'N/A' }}</td>
                             @endif
-                            @if($displayOptions['show_country_of_origin'] ?? true)
-                            <td>{{ $product->country_of_origin ?? 'N/A' }}</td>
-                            @endif
+                            <td class="text-center">{{ number_format($pcsPerCarton, 0) }}</td>
                             <td class="text-center">{{ number_format($qty, 0) }}</td>
                             <td class="text-center">{{ number_format($cartons, 0) }}</td>
                             @if($displayOptions['show_weight_volume'] ?? true)
@@ -383,8 +379,7 @@
                         // Calculate colspan: No. (1) + Product Description (1) + optional columns
                         $colspan = 2; // No. + Product Description
                         if ($displayOptions['show_supplier_code'] ?? false) $colspan++;
-                        if ($displayOptions['show_hs_codes'] ?? true) $colspan++;
-                        if ($displayOptions['show_country_of_origin'] ?? true) $colspan++;
+                        if ($displayOptions['show_customer_code'] ?? true) $colspan++;
                     @endphp
                     <td colspan="{{ $colspan }}" class="text-right">TOTAL:</td>
                     <td class="text-center">{{ number_format($totalQty, 0) }}</td>
