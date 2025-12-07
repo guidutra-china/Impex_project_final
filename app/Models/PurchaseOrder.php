@@ -32,6 +32,7 @@ class PurchaseOrder extends Model
         'po_number',
         'revision_number',
         'order_id',
+        'proforma_invoice_id',
         'supplier_quote_id',
         'supplier_id',
         'currency_id',
@@ -145,6 +146,11 @@ class PurchaseOrder extends Model
     public function order(): BelongsTo
     {
         return $this->belongsTo(Order::class);
+    }
+
+    public function proformaInvoice(): BelongsTo
+    {
+        return $this->belongsTo(ProformaInvoice::class);
     }
 
     public function supplierQuote(): BelongsTo

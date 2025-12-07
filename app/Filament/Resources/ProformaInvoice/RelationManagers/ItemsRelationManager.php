@@ -429,8 +429,9 @@ class ItemsRelationManager extends RelationManager
             $supplier = $items->first()->supplierQuote->supplier;
             $itemCount = $items->count();
             
-            // Check if PO already exists for this supplier (simple check by supplier only)
-            $lastPO = \App\Models\PurchaseOrder::where('supplier_id', $supplierId)
+            // Check if PO already exists for this PI + Supplier combination
+            $lastPO = \App\Models\PurchaseOrder::where('proforma_invoice_id', $proformaInvoice->id)
+                ->where('supplier_id', $supplierId)
                 ->orderBy('revision_number', 'desc')
                 ->first();
             
@@ -454,6 +455,7 @@ class ItemsRelationManager extends RelationManager
                     
                     // Create Purchase Order
                     $po = \App\Models\PurchaseOrder::create([
+                        'proforma_invoice_id' => $proformaInvoice->id,
                         'supplier_id' => $supplierId,
                         'supplier_quote_id' => $supplierQuoteId,
                         'currency_id' => $proformaInvoice->currency_id,
