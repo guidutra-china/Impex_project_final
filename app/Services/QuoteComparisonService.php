@@ -78,11 +78,14 @@ class QuoteComparisonService
                     'supplier' => $quote->supplier->name,
                     'quote_id' => $quote->id,
                     'price' => $quoteItem->unit_price_after_commission,
+                    'price_before_commission' => $quoteItem->unit_price_before_commission,
                     'total' => $quoteItem->total_price_after_commission,
                     'converted_price' => $convertedPrice,
                     'currency' => $quote->currency->symbol,
                     'order_currency' => $order->currency->symbol,
                     'exchange_rate' => $quote->locked_exchange_rate,
+                    'commission_percent' => $quoteItem->commission_percent,
+                    'commission_type' => $quoteItem->commission_type,
                     'status' => 'Quoted',
                 ];
 

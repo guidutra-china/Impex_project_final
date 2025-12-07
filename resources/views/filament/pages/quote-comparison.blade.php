@@ -386,9 +386,21 @@
                                     
                                     <div class="product-cell price {{ $isCheapestProduct ? 'best' : '' }} {{ !$productPrice || !$productPrice['price'] ? 'not-quoted' : '' }}">
                                         @if($productPrice && $productPrice['price'])
-                                            {{ $order->currency->symbol }}{{ number_format($productPrice['price'] / 100, 2) }}
-                                            @if($isCheapestProduct)
-                                                <span style="margin-left: 4px;">⭐</span>
+                                            <div style="font-weight: 700;">
+                                                {{ $order->currency->symbol }}{{ number_format($productPrice['price'] / 100, 2) }}
+                                                @if($isCheapestProduct)
+                                                    <span style="margin-left: 4px;">⭐</span>
+                                                @endif
+                                            </div>
+                                            
+                                            @if(isset($productPrice['commission_type']) && isset($productPrice['commission_percent']) && $productPrice['commission_percent'] > 0)
+                                                <div style="font-size: 10px; color: #6b7280; margin-top: 2px;">
+                                                    @if($productPrice['commission_type'] === 'embedded')
+                                                        <span title="Commission is embedded in the price">📊 +{{ number_format($productPrice['commission_percent'], 1) }}% incl.</span>
+                                                    @else
+                                                        <span title="Commission is separate">📊 +{{ number_format($productPrice['commission_percent'], 1) }}% sep.</span>
+                                                    @endif
+                                                </div>
                                             @endif
                                         @else
                                             Not quoted
