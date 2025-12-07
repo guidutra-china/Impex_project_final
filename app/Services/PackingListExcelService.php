@@ -36,12 +36,7 @@ class PackingListExcelService
         $styles = $this->getStyles();
         
         $currentRow = 1;
-
-        // ==================== HEADER ====================
-        $sheet->setCellValue('A' . $currentRow, 'PACKING LIST');
-        $sheet->mergeCells('A' . $currentRow . ':I' . $currentRow);
-        $sheet->getStyle('A' . $currentRow)->applyFromArray($styles['title']);
-        $sheet->getRowDimension($currentRow)->setRowHeight(40);
+        $titleRow = $currentRow; // Save for later update after we know last column
         $currentRow += 2;
 
         // ==================== DOCUMENT INFO ====================
@@ -108,41 +103,36 @@ class PackingListExcelService
         }
         
         $currentRow = max($currentRow, $infoStartRow + 4);
-
-        // ==================== SHIPPING DETAILS ====================
+        
+        // Save row for shipping details (will fill after we know lastCol)
+        $shippingDetailsRow = $currentRow;
+        $shippingDetailsData = [];
+        
         if ($displayOptions['show_shipping_details'] ?? true) {
-            $sheet->setCellValue('A' . $currentRow, 'SHIPPING DETAILS:');
-            $sheet->mergeCells('A' . $currentRow . ':I' . $currentRow);
-            $sheet->getStyle('A' . $currentRow)->applyFromArray($styles['sectionHeader']);
-            $currentRow++;
-            
-            $shippingDetails = [
+            $shippingDetailsData = [
                 'Port of Loading:' => $packingList->port_of_loading ?? $shipment->origin_port ?? 'N/A',
                 'Port of Discharge:' => $packingList->port_of_discharge ?? $shipment->destination_port ?? 'N/A',
                 'Final Destination:' => $packingList->final_destination ?? $shipment->final_destination ?? 'N/A',
             ];
             
             if ($packingList->bl_number ?? $shipment->bl_number) {
-                $shippingDetails['B/L Number:'] = $packingList->bl_number ?? $shipment->bl_number;
+                $shippingDetailsData['B/L Number:'] = $packingList->bl_number ?? $shipment->bl_number;
             }
             
             if ($packingList->container_numbers) {
-                $shippingDetails['Container Numbers:'] = $packingList->container_numbers;
+                $shippingDetailsData['Container Numbers:'] = $packingList->container_numbers;
             }
             
-            foreach ($shippingDetails as $label => $value) {
-                $sheet->setCellValue('A' . $currentRow, $label);
-                $sheet->setCellValue('B' . $currentRow, $value);
-                $sheet->getStyle('A' . $currentRow)->applyFromArray($styles['label']);
-                $sheet->mergeCells('B' . $currentRow . ':D' . $currentRow);
-                $currentRow++;
-            }
-            
-            $currentRow += 1;
+            // Reserve space for shipping details
+            $currentRow += count($shippingDetailsData) + 2; // +1 for header, +1 for spacing
         }
 
         // ==================== ITEMS TABLE ====================
         $tableStartRow = $currentRow;
+        
+        // Now we can set the title with correct column span
+        $sheet->setCellValue('A' . $titleRow, 'PACKING LIST');
+        // Will update merge after we know lastCol
         
         // Table Header
         $col = 'A';
@@ -176,6 +166,34 @@ class PackingListExcelService
         }
         
         $lastCol = chr(ord($col) - 1);
+        
+        // Update title merge now that we know the last column
+        $sheet->mergeCells('A' . $titleRow . ':' . $lastCol . $titleRow);
+        $sheet->getStyle('A' . $titleRow)->applyFromArray($styles['title']);
+        $sheet->getRowDimension($titleRow)->setRowHeight(40);
+        
+        // ==================== FILL SHIPPING DETAILS NOW ====================
+        if (!empty($shippingDetailsData)) {
+            $currentShippingRow = $shippingDetailsRow;
+            
+            $sheet->setCellValue('A' . $currentShippingRow, 'SHIPPING DETAILS:');
+            $sheet->mergeCells('A' . $currentShippingRow . ':' . $lastCol . $currentShippingRow);
+            $sheet->getStyle('A' . $currentShippingRow)->applyFromArray($styles['sectionHeader']);
+            $currentShippingRow++;
+            
+            foreach ($shippingDetailsData as $label => $value) {
+                // Merge A:B for label
+                $sheet->setCellValue('A' . $currentShippingRow, $label);
+                $sheet->mergeCells('A' . $currentShippingRow . ':B' . $currentShippingRow);
+                $sheet->getStyle('A' . $currentShippingRow)->applyFromArray($styles['label']);
+                
+                // Value in column C
+                $sheet->setCellValue('C' . $currentShippingRow, $value);
+                $sheet->mergeCells('C' . $currentShippingRow . ':' . $lastCol . $currentShippingRow);
+                $sheet->getStyle('C' . $currentShippingRow)->applyFromArray($styles['value']);
+                $currentShippingRow++;
+            }
+        }
         
         // Apply headers
         foreach ($headers as $header) {
