@@ -79,8 +79,14 @@ class ItemsRelationManager extends RelationManager
                                 Notification::make()
                                     ->warning()
                                     ->title('⚠️ Product Already Exists')
-                                    ->body("**{$product->name}** (Code: {$product->code}) is already in this order with quantity {$existingItem->quantity}. You can either increase the quantity of the existing item or add this as a separate line if it has different specifications.")
+                                    ->body("**{$product->name}** (Code: {$product->code}) is already in this order with quantity {$existingItem->quantity}.\n\nYou can either:\n- **Cancel** and increase the quantity of the existing item, OR\n- **Continue** to add this as a separate line (if it has different specifications)")
                                     ->persistent()
+                                    ->actions([
+                                        \Filament\Notifications\Actions\Action::make('understood')
+                                            ->label('OK, I Understand')
+                                            ->button()
+                                            ->close(),
+                                    ])
                                     ->send();
                             }
                         }
