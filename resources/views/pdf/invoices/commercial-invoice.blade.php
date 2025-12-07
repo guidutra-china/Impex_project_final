@@ -495,27 +495,35 @@
                 <span>{{ $shipment->proformaInvoices->first()?->paymentTerm->name }}</span>
             </div>
             @endif
-            @if($showBankInfo && ($shipment->commercialInvoice->bank_name ?? ""))
+            @if($showBankInfo)
+            @php
+                $bankName = $shipment->commercialInvoice->bank_name ?? $companySettings->bank_name ?? '';
+                $bankAccount = $shipment->commercialInvoice->bank_account ?? $companySettings->bank_account ?? '';
+                $bankSwift = $shipment->commercialInvoice->bank_swift ?? $companySettings->bank_swift ?? '';
+                $bankAddress = $shipment->commercialInvoice->bank_address ?? $companySettings->bank_address ?? '';
+            @endphp
+            @if($bankName)
             <div class="payment-row">
                 <span class="payment-label">Bank Name:</span>
-                <span>{{ $shipment->commercialInvoice->bank_name ?? "" }}</span>
+                <span>{{ $bankName }}</span>
             </div>
-            @if($shipment->commercialInvoice->bank_account ?? "")
+            @endif
+            @if($bankAccount)
             <div class="payment-row">
                 <span class="payment-label">Account Number:</span>
-                <span>{{ $shipment->commercialInvoice->bank_account ?? "" }}</span>
+                <span>{{ $bankAccount }}</span>
             </div>
             @endif
-            @if($shipment->commercialInvoice->bank_swift ?? "")
+            @if($bankSwift)
             <div class="payment-row">
                 <span class="payment-label">SWIFT Code:</span>
-                <span>{{ $shipment->commercialInvoice->bank_swift ?? "" }}</span>
+                <span>{{ $bankSwift }}</span>
             </div>
             @endif
-            @if($shipment->commercialInvoice->bank_address ?? "")
+            @if($bankAddress)
             <div class="payment-row">
                 <span class="payment-label">Bank Address:</span>
-                <span>{{ $shipment->commercialInvoice->bank_address ?? "" }}</span>
+                <span>{{ $bankAddress }}</span>
             </div>
             @endif
             @endif
