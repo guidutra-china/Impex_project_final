@@ -23,7 +23,7 @@ class ViewContainerItems extends Page implements HasForms, HasTable
 
     protected static string $resource = ShipmentResource::class;
 
-    protected static string $view = 'filament.resources.shipments.pages.view-container-items';
+    protected string $view = 'filament.resources.shipments.pages.view-container-items';
 
     protected static ?string $title = 'Container Items';
 
