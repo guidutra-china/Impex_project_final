@@ -1,327 +1,289 @@
 <x-filament-panels::page>
+    <style>
+        .quote-compare-container {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 20px;
+        }
+        .quote-selector {
+            background: white;
+            padding: 16px;
+            border-radius: 10px;
+            box-shadow: 0 1px 4px rgba(2,6,23,0.06);
+            margin-bottom: 20px;
+        }
+        .quote-chips {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+        .quote-chip {
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: 2px solid #e6eef8;
+            background: white;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .quote-chip.selected {
+            border-color: #0f6fff;
+            background: #eff6ff;
+        }
+        .quote-chip:hover {
+            border-color: #0f6fff;
+        }
+        .compare-area {
+            overflow-x: auto;
+            background: white;
+            border-radius: 10px;
+            padding: 16px;
+            box-shadow: 0 1px 6px rgba(2,6,23,0.06);
+        }
+        .compare-grid {
+            display: grid;
+            grid-auto-flow: column;
+            grid-auto-columns: 280px;
+            gap: 16px;
+            min-width: min-content;
+        }
+        .quote-card {
+            min-width: 280px;
+            border-radius: 10px;
+            padding: 16px;
+            background: linear-gradient(180deg, #fff, #fbfdff);
+            border: 1px solid #eef6ff;
+        }
+        .quote-card-header {
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #f1f5f9;
+        }
+        .supplier-name {
+            font-size: 18px;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 4px;
+        }
+        .total-price {
+            font-size: 28px;
+            font-weight: 800;
+            color: #0f6fff;
+            margin: 8px 0;
+        }
+        .best-badge {
+            display: inline-block;
+            background: rgba(34,197,94,0.12);
+            color: #16a34a;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .status-sent { background: #fef3c7; color: #92400e; }
+        .status-accepted { background: #d1fae5; color: #065f46; }
+        .status-draft { background: #e5e7eb; color: #374151; }
+        .status-rejected { background: #fee2e2; color: #991b1b; }
+        
+        .spec-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-top: 1px dashed #f1f5f9;
+        }
+        .spec-row:first-child {
+            border-top: 0;
+        }
+        .spec-key {
+            color: #6b7280;
+            font-size: 13px;
+        }
+        .spec-val {
+            font-weight: 600;
+            color: #0f172a;
+            text-align: right;
+        }
+        .spec-val.highlight {
+            background: rgba(34,197,94,0.12);
+            border-radius: 6px;
+            padding: 4px 8px;
+            color: #16a34a;
+        }
+        .spec-val.warning {
+            background: rgba(239,68,68,0.08);
+            border-radius: 6px;
+            padding: 4px 8px;
+            color: #dc2626;
+        }
+        .section-header {
+            font-size: 14px;
+            font-weight: 700;
+            color: #0f6fff;
+            margin: 16px 0 8px 0;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .toolbar {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            margin-top: 12px;
+        }
+        .empty-state {
+            padding: 60px 20px;
+            text-align: center;
+            color: #6b7280;
+        }
+        @media (max-width: 800px) {
+            .compare-grid {
+                grid-auto-columns: 240px;
+            }
+            .quote-card {
+                min-width: 240px;
+            }
+        }
+    </style>
+
     @if(!$order)
-        <x-filament::section>
-            <x-slot name="heading">
-                No Order Selected
-            </x-slot>
-
-            <div class="text-center py-12">
-                <p class="text-gray-500 dark:text-gray-400">
-                    Please select an order to compare quotes.
-                </p>
-            </div>
-        </x-filament::section>
+        <div class="empty-state">
+            <div style="font-size: 48px; margin-bottom: 16px;">📊</div>
+            <h3 style="margin: 0 0 8px 0; color: #0f172a;">No Order Selected</h3>
+            <p>Please select an order to compare quotes.</p>
+        </div>
     @elseif(empty($comparison['overall']['all_quotes']))
-        <x-filament::section>
-            <x-slot name="heading">
-                No Quotes Available
-            </x-slot>
-
-            <div class="text-center py-12">
-                <p class="text-gray-500 dark:text-gray-400">
-                    No supplier quotes found for this order.
-                </p>
-            </div>
-        </x-filament::section>
+        <div class="empty-state">
+            <div style="font-size: 48px; margin-bottom: 16px;">📭</div>
+            <h3 style="margin: 0 0 8px 0; color: #0f172a;">No Quotes Available</h3>
+            <p>No supplier quotes found for this order.</p>
+        </div>
     @else
-        {{-- Quote Selector --}}
-        <x-filament::section>
-            <x-slot name="heading">
-                📋 Select Quotes to Compare
-            </x-slot>
-            
-            <x-slot name="description">
-                Choose 2-4 quotes to compare side-by-side. Click on cards to select/deselect.
-            </x-slot>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                @foreach($comparison['overall']['all_quotes'] as $quote)
-                    <button
-                        wire:click="toggleQuote({{ $quote['quote_id'] }})"
-                        class="relative p-6 rounded-lg border-2 transition-all duration-200 text-left
-                            {{ in_array($quote['quote_id'], $selectedQuotes) 
-                                ? 'border-primary-500 bg-primary-50 dark:bg-primary-500/10 shadow-lg' 
-                                : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600' }}"
-                    >
-                        {{-- Checkbox --}}
-                        <div class="absolute top-4 right-4">
-                            @if(in_array($quote['quote_id'], $selectedQuotes))
-                                <div class="w-6 h-6 rounded bg-primary-500 flex items-center justify-center">
-                                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
-                                    </svg>
+        <div class="quote-compare-container">
+            {{-- Quote Selector --}}
+            <div class="quote-selector">
+                <div style="font-size: 14px; font-weight: 600; color: #6b7280; margin-bottom: 12px;">
+                    📋 Select Quotes to Compare ({{ count($selectedQuotes) }}/{{ count($comparison['overall']['all_quotes']) }} selected)
+                </div>
+                
+                <div class="quote-chips">
+                    @foreach($comparison['overall']['all_quotes'] as $quote)
+                        <button
+                            wire:click="toggleQuote({{ $quote['quote_id'] }})"
+                            class="quote-chip {{ in_array($quote['quote_id'], $selectedQuotes) ? 'selected' : '' }}"
+                        >
+                            <span style="font-size: 18px;">
+                                {{ in_array($quote['quote_id'], $selectedQuotes) ? '☑' : '☐' }}
+                            </span>
+                            <div>
+                                <div style="font-weight: 600; font-size: 14px;">{{ $quote['supplier'] }}</div>
+                                <div style="font-size: 12px; color: #6b7280;">
+                                    {{ $order->currency->symbol }}{{ number_format($quote['total_after_commission'] / 100, 2) }}
                                 </div>
-                            @else
-                                <div class="w-6 h-6 rounded border-2 border-gray-300 dark:border-gray-600"></div>
-                            @endif
-                        </div>
-
-                        {{-- Supplier Name --}}
-                        <div class="mb-3">
-                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white pr-8">
-                                {{ $quote['supplier'] }}
-                            </h3>
-                        </div>
-
-                        {{-- Total Price --}}
-                        <div class="mb-2">
-                            <div class="text-2xl font-bold text-gray-900 dark:text-white">
-                                {{ $order->currency->symbol }}{{ number_format($quote['total_after_commission'] / 100, 2) }}
                             </div>
-                        </div>
+                        </button>
+                    @endforeach
+                </div>
 
-                        {{-- Best Price Badge --}}
-                        @if($quote['quote_id'] === $comparison['overall']['cheapest_quote_id'])
-                            <x-filament::badge color="success" size="sm">
-                                ⭐ Best Price
-                            </x-filament::badge>
-                        @endif
-
-                        {{-- Status --}}
-                        <div class="mt-3">
-                            <x-filament::badge
-                                :color="match($quote['status']) {
-                                    'accepted' => 'success',
-                                    'sent' => 'warning',
-                                    'rejected' => 'danger',
-                                    default => 'gray'
-                                }"
-                                size="sm"
-                            >
-                                {{ ucfirst($quote['status']) }}
-                            </x-filament::badge>
-                        </div>
-
-                        {{-- Quick Info --}}
-                        <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700 text-sm text-gray-600 dark:text-gray-400 space-y-1">
-                            @if($quote['moq'])
-                                <div>MOQ: {{ number_format($quote['moq']) }}</div>
-                            @endif
-                            @if($quote['lead_time_days'])
-                                <div>Lead: {{ $quote['lead_time_days'] }}d</div>
-                            @endif
-                        </div>
-                    </button>
-                @endforeach
+                <div style="font-size: 12px; color: #6b7280;">
+                    Click on quotes to select/deselect • Min: 1, Max: 4
+                </div>
             </div>
 
-            <div class="mt-4 text-sm text-gray-500 dark:text-gray-400">
-                {{ count($selectedQuotes) }} of {{ count($comparison['overall']['all_quotes']) }} quotes selected
-                (min: 1, max: 4)
-            </div>
-        </x-filament::section>
+            {{-- Comparison Grid --}}
+            @php
+                $selectedQuotesData = collect($comparison['overall']['all_quotes'])
+                    ->filter(fn($q) => in_array($q['quote_id'], $selectedQuotes))
+                    ->values();
+                
+                $cheapestSelected = $selectedQuotesData->sortBy('total_after_commission')->first();
+                
+                // Find best values for highlighting
+                $bestMOQ = $selectedQuotesData->filter(fn($q) => isset($q['moq']))->min('moq');
+                $bestLeadTime = $selectedQuotesData->filter(fn($q) => isset($q['lead_time_days']))->min('lead_time_days');
+            @endphp
 
-        {{-- Side-by-Side Comparison --}}
-        @php
-            $selectedQuotesData = collect($comparison['overall']['all_quotes'])
-                ->filter(fn($q) => in_array($q['quote_id'], $selectedQuotes))
-                ->values();
-            
-            $cheapestSelected = $selectedQuotesData->sortBy('total_after_commission')->first();
-        @endphp
-
-        @if($selectedQuotesData->isNotEmpty())
-            <x-filament::section class="mt-6">
-                <x-slot name="heading">
-                    🔍 Side-by-Side Comparison
-                </x-slot>
-
-                <div class="overflow-x-auto">
-                    <div class="inline-flex min-w-full">
-                        {{-- Comparison Table --}}
-                        <div class="flex-1 grid gap-px bg-gray-200 dark:bg-gray-700" 
-                             style="grid-template-columns: 200px repeat({{ $selectedQuotesData->count() }}, 1fr);">
+            @if($selectedQuotesData->isNotEmpty())
+                <div class="compare-area">
+                    <div class="compare-grid">
+                        @foreach($selectedQuotesData as $quote)
+                            @php
+                                $isBestPrice = $quote['quote_id'] === $cheapestSelected['quote_id'];
+                                $priceDiff = $quote['total_after_commission'] - $cheapestSelected['total_after_commission'];
+                            @endphp
                             
-                            {{-- Header Row --}}
-                            <div class="bg-gray-50 dark:bg-gray-800 p-4 font-semibold text-gray-900 dark:text-white">
-                                Criteria
-                            </div>
-                            @foreach($selectedQuotesData as $quote)
-                                <div class="bg-gray-50 dark:bg-gray-800 p-4 text-center">
-                                    <div class="font-semibold text-gray-900 dark:text-white mb-2">
-                                        {{ $quote['supplier'] }}
-                                    </div>
-                                    @if($quote['quote_id'] === $cheapestSelected['quote_id'])
-                                        <x-filament::badge color="success" size="sm">
-                                            ⭐ Best Price
-                                        </x-filament::badge>
-                                    @endif
-                                </div>
-                            @endforeach
-
-                            {{-- PRICING SECTION --}}
-                            <div class="bg-primary-50 dark:bg-primary-900/20 p-3 font-bold text-primary-700 dark:text-primary-300" 
-                                 style="grid-column: 1 / -1;">
-                                💰 PRICING
-                            </div>
-
-                            {{-- Total Price --}}
-                            <div class="bg-white dark:bg-gray-900 p-4 font-medium text-gray-700 dark:text-gray-300">
-                                Total Price
-                            </div>
-                            @foreach($selectedQuotesData as $quote)
-                                @php
-                                    $isCheapest = $quote['quote_id'] === $cheapestSelected['quote_id'];
-                                    $priceDiff = $quote['total_after_commission'] - $cheapestSelected['total_after_commission'];
-                                @endphp
-                                <div class="bg-white dark:bg-gray-900 p-4 text-center {{ $isCheapest ? 'bg-success-50 dark:bg-success-900/20' : '' }}">
-                                    <div class="text-xl font-bold {{ $isCheapest ? 'text-success-700 dark:text-success-300' : 'text-gray-900 dark:text-white' }}">
+                            <div class="quote-card">
+                                {{-- Header --}}
+                                <div class="quote-card-header">
+                                    <div class="supplier-name">{{ $quote['supplier'] }}</div>
+                                    
+                                    <div class="total-price">
                                         {{ $order->currency->symbol }}{{ number_format($quote['total_after_commission'] / 100, 2) }}
                                     </div>
-                                    @if(!$isCheapest && $priceDiff > 0)
-                                        <div class="text-sm text-danger-600 dark:text-danger-400 mt-1">
+                                    
+                                    @if($isBestPrice)
+                                        <span class="best-badge">⭐ Best Price</span>
+                                    @elseif($priceDiff > 0)
+                                        <div style="font-size: 13px; color: #dc2626; margin-top: 4px;">
                                             +{{ $order->currency->symbol }}{{ number_format($priceDiff / 100, 2) }}
                                         </div>
                                     @endif
+                                    
+                                    <div style="margin-top: 8px;">
+                                        <span class="status-badge status-{{ $quote['status'] }}">
+                                            {{ ucfirst($quote['status']) }}
+                                        </span>
+                                    </div>
                                 </div>
-                            @endforeach
 
-                            {{-- PROCUREMENT SECTION --}}
-                            <div class="bg-primary-50 dark:bg-primary-900/20 p-3 font-bold text-primary-700 dark:text-primary-300" 
-                                 style="grid-column: 1 / -1;">
-                                📦 PROCUREMENT DETAILS
-                            </div>
-
-                            {{-- MOQ --}}
-                            <div class="bg-white dark:bg-gray-900 p-4 font-medium text-gray-700 dark:text-gray-300">
-                                MOQ
-                            </div>
-                            @foreach($selectedQuotesData as $quote)
-                                @php
-                                    $moq = $quote['moq'] ?? null;
-                                    $isHigh = $moq && $moq > 500;
-                                @endphp
-                                <div class="bg-white dark:bg-gray-900 p-4 text-center">
-                                    @if($moq)
-                                        <div class="text-gray-900 dark:text-white">
-                                            {{ number_format($moq) }}
-                                            @if($isHigh)
-                                                <x-filament::badge color="warning" size="sm">⚠️</x-filament::badge>
-                                            @else
-                                                <x-filament::badge color="success" size="sm">✅</x-filament::badge>
-                                            @endif
-                                        </div>
-                                    @else
-                                        <span class="text-gray-400">N/A</span>
-                                    @endif
+                                {{-- Procurement Details --}}
+                                <div class="section-header">📦 Procurement</div>
+                                
+                                <div class="spec-row">
+                                    <div class="spec-key">MOQ</div>
+                                    <div class="spec-val {{ isset($quote['moq']) && $quote['moq'] == $bestMOQ ? 'highlight' : '' }} {{ isset($quote['moq']) && $quote['moq'] > 500 ? 'warning' : '' }}">
+                                        {{ isset($quote['moq']) ? number_format($quote['moq']) : 'N/A' }}
+                                    </div>
                                 </div>
-                            @endforeach
 
-                            {{-- Lead Time --}}
-                            <div class="bg-white dark:bg-gray-900 p-4 font-medium text-gray-700 dark:text-gray-300">
-                                Lead Time
-                            </div>
-                            @foreach($selectedQuotesData as $quote)
-                                @php
-                                    $leadTime = $quote['lead_time_days'] ?? null;
-                                    $isLong = $leadTime && $leadTime > 60;
-                                @endphp
-                                <div class="bg-white dark:bg-gray-900 p-4 text-center">
-                                    @if($leadTime)
-                                        <div class="text-gray-900 dark:text-white">
-                                            {{ $leadTime }} days
-                                            @if($isLong)
-                                                <x-filament::badge color="danger" size="sm">⚠️</x-filament::badge>
-                                            @else
-                                                <x-filament::badge color="success" size="sm">✅</x-filament::badge>
-                                            @endif
-                                        </div>
-                                    @else
-                                        <span class="text-gray-400">N/A</span>
-                                    @endif
+                                <div class="spec-row">
+                                    <div class="spec-key">Lead Time</div>
+                                    <div class="spec-val {{ isset($quote['lead_time_days']) && $quote['lead_time_days'] == $bestLeadTime ? 'highlight' : '' }} {{ isset($quote['lead_time_days']) && $quote['lead_time_days'] > 60 ? 'warning' : '' }}">
+                                        {{ isset($quote['lead_time_days']) ? $quote['lead_time_days'] . ' days' : 'N/A' }}
+                                    </div>
                                 </div>
-                            @endforeach
 
-                            {{-- Incoterm --}}
-                            <div class="bg-white dark:bg-gray-900 p-4 font-medium text-gray-700 dark:text-gray-300">
-                                Incoterm
-                            </div>
-                            @foreach($selectedQuotesData as $quote)
-                                <div class="bg-white dark:bg-gray-900 p-4 text-center">
-                                    @if($quote['incoterm'])
-                                        <x-filament::badge 
-                                            :color="in_array($quote['incoterm'], ['DDP', 'DAP']) ? 'success' : 'info'" 
-                                            size="sm"
-                                        >
-                                            {{ $quote['incoterm'] }}
-                                        </x-filament::badge>
-                                        @if(in_array($quote['incoterm'], ['DDP', 'DAP']))
-                                            <div class="text-xs text-success-600 dark:text-success-400 mt-1">All-inclusive</div>
-                                        @endif
-                                    @else
-                                        <span class="text-gray-400">N/A</span>
-                                    @endif
+                                <div class="spec-row">
+                                    <div class="spec-key">Incoterm</div>
+                                    <div class="spec-val {{ isset($quote['incoterm']) && in_array($quote['incoterm'], ['DDP', 'DAP']) ? 'highlight' : '' }}">
+                                        {{ $quote['incoterm'] ?? 'N/A' }}
+                                    </div>
                                 </div>
-                            @endforeach
 
-                            {{-- Payment Terms --}}
-                            <div class="bg-white dark:bg-gray-900 p-4 font-medium text-gray-700 dark:text-gray-300">
-                                Payment Terms
-                            </div>
-                            @foreach($selectedQuotesData as $quote)
-                                @php
-                                    $payment = $quote['payment_terms'] ?? null;
-                                    $isGood = $payment && !str_contains($payment, '100');
-                                @endphp
-                                <div class="bg-white dark:bg-gray-900 p-4 text-center text-sm">
-                                    @if($payment)
-                                        <div class="text-gray-900 dark:text-white">
-                                            {{ str_replace('_', ' ', ucwords($payment, '_')) }}
-                                        </div>
-                                        @if($isGood)
-                                            <x-filament::badge color="success" size="sm">✅</x-filament::badge>
+                                <div class="spec-row">
+                                    <div class="spec-key">Payment</div>
+                                    <div class="spec-val {{ isset($quote['payment_terms']) && !str_contains($quote['payment_terms'], '100') ? 'highlight' : '' }}">
+                                        @if(isset($quote['payment_terms']))
+                                            {{ str_replace('_', ' ', ucwords($quote['payment_terms'], '_')) }}
                                         @else
-                                            <x-filament::badge color="warning" size="sm">⚠️</x-filament::badge>
-                                        @endif
-                                    @else
-                                        <span class="text-gray-400">N/A</span>
-                                    @endif
-                                </div>
-                            @endforeach
-
-                            {{-- STATUS --}}
-                            <div class="bg-white dark:bg-gray-900 p-4 font-medium text-gray-700 dark:text-gray-300">
-                                Status
-                            </div>
-                            @foreach($selectedQuotesData as $quote)
-                                <div class="bg-white dark:bg-gray-900 p-4 text-center">
-                                    <x-filament::badge
-                                        :color="match($quote['status']) {
-                                            'accepted' => 'success',
-                                            'sent' => 'warning',
-                                            'rejected' => 'danger',
-                                            default => 'gray'
-                                        }"
-                                        size="sm"
-                                    >
-                                        {{ ucfirst($quote['status']) }}
-                                    </x-filament::badge>
-                                </div>
-                            @endforeach
-
-                            {{-- PRODUCTS SECTION --}}
-                            @if(isset($comparison['by_product']) && count($comparison['by_product']) > 0)
-                                <div class="bg-primary-50 dark:bg-primary-900/20 p-3 font-bold text-primary-700 dark:text-primary-300" 
-                                     style="grid-column: 1 / -1;">
-                                    📦 PRODUCTS
-                                </div>
-
-                                @foreach($comparison['by_product'] as $productComparison)
-                                    {{-- Product Name --}}
-                                    <div class="bg-gray-50 dark:bg-gray-800 p-4 font-semibold text-gray-900 dark:text-white" 
-                                         style="grid-column: 1 / -1;">
-                                        {{ $productComparison['product'] ?? 'Unknown Product' }}
-                                        @if(isset($productComparison['product_code']))
-                                            <span class="text-sm text-gray-500 dark:text-gray-400 ml-2">({{ $productComparison['product_code'] }})</span>
+                                            N/A
                                         @endif
                                     </div>
+                                </div>
 
-                                    {{-- Unit Price Label --}}
-                                    <div class="bg-white dark:bg-gray-900 p-4 font-medium text-gray-700 dark:text-gray-300 pl-8">
-                                        Unit Price
-                                    </div>
-
-                                    @foreach($selectedQuotesData as $quote)
+                                {{-- Products --}}
+                                @if(isset($comparison['by_product']) && count($comparison['by_product']) > 0)
+                                    <div class="section-header">📦 Products</div>
+                                    
+                                    @foreach($comparison['by_product'] as $productComparison)
                                         @php
                                             $productPrice = collect($productComparison['all_prices'])
                                                 ->firstWhere('supplier_id', $quote['supplier_id']);
@@ -330,26 +292,52 @@
                                                 $productPrice && 
                                                 $productPrice['supplier_id'] === $productComparison['cheapest']['supplier_id'];
                                         @endphp
-                                        <div class="bg-white dark:bg-gray-900 p-4 text-center {{ $isCheapestProduct ? 'bg-success-50 dark:bg-success-900/20' : '' }}">
-                                            @if($productPrice && $productPrice['price'])
-                                                <div class="font-mono {{ $isCheapestProduct ? 'text-success-700 dark:text-success-300 font-bold' : 'text-gray-900 dark:text-white' }}">
+                                        
+                                        <div class="spec-row">
+                                            <div class="spec-key" style="max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="{{ $productComparison['product'] ?? 'Unknown' }}">
+                                                {{ $productComparison['product'] ?? 'Unknown' }}
+                                            </div>
+                                            <div class="spec-val {{ $isCheapestProduct ? 'highlight' : '' }}">
+                                                @if($productPrice && $productPrice['price'])
                                                     {{ $order->currency->symbol }}{{ number_format($productPrice['converted_price'] / 100, 2) }}
-                                                </div>
-                                                @if($isCheapestProduct)
-                                                    <x-filament::badge color="success" size="sm">⭐</x-filament::badge>
+                                                @else
+                                                    <span style="color: #9ca3af;">Not quoted</span>
                                                 @endif
-                                            @else
-                                                <span class="text-gray-400">Not quoted</span>
-                                            @endif
+                                            </div>
                                         </div>
                                     @endforeach
-                                @endforeach
-                            @endif
+                                @endif
 
-                        </div>
+                                {{-- Additional Info --}}
+                                <div class="section-header">ℹ️ Details</div>
+                                
+                                <div class="spec-row">
+                                    <div class="spec-key">Quote ID</div>
+                                    <div class="spec-val" style="font-size: 12px;">#{{ $quote['quote_id'] }}</div>
+                                </div>
+
+                                <div class="spec-row">
+                                    <div class="spec-key">Currency</div>
+                                    <div class="spec-val">{{ $quote['currency'] }}</div>
+                                </div>
+
+                                @if(isset($quote['exchange_rate']) && $quote['exchange_rate'] != 1)
+                                    <div class="spec-row">
+                                        <div class="spec-key">Exchange Rate</div>
+                                        <div class="spec-val" style="font-size: 12px;">{{ number_format($quote['exchange_rate'], 4) }}</div>
+                                    </div>
+                                @endif
+                            </div>
+                        @endforeach
                     </div>
                 </div>
-            </x-filament::section>
-        @endif
+            @else
+                <div class="empty-state">
+                    <div style="font-size: 48px; margin-bottom: 16px;">👆</div>
+                    <h3 style="margin: 0 0 8px 0; color: #0f172a;">Select Quotes Above</h3>
+                    <p>Click on quote chips above to start comparing.</p>
+                </div>
+            @endif
+        </div>
     @endif
 </x-filament-panels::page>
