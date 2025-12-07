@@ -98,6 +98,24 @@ class ItemsRelationManager extends RelationManager
                                     return;
                                 }
 
+                                // Check for duplicate product across all proforma items
+                                $proformaInvoice = $this->getOwnerRecord();
+                                $existingItem = $proformaInvoice->items()
+                                    ->where('product_id', $quoteItem->product_id)
+                                    ->first();
+                                
+                                if ($existingItem) {
+                                    $product = $quoteItem->product;
+                                    
+                                    Notification::make()
+                                        ->danger()
+                                        ->title('⚠️ ATTENTION: Product Already Exists!')
+                                        ->body("**{$product->name}** (Code: {$product->code}) is already in this proforma invoice with quantity **{$existingItem->quantity}**.\n\n**You can either:**\n\n✅ **Cancel** and increase the quantity of the existing item\n\n⚠️ **Continue** to add as separate line ONLY if it has different specifications or comes from a different source\n\n**Please acknowledge by closing this notification.**")
+                                        ->persistent()
+                                        ->duration(null)
+                                        ->send();
+                                }
+
                                 // Auto-fill from quote item
                                 $set('product_id', $quoteItem->product_id);
                                 $set('quantity', $quoteItem->quantity);
