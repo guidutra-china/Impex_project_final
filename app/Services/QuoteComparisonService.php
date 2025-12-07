@@ -204,6 +204,7 @@ class QuoteComparisonService
                 'total_after_commission' => $convertedTotal,  // Sum of converted item prices
                 'original_total' => $quote->total_price_after_commission,  // Keep original for reference
                 'commission_amount' => $quote->commission_amount,
+                'commission_type' => $quote->commission_type,
                 'currency' => $quote->currency->symbol,
                 'order_currency' => $order->currency->symbol,
                 'exchange_rate' => $quote->locked_exchange_rate,

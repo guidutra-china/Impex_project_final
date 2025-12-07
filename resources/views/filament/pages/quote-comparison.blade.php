@@ -267,12 +267,27 @@
                                 <div class="quote-card-header">
                                     <div class="supplier-name">{{ $quote['supplier'] }}</div>
                                     
+                                    @php
+                                        $displayTotal = isset($quote['commission_type']) && $quote['commission_type'] === 'separate' 
+                                            ? $quote['total_before_commission'] 
+                                            : $quote['total_after_commission'];
+                                    @endphp
+                                    
                                     <div class="total-price">
-                                        {{ $order->currency->symbol }}{{ number_format($quote['total_after_commission'] / 100, 2) }}
+                                        {{ $order->currency->symbol }}{{ number_format($displayTotal / 100, 2) }}
                                     </div>
                                     
+                                    @if(isset($quote['commission_type']) && $quote['commission_type'] === 'separate' && isset($quote['commission_amount']) && $quote['commission_amount'] > 0)
+                                        <div style="font-size: 13px; color: #6b7280; margin-top: 4px;">
+                                            + Commission: {{ $order->currency->symbol }}{{ number_format($quote['commission_amount'] / 100, 2) }}
+                                        </div>
+                                        <div style="font-size: 12px; color: #9ca3af; margin-top: 2px; border-top: 1px solid #e5e7eb; padding-top: 4px;">
+                                            Total: {{ $order->currency->symbol }}{{ number_format($quote['total_after_commission'] / 100, 2) }}
+                                        </div>
+                                    @endif
+                                    
                                     @if($isBestPrice)
-                                        <span class="best-badge">⭐ Best Price</span>
+                                        <span class="best-badge" style="margin-top: 8px; display: inline-block;">⭐ Best Price</span>
                                     @elseif($priceDiff > 0)
                                         <div style="font-size: 13px; color: #dc2626; margin-top: 4px;">
                                             +{{ $order->currency->symbol }}{{ number_format($priceDiff / 100, 2) }}
@@ -386,8 +401,15 @@
                                     
                                     <div class="product-cell price {{ $isCheapestProduct ? 'best' : '' }} {{ !$productPrice || !$productPrice['price'] ? 'not-quoted' : '' }}">
                                         @if($productPrice && $productPrice['price'])
+                                            @php
+                                                // Show price WITHOUT commission if type is 'separate'
+                                                $displayPrice = isset($productPrice['commission_type']) && $productPrice['commission_type'] === 'separate'
+                                                    ? $productPrice['price_before_commission']
+                                                    : $productPrice['price'];
+                                            @endphp
+                                            
                                             <div style="font-weight: 700;">
-                                                {{ $order->currency->symbol }}{{ number_format($productPrice['price'] / 100, 2) }}
+                                                {{ $order->currency->symbol }}{{ number_format($displayPrice / 100, 2) }}
                                                 @if($isCheapestProduct)
                                                     <span style="margin-left: 4px;">⭐</span>
                                                 @endif
@@ -398,7 +420,7 @@
                                                     @if($productPrice['commission_type'] === 'embedded')
                                                         <span title="Commission is embedded in the price">📊 +{{ number_format($productPrice['commission_percent'], 1) }}% incl.</span>
                                                     @else
-                                                        <span title="Commission is separate">📊 +{{ number_format($productPrice['commission_percent'], 1) }}% sep.</span>
+                                                        <span title="Commission is separate (shown in header)">📊 +{{ number_format($productPrice['commission_percent'], 1) }}% sep.</span>
                                                     @endif
                                                 </div>
                                             @endif
