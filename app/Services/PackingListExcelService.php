@@ -120,15 +120,15 @@ class PackingListExcelService
             $currentRow++;
             
             $sheet->setCellValue('A' . $currentRow, 'Port of Loading:');
-            $sheet->setCellValue('B' . $currentRow, $packingList->port_of_loading ?? $shipment->port_of_loading ?? 'N/A');
+            $sheet->setCellValue('B' . $currentRow, $packingList->port_of_loading ?? $shipment->origin_port ?? 'N/A');
             $currentRow++;
             
             $sheet->setCellValue('A' . $currentRow, 'Port of Discharge:');
-            $sheet->setCellValue('B' . $currentRow, $packingList->port_of_discharge ?? $shipment->port_of_discharge ?? 'N/A');
+            $sheet->setCellValue('B' . $currentRow, $packingList->port_of_discharge ?? $shipment->destination_port ?? 'N/A');
             $currentRow++;
             
             $sheet->setCellValue('A' . $currentRow, 'Final Destination:');
-            $sheet->setCellValue('B' . $currentRow, $packingList->final_destination ?? $shipment->final_destination ?? 'N/A');
+            $sheet->setCellValue('B' . $currentRow, $packingList->final_destination ?? $shipment->destination_address ?? 'N/A');
             $currentRow++;
             
             if ($packingList->bl_number ?? $shipment->bl_number) {

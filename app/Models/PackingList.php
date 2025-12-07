@@ -115,9 +115,9 @@ class PackingList extends Model
         $packingList->packing_date = now();
         
         // Shipping details from shipment
-        $packingList->port_of_loading = $shipment->port_of_loading;
-        $packingList->port_of_discharge = $shipment->port_of_discharge;
-        $packingList->final_destination = $shipment->final_destination;
+        $packingList->port_of_loading = $shipment->origin_port;
+        $packingList->port_of_discharge = $shipment->destination_port;
+        $packingList->final_destination = $shipment->destination_address;
         $packingList->bl_number = $shipment->bl_number ?? '';
         
         // Container numbers from shipment

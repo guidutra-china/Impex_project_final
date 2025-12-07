@@ -267,15 +267,15 @@
         <div class="shipping-section">
             <div class="shipping-row">
                 <span class="shipping-label">Port of Loading:</span>
-                <span>{{ $packingList->port_of_loading ?? $shipment->port_of_loading ?? 'N/A' }}</span>
+                <span>{{ $packingList->port_of_loading ?? $shipment->origin_port ?? 'N/A' }}</span>
             </div>
             <div class="shipping-row">
                 <span class="shipping-label">Port of Discharge:</span>
-                <span>{{ $packingList->port_of_discharge ?? $shipment->port_of_discharge ?? 'N/A' }}</span>
+                <span>{{ $packingList->port_of_discharge ?? $shipment->destination_port ?? 'N/A' }}</span>
             </div>
             <div class="shipping-row">
                 <span class="shipping-label">Final Destination:</span>
-                <span>{{ $packingList->final_destination ?? $shipment->final_destination ?? 'N/A' }}</span>
+                <span>{{ $packingList->final_destination ?? $shipment->destination_address ?? 'N/A' }}</span>
             </div>
             @if($packingList->bl_number ?? $shipment->bl_number)
             <div class="shipping-row">
@@ -379,7 +379,14 @@
                 
                 <!-- Totals Row -->
                 <tr style="background: #e5e7eb; font-weight: bold;">
-                    <td colspan="{{ ($displayOptions['show_supplier_code'] ?? false) ? 2 : 2 }}{{ ($displayOptions['show_hs_codes'] ?? true) ? '+1' : '' }}{{ ($displayOptions['show_country_of_origin'] ?? true) ? '+1' : '' }}" class="text-right">TOTAL:</td>
+                    @php
+                        // Calculate colspan: No. (1) + Product Description (1) + optional columns
+                        $colspan = 2; // No. + Product Description
+                        if ($displayOptions['show_supplier_code'] ?? false) $colspan++;
+                        if ($displayOptions['show_hs_codes'] ?? true) $colspan++;
+                        if ($displayOptions['show_country_of_origin'] ?? true) $colspan++;
+                    @endphp
+                    <td colspan="{{ $colspan }}" class="text-right">TOTAL:</td>
                     <td class="text-center">{{ number_format($totalQty, 0) }}</td>
                     <td class="text-center">{{ number_format($totalCartons, 0) }}</td>
                     @if($displayOptions['show_weight_volume'] ?? true)
