@@ -457,6 +457,7 @@ class ItemsRelationManager extends RelationManager
                         'supplier_id' => $supplierId,
                         'supplier_quote_id' => $supplierQuoteId,
                         'currency_id' => $proformaInvoice->currency_id,
+                        'base_currency_id' => $proformaInvoice->currency_id, // Use same as currency for now
                         'exchange_rate' => $proformaInvoice->exchange_rate ?? 1.0,
                         'payment_term_id' => $proformaInvoice->payment_term_id,
                         'incoterm' => $proformaInvoice->incoterm,
