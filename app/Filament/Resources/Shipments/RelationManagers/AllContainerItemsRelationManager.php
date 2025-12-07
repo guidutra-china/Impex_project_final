@@ -5,9 +5,10 @@ namespace App\Filament\Resources\Shipments\RelationManagers;
 use App\Models\ShipmentContainer;
 use App\Models\ShipmentContainerItem;
 use BackedEnum;
+use Filament\Actions\Action;
 use Filament\Forms\Components\Select;
 use Filament\Resources\RelationManagers\RelationManager;
-use Filament\Tables\Actions\Action;
+use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
@@ -40,7 +41,7 @@ class AllContainerItemsRelationManager extends RelationManager
             ->query($this->getContainerItemsQuery())
             ->heading($this->getTableHeading())
             ->headerActions([
-                \Filament\Tables\Actions\Action::make('selectContainer')
+                Action::make('selectContainer')
                     ->label('Select Container')
                     ->icon('heroicon-o-adjustments-horizontal')
                     ->form([
@@ -186,7 +187,7 @@ class AllContainerItemsRelationManager extends RelationManager
     }
 
     // Dummy method to satisfy RelationManager requirements
-    public function form(\Filament\Schemas\Schema $schema): \Filament\Schemas\Schema
+    public function form(Schema $schema): Schema
     {
         return $schema->schema([]);
     }
