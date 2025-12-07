@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Shipments\RelationManagers;
 
 use App\Models\ShipmentContainer;
 use App\Models\ShipmentContainerItem;
+use BackedEnum;
 use Filament\Forms\Components\Select;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables\Columns\TextColumn;
@@ -17,7 +18,7 @@ class AllContainerItemsRelationManager extends RelationManager
 
     protected static ?string $title = 'Container Items';
 
-    protected static ?string $icon = 'heroicon-o-cube-transparent';
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-cube-transparent';
 
     public $selectedContainerId = null;
 
