@@ -267,6 +267,15 @@
                                 <div class="quote-card-header">
                                     <div class="supplier-name">{{ $quote['supplier'] }}</div>
                                     
+                                    {{-- DEBUG: Remove after testing --}}
+                                    <div style="font-size: 10px; background: #fef3c7; padding: 4px; margin: 4px 0; border: 1px solid #f59e0b;">
+                                        DEBUG:<br>
+                                        Type: {{ $quote['commission_type'] ?? 'NULL' }}<br>
+                                        Before: {{ isset($quote['total_before_commission']) ? number_format($quote['total_before_commission']/100, 2) : 'NULL' }}<br>
+                                        After: {{ isset($quote['total_after_commission']) ? number_format($quote['total_after_commission']/100, 2) : 'NULL' }}<br>
+                                        Commission: {{ isset($quote['commission_amount']) ? number_format($quote['commission_amount']/100, 2) : 'NULL' }}
+                                    </div>
+                                    
                                     @php
                                         $displayTotal = isset($quote['commission_type']) && $quote['commission_type'] === 'separate' 
                                             ? $quote['total_before_commission'] 
