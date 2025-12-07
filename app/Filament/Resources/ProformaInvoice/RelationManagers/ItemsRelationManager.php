@@ -249,6 +249,13 @@ class ItemsRelationManager extends RelationManager
                     ->wrap()
                     ->weight(FontWeight::Medium),
 
+                TextColumn::make('supplierQuote.supplier.code')
+                    ->label('Supplier')
+                    ->searchable()
+                    ->sortable()
+                    ->badge()
+                    ->color('info'),
+
                 TextInputColumn::make('quantity')
                     ->label('Qty')
                     ->type('number')
