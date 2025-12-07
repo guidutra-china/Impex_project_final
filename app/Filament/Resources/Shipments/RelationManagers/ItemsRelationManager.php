@@ -350,6 +350,143 @@ class ItemsRelationManager extends RelationManager
                                         return $box->id;
                                     })
                                     ->helperText('Click + to create a new box/pallet'),
+                                
+                                // Capacity validation info
+                                \Filament\Forms\Components\Placeholder::make('capacity_info')
+                                    ->label('Capacity Check')
+                                    ->content(function ($get, $livewire) use ($shipment) {
+                                        $destinationType = $get('destination_type');
+                                        $containerId = $get('container_id');
+                                        $boxId = $get('box_id');
+                                        
+                                        if (!$destinationType) {
+                                            return 'Select a destination to see capacity information.';
+                                        }
+                                        
+                                        // Get selected items
+                                        $selectedRecords = $livewire->getSelectedTableRecords();
+                                        if ($selectedRecords->isEmpty()) {
+                                            return 'No items selected.';
+                                        }
+                                        
+                                        // Calculate total weight and volume of selected items
+                                        $totalWeight = 0;
+                                        $totalVolume = 0;
+                                        
+                                        foreach ($selectedRecords as $item) {
+                                            $qty = $item->quantity_to_ship - $item->quantity_packed;
+                                            if ($qty > 0) {
+                                                $product = $item->product;
+                                                
+                                                // Calculate weight and volume
+                                                if ($product && $product->pcs_per_carton > 0) {
+                                                    $unitWeight = $product->carton_weight / $product->pcs_per_carton;
+                                                    $unitVolume = $product->carton_cbm / $product->pcs_per_carton;
+                                                } else {
+                                                    $unitWeight = $product->net_weight ?? 0;
+                                                    if ($product && $product->product_length && $product->product_width && $product->product_height) {
+                                                        $unitVolume = ($product->product_length * $product->product_width * $product->product_height) / 1000000;
+                                                    } else {
+                                                        $unitVolume = 0;
+                                                    }
+                                                }
+                                                
+                                                $totalWeight += $qty * $unitWeight;
+                                                $totalVolume += $qty * $unitVolume;
+                                            }
+                                        }
+                                        
+                                        // Get destination capacity
+                                        if ($destinationType === 'container' && $containerId) {
+                                            $container = \App\Models\ShipmentContainer::find($containerId);
+                                            if ($container) {
+                                                $currentWeight = $container->current_weight ?? 0;
+                                                $currentVolume = $container->current_volume ?? 0;
+                                                $maxWeight = $container->max_weight ?? 0;
+                                                $maxVolume = $container->max_volume ?? 0;
+                                                
+                                                $afterWeight = $currentWeight + $totalWeight;
+                                                $afterVolume = $currentVolume + $totalVolume;
+                                                
+                                                $weightPercent = $maxWeight > 0 ? ($afterWeight / $maxWeight * 100) : 0;
+                                                $volumePercent = $maxVolume > 0 ? ($afterVolume / $maxVolume * 100) : 0;
+                                                
+                                                $weightStatus = $afterWeight > $maxWeight ? '⚠️ EXCEEDS' : ($weightPercent > 90 ? '⚠️ NEAR LIMIT' : '✅ OK');
+                                                $volumeStatus = $afterVolume > $maxVolume ? '⚠️ EXCEEDS' : ($volumePercent > 90 ? '⚠️ NEAR LIMIT' : '✅ OK');
+                                                
+                                                return sprintf(
+                                                    "**Container: %s**\n\n" .
+                                                    "**Weight:** %s\n" .
+                                                    "Current: %.2f kg\n" .
+                                                    "Selected Items: %.2f kg\n" .
+                                                    "After Packing: %.2f / %.2f kg (%.1f%%)\n\n" .
+                                                    "**Volume:** %s\n" .
+                                                    "Current: %.3f m³\n" .
+                                                    "Selected Items: %.3f m³\n" .
+                                                    "After Packing: %.3f / %.3f m³ (%.1f%%)",
+                                                    $container->container_number,
+                                                    $weightStatus,
+                                                    $currentWeight,
+                                                    $totalWeight,
+                                                    $afterWeight,
+                                                    $maxWeight,
+                                                    $weightPercent,
+                                                    $volumeStatus,
+                                                    $currentVolume,
+                                                    $totalVolume,
+                                                    $afterVolume,
+                                                    $maxVolume,
+                                                    $volumePercent
+                                                );
+                                            }
+                                        } elseif ($destinationType === 'box' && $boxId) {
+                                            $box = \App\Models\PackingBox::find($boxId);
+                                            if ($box) {
+                                                $currentWeight = $box->total_weight ?? 0;
+                                                $currentVolume = $box->total_volume ?? 0;
+                                                $maxVolume = $box->volume ?? 0;
+                                                
+                                                $afterWeight = $currentWeight + $totalWeight;
+                                                $afterVolume = $currentVolume + $totalVolume;
+                                                
+                                                $volumePercent = $maxVolume > 0 ? ($afterVolume / $maxVolume * 100) : 0;
+                                                $volumeStatus = $afterVolume > $maxVolume ? '⚠️ EXCEEDS' : ($volumePercent > 90 ? '⚠️ NEAR LIMIT' : '✅ OK');
+                                                
+                                                return sprintf(
+                                                    "**Box: %s**\n\n" .
+                                                    "**Weight:**\n" .
+                                                    "Current: %.2f kg\n" .
+                                                    "Selected Items: %.2f kg\n" .
+                                                    "After Packing: %.2f kg\n\n" .
+                                                    "**Volume:** %s\n" .
+                                                    "Current: %.3f m³\n" .
+                                                    "Selected Items: %.3f m³\n" .
+                                                    "After Packing: %.3f / %.3f m³ (%.1f%%)",
+                                                    $box->box_label ?? "Box #{$box->box_number}",
+                                                    $currentWeight,
+                                                    $totalWeight,
+                                                    $afterWeight,
+                                                    $volumeStatus,
+                                                    $currentVolume,
+                                                    $totalVolume,
+                                                    $afterVolume,
+                                                    $maxVolume,
+                                                    $volumePercent
+                                                );
+                                            }
+                                        }
+                                        
+                                        return sprintf(
+                                            "**Selected Items:**\n" .
+                                            "Total Weight: %.2f kg\n" .
+                                            "Total Volume: %.3f m³\n\n" .
+                                            "Select a %s to see capacity check.",
+                                            $totalWeight,
+                                            $totalVolume,
+                                            $destinationType === 'container' ? 'container' : 'box'
+                                        );
+                                    })
+                                    ->columnSpanFull(),
                             ];
                         })
                         ->action(function (Collection $records, array $data) {
