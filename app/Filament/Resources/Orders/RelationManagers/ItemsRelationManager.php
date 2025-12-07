@@ -16,7 +16,6 @@ use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Notifications\Notification;
-use Filament\Notifications\Actions\Action as NotificationAction;
 
 class ItemsRelationManager extends RelationManager
 {
@@ -77,17 +76,12 @@ class ItemsRelationManager extends RelationManager
                             if ($existingItem) {
                                 $product = \App\Models\Product::find($state);
                                 
-                                Notification::make()
-                                    ->warning()
-                                    ->title('⚠️ Product Already Exists')
-                                    ->body("**{$product->name}** (Code: {$product->code}) is already in this order with quantity {$existingItem->quantity}.\n\nYou can either:\n- **Cancel** and increase the quantity of the existing item, OR\n- **Continue** to add this as a separate line (if it has different specifications)")
+Notification::make()
+                                    ->danger()
+                                    ->title('⚠️ ATTENTION: Product Already Exists!')
+                                    ->body("**{$product->name}** (Code: {$product->code}) is already in this order with quantity **{$existingItem->quantity}**.\n\n**You can either:**\n\n✅ **Cancel** and increase the quantity of the existing item\n\n⚠️ **Continue** to add as separate line ONLY if it has different specifications (color, size, etc.)\n\n**Please acknowledge by closing this notification.**")
                                     ->persistent()
-                                    ->actions([
-                                        NotificationAction::make('understood')
-                                            ->label('OK, I Understand')
-                                            ->button()
-                                            ->close(),
-                                    ])
+                                    ->duration(null)
                                     ->send();
                             }
                         }
