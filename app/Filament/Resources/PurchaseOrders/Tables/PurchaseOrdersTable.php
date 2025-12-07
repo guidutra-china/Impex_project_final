@@ -36,6 +36,14 @@ class PurchaseOrdersTable
                     ->sortable()
                     ->limit(30),
                 
+                TextColumn::make('proformaInvoice.proforma_number')
+                    ->label('Proforma Invoice')
+                    ->searchable()
+                    ->sortable()
+                    ->badge()
+                    ->color('info')
+                    ->default('N/A'),
+                
                 TextColumn::make('status')
                     ->badge()
                     ->colors([

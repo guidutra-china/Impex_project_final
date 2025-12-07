@@ -159,7 +159,7 @@ class SupplierQuotesTable
                     ->action(function ($record) {
                         // Create PO from Supplier Quote
                         $po = \App\Models\PurchaseOrder::create([
-                            'po_number' => 'PO-' . date('Y') . '-' . str_pad(rand(1, 9999), 4, '0', STR_PAD_LEFT),
+                            // po_number will be auto-generated
                             'revision_number' => 1,
                             'po_date' => now(),
                             'status' => 'draft',

@@ -95,10 +95,10 @@ class PurchaseOrderForm
         return [
             TextInput::make('po_number')
                 ->label('PO Number')
-                ->default(fn () => 'PO-' . date('Y') . '-' . str_pad(rand(1, 9999), 4, '0', STR_PAD_LEFT))
                 ->required()
                 ->unique(ignoreRecord: true)
-                ->maxLength(50),
+                ->maxLength(50)
+                ->helperText('Auto-generated if left empty (Format: PO-YY-NNNN)'),
 
             TextInput::make('revision_number')
                 ->label('Revision')
