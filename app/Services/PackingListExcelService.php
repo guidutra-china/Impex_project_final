@@ -8,11 +8,12 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Style\Border;
+use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 
 class PackingListExcelService
 {
     /**
-     * Generate Packing List Excel file
+     * Generate Packing List Excel file with formulas
      *
      * @param Shipment $shipment
      * @return string Path to generated file
@@ -31,287 +32,258 @@ class PackingListExcelService
             ->setTitle('Packing List - ' . ($packingList->packing_list_number ?? 'PL-' . $shipment->shipment_number))
             ->setSubject('Packing List');
 
-        // Styling
-        $headerStyle = [
-            'font' => ['bold' => true, 'size' => 16, 'color' => ['rgb' => 'FFFFFF']],
-            'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '2563eb']], // Blue
-            'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER],
-        ];
-
-        $labelStyle = [
-            'font' => ['bold' => true, 'size' => 10],
-            'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'E0E0E0']],
-        ];
-
-        $tableHeaderStyle = [
-            'font' => ['bold' => true, 'size' => 10, 'color' => ['rgb' => 'FFFFFF']],
-            'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '1f2937']],
-            'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER],
-            'borders' => [
-                'allBorders' => ['borderStyle' => Border::BORDER_THIN, 'color' => ['rgb' => '000000']],
-            ],
-        ];
-
-        $totalStyle = [
-            'font' => ['bold' => true, 'size' => 11],
-            'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'D1FAE5']], // Light green
-            'borders' => [
-                'allBorders' => ['borderStyle' => Border::BORDER_MEDIUM, 'color' => ['rgb' => '000000']],
-            ],
-        ];
-
+        // Define styles
+        $styles = $this->getStyles();
+        
         $currentRow = 1;
 
-        // Title
+        // ==================== HEADER ====================
         $sheet->setCellValue('A' . $currentRow, 'PACKING LIST');
-        $sheet->mergeCells('A' . $currentRow . ':H' . $currentRow);
-        $sheet->getStyle('A' . $currentRow)->applyFromArray($headerStyle);
-        $sheet->getRowDimension($currentRow)->setRowHeight(35);
+        $sheet->mergeCells('A' . $currentRow . ':I' . $currentRow);
+        $sheet->getStyle('A' . $currentRow)->applyFromArray($styles['title']);
+        $sheet->getRowDimension($currentRow)->setRowHeight(40);
         $currentRow += 2;
 
-        // Packing List Information - Use Commercial Invoice number and date
+        // ==================== DOCUMENT INFO ====================
         $commercialInvoice = $shipment->commercialInvoice;
         $invoiceNumber = $commercialInvoice?->invoice_number ?? 'N/A';
         $invoiceDate = $commercialInvoice?->invoice_date ?? now();
         
         $sheet->setCellValue('A' . $currentRow, 'Invoice Number:');
         $sheet->setCellValue('B' . $currentRow, $invoiceNumber);
-        $sheet->getStyle('A' . $currentRow)->applyFromArray($labelStyle);
+        $sheet->getStyle('A' . $currentRow)->applyFromArray($styles['label']);
+        $sheet->getStyle('B' . $currentRow)->applyFromArray($styles['value']);
         $currentRow++;
 
         $sheet->setCellValue('A' . $currentRow, 'Date:');
         $sheet->setCellValue('B' . $currentRow, $invoiceDate->format('d/m/Y'));
-        $sheet->getStyle('A' . $currentRow)->applyFromArray($labelStyle);
+        $sheet->getStyle('A' . $currentRow)->applyFromArray($styles['label']);
+        $sheet->getStyle('B' . $currentRow)->applyFromArray($styles['value']);
         $currentRow += 2;
 
-        // Exporter & Importer Info
+        // ==================== EXPORTER & IMPORTER ====================
+        $infoStartRow = $currentRow;
+        
+        // Exporter (Left side)
         if ($displayOptions['show_exporter_details'] ?? true) {
             $companySettings = \App\Models\CompanySetting::first();
             $exporterName = $packingList->exporter_name ?? $companySettings?->company_name ?? 'N/A';
             $exporterAddress = $packingList->exporter_address ?? $companySettings?->full_address ?? 'N/A';
             
             $sheet->setCellValue('A' . $currentRow, 'EXPORTER (SHIPPER):');
-            $sheet->getStyle('A' . $currentRow)->applyFromArray($labelStyle);
+            $sheet->mergeCells('A' . $currentRow . ':D' . $currentRow);
+            $sheet->getStyle('A' . $currentRow)->applyFromArray($styles['sectionHeader']);
             $currentRow++;
+            
             $sheet->setCellValue('A' . $currentRow, $exporterName);
+            $sheet->mergeCells('A' . $currentRow . ':D' . $currentRow);
             $currentRow++;
+            
             $sheet->setCellValue('A' . $currentRow, $exporterAddress);
-            $currentRow += 2;
+            $sheet->mergeCells('A' . $currentRow . ':D' . $currentRow);
+            $sheet->getStyle('A' . $currentRow)->getAlignment()->setWrapText(true);
+            $currentRow++;
         }
-
+        
+        // Importer (Right side)
+        $currentRow = $infoStartRow;
         if ($displayOptions['show_importer_details'] ?? true) {
             $customer = $shipment->customer;
             $importerName = $packingList->importer_name ?? $customer?->name ?? 'N/A';
-            $importerAddress = $packingList->importer_address ?? ($customer ? implode(', ', array_filter([$customer->address, $customer->city, $customer->state, $customer->zip, $customer->country])) : 'N/A');
+            $importerAddress = $packingList->importer_address ?? $customer?->address ?? 'N/A';
             
-            $sheet->setCellValue('A' . $currentRow, 'IMPORTER (CONSIGNEE):');
-            $sheet->getStyle('A' . $currentRow)->applyFromArray($labelStyle);
+            $sheet->setCellValue('F' . $currentRow, 'IMPORTER (CONSIGNEE):');
+            $sheet->mergeCells('F' . $currentRow . ':I' . $currentRow);
+            $sheet->getStyle('F' . $currentRow)->applyFromArray($styles['sectionHeader']);
             $currentRow++;
-            $sheet->setCellValue('A' . $currentRow, $importerName);
+            
+            $sheet->setCellValue('F' . $currentRow, $importerName);
+            $sheet->mergeCells('F' . $currentRow . ':I' . $currentRow);
             $currentRow++;
-            $sheet->setCellValue('A' . $currentRow, $importerAddress);
+            
+            $sheet->setCellValue('F' . $currentRow, $importerAddress);
+            $sheet->mergeCells('F' . $currentRow . ':I' . $currentRow);
+            $sheet->getStyle('F' . $currentRow)->getAlignment()->setWrapText(true);
             $currentRow += 2;
         }
+        
+        $currentRow = max($currentRow, $infoStartRow + 4);
 
-        // Shipping Details
+        // ==================== SHIPPING DETAILS ====================
         if ($displayOptions['show_shipping_details'] ?? true) {
             $sheet->setCellValue('A' . $currentRow, 'SHIPPING DETAILS:');
-            $sheet->getStyle('A' . $currentRow)->applyFromArray($labelStyle);
+            $sheet->mergeCells('A' . $currentRow . ':I' . $currentRow);
+            $sheet->getStyle('A' . $currentRow)->applyFromArray($styles['sectionHeader']);
             $currentRow++;
             
-            $sheet->setCellValue('A' . $currentRow, 'Port of Loading:');
-            $sheet->setCellValue('B' . $currentRow, $packingList->port_of_loading ?? $shipment->origin_port ?? 'N/A');
-            $currentRow++;
-            
-            $sheet->setCellValue('A' . $currentRow, 'Port of Discharge:');
-            $sheet->setCellValue('B' . $currentRow, $packingList->port_of_discharge ?? $shipment->destination_port ?? 'N/A');
-            $currentRow++;
-            
-            $sheet->setCellValue('A' . $currentRow, 'Final Destination:');
-            $sheet->setCellValue('B' . $currentRow, $packingList->final_destination ?? $shipment->destination_address ?? 'N/A');
-            $currentRow++;
+            $shippingDetails = [
+                'Port of Loading:' => $packingList->port_of_loading ?? $shipment->origin_port ?? 'N/A',
+                'Port of Discharge:' => $packingList->port_of_discharge ?? $shipment->destination_port ?? 'N/A',
+                'Final Destination:' => $packingList->final_destination ?? $shipment->final_destination ?? 'N/A',
+            ];
             
             if ($packingList->bl_number ?? $shipment->bl_number) {
-                $sheet->setCellValue('A' . $currentRow, 'B/L Number:');
-                $sheet->setCellValue('B' . $currentRow, $packingList->bl_number ?? $shipment->bl_number);
-                $currentRow++;
+                $shippingDetails['B/L Number:'] = $packingList->bl_number ?? $shipment->bl_number;
             }
             
             if ($packingList->container_numbers) {
-                $sheet->setCellValue('A' . $currentRow, 'Container Numbers:');
-                $sheet->setCellValue('B' . $currentRow, $packingList->container_numbers);
+                $shippingDetails['Container Numbers:'] = $packingList->container_numbers;
+            }
+            
+            foreach ($shippingDetails as $label => $value) {
+                $sheet->setCellValue('A' . $currentRow, $label);
+                $sheet->setCellValue('B' . $currentRow, $value);
+                $sheet->getStyle('A' . $currentRow)->applyFromArray($styles['label']);
+                $sheet->mergeCells('B' . $currentRow . ':D' . $currentRow);
                 $currentRow++;
             }
             
-            $currentRow += 2;
+            $currentRow += 1;
         }
 
-        // Items Table Header
+        // ==================== ITEMS TABLE ====================
+        $tableStartRow = $currentRow;
+        
+        // Table Header
         $col = 'A';
-        $sheet->setCellValue($col . $currentRow, 'No.');
-        $sheet->getColumnDimension($col)->setWidth(6);
-        $col++;
+        $headers = [];
+        
+        $headers[] = ['col' => $col++, 'label' => 'No.', 'width' => 6];
         
         if ($displayOptions['show_customer_code'] ?? true) {
-            $sheet->setCellValue($col . $currentRow, 'Customer Code');
-            $sheet->getColumnDimension($col)->setWidth(15);
-            $col++;
+            $headers[] = ['col' => $col++, 'label' => 'Customer Code', 'width' => 15];
         }
         
-        $sheet->setCellValue($col . $currentRow, 'Product Description');
-        $sheet->getColumnDimension($col)->setWidth(35);
-        $col++;
-        
-        $sheet->setCellValue($col . $currentRow, 'Qty');
-        $sheet->getColumnDimension($col)->setWidth(10);
-        $col++;
-        
-        $sheet->setCellValue($col . $currentRow, 'Qty/Carton');
-        $sheet->getColumnDimension($col)->setWidth(12);
-        $col++;
-        
-        $sheet->setCellValue($col . $currentRow, 'Cartons');
-        $sheet->getColumnDimension($col)->setWidth(10);
-        $col++;
+        $headers[] = ['col' => $col++, 'label' => 'Product Description', 'width' => 35];
+        $qtyCol = $col;
+        $headers[] = ['col' => $col++, 'label' => 'Qty', 'width' => 10];
+        $qtyCartonCol = $col;
+        $headers[] = ['col' => $col++, 'label' => 'Qty/Carton', 'width' => 12];
+        $cartonsCol = $col;
+        $headers[] = ['col' => $col++, 'label' => 'Cartons', 'width' => 10];
         
         if ($displayOptions['show_weight_volume'] ?? true) {
-            $sheet->setCellValue($col . $currentRow, 'N.W. (kg)');
-            $sheet->getColumnDimension($col)->setWidth(12);
-            $col++;
-            
-            $sheet->setCellValue($col . $currentRow, 'G.W. (kg)');
-            $sheet->getColumnDimension($col)->setWidth(12);
-            $col++;
-            
-            $sheet->setCellValue($col . $currentRow, 'CBM');
-            $sheet->getColumnDimension($col)->setWidth(12);
-            $col++;
+            $nwCol = $col;
+            $headers[] = ['col' => $col++, 'label' => 'N.W. (kg)', 'width' => 12];
+            $gwCol = $col;
+            $headers[] = ['col' => $col++, 'label' => 'G.W. (kg)', 'width' => 12];
+            $cbmCol = $col;
+            $headers[] = ['col' => $col++, 'label' => 'CBM', 'width' => 12];
         }
         
         $lastCol = chr(ord($col) - 1);
-        $sheet->getStyle('A' . $currentRow . ':' . $lastCol . $currentRow)->applyFromArray($tableHeaderStyle);
+        
+        // Apply headers
+        foreach ($headers as $header) {
+            $sheet->setCellValue($header['col'] . $currentRow, $header['label']);
+            $sheet->getColumnDimension($header['col'])->setWidth($header['width']);
+        }
+        
+        $sheet->getStyle('A' . $currentRow . ':' . $lastCol . $currentRow)->applyFromArray($styles['tableHeader']);
         $currentRow++;
-
-        // Items Data
-        $containers = $shipment->containers()->with('items.product')->get();
+        
+        // ==================== ITEMS DATA ====================
+        $itemStartRow = $currentRow;
         $itemNumber = 1;
-        $totalQty = 0;
-        $totalCartons = 0;
-        $totalNetWeight = 0;
-        $totalGrossWeight = 0;
-        $totalVolume = 0;
-
-        foreach ($containers as $container) {
+        
+        foreach ($shipment->containers as $container) {
             foreach ($container->items as $item) {
                 $product = $item->product;
-                $qty = $item->quantity ?? 0;
-                
-                // Calculate cartons: quantity / pcs_per_carton (rounded up)
+                $qty = $item->quantity;
                 $pcsPerCarton = $product->pcs_per_carton ?? 1;
                 $cartons = $pcsPerCarton > 0 ? ceil($qty / $pcsPerCarton) : 0;
                 
-                // Use total_volume from item (already calculated) or calculate from product
-                $volume = $item->total_volume ?? (($product->volume ?? 0) * $qty);
-                
-                // Calculate weights
+                // Weights and volume
                 $netWeight = ($product->net_weight ?? 0) * $qty;
                 $grossWeight = ($product->gross_weight ?? 0) * $qty;
+                $volume = $item->total_volume ?? (($product->volume ?? 0) * $qty);
                 
-                $totalQty += $qty;
-                $totalCartons += $cartons;
-                $totalNetWeight += $netWeight;
-                $totalGrossWeight += $grossWeight;
-                $totalVolume += $volume;
-
                 $col = 'A';
-                $sheet->setCellValue($col . $currentRow, $itemNumber++);
-                $col++;
                 
+                // No.
+                $sheet->setCellValue($col++ . $currentRow, $itemNumber++);
+                
+                // Customer Code
                 if ($displayOptions['show_customer_code'] ?? true) {
-                    $sheet->setCellValue($col . $currentRow, $product->customer_code ?? 'N/A');
-                    $col++;
+                    $sheet->setCellValue($col++ . $currentRow, $product->customer_code ?? 'N/A');
                 }
                 
-                $sheet->setCellValue($col . $currentRow, $product->name);
-                $col++;
+                // Product Description
+                $sheet->setCellValue($col++ . $currentRow, $product->name);
                 
-                $sheet->setCellValue($col . $currentRow, $qty);
-                $col++;
+                // Qty
+                $sheet->setCellValue($col++ . $currentRow, $qty);
                 
-                $sheet->setCellValue($col . $currentRow, $pcsPerCarton);
-                $col++;
+                // Qty/Carton
+                $sheet->setCellValue($col++ . $currentRow, $pcsPerCarton);
                 
-                $sheet->setCellValue($col . $currentRow, $cartons);
-                $col++;
+                // Cartons
+                $sheet->setCellValue($col++ . $currentRow, $cartons);
                 
+                // Weights and Volume
                 if ($displayOptions['show_weight_volume'] ?? true) {
-                    $sheet->setCellValue($col . $currentRow, number_format($netWeight, 2));
-                    $col++;
-                    
-                    $sheet->setCellValue($col . $currentRow, number_format($grossWeight, 2));
-                    $col++;
-                    
-                    $sheet->setCellValue($col . $currentRow, number_format($volume, 3));
-                    $col++;
+                    $sheet->setCellValue($col++ . $currentRow, $netWeight);
+                    $sheet->setCellValue($col++ . $currentRow, $grossWeight);
+                    $sheet->setCellValue($col++ . $currentRow, $volume);
                 }
                 
-                // Apply borders to row
-                $sheet->getStyle('A' . $currentRow . ':' . $lastCol . $currentRow)->applyFromArray([
-                    'borders' => [
-                        'allBorders' => ['borderStyle' => Border::BORDER_THIN, 'color' => ['rgb' => 'CCCCCC']],
-                    ],
-                ]);
+                // Apply borders and alignment
+                $sheet->getStyle('A' . $currentRow . ':' . $lastCol . $currentRow)->applyFromArray($styles['tableCell']);
+                $sheet->getStyle($qtyCol . $currentRow . ':' . $lastCol . $currentRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
                 
                 $currentRow++;
             }
         }
-
-        // Totals Row
-        $col = 'A';
-        $totalStartCol = $col;
         
-        // Calculate colspan for "TOTAL" label
-        $colsBeforeQty = 1; // No. column
-        if ($displayOptions['show_supplier_code'] ?? false) $colsBeforeQty++;
-        if ($displayOptions['show_hs_codes'] ?? true) $colsBeforeQty++;
-        if ($displayOptions['show_country_of_origin'] ?? true) $colsBeforeQty++;
+        $itemEndRow = $currentRow - 1;
         
-        $totalLabelEndCol = chr(ord('A') + $colsBeforeQty);
+        // ==================== TOTALS ROW WITH FORMULAS ====================
         $sheet->setCellValue('A' . $currentRow, 'TOTAL:');
+        
+        // Calculate colspan for TOTAL label
+        $colspan = 1; // No.
+        if ($displayOptions['show_customer_code'] ?? true) $colspan++;
+        $colspan++; // Description
+        
+        $totalLabelEndCol = chr(ord('A') + $colspan - 1);
         $sheet->mergeCells('A' . $currentRow . ':' . $totalLabelEndCol . $currentRow);
         
-        $col = chr(ord($totalLabelEndCol) + 1);
-        $sheet->setCellValue($col . $currentRow, $totalQty);
-        $col++;
+        // Qty Total (SUM formula)
+        $sheet->setCellValue($qtyCol . $currentRow, "=SUM({$qtyCol}{$itemStartRow}:{$qtyCol}{$itemEndRow})");
         
-        $sheet->setCellValue($col . $currentRow, $totalCartons);
-        $col++;
+        // Qty/Carton (no total, just dash)
+        $sheet->setCellValue($qtyCartonCol . $currentRow, '-');
         
+        // Cartons Total (SUM formula)
+        $sheet->setCellValue($cartonsCol . $currentRow, "=SUM({$cartonsCol}{$itemStartRow}:{$cartonsCol}{$itemEndRow})");
+        
+        // Weights and Volume Totals (SUM formulas)
         if ($displayOptions['show_weight_volume'] ?? true) {
-            $sheet->setCellValue($col . $currentRow, number_format($totalNetWeight, 2));
-            $col++;
+            $sheet->setCellValue($nwCol . $currentRow, "=SUM({$nwCol}{$itemStartRow}:{$nwCol}{$itemEndRow})");
+            $sheet->setCellValue($gwCol . $currentRow, "=SUM({$gwCol}{$itemStartRow}:{$gwCol}{$itemEndRow})");
+            $sheet->setCellValue($cbmCol . $currentRow, "=SUM({$cbmCol}{$itemStartRow}:{$cbmCol}{$itemEndRow})");
             
-            $sheet->setCellValue($col . $currentRow, number_format($totalGrossWeight, 2));
-            $col++;
-            
-            $sheet->setCellValue($col . $currentRow, number_format($totalVolume, 3));
-            $col++;
+            // Format numbers
+            $sheet->getStyle($nwCol . $currentRow)->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
+            $sheet->getStyle($gwCol . $currentRow)->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
+            $sheet->getStyle($cbmCol . $currentRow)->getNumberFormat()->setFormatCode('#,##0.000');
         }
         
-        $sheet->getStyle('A' . $currentRow . ':' . $lastCol . $currentRow)->applyFromArray($totalStyle);
+        $sheet->getStyle('A' . $currentRow . ':' . $lastCol . $currentRow)->applyFromArray($styles['totalRow']);
         $currentRow += 2;
 
-        // Notes
+        // ==================== NOTES ====================
         if ($packingList->notes) {
             $sheet->setCellValue('A' . $currentRow, 'NOTES:');
-            $sheet->getStyle('A' . $currentRow)->applyFromArray($labelStyle);
+            $sheet->getStyle('A' . $currentRow)->applyFromArray($styles['sectionHeader']);
             $currentRow++;
+            
             $sheet->setCellValue('A' . $currentRow, $packingList->notes);
             $sheet->mergeCells('A' . $currentRow . ':' . $lastCol . $currentRow);
             $sheet->getStyle('A' . $currentRow)->getAlignment()->setWrapText(true);
         }
 
-        // Save file
+        // ==================== SAVE FILE ====================
         $fileName = 'packing_list_' . ($packingList->packing_list_number ?? $shipment->shipment_number) . '_' . now()->format('YmdHis') . '.xlsx';
         $filePath = storage_path('app/public/exports/' . $fileName);
         
@@ -324,5 +296,55 @@ class PackingListExcelService
         $writer->save($filePath);
 
         return $filePath;
+    }
+    
+    /**
+     * Get predefined styles
+     */
+    private function getStyles(): array
+    {
+        return [
+            'title' => [
+                'font' => ['bold' => true, 'size' => 18, 'color' => ['rgb' => 'FFFFFF']],
+                'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '2563eb']], // Blue
+                'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER],
+            ],
+            'label' => [
+                'font' => ['bold' => true, 'size' => 10],
+                'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'E5E7EB']],
+                'alignment' => ['vertical' => Alignment::VERTICAL_CENTER],
+            ],
+            'value' => [
+                'font' => ['size' => 10],
+                'alignment' => ['vertical' => Alignment::VERTICAL_CENTER],
+            ],
+            'sectionHeader' => [
+                'font' => ['bold' => true, 'size' => 11, 'color' => ['rgb' => 'FFFFFF']],
+                'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '1f2937']], // Dark gray
+                'alignment' => ['horizontal' => Alignment::HORIZONTAL_LEFT, 'vertical' => Alignment::VERTICAL_CENTER],
+            ],
+            'tableHeader' => [
+                'font' => ['bold' => true, 'size' => 10, 'color' => ['rgb' => 'FFFFFF']],
+                'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '1f2937']],
+                'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER],
+                'borders' => [
+                    'allBorders' => ['borderStyle' => Border::BORDER_THIN, 'color' => ['rgb' => '000000']],
+                ],
+            ],
+            'tableCell' => [
+                'borders' => [
+                    'allBorders' => ['borderStyle' => Border::BORDER_THIN, 'color' => ['rgb' => 'CCCCCC']],
+                ],
+                'alignment' => ['vertical' => Alignment::VERTICAL_CENTER],
+            ],
+            'totalRow' => [
+                'font' => ['bold' => true, 'size' => 11],
+                'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'DBEAFE']], // Light blue
+                'borders' => [
+                    'allBorders' => ['borderStyle' => Border::BORDER_MEDIUM, 'color' => ['rgb' => '000000']],
+                ],
+                'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER],
+            ],
+        ];
     }
 }
