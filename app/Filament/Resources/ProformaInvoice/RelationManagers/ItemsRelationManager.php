@@ -250,7 +250,7 @@ class ItemsRelationManager extends RelationManager
                     ->wrap()
                     ->weight(FontWeight::Medium),
 
-                TextColumn::make('supplierQuote.supplier.code')
+                TextColumn::make('supplierQuote.supplier.supplier_code')
                     ->label('Supplier')
                     ->badge()
                     ->color('info')
