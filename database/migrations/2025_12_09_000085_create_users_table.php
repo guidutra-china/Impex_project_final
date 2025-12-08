@@ -15,13 +15,13 @@ return new class extends Migration
             $table->id();
             $table->string('name', 255);
             $table->string('email', 255);
-            $table->string('locale', 10);
+            $table->string('locale', 10)->default('en');
             $table->string('avatar', 255)->nullable();
             $table->string('phone', 20)->nullable();
             $table->timestamp('email_verified_at')->nullable();
             // TODO: `status` enum('active','inactive','suspended') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'active'
             $table->string('password', 255);
-            $table->integer('is_admin');
+            $table->boolean('is_admin')->default(false);
             $table->string('remember_token', 100)->nullable();
             $table->timestamp('last_login_at')->nullable();
             $table->timestamps();
