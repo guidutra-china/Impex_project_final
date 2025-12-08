@@ -27,12 +27,12 @@ class EditSupplierQuote extends EditRecord
     {
         return [
             Action::make('import_excel')
-                ->label('Import from Excel')
+                ->label(__('common.import'))
                 ->icon('heroicon-o-arrow-up-tray')
                 ->color('info')
                 ->form([
                     FileUpload::make('excel_file')
-                        ->label('Excel File')
+                        ->label(__('fields.file'))
                         ->acceptedFileTypes(['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/vnd.ms-excel'])
                         ->required()
                         ->maxSize(5120) // 5MB

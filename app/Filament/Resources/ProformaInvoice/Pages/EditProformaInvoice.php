@@ -26,7 +26,7 @@ class EditProformaInvoice extends EditRecord
             Actions\DeleteAction::make(),
             
             Actions\Action::make('approve')
-                ->label('Approve')
+                ->label(__('common.approved'))
                 ->icon('heroicon-o-check-circle')
                 ->color('success')
                 ->requiresConfirmation()
@@ -36,7 +36,7 @@ class EditProformaInvoice extends EditRecord
                 }),
 
             Actions\Action::make('reject')
-                ->label('Reject')
+                ->label(__('common.rejected'))
                 ->icon('heroicon-o-x-circle')
                 ->color('danger')
                 ->requiresConfirmation()
@@ -69,10 +69,10 @@ class EditProformaInvoice extends EditRecord
                 ->visible(fn ($record) => $record->deposit_required && !$record->deposit_received)
                 ->form([
                     \Filament\Forms\Components\TextInput::make('deposit_payment_method')
-                        ->label('Payment Method')
+                        ->label(__('fields.payment_method'))
                         ->required(),
                     \Filament\Forms\Components\TextInput::make('deposit_payment_reference')
-                        ->label('Payment Reference'),
+                        ->label(__('fields.payment_reference')),
                 ])
                 ->action(function ($record, array $data) {
                     $this->handleMarkDepositReceived($record, $data);

@@ -67,11 +67,11 @@ class ViewRecurringTransaction extends ViewRecord
                 Section::make('Recurrence Details')
                     ->schema([
                         Placeholder::make('name')
-                            ->label('Name')
+                            ->label(__('fields.name'))
                             ->content(fn ($record) => $record->name),
                         
                         Placeholder::make('type')
-                            ->label('Type')
+                            ->label(__('fields.type'))
                             ->content(fn ($record) => match($record->type) {
                                 'payable' => 'Payable',
                                 'receivable' => 'Receivable',
@@ -79,7 +79,7 @@ class ViewRecurringTransaction extends ViewRecord
                             }),
                         
                         Placeholder::make('amount')
-                            ->label('Amount')
+                            ->label(__('fields.amount'))
                             ->content(fn ($record) => money($record->amount, $record->currency->code)),
                         
                         Placeholder::make('frequency')
@@ -98,7 +98,7 @@ class ViewRecurringTransaction extends ViewRecord
                             ->content(fn ($record) => $record->next_due_date->format('Y-m-d')),
                         
                         Placeholder::make('is_active')
-                            ->label('Status')
+                            ->label(__('fields.status'))
                             ->content(fn ($record) => $record->is_active ? '✅ Active' : '❌ Inactive'),
                     ])
                     ->columns(2),

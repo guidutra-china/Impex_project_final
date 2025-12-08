@@ -16,7 +16,7 @@ class ViewProduct extends ViewRecord
     {
         return [
             EditAction::make()
-                ->label('Edit Product')
+                ->label(__('common.edit'))
                 ->icon('heroicon-o-pencil-square'),
         ];
     }

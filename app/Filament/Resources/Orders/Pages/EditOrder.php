@@ -40,7 +40,7 @@ class EditOrder extends EditRecord
                 ->color('warning')
                 ->form([
                     Select::make('financial_category_id')
-                        ->label('Expense Category')
+                        ->label(__('fields.category'))
                         ->options(
                             FinancialCategory::where('code', 'LIKE', 'RFQ-EXP-%')
                                 ->orWhere('code', 'RFQ-EXPENSES')
@@ -51,7 +51,7 @@ class EditOrder extends EditRecord
                         ->helperText('Select the type of expense for this RFQ'),
                     
                     Select::make('currency_id')
-                        ->label('Currency')
+                        ->label(__('fields.currency'))
                         ->relationship('currency', 'code')
                         ->default(fn() => $this->record->currency_id)
                         ->required()
@@ -89,7 +89,7 @@ class EditOrder extends EditRecord
                         ->helperText('Automatically loaded from Exchange Rates (editable)'),
                     
                     TextInput::make('amount')
-                        ->label('Amount')
+                        ->label(__('fields.amount'))
                         ->numeric()
                         ->required()
                         ->minValue(0.01)
@@ -97,28 +97,28 @@ class EditOrder extends EditRecord
                         ->helperText('Enter amount in the selected currency'),
                     
                     DatePicker::make('transaction_date')
-                        ->label('Transaction Date')
+                        ->label(__('fields.date'))
                         ->default(now())
                         ->required()
                         ->maxDate(now())
                         ->helperText('Date when the expense occurred'),
                     
                     DatePicker::make('due_date')
-                        ->label('Due Date')
+                        ->label(__('fields.due_date'))
                         ->default(now()->addDays(30))
                         ->required()
                         ->minDate(now())
                         ->helperText('Payment due date'),
                     
                     Textarea::make('description')
-                        ->label('Description')
+                        ->label(__('fields.description'))
                         ->required()
                         ->rows(3)
                         ->maxLength(500)
                         ->helperText('Describe the expense in detail'),
                     
                     Textarea::make('notes')
-                        ->label('Additional Notes')
+                        ->label(__('fields.notes'))
                         ->rows(2)
                         ->maxLength(500)
                         ->helperText('Optional additional information'),

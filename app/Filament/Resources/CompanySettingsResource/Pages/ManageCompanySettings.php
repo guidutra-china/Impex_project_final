@@ -87,7 +87,7 @@ class ManageCompanySettings extends Page implements HasForms
     {
         return [
             Action::make('save')
-                ->label('Save Settings')
+                ->label(__('common.save'))
                 ->action('save'),
         ];
     }

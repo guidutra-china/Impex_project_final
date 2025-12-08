@@ -245,5 +245,8 @@ return [
     'is_visible' => 'Is Visible',
     'is_featured' => 'Is Featured',
     'visibility' => 'Visibility',
-];
     'tags' => 'Tags',
+    'payment_method' => 'Payment Method',
+    'payment_reference' => 'Payment Reference',
+    'deleted_at' => 'Deleted At',
+];

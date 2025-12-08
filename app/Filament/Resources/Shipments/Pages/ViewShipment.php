@@ -30,15 +30,15 @@ class ViewShipment extends ViewRecord
                         Grid::make(4)
                             ->schema([
                                 Placeholder::make('shipment_number')
-                                    ->label('Shipment #')
+                                    ->label(__('fields.shipment_number'))
                                     ->content(fn ($record) => $record->shipment_number),
 
                                 Placeholder::make('shipment_type')
-                                    ->label('Type')
+                                    ->label(__('fields.type'))
                                     ->content(fn ($record) => ucfirst($record->shipment_type)),
 
                                 Placeholder::make('status')
-                                    ->label('Status')
+                                    ->label(__('fields.status'))
                                     ->content(fn ($record) => str_replace('_', ' ', ucwords($record->status, '_'))),
 
                                 Placeholder::make('packing_status')
@@ -57,15 +57,15 @@ class ViewShipment extends ViewRecord
                         Grid::make(3)
                             ->schema([
                                 Placeholder::make('shipping_method')
-                                    ->label('Shipping Method')
+                                    ->label(__('fields.shipping_method'))
                                     ->content(fn ($record) => $record->shipping_method ? ucfirst($record->shipping_method) : '-'),
 
                                 Placeholder::make('carrier')
-                                    ->label('Carrier')
+                                    ->label(__('fields.carrier'))
                                     ->content(fn ($record) => $record->carrier ?? '-'),
 
                                 Placeholder::make('tracking_number')
-                                    ->label('Tracking Number')
+                                    ->label(__('fields.tracking_number'))
                                     ->content(fn ($record) => $record->tracking_number ?? '-'),
                             ]),
 
@@ -87,11 +87,11 @@ class ViewShipment extends ViewRecord
                         Grid::make(2)
                             ->schema([
                                 Placeholder::make('origin_address')
-                                    ->label('Origin Address')
+                                    ->label(__('fields.origin_address'))
                                     ->content(fn ($record) => $record->origin_address ?? '-'),
 
                                 Placeholder::make('destination_address')
-                                    ->label('Destination Address')
+                                    ->label(__('fields.destination_address'))
                                     ->content(fn ($record) => $record->destination_address ?? '-'),
                             ]),
                     ])
@@ -102,7 +102,7 @@ class ViewShipment extends ViewRecord
                         Grid::make(3)
                             ->schema([
                                 Placeholder::make('shipment_date')
-                                    ->label('Shipment Date')
+                                    ->label(__('fields.shipment_date'))
                                     ->content(fn ($record) => $record->shipment_date ? $record->shipment_date->format('Y-m-d') : '-'),
 
                                 Placeholder::make('estimated_departure_date')
@@ -139,7 +139,7 @@ class ViewShipment extends ViewRecord
                                     ->content(fn ($record) => $record->total_items ?? 0),
 
                                 Placeholder::make('total_quantity')
-                                    ->label('Total Quantity')
+                                    ->label(__('fields.quantity'))
                                     ->content(fn ($record) => $record->total_quantity ?? 0),
 
                                 Placeholder::make('total_boxes')
@@ -147,14 +147,14 @@ class ViewShipment extends ViewRecord
                                     ->content(fn ($record) => $record->total_boxes ?? 0),
 
                                 Placeholder::make('total_weight')
-                                    ->label('Total Weight')
+                                    ->label(__('fields.weight'))
                                     ->content(fn ($record) => $record->total_weight ? number_format($record->total_weight, 2) . ' kg' : '0.00 kg'),
                             ]),
 
                         Grid::make(2)
                             ->schema([
                                 Placeholder::make('total_volume')
-                                    ->label('Total Volume')
+                                    ->label(__('fields.volume'))
                                     ->content(fn ($record) => $record->total_volume ? number_format($record->total_volume, 3) . ' m³' : '0.000 m³'),
 
                                 Placeholder::make('total_customs_value')
@@ -168,15 +168,15 @@ class ViewShipment extends ViewRecord
                         Grid::make(4)
                             ->schema([
                                 Placeholder::make('shipping_cost')
-                                    ->label('Shipping Cost')
+                                    ->label(__('fields.freight_cost'))
                                     ->content(fn ($record) => $record->shipping_cost ? '$' . number_format($record->shipping_cost, 2) : '$0.00'),
 
                                 Placeholder::make('insurance_cost')
-                                    ->label('Insurance Cost')
+                                    ->label(__('fields.insurance_cost'))
                                     ->content(fn ($record) => $record->insurance_cost ? '$' . number_format($record->insurance_cost, 2) : '$0.00'),
 
                                 Placeholder::make('currency.code')
-                                    ->label('Currency')
+                                    ->label(__('fields.currency'))
                                     ->content(fn ($record) => $record->currency?->code ?? '-'),
 
                                 Placeholder::make('incoterm')
@@ -185,14 +185,14 @@ class ViewShipment extends ViewRecord
                             ]),
 
                         Placeholder::make('payment_terms')
-                            ->label('Payment Terms')
+                            ->label(__('fields.payment_terms'))
                             ->content(fn ($record) => $record->payment_terms ?? '-'),
                     ]),
 
                 Section::make('Additional Information')
                     ->schema([
                         Placeholder::make('notes')
-                            ->label('Internal Notes')
+                            ->label(__('fields.notes'))
                             ->content(fn ($record) => $record->notes ?? '-')
                             ->columnSpanFull(),
 
@@ -224,15 +224,15 @@ class ViewShipment extends ViewRecord
                         Grid::make(3)
                             ->schema([
                                 Placeholder::make('created_at')
-                                    ->label('Created')
+                                    ->label(__('fields.created_at'))
                                     ->content(fn ($record) => $record->created_at->format('Y-m-d H:i:s')),
 
                                 Placeholder::make('updated_at')
-                                    ->label('Updated')
+                                    ->label(__('fields.updated_at'))
                                     ->content(fn ($record) => $record->updated_at->format('Y-m-d H:i:s')),
 
                                 Placeholder::make('deleted_at')
-                                    ->label('Deleted')
+                                    ->label(__('fields.deleted_at'))
                                     ->content(fn ($record) => $record->deleted_at ? $record->deleted_at->format('Y-m-d H:i:s') : '-')
                                     ->visible(fn ($record) => $record->deleted_at),
                             ]),

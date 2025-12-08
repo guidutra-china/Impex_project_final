@@ -14,7 +14,7 @@ class ListGeneratedDocuments extends ListRecords
     {
         return [
             Actions\Action::make('refresh')
-                ->label('Refresh')
+                ->label(__('common.refresh'))
                 ->icon('heroicon-o-arrow-path')
                 ->action(function () {
                     $this->dispatch('$refresh');

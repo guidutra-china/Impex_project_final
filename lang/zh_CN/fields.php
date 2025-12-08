@@ -245,5 +245,8 @@ return [
     'is_visible' => '是否可见',
     'is_featured' => '是否特色',
     'visibility' => '可见性',
-];
     'tags' => '标签',
+    'payment_method' => '支付方式',
+    'payment_reference' => '支付参考',
+    'deleted_at' => '删除时间',
+];
