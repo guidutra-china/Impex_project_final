@@ -18,12 +18,12 @@ return new class extends Migration
             $table->decimal('rate', 10, 2);
             $table->decimal('inverse_rate', 10, 2)->nullable();
             $table->date('date');
-            // TODO: `source` enum('api','manual','import') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'manual'
+            $table->string('source', 50)->default('manual');
             $table->string('source_name', 255)->nullable();
-            // TODO: `status` enum('pending','approved','rejected') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'approved'
+            $table->string('status', 50)->default('approved');
             $table->bigInteger('approved_by')->nullable();
             $table->timestamp('approved_at')->nullable();
-            $table->text('notes');
+            $table->text('notes')->nullable();
             $table->bigInteger('created_by')->nullable();
             $table->timestamp('deleted_at')->nullable();
             $table->timestamps();
