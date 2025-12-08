@@ -246,3 +246,4 @@ return [
     'is_featured' => 'Is Featured',
     'visibility' => 'Visibility',
 ];
+    'tags' => 'Tags',

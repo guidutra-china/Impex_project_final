@@ -246,3 +246,4 @@ return [
     'is_featured' => '是否特色',
     'visibility' => '可见性',
 ];
+    'tags' => '标签',
