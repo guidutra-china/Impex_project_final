@@ -27,6 +27,14 @@ use Illuminate\View\Middleware\ShareErrorsFromSession;
 
 class AdminPanelProvider extends PanelProvider
 {
+    public function boot(): void
+    {
+        // Set locale from authenticated user before Filament loads
+        if (auth()->check() && auth()->user()->locale) {
+            app()->setLocale(auth()->user()->locale);
+        }
+    }
+
     public function panel(Panel $panel): Panel
     {
         return $panel
