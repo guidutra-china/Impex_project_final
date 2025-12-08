@@ -14,7 +14,7 @@
 
 ## ✅ **Pré-requisitos**
 
-- ✅ Servidor com PHP 8.2+
+- ✅ Servidor com PHP 8.3+
 - ✅ MySQL/MariaDB configurado com UTF8MB4
 - ✅ Acesso SSH ao servidor
 - ✅ Git configurado
@@ -411,7 +411,7 @@ composer dump-autoload
 
 **Para Nginx + PHP-FPM:**
 ```bash
-sudo systemctl restart php8.2-fpm
+sudo systemctl restart php8.3-fpm
 sudo systemctl restart nginx
 ```
 
@@ -468,7 +468,7 @@ php artisan config:clear
 php artisan cache:clear
 php artisan view:clear
 composer dump-autoload
-sudo systemctl restart php8.2-fpm nginx
+sudo systemctl restart php8.3-fpm nginx
 ```
 
 ### **Problema 2: Traduções não aparecem (mostra a key)**
@@ -644,7 +644,7 @@ php artisan optimize:clear
 composer dump-autoload
 
 # 8. Reiniciar serviços
-sudo systemctl restart php8.2-fpm nginx
+sudo systemctl restart php8.3-fpm nginx
 # ou
 sudo systemctl restart apache2
 # ou
