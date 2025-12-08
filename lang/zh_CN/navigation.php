@@ -15,6 +15,9 @@ return [
     // Main Navigation Items
     'dashboard' => '仪表板',
     'calendar' => '日历',
+    'quote_comparison' => '报价比较',
+    'customize_dashboard' => '自定义仪表板',
+    'widget_selector' => '小部件选择器',
     
     // Sales & Quotations
     'rfqs' => '询价单',

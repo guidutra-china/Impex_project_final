@@ -16,7 +16,15 @@ class Dashboard extends BaseDashboard
 {
     protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-home';
 
-    protected static ?string $title = 'Dashboard';
+    public static function getNavigationLabel(): string
+    {
+        return __('navigation.dashboard');
+    }
+
+    public function getTitle(): string
+    {
+        return __('navigation.dashboard');
+    }
 
     protected string $view = 'filament.pages.dashboard';
 

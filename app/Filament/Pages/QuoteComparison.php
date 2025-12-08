@@ -19,13 +19,17 @@ class QuoteComparison extends Page
         return 'filament.pages.quote-comparison';
     }
 
-    protected static string | UnitEnum | null $navigationGroup = 'Sales & Quotations';
+    public static function getNavigationGroup(): ?string
+    {
+        return __('navigation.sales_quotations');
+    }
 
     protected static ?int $navigationSort = 50;
 
-    protected static ?string $navigationLabel = 'Quote Comparison';
-
-    protected static ?string $title = 'Quote Comparison';
+    public static function getNavigationLabel(): string
+    {
+        return __('navigation.quote_comparison');
+    }
 
     public ?int $orderId = null;
 
@@ -81,10 +85,10 @@ class QuoteComparison extends Page
     public function getTitle(): string|Htmlable
     {
         if ($this->order) {
-            return "Quote Comparison - Order #{$this->order->order_number}";
+            return __('navigation.quote_comparison') . " - Order #{$this->order->order_number}";
         }
 
-        return 'Quote Comparison';
+        return __('navigation.quote_comparison');
     }
 
     public function getHeading(): string|Htmlable

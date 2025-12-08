@@ -15,6 +15,9 @@ return [
     // Main Navigation Items
     'dashboard' => 'Dashboard',
     'calendar' => 'Calendar',
+    'quote_comparison' => 'Quote Comparison',
+    'customize_dashboard' => 'Customize Dashboard',
+    'widget_selector' => 'Widget Selector',
     
     // Sales & Quotations
     'rfqs' => 'RFQs',

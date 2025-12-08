@@ -22,11 +22,20 @@ class WidgetSelectorPage extends Page implements HasForms
 
     protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-squares-2x2';
     
-    protected static UnitEnum|string|null $navigationGroup = 'Dashboard';
+    public static function getNavigationGroup(): ?string
+    {
+        return __('navigation.dashboard');
+    }
     
-    protected static ?string $navigationLabel = 'Customize Dashboard';
+    public static function getNavigationLabel(): string
+    {
+        return __('navigation.customize_dashboard');
+    }
     
-    protected static ?string $title = 'Customize Dashboard';
+    public function getTitle(): string
+    {
+        return __('navigation.customize_dashboard');
+    }
     
     protected static bool $shouldRegisterNavigation = true;
     
