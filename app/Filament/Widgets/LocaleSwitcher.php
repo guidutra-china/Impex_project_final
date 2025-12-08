@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\App;
 
 class LocaleSwitcher extends Widget
 {
-    protected static string $view = 'filament.widgets.locale-switcher';
+    protected string $view = 'filament.widgets.locale-switcher';
     
     protected int | string | array $columnSpan = 'full';
     
