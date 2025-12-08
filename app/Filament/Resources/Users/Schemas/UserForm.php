@@ -43,7 +43,7 @@ class UserForm
                             ->columnSpan(1),
 
                         TextInput::make('email')
-                            ->label('Email Address')
+                            ->label(__('fields.email'))
                             ->email()
                             ->required()
                             ->unique(ignoreRecord: true)
@@ -52,7 +52,7 @@ class UserForm
                             ->columnSpan(1),
 
                         TextInput::make('phone')
-                            ->label('Phone Number')
+                            ->label(__('fields.phone'))
                             ->tel()
                             ->mask('(999) 999-9999')
                             ->placeholder('(123) 456-7890')
@@ -74,7 +74,7 @@ class UserForm
                     ->description('User status and administrative privileges')
                     ->schema([
                         Select::make('status')
-                            ->label('Account Status')
+                            ->label(__('fields.status'))
                             ->options([
                                 'active' => 'Active',
                                 'inactive' => 'Inactive',

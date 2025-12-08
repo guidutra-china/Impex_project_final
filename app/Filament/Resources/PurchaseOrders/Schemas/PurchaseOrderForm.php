@@ -66,7 +66,7 @@ class PurchaseOrderForm
                 Section::make()
                     ->schema([
                         TextEntry::make('created_at')
-                            ->label('Created')
+                            ->label(__('fields.created_at'))
                             ->state(fn (PurchaseOrder $record): ?string => $record->created_at?->diffForHumans()),
 
                         TextEntry::make('updated_at')
@@ -364,11 +364,11 @@ class PurchaseOrderForm
                 ->inline(false),
 
             DatePicker::make('expected_delivery_date')
-                ->label('Expected Delivery')
+                ->label(__('fields.delivery_date'))
                 ->native(false),
 
             DatePicker::make('actual_delivery_date')
-                ->label('Actual Delivery')
+                ->label(__('fields.delivery_date'))
                 ->native(false),
 
             Textarea::make('delivery_address')
@@ -406,7 +406,7 @@ class PurchaseOrderForm
     {
         return [
             TextInput::make('shipping_cost')
-                ->label('Shipping Cost')
+                ->label(__('fields.freight_cost'))
                 ->numeric()
                 ->default(0)
                 ->minValue(0)
@@ -491,7 +491,7 @@ class PurchaseOrderForm
     {
         return [
             Textarea::make('notes')
-                ->label('Internal Notes')
+                ->label(__('fields.notes'))
                 ->rows(3)
                 ->columnSpanFull(),
 

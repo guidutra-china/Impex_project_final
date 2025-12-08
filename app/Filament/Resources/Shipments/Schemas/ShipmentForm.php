@@ -213,7 +213,7 @@ class ShipmentForm
                     Grid::make(3)
                         ->schema([
                             TextInput::make('shipping_cost')
-                                ->label('Shipping Cost')
+                                ->label(__('fields.freight_cost'))
                                 ->numeric()
                                 ->prefix('$')
                                 ->default(0),
@@ -300,7 +300,7 @@ class ShipmentForm
     {
         return [
             Textarea::make('notes')
-                ->label('Internal Notes')
+                ->label(__('fields.notes'))
                 ->rows(3)
                 ->columnSpanFull(),
 

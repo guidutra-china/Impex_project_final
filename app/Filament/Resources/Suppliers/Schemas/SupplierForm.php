@@ -59,11 +59,11 @@ class SupplierForm
                             ->maxLength(255),
 
                         TextInput::make('state')
-                            ->label('State/Province')
+                            ->label(__('fields.state'))
                             ->maxLength(255),
 
                         TextInput::make('zip')
-                            ->label('ZIP/Postal Code')
+                            ->label(__('fields.zip'))
                             ->maxLength(255),
 
                         Select::make('country')
@@ -76,7 +76,7 @@ class SupplierForm
                 Section::make()
                     ->schema([
                         Select::make('tags')
-                            ->label('Tags')
+                            ->label(__('fields.tags'))
                             ->relationship('tags', 'name')
                             ->multiple()
                             ->preload()
@@ -99,7 +99,7 @@ class SupplierForm
                             ->state(fn (Supplier $record): ?string => $record->created_at?->diffForHumans()),
 
                         TextEntry::make('updated_at')
-                            ->label('Last modified at')
+                            ->label(__('fields.updated_at'))
                             ->state(fn (Supplier $record): ?string => $record->updated_at?->diffForHumans()),
                     ])
                     ->columnSpan(['lg' => 1])

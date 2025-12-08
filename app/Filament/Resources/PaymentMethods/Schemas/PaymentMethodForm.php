@@ -41,7 +41,7 @@ class PaymentMethodForm
                             ->searchable(),
 
                         Select::make('bank_account_id')
-                            ->label('Bank Account')
+                            ->label(__('fields.bank_name'))
                             ->relationship('bankAccount', 'account_name')
                             ->searchable()
                             ->preload()

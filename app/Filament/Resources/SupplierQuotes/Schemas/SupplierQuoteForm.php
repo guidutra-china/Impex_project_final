@@ -215,7 +215,7 @@ class SupplierQuoteForm
                             ->columnSpanFull(),
 
                         Textarea::make('notes')
-                            ->label('Internal Notes')
+                            ->label(__('fields.notes'))
                             ->helperText('Internal notes (not visible to supplier)')
                             ->rows(3)
                             ->columnSpanFull(),

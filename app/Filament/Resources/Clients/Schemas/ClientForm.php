@@ -69,11 +69,11 @@ class ClientForm
                             ->maxLength(255),
 
                         TextInput::make('state')
-                            ->label('State/Province')
+                            ->label(__('fields.state'))
                             ->maxLength(255),
 
                         TextInput::make('zip')
-                            ->label('ZIP/Postal Code')
+                            ->label(__('fields.zip'))
                             ->maxLength(255),
 
                         Select::make('country')
@@ -94,7 +94,7 @@ class ClientForm
                             ->state(fn (Client $record): ?string => $record->created_at?->diffForHumans()),
 
                         TextEntry::make('updated_at')
-                            ->label('Last modified at')
+                            ->label(__('fields.updated_at'))
                             ->state(fn (Client $record): ?string => $record->updated_at?->diffForHumans()),
                     ])
                     ->columnSpan(['lg' => 1])

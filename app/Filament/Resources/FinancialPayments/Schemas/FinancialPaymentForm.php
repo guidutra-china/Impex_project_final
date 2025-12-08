@@ -16,7 +16,7 @@ class FinancialPaymentForm
             Section::make('Payment Information')->schema([
                 Textarea::make('description')->label(__('fields.description'))->required()->maxLength(65535)->columnSpanFull(),
                 Select::make('type')->label(__('fields.type'))->required()->options(['debit' => 'Debit (Payment)', 'credit' => 'Credit (Receipt)'])->default('debit'),
-                Select::make('bank_account_id')->label('Bank Account')->relationship('bankAccount', 'account_name')->searchable()->preload()->required(),
+                Select::make('bank_account_id')->label(__('fields.bank_name'))->relationship('bankAccount', 'account_name')->searchable()->preload()->required(),
                 Select::make('payment_method_id')->label('Payment Method')->relationship('paymentMethod', 'name')->searchable()->preload()->required(),
                 DatePicker::make('payment_date')->label('Payment Date')->required()->default(now()),
             ])->columns(2),

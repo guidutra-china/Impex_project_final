@@ -54,20 +54,20 @@ class ProductInfolist
                             ->formatStateUsing(fn ($record) => $record->currency ? "{$record->currency->code} ({$record->currency->symbol})" : '-'),
 
                         TextEntry::make('price')
-                            ->label('Current Price')
+                            ->label(__('fields.price'))
                             ->money(fn ($record) => $record->currency?->code ?? 'USD', divideBy: 100)
                             ->default('-'),
 
                         TextEntry::make('brand')
-                            ->label('Family')
+                            ->label(__('fields.category'))
                             ->default('-'),
 
                         TextEntry::make('model_number')
-                            ->label('Model Number')
+                            ->label(__('fields.model'))
                             ->default('-'),
 
                         TextEntry::make('created_at')
-                            ->label('Created')
+                            ->label(__('fields.created_at'))
                             ->dateTime()
                             ->since(),
 
@@ -87,7 +87,7 @@ class ProductInfolist
                             ->default('-'),
 
                         TextEntry::make('supplier_code')
-                            ->label('Supplier Product Code')
+                            ->label(__('fields.supplier_code'))
                             ->copyable()
                             ->default('-'),
 
@@ -96,7 +96,7 @@ class ProductInfolist
                             ->default('-'),
 
                         TextEntry::make('customer_code')
-                            ->label('Customer Product Code')
+                            ->label(__('fields.customer_code'))
                             ->copyable()
                             ->default('-'),
 
@@ -314,7 +314,7 @@ class ProductInfolist
                             ->default('-'),
 
                         TextEntry::make('internal_notes')
-                            ->label('Internal Notes')
+                            ->label(__('fields.notes'))
                             ->columnSpan(2)
                             ->default('-'),
                     ])

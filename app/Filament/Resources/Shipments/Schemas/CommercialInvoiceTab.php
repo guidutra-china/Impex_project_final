@@ -149,7 +149,7 @@ class CommercialInvoiceTab
                             ->placeholder(fn () => CompanySetting::current()?->full_address ?? 'From Company Settings'),
                         
                         TextInput::make('commercialInvoice.exporter_tax_id')
-                            ->label('Tax ID / VAT Number')
+                            ->label(__('fields.tax_id'))
                             ->maxLength(100)
                             ->placeholder(fn () => CompanySetting::current()?->tax_id ?? 'From Company Settings'),
                         
@@ -177,7 +177,7 @@ class CommercialInvoiceTab
                             ->placeholder('From Customer'),
                         
                         TextInput::make('commercialInvoice.importer_tax_id')
-                            ->label('Tax ID / VAT Number')
+                            ->label(__('fields.tax_id'))
                             ->maxLength(100)
                             ->placeholder('From Customer'),
                         

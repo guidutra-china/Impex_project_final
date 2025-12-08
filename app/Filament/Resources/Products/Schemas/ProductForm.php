@@ -77,7 +77,7 @@ class ProductForm
                                     ->helperText('Select the currency for this product'),
 
                                 TextInput::make('price')
-                                    ->label('Current Price')
+                                    ->label(__('fields.price'))
                                     ->numeric()
                                     ->prefix(fn(Get $get) => \App\Models\Currency::find($get('currency_id'))?->symbol ?? '$')
                                     ->step(0.01)
@@ -96,11 +96,11 @@ class ProductForm
                                     ->live(),
 
                                 TextInput::make('brand')
-                                    ->label('Family')
+                                    ->label(__('fields.category'))
                                     ->maxLength(255),
 
                                 TextInput::make('model_number')
-                                    ->label('Model Number')
+                                    ->label(__('fields.model'))
                                     ->maxLength(255),
                             ]),
 
@@ -129,12 +129,12 @@ class ProductForm
                         ->columnSpan(2),
 
                         TextEntry::make('created_at')
-                            ->label('Created')
+                            ->label(__('fields.created_at'))
                             ->state(fn(?Product $record): ?string => $record?->created_at?->diffForHumans() ?? 'Just now')
                             ->visible(fn(?Product $record) => $record !== null),
 
                         TextEntry::make('updated_at')
-                            ->label('Last Modified')
+                            ->label(__('fields.updated_at'))
                             ->state(fn(?Product $record): ?string => $record?->updated_at?->diffForHumans() ?? 'Not modified')
                             ->visible(fn(?Product $record) => $record !== null),
 
@@ -152,7 +152,7 @@ class ProductForm
                             ->preload(),
 
                         TextInput::make('supplier_code')
-                            ->label('Supplier Product Code')
+                            ->label(__('fields.supplier_code'))
                             ->maxLength(255)
                             ->helperText('Supplier\'s reference code for this product'),
 
@@ -163,7 +163,7 @@ class ProductForm
                             ->preload(),
 
                         TextInput::make('customer_code')
-                            ->label('Customer Product Code')
+                            ->label(__('fields.customer_code'))
                             ->maxLength(255)
                             ->helperText('Customer\'s reference code for this product'),
 
@@ -474,7 +474,7 @@ class ProductForm
                             ->placeholder('Special packing instructions or requirements'),
 
                         Textarea::make('internal_notes')
-                            ->label('Internal Notes')
+                            ->label(__('fields.notes'))
                             ->rows(3)
                             ->placeholder('Internal notes (not visible to customers)'),
                     ])

@@ -58,7 +58,7 @@ class ProformaInvoiceForm
                                     ->columnSpan(1),
 
                                 DatePicker::make('issue_date')
-                                    ->label('Issue Date')
+                                    ->label(__('fields.invoice_date'))
                                     ->required()
                                     ->default(now())
                                     ->columnSpan(1),
@@ -238,7 +238,7 @@ class ProformaInvoiceForm
                                     ->columnSpan(1),
 
                                 Textarea::make('notes')
-                                    ->label('Internal Notes')
+                                    ->label(__('fields.notes'))
                                     ->helperText('Internal notes (not visible to customer)')
                                     ->rows(3)
                                     ->columnSpan(1),

@@ -31,7 +31,7 @@ class CompanySettingsForm
                         ->columnSpan(2),
 
                     Textarea::make('address')
-                        ->label('Street Address')
+                        ->label(__('fields.address'))
                         ->rows(2)
                         ->columnSpan(2),
 
@@ -40,11 +40,11 @@ class CompanySettingsForm
                         ->maxLength(255),
 
                     TextInput::make('state')
-                        ->label('State/Province')
+                        ->label(__('fields.state'))
                         ->maxLength(255),
 
                     TextInput::make('zip_code')
-                        ->label('ZIP/Postal Code')
+                        ->label(__('fields.zip'))
                         ->maxLength(20),
 
                     TextInput::make('country')
@@ -56,12 +56,12 @@ class CompanySettingsForm
             Section::make('Contact Information')
                 ->schema([
                     TextInput::make('phone')
-                        ->label('Phone Number')
+                        ->label(__('fields.phone'))
                         ->tel()
                         ->maxLength(255),
 
                     TextInput::make('email')
-                        ->label('Email Address')
+                        ->label(__('fields.email'))
                         ->email()
                         ->maxLength(255),
 
@@ -76,7 +76,7 @@ class CompanySettingsForm
             Section::make('Legal Information')
                 ->schema([
                     TextInput::make('tax_id')
-                        ->label('Tax ID / VAT Number')
+                        ->label(__('fields.tax_id'))
                         ->maxLength(255),
 
                     TextInput::make('registration_number')
@@ -101,7 +101,7 @@ class CompanySettingsForm
                         ->maxLength(255),
 
                     TextInput::make('bank_swift_code')
-                        ->label('SWIFT/BIC Code')
+                        ->label(__('fields.swift_code'))
                         ->maxLength(255),
                 ])
                 ->columns(2)

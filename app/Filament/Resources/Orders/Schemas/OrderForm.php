@@ -172,7 +172,7 @@ class OrderForm
                     ->columnSpan(1),
 
                 Textarea::make('notes')
-                    ->label('Internal Notes')
+                    ->label(__('fields.notes'))
                     ->helperText('Internal notes (not visible to customer)')
                     ->rows(3)
                     ->columnSpan(1),

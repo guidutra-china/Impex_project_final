@@ -28,11 +28,11 @@ class SupplierContactForm
                     ->required()
                     ->hidden(fn ($livewire) => $livewire instanceof RelationManager),
                 TextInput::make('email')
-                    ->label('Email Address')
+                    ->label(__('fields.email'))
                     ->email()
                     ->maxLength(255),
                 TextInput::make('phone')
-                    ->label('Phone Number')
+                    ->label(__('fields.phone'))
                     ->tel()
                     ->maxLength(20),
                 TextInput::make('wechat')
