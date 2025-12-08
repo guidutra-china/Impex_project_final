@@ -14,15 +14,15 @@ class FinancialPaymentForm
     {
         return $schema->components([
             Section::make('Payment Information')->schema([
-                Textarea::make('description')->label('Description')->required()->maxLength(65535)->columnSpanFull(),
-                Select::make('type')->label('Type')->required()->options(['debit' => 'Debit (Payment)', 'credit' => 'Credit (Receipt)'])->default('debit'),
+                Textarea::make('description')->label(__('fields.description'))->required()->maxLength(65535)->columnSpanFull(),
+                Select::make('type')->label(__('fields.type'))->required()->options(['debit' => 'Debit (Payment)', 'credit' => 'Credit (Receipt)'])->default('debit'),
                 Select::make('bank_account_id')->label('Bank Account')->relationship('bankAccount', 'account_name')->searchable()->preload()->required(),
                 Select::make('payment_method_id')->label('Payment Method')->relationship('paymentMethod', 'name')->searchable()->preload()->required(),
                 DatePicker::make('payment_date')->label('Payment Date')->required()->default(now()),
             ])->columns(2),
             Section::make('Values')->schema([
-                TextInput::make('amount')->label('Amount')->required()->numeric()->prefix(fn ($get) => Currency::find($get('currency_id'))?->symbol ?? '$'),
-                Select::make('currency_id')->label('Currency')->relationship('currency', 'code')->searchable()->preload()->required()->live()->afterStateUpdated(function ($state, callable $set) {
+                TextInput::make('amount')->label(__('fields.amount'))->required()->numeric()->prefix(fn ($get) => Currency::find($get('currency_id'))?->symbol ?? '$'),
+                Select::make('currency_id')->label(__('fields.currency'))->relationship('currency', 'code')->searchable()->preload()->required()->live()->afterStateUpdated(function ($state, callable $set) {
                     if (!$state) return;
                     $baseCurrency = Currency::where('is_base', true)->first();
                     if (!$baseCurrency) return;
@@ -30,7 +30,7 @@ class FinancialPaymentForm
                     $set('exchange_rate_to_base', $rate ?? 1.0);
                 }),
                 TextInput::make('fee')->label('Fee')->numeric()->default(0)->prefix(fn ($get) => Currency::find($get('currency_id'))?->symbol ?? '$'),
-                TextInput::make('exchange_rate_to_base')->label('Exchange Rate')->numeric()->disabled()->dehydrated(),
+                TextInput::make('exchange_rate_to_base')->label(__('fields.exchange_rate'))->numeric()->disabled()->dehydrated(),
             ])->columns(2),
         ]);
     }

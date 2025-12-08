@@ -32,7 +32,7 @@ class ProformaInvoiceForm
                                     ->columnSpan(1),
 
                                 TextInput::make('revision_number')
-                                    ->label('Revision')
+                                    ->label(__('fields.revision'))
                                     ->numeric()
                                     ->default(1)
                                     ->disabled()
@@ -45,7 +45,7 @@ class ProformaInvoiceForm
                                     ->required()
                                     ->searchable()
                                     ->preload()
-                                    ->label('Customer')
+                                    ->label(__('fields.customer'))
                                     ->columnSpan(1),
 
                                 Select::make('currency_id')
@@ -54,7 +54,7 @@ class ProformaInvoiceForm
                                     ->searchable()
                                     ->default(1)
                                     ->preload()
-                                    ->label('Currency')
+                                    ->label(__('fields.currency'))
                                     ->columnSpan(1),
 
                                 DatePicker::make('issue_date')
@@ -74,7 +74,7 @@ class ProformaInvoiceForm
                                     ->relationship('paymentTerm', 'name')
                                     ->searchable()
                                     ->preload()
-                                    ->label('Payment Terms')
+                                    ->label(__('fields.payment_terms'))
                                     ->columnSpan(1),
 
                                 Select::make('incoterm')
@@ -103,7 +103,7 @@ class ProformaInvoiceForm
                                     ->columnSpan(1),
 
                                 DatePicker::make('due_date')
-                                    ->label('Due Date')
+                                    ->label(__('fields.due_date'))
                                     ->afterOrEqual('issue_date')
                                     ->columnSpan(1),
 
@@ -121,7 +121,7 @@ class ProformaInvoiceForm
                                     ->columnSpan(1),
 
                                 TextInput::make('exchange_rate')
-                                    ->label('Exchange Rate')
+                                    ->label(__('fields.exchange_rate'))
                                     ->numeric()
                                     ->default(1.0)
                                     ->minValue(0.000001)
@@ -195,7 +195,7 @@ class ProformaInvoiceForm
                         Grid::make()
                             ->schema([
                                 Placeholder::make('subtotal_display')
-                                    ->label('Subtotal')
+                                    ->label(__('fields.subtotal'))
                                     ->content(fn ($record) => $record 
                                         ? ($record->currency?->code ?? 'USD') . ' ' . number_format($record->subtotal, 2)
                                         : '$0.00'
@@ -203,7 +203,7 @@ class ProformaInvoiceForm
                                     ->columnSpan(1),
 
                                 TextInput::make('tax')
-                                    ->label('Tax')
+                                    ->label(__('fields.tax'))
                                     ->numeric()
                                     ->prefix('$')
                                     ->default(0)
@@ -216,7 +216,7 @@ class ProformaInvoiceForm
                                     ->columnSpan(1),
 
                                 Placeholder::make('total_display')
-                                    ->label('Total')
+                                    ->label(__('fields.total'))
                                     ->content(fn ($record) => $record 
                                         ? ($record->currency?->code ?? 'USD') . ' ' . number_format($record->total, 2)
                                         : '$0.00'

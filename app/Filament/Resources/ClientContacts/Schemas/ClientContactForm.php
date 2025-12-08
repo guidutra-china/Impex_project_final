@@ -16,11 +16,11 @@ class ClientContactForm
         return $schema
             ->components([
                 TextInput::make('name')
-                    ->label('Contact Name')
+                    ->label(__('fields.contact_person'))
                     ->required()
                     ->maxLength(255),
                 Select::make('client_id')
-                    ->label('Client')
+                    ->label(__('fields.customer'))
                     ->searchable()
                     ->preload()
                     ->relationship('client', 'name')

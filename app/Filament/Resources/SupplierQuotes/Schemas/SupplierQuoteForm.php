@@ -189,7 +189,7 @@ class SupplierQuoteForm
                             ->columnSpan(1),
 
                         Select::make('payment_terms')
-                            ->label('Payment Terms')
+                            ->label(__('fields.payment_terms'))
                             ->options([
                                 'advance_100' => '100% Advance Payment',
                                 'advance_50_balance_50' => '50% Advance, 50% Before Shipment',

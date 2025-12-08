@@ -24,18 +24,18 @@ class ProductInfolist
                             ->columnSpan(2),
 
                         TextEntry::make('category.name')
-                            ->label('Category')
+                            ->label(__('fields.category'))
                             ->badge()
                             ->color(fn ($record) => $record->category?->color ?? 'gray')
                             ->icon(fn ($record) => $record->category?->icon),
 
                         TextEntry::make('name')
-                            ->label('Product Name')
+                            ->label(__('fields.product_name'))
                             ->weight('bold')
                             ->size('lg'),
 
                         TextEntry::make('sku')
-                            ->label('SKU')
+                            ->label(__('fields.product_code'))
                             ->badge()
                             ->color('gray')
                             ->copyable(),
@@ -50,7 +50,7 @@ class ProductInfolist
                             ->formatStateUsing(fn (string $state): string => ucfirst($state)),
 
                         TextEntry::make('currency.code')
-                            ->label('Currency')
+                            ->label(__('fields.currency'))
                             ->formatStateUsing(fn ($record) => $record->currency ? "{$record->currency->code} ({$record->currency->symbol})" : '-'),
 
                         TextEntry::make('price')
@@ -83,7 +83,7 @@ class ProductInfolist
                 Section::make('Supplier & Customer Information')
                     ->schema([
                         TextEntry::make('supplier.name')
-                            ->label('Supplier')
+                            ->label(__('fields.supplier'))
                             ->default('-'),
 
                         TextEntry::make('supplier_code')
@@ -92,7 +92,7 @@ class ProductInfolist
                             ->default('-'),
 
                         TextEntry::make('client.name')
-                            ->label('Customer')
+                            ->label(__('fields.customer'))
                             ->default('-'),
 
                         TextEntry::make('customer_code')
@@ -113,20 +113,20 @@ class ProductInfolist
                 Section::make('International Trade & Compliance')
                     ->schema([
                         TextEntry::make('hs_code')
-                            ->label('HS Code')
+                            ->label(__('fields.hs_code'))
                             ->copyable()
                             ->default('-'),
 
                         TextEntry::make('origin_country')
-                            ->label('Country of Origin')
+                            ->label(__('fields.country_of_origin'))
                             ->default('-'),
 
                         TextEntry::make('moq')
-                            ->label('MOQ')
+                            ->label(__('fields.moq'))
                             ->formatStateUsing(fn ($state, $record) => $state ? "{$state} {$record->moq_unit}" : '-'),
 
                         TextEntry::make('lead_time_days')
-                            ->label('Lead Time')
+                            ->label(__('fields.lead_time'))
                             ->suffix(' days')
                             ->default('-'),
 
@@ -143,27 +143,27 @@ class ProductInfolist
                 Section::make('Product Dimensions & Weight')
                     ->schema([
                         TextEntry::make('product_length')
-                            ->label('Length')
+                            ->label(__('fields.length'))
                             ->suffix(' cm')
                             ->default('-'),
 
                         TextEntry::make('product_width')
-                            ->label('Width')
+                            ->label(__('fields.width'))
                             ->suffix(' cm')
                             ->default('-'),
 
                         TextEntry::make('product_height')
-                            ->label('Height')
+                            ->label(__('fields.height'))
                             ->suffix(' cm')
                             ->default('-'),
 
                         TextEntry::make('net_weight')
-                            ->label('Net Weight')
+                            ->label(__('fields.net_weight'))
                             ->suffix(' kg')
                             ->default('-'),
 
                         TextEntry::make('gross_weight')
-                            ->label('Gross Weight')
+                            ->label(__('fields.gross_weight'))
                             ->suffix(' kg')
                             ->default('-'),
                     ])
@@ -179,22 +179,22 @@ class ProductInfolist
                             ->default('-'),
 
                         TextEntry::make('inner_box_length')
-                            ->label('Length')
+                            ->label(__('fields.length'))
                             ->suffix(' cm')
                             ->default('-'),
 
                         TextEntry::make('inner_box_width')
-                            ->label('Width')
+                            ->label(__('fields.width'))
                             ->suffix(' cm')
                             ->default('-'),
 
                         TextEntry::make('inner_box_height')
-                            ->label('Height')
+                            ->label(__('fields.height'))
                             ->suffix(' cm')
                             ->default('-'),
 
                         TextEntry::make('inner_box_weight')
-                            ->label('Weight')
+                            ->label(__('fields.weight'))
                             ->suffix(' kg')
                             ->default('-'),
                     ])
@@ -206,7 +206,7 @@ class ProductInfolist
                 Section::make('Master Carton Packing')
                     ->schema([
                         TextEntry::make('pcs_per_carton')
-                            ->label('Pieces per Carton')
+                            ->label(__('fields.pcs_per_carton'))
                             ->default('-'),
 
                         TextEntry::make('inner_boxes_per_carton')
@@ -214,27 +214,27 @@ class ProductInfolist
                             ->default('-'),
 
                         TextEntry::make('carton_length')
-                            ->label('Length')
+                            ->label(__('fields.length'))
                             ->suffix(' cm')
                             ->default('-'),
 
                         TextEntry::make('carton_width')
-                            ->label('Width')
+                            ->label(__('fields.width'))
                             ->suffix(' cm')
                             ->default('-'),
 
                         TextEntry::make('carton_height')
-                            ->label('Height')
+                            ->label(__('fields.height'))
                             ->suffix(' cm')
                             ->default('-'),
 
                         TextEntry::make('carton_weight')
-                            ->label('Weight')
+                            ->label(__('fields.weight'))
                             ->suffix(' kg')
                             ->default('-'),
 
                         TextEntry::make('carton_cbm')
-                            ->label('CBM')
+                            ->label(__('fields.cbm'))
                             ->suffix(' m³')
                             ->default('-'),
                     ])

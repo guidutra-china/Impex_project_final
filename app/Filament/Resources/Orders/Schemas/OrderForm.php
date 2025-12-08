@@ -41,7 +41,7 @@ class OrderForm
                                         TextInput::make('email')
                                             ->email(),
                                     ])
-                                    ->label('Customer')
+                                    ->label(__('fields.customer'))
                                     ->columnSpan(1),
 
                                 // Coluna 1 - Customer Nr. RFQ
@@ -180,7 +180,7 @@ class OrderForm
 
 
                         Placeholder::make('total_amount_display')
-                            ->label('Total Amount')
+                            ->label(__('fields.total'))
                             ->content(function ($record) {
                                 if (!$record || !$record->total_amount) {
                                     return 'Not calculated yet';

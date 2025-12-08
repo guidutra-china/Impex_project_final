@@ -46,26 +46,26 @@ class ClientForm
                             ->placeholder('Auto-generated'),
 
                         TextInput::make('name')
-                            ->label('Company Name')
+                            ->label(__('fields.company_name'))
                             ->required()
                             ->maxLength(255),
 
                         TextInput::make('phone')
-                            ->label('Phone')
+                            ->label(__('fields.phone'))
                             ->tel()
                             ->maxLength(255),
 
                         TextInput::make('website')
-                            ->label('Website')
+                            ->label(__('fields.website'))
                             ->url()
                             ->maxLength(255),
 
                         TextInput::make('address')
-                            ->label('Address')
+                            ->label(__('fields.address'))
                             ->maxLength(255),
 
                         TextInput::make('city')
-                            ->label('City')
+                            ->label(__('fields.city'))
                             ->maxLength(255),
 
                         TextInput::make('state')

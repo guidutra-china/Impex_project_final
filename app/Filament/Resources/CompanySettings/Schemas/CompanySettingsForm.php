@@ -15,7 +15,7 @@ class CompanySettingsForm
             Section::make('Basic Information')
                 ->schema([
                     TextInput::make('company_name')
-                        ->label('Company Name')
+                        ->label(__('fields.company_name'))
                         ->required()
                         ->maxLength(255)
                         ->columnSpan(2),
@@ -36,7 +36,7 @@ class CompanySettingsForm
                         ->columnSpan(2),
 
                     TextInput::make('city')
-                        ->label('City')
+                        ->label(__('fields.city'))
                         ->maxLength(255),
 
                     TextInput::make('state')
@@ -48,7 +48,7 @@ class CompanySettingsForm
                         ->maxLength(20),
 
                     TextInput::make('country')
-                        ->label('Country')
+                        ->label(__('fields.country'))
                         ->maxLength(255),
                 ])
                 ->columns(2),
@@ -66,7 +66,7 @@ class CompanySettingsForm
                         ->maxLength(255),
 
                     TextInput::make('website')
-                        ->label('Website')
+                        ->label(__('fields.website'))
                         ->url()
                         ->maxLength(255)
                         ->columnSpan(2),
@@ -89,11 +89,11 @@ class CompanySettingsForm
                 ->description('This information will be displayed on invoices for payment')
                 ->schema([
                     TextInput::make('bank_name')
-                        ->label('Bank Name')
+                        ->label(__('fields.bank_name'))
                         ->maxLength(255),
 
                     TextInput::make('bank_account_number')
-                        ->label('Account Number')
+                        ->label(__('fields.account_number'))
                         ->maxLength(255),
 
                     TextInput::make('bank_routing_number')

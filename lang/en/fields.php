@@ -1,7 +1,7 @@
 <?php
 
 return [
-    // Common fields
+    // === COMMON FIELDS ===
     'name' => 'Name',
     'email' => 'Email',
     'phone' => 'Phone',
@@ -16,8 +16,27 @@ return [
     'notes' => 'Notes',
     'created_at' => 'Created At',
     'updated_at' => 'Updated At',
+    'description' => 'Description',
+    'type' => 'Type',
+    'reference' => 'Reference',
+    'website' => 'Website',
+    'industry' => 'Industry',
+    'credit_limit' => 'Credit Limit',
+    'brand' => 'Brand',
+    'model' => 'Model',
+    'specification' => 'Specification',
+    'material' => 'Material',
+    'color' => 'Color',
+    'size' => 'Size',
+    'barcode' => 'Barcode',
+    'stock' => 'Stock',
+    'min_stock' => 'Min Stock',
+    'max_stock' => 'Max Stock',
+    'reorder_level' => 'Reorder Level',
+    'thickness' => 'Thickness',
     
-    // Customer fields
+    // === CUSTOMER/CLIENT FIELDS ===
+    'customer' => 'Customer',
     'customer_name' => 'Customer Name',
     'customer_code' => 'Customer Code',
     'company_name' => 'Company Name',
@@ -25,7 +44,8 @@ return [
     'contact_email' => 'Contact Email',
     'contact_phone' => 'Contact Phone',
     
-    // Product fields
+    // === PRODUCT FIELDS ===
+    'product' => 'Product',
     'product_name' => 'Product Name',
     'product_code' => 'Product Code',
     'supplier_code' => 'Supplier Code',
@@ -40,8 +60,10 @@ return [
     'pcs_per_carton' => 'Pcs per Carton',
     'cartons' => 'Cartons',
     'country_of_origin' => 'Country of Origin',
+    'category' => 'Category',
     
-    // Shipment fields
+    // === SHIPMENT FIELDS ===
+    'shipment' => 'Shipment',
     'shipment_number' => 'Shipment Number',
     'shipment_date' => 'Shipment Date',
     'origin_port' => 'Port of Loading',
@@ -56,24 +78,23 @@ return [
     'tracking_number' => 'Tracking Number',
     'origin_address' => 'Origin Address',
     'destination_address' => 'Destination Address',
+    'etd' => 'ETD',
+    'eta' => 'ETA',
+    'actual_departure' => 'Actual Departure',
+    'actual_arrival' => 'Actual Arrival',
+    'freight_cost' => 'Freight Cost',
+    'insurance_cost' => 'Insurance Cost',
+    'customs_value' => 'Customs Value',
     
-    // Invoice fields
-    'invoice_number' => 'Invoice Number',
-    'invoice_date' => 'Invoice Date',
-    'payment_terms' => 'Payment Terms',
-    'due_date' => 'Due Date',
-    'bank_name' => 'Bank Name',
-    'account_number' => 'Account Number',
-    'account_name' => 'Account Name',
-    'swift_code' => 'SWIFT Code',
-    'bank_address' => 'Bank Address',
+    // === SUPPLIER FIELDS ===
+    'supplier' => 'Supplier',
+    'supplier_name' => 'Supplier Name',
+    'lead_time' => 'Lead Time',
+    'moq' => 'MOQ',
+    'rating' => 'Rating',
+    'performance' => 'Performance',
     
-    // Packing List fields
-    'packing_list_number' => 'Packing List Number',
-    'packing_date' => 'Packing Date',
-    'qty_carton' => 'Qty/Carton',
-    
-    // Common measurement
+    // === MEASUREMENT FIELDS ===
     'quantity' => 'Quantity',
     'qty' => 'Qty',
     'unit' => 'Unit',
@@ -83,22 +104,145 @@ return [
     'width' => 'Width',
     'height' => 'Height',
     
-    // Financial
+    // === FINANCIAL FIELDS ===
     'price' => 'Price',
     'total' => 'Total',
     'subtotal' => 'Subtotal',
     'discount' => 'Discount',
+    'discount_percent' => 'Discount %',
+    'discount_amount' => 'Discount Amount',
     'tax' => 'Tax',
+    'tax_percent' => 'Tax %',
+    'tax_amount' => 'Tax Amount',
     'grand_total' => 'Grand Total',
     'currency' => 'Currency',
+    'amount' => 'Amount',
+    'balance' => 'Balance',
+    'paid_amount' => 'Paid Amount',
+    'exchange_rate' => 'Exchange Rate',
+    'payment_terms' => 'Payment Terms',
     
-    // Exporter/Importer
+    // === INVOICE FIELDS ===
+    'invoice' => 'Invoice',
+    'invoice_number' => 'Invoice Number',
+    'invoice_date' => 'Invoice Date',
+    'due_date' => 'Due Date',
+    'proforma_invoice' => 'Proforma Invoice',
+    'commercial_invoice' => 'Commercial Invoice',
+    'packing_list' => 'Packing List',
+    
+    // === BANK FIELDS ===
+    'bank' => 'Bank',
+    'bank_name' => 'Bank Name',
+    'account_number' => 'Account Number',
+    'account_name' => 'Account Name',
+    'swift_code' => 'SWIFT Code',
+    'iban' => 'IBAN',
+    'bank_address' => 'Bank Address',
+    'branch' => 'Branch',
+    'routing_number' => 'Routing Number',
+    
+    // === DATE FIELDS ===
+    'date' => 'Date',
+    'start_date' => 'Start Date',
+    'end_date' => 'End Date',
+    'order_date' => 'Order Date',
+    'delivery_date' => 'Delivery Date',
+    'expected_date' => 'Expected Date',
+    'confirmed_date' => 'Confirmed Date',
+    
+    // === ORDER FIELDS ===
+    'order' => 'Order',
+    'order_number' => 'Order Number',
+    'po_number' => 'PO Number',
+    'purchase_order' => 'Purchase Order',
+    'rfq' => 'RFQ',
+    'quote' => 'Quote',
+    'quote_number' => 'Quote Number',
+    'reference_number' => 'Reference Number',
+    
+    // === WAREHOUSE FIELDS ===
+    'warehouse' => 'Warehouse',
+    'location' => 'Location',
+    'bin' => 'Bin',
+    'rack' => 'Rack',
+    'shelf' => 'Shelf',
+    'zone' => 'Zone',
+    'aisle' => 'Aisle',
+    
+    // === USER FIELDS ===
+    'user' => 'User',
+    'username' => 'Username',
+    'password' => 'Password',
+    'role' => 'Role',
+    'permission' => 'Permission',
+    'permissions' => 'Permissions',
+    'department' => 'Department',
+    'position' => 'Position',
+    'title' => 'Title',
+    
+    // === QUALITY FIELDS ===
+    'quality' => 'Quality',
+    'inspection' => 'Inspection',
+    'inspection_date' => 'Inspection Date',
+    'inspector' => 'Inspector',
+    'defect' => 'Defect',
+    'defects' => 'Defects',
+    'passed' => 'Passed',
+    'failed' => 'Failed',
+    'result' => 'Result',
+    
+    // === DOCUMENT FIELDS ===
+    'document' => 'Document',
+    'document_type' => 'Document Type',
+    'file' => 'File',
+    'attachment' => 'Attachment',
+    'attachments' => 'Attachments',
+    'upload' => 'Upload',
+    'download' => 'Download',
+    
+    // === PACKING FIELDS ===
+    'packing_list_number' => 'Packing List Number',
+    'packing_date' => 'Packing Date',
+    'qty_carton' => 'Qty/Carton',
+    'packing_method' => 'Packing Method',
+    'box_type' => 'Box Type',
+    'packing_unit' => 'Packing Unit',
+    
+    // === EXPORTER/IMPORTER ===
+    'exporter' => 'Exporter',
     'exporter_name' => 'Exporter Name',
     'exporter_address' => 'Exporter Address',
     'exporter_tax_id' => 'Exporter Tax ID',
     'exporter_country' => 'Exporter Country',
+    'importer' => 'Importer',
     'importer_name' => 'Importer Name',
     'importer_address' => 'Importer Address',
     'importer_tax_id' => 'Importer Tax ID',
     'importer_country' => 'Importer Country',
+    
+    // === ADDITIONAL FIELDS ===
+    'priority' => 'Priority',
+    'urgency' => 'Urgency',
+    'source' => 'Source',
+    'destination' => 'Destination',
+    'origin' => 'Origin',
+    'target' => 'Target',
+    'goal' => 'Goal',
+    'objective' => 'Objective',
+    'milestone' => 'Milestone',
+    'phase' => 'Phase',
+    'stage' => 'Stage',
+    'step' => 'Step',
+    'version' => 'Version',
+    'revision' => 'Revision',
+    'sequence' => 'Sequence',
+    'sort_order' => 'Sort Order',
+    'display_order' => 'Display Order',
+    'is_active' => 'Is Active',
+    'is_default' => 'Is Default',
+    'is_primary' => 'Is Primary',
+    'is_visible' => 'Is Visible',
+    'is_featured' => 'Is Featured',
+    'visibility' => 'Visibility',
 ];

@@ -21,14 +21,14 @@ class PackingBoxTypeForm
                         Grid::make(2)
                             ->schema([
                                 TextInput::make('name')
-                                    ->label('Name')
+                                    ->label(__('fields.name'))
                                     ->required()
                                     ->maxLength(255)
                                     ->placeholder('e.g., Standard Carton Box')
                                     ->unique(ignoreRecord: true),
 
                                 TextInput::make('code')
-                                    ->label('Code')
+                                    ->label(__('fields.code'))
                                     ->required()
                                     ->maxLength(255)
                                     ->placeholder('e.g., STD-BOX-001')
@@ -37,7 +37,7 @@ class PackingBoxTypeForm
                             ]),
 
                         Select::make('category')
-                            ->label('Category')
+                            ->label(__('fields.category'))
                             ->options([
                                 'carton_box' => 'Carton Box',
                                 'pallet' => 'Pallet',
@@ -48,13 +48,13 @@ class PackingBoxTypeForm
                             ->helperText('Type of packing unit'),
 
                         Textarea::make('description')
-                            ->label('Description')
+                            ->label(__('fields.description'))
                             ->rows(3)
                             ->maxLength(65535)
                             ->placeholder('Additional details about this box type...'),
 
                         Toggle::make('is_active')
-                            ->label('Active')
+                            ->label(__('common.active'))
                             ->default(true)
                             ->helperText('Inactive types will not be available for selection'),
                     ]),
@@ -142,7 +142,7 @@ class PackingBoxTypeForm
                                     ->helperText('Cost per box'),
 
                                 Select::make('currency_id')
-                                    ->label('Currency')
+                                    ->label(__('fields.currency'))
                                     ->relationship('currency', 'code')
                                     ->searchable()
                                     ->preload()

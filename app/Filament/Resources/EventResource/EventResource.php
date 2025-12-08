@@ -70,13 +70,13 @@ class EventResource extends Resource
                 Section::make('Event Details')
                     ->schema([
                         TextInput::make('title')
-                            ->label('Title')
+                            ->label(__('fields.title'))
                             ->required()
                             ->maxLength(255)
                             ->columnSpanFull(),
 
                         Textarea::make('description')
-                            ->label('Description')
+                            ->label(__('fields.description'))
                             ->rows(3)
                             ->columnSpanFull(),
 
@@ -123,7 +123,7 @@ class EventResource extends Resource
                             ->columnSpan(1),
 
                         ColorPicker::make('color')
-                            ->label('Color')
+                            ->label(__('fields.color'))
                             ->columnSpan(1),
 
                         Toggle::make('is_completed')
@@ -143,18 +143,18 @@ class EventResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('title')
-                    ->label('Title')
+                    ->label(__('fields.title'))
                     ->searchable()
                     ->sortable()
                     ->weight('bold'),
 
                 Tables\Columns\TextColumn::make('user.name')
-                    ->label('User')
+                    ->label(__('fields.user'))
                     ->searchable()
                     ->sortable(),
 
                 Tables\Columns\TextColumn::make('event_type')
-                    ->label('Type')
+                    ->label(__('fields.type'))
                     ->badge()
                     ->formatStateUsing(fn (string $state): string => Event::getEventTypes()[$state] ?? $state)
                     ->color(fn (string $state): string => match ($state) {
@@ -184,7 +184,7 @@ class EventResource extends Resource
                     ->toggleable(),
 
                 Tables\Columns\IconColumn::make('is_completed')
-                    ->label('Completed')
+                    ->label(__('common.completed'))
                     ->boolean()
                     ->sortable(),
 
@@ -196,17 +196,17 @@ class EventResource extends Resource
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('event_type')
-                    ->label('Type')
+                    ->label(__('fields.type'))
                     ->options(Event::getEventTypes()),
 
                 Tables\Filters\TernaryFilter::make('is_completed')
-                    ->label('Completed')
+                    ->label(__('common.completed'))
                     ->placeholder('All events')
                     ->trueLabel('Only completed')
                     ->falseLabel('Only pending'),
 
                 Tables\Filters\TernaryFilter::make('is_automatic')
-                    ->label('Source')
+                    ->label(__('fields.source'))
                     ->placeholder('All events')
                     ->trueLabel('Only automatic')
                     ->falseLabel('Only manual'),

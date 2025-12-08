@@ -20,13 +20,13 @@ class FinancialTransactionForm
                 Section::make('Basic Information')
                     ->schema([
                         Textarea::make('description')
-                            ->label('Description')
+                            ->label(__('fields.description'))
                             ->required()
                             ->maxLength(65535)
                             ->columnSpanFull(),
 
                         Select::make('type')
-                            ->label('Type')
+                            ->label(__('fields.type'))
                             ->required()
                             ->options([
                                 'payable' => 'Payable',
@@ -36,7 +36,7 @@ class FinancialTransactionForm
                             ->live(),
 
                         Select::make('financial_category_id')
-                            ->label('Category')
+                            ->label(__('fields.category'))
                             ->relationship('category', 'name')
                             ->searchable()
                             ->preload()
@@ -47,13 +47,13 @@ class FinancialTransactionForm
                 Section::make('Values')
                     ->schema([
                         TextInput::make('amount')
-                            ->label('Amount')
+                            ->label(__('fields.amount'))
                             ->required()
                             ->numeric()
                             ->prefix(fn ($get) => Currency::find($get('currency_id'))?->symbol ?? '$'),
 
                         Select::make('currency_id')
-                            ->label('Currency')
+                            ->label(__('fields.currency'))
                             ->relationship('currency', 'code')
                             ->searchable()
                             ->preload()
@@ -75,7 +75,7 @@ class FinancialTransactionForm
                             }),
 
                         TextInput::make('exchange_rate_to_base')
-                            ->label('Exchange Rate')
+                            ->label(__('fields.exchange_rate'))
                             ->numeric()
                             ->disabled()
                             ->dehydrated(),
@@ -90,7 +90,7 @@ class FinancialTransactionForm
                             ->default(now()),
 
                         DatePicker::make('due_date')
-                            ->label('Due Date')
+                            ->label(__('fields.due_date'))
                             ->required()
                             ->default(now()->addDays(30)),
                     ])
@@ -99,14 +99,14 @@ class FinancialTransactionForm
                 Section::make('Relationships')
                     ->schema([
                         Select::make('supplier_id')
-                            ->label('Supplier')
+                            ->label(__('fields.supplier'))
                             ->relationship('supplier', 'name')
                             ->searchable()
                             ->preload()
                             ->visible(fn ($get) => $get('type') === 'payable'),
 
                         Select::make('client_id')
-                            ->label('Client')
+                            ->label(__('fields.customer'))
                             ->relationship('client', 'name')
                             ->searchable()
                             ->preload()

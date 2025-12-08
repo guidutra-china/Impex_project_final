@@ -18,13 +18,13 @@ class PaymentMethodForm
                 Section::make('Payment Method Information')
                     ->schema([
                         TextInput::make('name')
-                            ->label('Name')
+                            ->label(__('fields.name'))
                             ->required()
                             ->maxLength(255)
                             ->placeholder('e.g., PayPal Business, Bank Transfer USD'),
 
                         Select::make('type')
-                            ->label('Type')
+                            ->label(__('fields.type'))
                             ->required()
                             ->options([
                                 'bank_transfer' => 'Bank Transfer',
@@ -61,7 +61,7 @@ class PaymentMethodForm
                             ->default('immediate'),
 
                         Toggle::make('is_active')
-                            ->label('Active')
+                            ->label(__('common.active'))
                             ->default(true)
                             ->helperText('Inactive payment methods will not be available for selection'),
                     ])
@@ -106,7 +106,7 @@ class PaymentMethodForm
                 Section::make('Additional Information')
                     ->schema([
                         Textarea::make('notes')
-                            ->label('Notes')
+                            ->label(__('fields.notes'))
                             ->maxLength(65535)
                             ->rows(3)
                             ->placeholder('Any additional information about this payment method...')

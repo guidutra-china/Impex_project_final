@@ -48,20 +48,20 @@ class ShipmentForm
             Grid::make(3)
                 ->schema([
                     TextInput::make('shipment_number')
-                        ->label('Shipment Number')
+                        ->label(__('fields.shipment_number'))
                         ->disabled()
                         ->dehydrated(false)
                         ->placeholder('Auto-generated'),
 
                     Select::make('customer_id')
-                        ->label('Customer')
+                        ->label(__('fields.customer'))
                         ->relationship('customer', 'name')
                         ->searchable()
                         ->preload()
                         ->required(),
 
                     Select::make('shipment_type')
-                        ->label('Type')
+                        ->label(__('fields.type'))
                         ->options([
                             'outbound' => 'Outbound (Export)',
                             'inbound' => 'Inbound (Import)',
@@ -73,7 +73,7 @@ class ShipmentForm
             Grid::make(2)
                 ->schema([
                     Select::make('status')
-                        ->label('Status')
+                        ->label(__('fields.status'))
                         ->options([
                             'pending' => 'Pending',
                             'preparing' => 'Preparing',
@@ -90,7 +90,7 @@ class ShipmentForm
                         ->required(),
 
                     TextInput::make('reference_number')
-                        ->label('Reference Number')
+                        ->label(__('fields.reference_number'))
                         ->placeholder('Customer PO or reference'),
                 ]),
             
@@ -119,7 +119,7 @@ class ShipmentForm
             Grid::make(3)
                 ->schema([
                     Select::make('shipping_method')
-                        ->label('Shipping Method')
+                        ->label(__('fields.shipping_method'))
                         ->options([
                             'air' => 'Air Freight',
                             'sea' => 'Sea Freight',
@@ -130,11 +130,11 @@ class ShipmentForm
                         ->searchable(),
 
                     TextInput::make('carrier')
-                        ->label('Carrier')
+                        ->label(__('fields.carrier'))
                         ->placeholder('e.g., DHL, Maersk, FedEx'),
 
                     TextInput::make('tracking_number')
-                        ->label('Tracking Number'),
+                        ->label(__('fields.tracking_number')),
                 ]),
 
             Grid::make(2)
@@ -149,27 +149,27 @@ class ShipmentForm
             Grid::make(3)
                 ->schema([
                     TextInput::make('origin_port')
-                        ->label('Port of Loading')
+                        ->label(__('fields.origin_port'))
                         ->placeholder('e.g., Hong Kong, Shanghai, Shenzhen'),
 
                     TextInput::make('destination_port')
-                        ->label('Port of Discharge')
+                        ->label(__('fields.destination_port'))
                         ->placeholder('e.g., Santos, Los Angeles, Rotterdam'),
 
                     TextInput::make('final_destination')
-                        ->label('Final Destination')
+                        ->label(__('fields.final_destination'))
                         ->placeholder('e.g., São Paulo, New York, London'),
                 ]),
 
             Grid::make(2)
                 ->schema([
                     Textarea::make('origin_address')
-                        ->label('Origin Address')
+                        ->label(__('fields.origin_address'))
                         ->rows(3)
                         ->placeholder('Shipper address'),
 
                     Textarea::make('destination_address')
-                        ->label('Destination Address')
+                        ->label(__('fields.destination_address'))
                         ->rows(3)
                         ->placeholder('Consignee address'),
                 ]),
@@ -184,7 +184,7 @@ class ShipmentForm
                     Grid::make(3)
                         ->schema([
                             DatePicker::make('shipment_date')
-                                ->label('Shipment Date')
+                                ->label(__('fields.shipment_date'))
                                 ->default(now())
                                 ->required(),
 
@@ -219,13 +219,13 @@ class ShipmentForm
                                 ->default(0),
 
                             TextInput::make('insurance_cost')
-                                ->label('Insurance Cost')
+                                ->label(__('fields.insurance_cost'))
                                 ->numeric()
                                 ->prefix('$')
                                 ->default(0),
 
                             Select::make('currency_id')
-                                ->label('Currency')
+                                ->label(__('fields.currency'))
                                 ->relationship('currency', 'code')
                                 ->searchable()
                                 ->preload(),
@@ -239,7 +239,7 @@ class ShipmentForm
                                 ->helperText('International Commercial Terms'),
 
                             TextInput::make('payment_terms')
-                                ->label('Payment Terms')
+                                ->label(__('fields.payment_terms'))
                                 ->placeholder('e.g., Net 30, COD'),
                         ]),
                 ]),

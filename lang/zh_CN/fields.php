@@ -1,13 +1,13 @@
 <?php
 
 return [
-    // Common fields
+    // === COMMON FIELDS ===
     'name' => '名称',
-    'email' => '电子邮箱',
+    'email' => '电子邮件',
     'phone' => '电话',
     'address' => '地址',
     'city' => '城市',
-    'state' => '州/省',
+    'state' => '省/州',
     'country' => '国家',
     'zip' => '邮政编码',
     'tax_id' => '税号',
@@ -16,8 +16,27 @@ return [
     'notes' => '备注',
     'created_at' => '创建时间',
     'updated_at' => '更新时间',
+    'description' => '描述',
+    'type' => '类型',
+    'reference' => '参考',
+    'website' => '网站',
+    'industry' => '行业',
+    'credit_limit' => '信用额度',
+    'brand' => '品牌',
+    'model' => '型号',
+    'specification' => '规格',
+    'material' => '材料',
+    'color' => '颜色',
+    'size' => '尺寸',
+    'barcode' => '条形码',
+    'stock' => '库存',
+    'min_stock' => '最小库存',
+    'max_stock' => '最大库存',
+    'reorder_level' => '补货点',
+    'thickness' => '厚度',
     
-    // Customer fields
+    // === CUSTOMER/CLIENT FIELDS ===
+    'customer' => '客户',
     'customer_name' => '客户名称',
     'customer_code' => '客户代码',
     'company_name' => '公司名称',
@@ -25,7 +44,8 @@ return [
     'contact_email' => '联系邮箱',
     'contact_phone' => '联系电话',
     
-    // Product fields
+    // === PRODUCT FIELDS ===
+    'product' => '产品',
     'product_name' => '产品名称',
     'product_code' => '产品代码',
     'supplier_code' => '供应商代码',
@@ -40,40 +60,41 @@ return [
     'pcs_per_carton' => '每箱件数',
     'cartons' => '箱数',
     'country_of_origin' => '原产国',
+    'category' => '类别',
     
-    // Shipment fields
-    'shipment_number' => '货运单号',
-    'shipment_date' => '发货日期',
+    // === SHIPMENT FIELDS ===
+    'shipment' => '货运',
+    'shipment_number' => '货运编号',
+    'shipment_date' => '货运日期',
     'origin_port' => '装货港',
     'destination_port' => '卸货港',
     'final_destination' => '最终目的地',
     'bl_number' => '提单号',
     'container_numbers' => '集装箱号',
     'vessel_name' => '船名',
-    'voyage_number' => '航次号',
+    'voyage_number' => '航次',
     'shipping_method' => '运输方式',
     'carrier' => '承运人',
     'tracking_number' => '跟踪号',
-    'origin_address' => '发货地址',
-    'destination_address' => '收货地址',
+    'origin_address' => '起运地址',
+    'destination_address' => '目的地址',
+    'etd' => '预计离港',
+    'eta' => '预计到港',
+    'actual_departure' => '实际离港',
+    'actual_arrival' => '实际到港',
+    'freight_cost' => '运费',
+    'insurance_cost' => '保险费',
+    'customs_value' => '报关价值',
     
-    // Invoice fields
-    'invoice_number' => '发票号',
-    'invoice_date' => '发票日期',
-    'payment_terms' => '付款条款',
-    'due_date' => '到期日',
-    'bank_name' => '银行名称',
-    'account_number' => '账号',
-    'account_name' => '账户名',
-    'swift_code' => 'SWIFT代码',
-    'bank_address' => '银行地址',
+    // === SUPPLIER FIELDS ===
+    'supplier' => '供应商',
+    'supplier_name' => '供应商名称',
+    'lead_time' => '交货期',
+    'moq' => '最小订购量',
+    'rating' => '评级',
+    'performance' => '表现',
     
-    // Packing List fields
-    'packing_list_number' => '装箱单号',
-    'packing_date' => '装箱日期',
-    'qty_carton' => '每箱数量',
-    
-    // Common measurement
+    // === MEASUREMENT FIELDS ===
     'quantity' => '数量',
     'qty' => '数量',
     'unit' => '单位',
@@ -83,22 +104,145 @@ return [
     'width' => '宽度',
     'height' => '高度',
     
-    // Financial
+    // === FINANCIAL FIELDS ===
     'price' => '价格',
     'total' => '总计',
     'subtotal' => '小计',
     'discount' => '折扣',
+    'discount_percent' => '折扣百分比',
+    'discount_amount' => '折扣金额',
     'tax' => '税',
+    'tax_percent' => '税率',
+    'tax_amount' => '税额',
     'grand_total' => '总金额',
     'currency' => '货币',
+    'amount' => '金额',
+    'balance' => '余额',
+    'paid_amount' => '已付金额',
+    'exchange_rate' => '汇率',
+    'payment_terms' => '付款条款',
     
-    // Exporter/Importer
+    // === INVOICE FIELDS ===
+    'invoice' => '发票',
+    'invoice_number' => '发票号',
+    'invoice_date' => '发票日期',
+    'due_date' => '到期日',
+    'proforma_invoice' => '形式发票',
+    'commercial_invoice' => '商业发票',
+    'packing_list' => '装箱单',
+    
+    // === BANK FIELDS ===
+    'bank' => '银行',
+    'bank_name' => '银行名称',
+    'account_number' => '账号',
+    'account_name' => '账户名',
+    'swift_code' => 'SWIFT代码',
+    'iban' => 'IBAN',
+    'bank_address' => '银行地址',
+    'branch' => '分行',
+    'routing_number' => '路由号',
+    
+    // === DATE FIELDS ===
+    'date' => '日期',
+    'start_date' => '开始日期',
+    'end_date' => '结束日期',
+    'order_date' => '订单日期',
+    'delivery_date' => '交货日期',
+    'expected_date' => '预期日期',
+    'confirmed_date' => '确认日期',
+    
+    // === ORDER FIELDS ===
+    'order' => '订单',
+    'order_number' => '订单号',
+    'po_number' => '采购订单号',
+    'purchase_order' => '采购订单',
+    'rfq' => '询价',
+    'quote' => '报价',
+    'quote_number' => '报价号',
+    'reference_number' => '参考号',
+    
+    // === WAREHOUSE FIELDS ===
+    'warehouse' => '仓库',
+    'location' => '位置',
+    'bin' => '货位',
+    'rack' => '货架',
+    'shelf' => '货架层',
+    'zone' => '区域',
+    'aisle' => '通道',
+    
+    // === USER FIELDS ===
+    'user' => '用户',
+    'username' => '用户名',
+    'password' => '密码',
+    'role' => '角色',
+    'permission' => '权限',
+    'permissions' => '权限',
+    'department' => '部门',
+    'position' => '职位',
+    'title' => '职称',
+    
+    // === QUALITY FIELDS ===
+    'quality' => '质量',
+    'inspection' => '检验',
+    'inspection_date' => '检验日期',
+    'inspector' => '检验员',
+    'defect' => '缺陷',
+    'defects' => '缺陷',
+    'passed' => '通过',
+    'failed' => '失败',
+    'result' => '结果',
+    
+    // === DOCUMENT FIELDS ===
+    'document' => '文档',
+    'document_type' => '文档类型',
+    'file' => '文件',
+    'attachment' => '附件',
+    'attachments' => '附件',
+    'upload' => '上传',
+    'download' => '下载',
+    
+    // === PACKING FIELDS ===
+    'packing_list_number' => '装箱单号',
+    'packing_date' => '装箱日期',
+    'qty_carton' => '每箱数量',
+    'packing_method' => '包装方式',
+    'box_type' => '箱型',
+    'packing_unit' => '包装单位',
+    
+    // === EXPORTER/IMPORTER ===
+    'exporter' => '出口商',
     'exporter_name' => '出口商名称',
     'exporter_address' => '出口商地址',
     'exporter_tax_id' => '出口商税号',
     'exporter_country' => '出口国',
+    'importer' => '进口商',
     'importer_name' => '进口商名称',
     'importer_address' => '进口商地址',
     'importer_tax_id' => '进口商税号',
     'importer_country' => '进口国',
+    
+    // === ADDITIONAL FIELDS ===
+    'priority' => '优先级',
+    'urgency' => '紧急程度',
+    'source' => '来源',
+    'destination' => '目的地',
+    'origin' => '起源',
+    'target' => '目标',
+    'goal' => '目标',
+    'objective' => '目的',
+    'milestone' => '里程碑',
+    'phase' => '阶段',
+    'stage' => '阶段',
+    'step' => '步骤',
+    'version' => '版本',
+    'revision' => '修订',
+    'sequence' => '序列',
+    'sort_order' => '排序',
+    'display_order' => '显示顺序',
+    'is_active' => '是否启用',
+    'is_default' => '是否默认',
+    'is_primary' => '是否主要',
+    'is_visible' => '是否可见',
+    'is_featured' => '是否特色',
+    'visibility' => '可见性',
 ];

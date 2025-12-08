@@ -17,7 +17,7 @@ class FinancialCategoryForm
                 Section::make()
                     ->schema([
                         TextInput::make('name')
-                            ->label('Name')
+                            ->label(__('fields.name'))
                             ->required()
                             ->maxLength(255)
                             ->live(onBlur: true)
@@ -30,7 +30,7 @@ class FinancialCategoryForm
                             }),
 
                         TextInput::make('code')
-                            ->label('Code')
+                            ->label(__('fields.code'))
                             ->required()
                             ->maxLength(20)
                             ->unique(ignoreRecord: true)
@@ -38,7 +38,7 @@ class FinancialCategoryForm
                             ->placeholder('Auto-generated'),
 
                         Select::make('type')
-                            ->label('Type')
+                            ->label(__('fields.type'))
                             ->required()
                             ->options([
                                 'expense' => 'Expense',

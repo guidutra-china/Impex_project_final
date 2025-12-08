@@ -21,14 +21,14 @@ class ContainerTypeForm
                         Grid::make(2)
                             ->schema([
                                 TextInput::make('name')
-                                    ->label('Name')
+                                    ->label(__('fields.name'))
                                     ->required()
                                     ->maxLength(255)
                                     ->placeholder('e.g., 20ft Standard Container')
                                     ->unique(ignoreRecord: true),
 
                                 TextInput::make('code')
-                                    ->label('Code')
+                                    ->label(__('fields.code'))
                                     ->required()
                                     ->maxLength(255)
                                     ->placeholder('e.g., 20ft, 40ft, 40hc')
@@ -37,13 +37,13 @@ class ContainerTypeForm
                             ]),
 
                         Textarea::make('description')
-                            ->label('Description')
+                            ->label(__('fields.description'))
                             ->rows(3)
                             ->maxLength(65535)
                             ->placeholder('Additional details about this container type...'),
 
                         Toggle::make('is_active')
-                            ->label('Active')
+                            ->label(__('common.active'))
                             ->default(true)
                             ->helperText('Inactive types will not be available for selection'),
                     ]),
@@ -131,7 +131,7 @@ class ContainerTypeForm
                                     ->helperText('Base cost for this container type'),
 
                                 Select::make('currency_id')
-                                    ->label('Currency')
+                                    ->label(__('fields.currency'))
                                     ->relationship('currency', 'code')
                                     ->searchable()
                                     ->preload()

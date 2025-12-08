@@ -32,7 +32,7 @@ class CategoryForm
                     ->helperText('URL-friendly identifier (auto-generated from name)'),
 
                 Textarea::make('description')
-                    ->label('Description')
+                    ->label(__('fields.description'))
                     ->rows(3)
                     ->maxLength(500)
                     ->columnSpan(2),
@@ -61,14 +61,14 @@ class CategoryForm
                     ->helperText('Color for category badges'),
 
                 TextInput::make('sort_order')
-                    ->label('Sort Order')
+                    ->label(__('fields.sort_order'))
                     ->numeric()
                     ->default(0)
                     ->minValue(0)
                     ->helperText('Lower numbers appear first'),
 
                 Checkbox::make('is_active')
-                    ->label('Active')
+                    ->label(__('common.active'))
                     ->default(true)
                     ->helperText('Inactive categories won\'t appear in product selection'),
             ])

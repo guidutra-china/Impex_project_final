@@ -17,11 +17,11 @@ class SupplierContactForm
         return $schema
             ->components([
                 TextInput::make('name')
-                    ->label('Contact Name')
+                    ->label(__('fields.contact_person'))
                     ->required()
                     ->maxLength(255),
                 Select::make('supplier_id')
-                    ->label('Supplier')
+                    ->label(__('fields.supplier'))
                     ->searchable()
                     ->preload()
                     ->relationship('supplier' , 'name' )

@@ -30,7 +30,7 @@ class CommercialInvoiceTab
                             ->description('Order reference information')
                             ->schema([
                                 Placeholder::make('order_number')
-                                    ->label('Order Number')
+                                    ->label(__('fields.order_number'))
                                     ->content(fn ($record) => $record?->order?->order_number ?? 'N/A'),
                                 
                                 Placeholder::make('proforma_invoices')
@@ -66,7 +66,7 @@ class CommercialInvoiceTab
                 Section::make('Additional Information')
                     ->schema([
                         Textarea::make('commercialInvoice.notes')
-                            ->label('Notes')
+                            ->label(__('fields.notes'))
                             ->rows(3)
                             ->placeholder('Any additional notes or remarks'),
                         
@@ -139,12 +139,12 @@ class CommercialInvoiceTab
                     ->description('Information about the exporter (your company) - Leave empty to use Company Settings')
                     ->schema([
                         TextInput::make('commercialInvoice.exporter_name')
-                            ->label('Company Name')
+                            ->label(__('fields.company_name'))
                             ->maxLength(255)
                             ->placeholder(fn () => CompanySetting::current()?->company_name ?? 'From Company Settings'),
                         
                         Textarea::make('commercialInvoice.exporter_address')
-                            ->label('Address')
+                            ->label(__('fields.address'))
                             ->rows(3)
                             ->placeholder(fn () => CompanySetting::current()?->full_address ?? 'From Company Settings'),
                         
@@ -154,7 +154,7 @@ class CommercialInvoiceTab
                             ->placeholder(fn () => CompanySetting::current()?->tax_id ?? 'From Company Settings'),
                         
                         TextInput::make('commercialInvoice.exporter_country')
-                            ->label('Country')
+                            ->label(__('fields.country'))
                             ->maxLength(100)
                             ->placeholder(fn () => CompanySetting::current()?->country ?? 'From Company Settings'),
                     ])
@@ -167,12 +167,12 @@ class CommercialInvoiceTab
                     ->description('Information about the importer (customer) - Leave empty to use Customer data')
                     ->schema([
                         TextInput::make('commercialInvoice.importer_name')
-                            ->label('Company Name')
+                            ->label(__('fields.company_name'))
                             ->maxLength(255)
                             ->placeholder('From Customer'),
                         
                         Textarea::make('commercialInvoice.importer_address')
-                            ->label('Address')
+                            ->label(__('fields.address'))
                             ->rows(3)
                             ->placeholder('From Customer'),
                         
@@ -182,7 +182,7 @@ class CommercialInvoiceTab
                             ->placeholder('From Customer'),
                         
                         TextInput::make('commercialInvoice.importer_country')
-                            ->label('Country')
+                            ->label(__('fields.country'))
                             ->maxLength(100)
                             ->placeholder('From Customer'),
                     ])
@@ -195,22 +195,22 @@ class CommercialInvoiceTab
                     ->description('Bank details for payment - Leave empty to use Company Settings')
                     ->schema([
                         TextInput::make('commercialInvoice.bank_name')
-                            ->label('Bank Name')
+                            ->label(__('fields.bank_name'))
                             ->maxLength(255)
                             ->placeholder(fn () => CompanySetting::current()?->bank_name ?? 'From Company Settings'),
                         
                         TextInput::make('commercialInvoice.bank_account')
-                            ->label('Account Number')
+                            ->label(__('fields.account_number'))
                             ->maxLength(100)
                             ->placeholder(fn () => CompanySetting::current()?->bank_account_number ?? 'From Company Settings'),
                         
                         TextInput::make('commercialInvoice.bank_swift')
-                            ->label('SWIFT Code')
+                            ->label(__('fields.swift_code'))
                             ->maxLength(20)
                             ->placeholder(fn () => CompanySetting::current()?->bank_swift_code ?? 'From Company Settings'),
                         
                         Textarea::make('commercialInvoice.bank_address')
-                            ->label('Bank Address')
+                            ->label(__('fields.bank_address'))
                             ->rows(2)
                             ->placeholder('Bank address (optional)'),
                     ])

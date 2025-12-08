@@ -98,7 +98,7 @@ class UserForm
                     ->description('Password and authentication settings')
                     ->schema([
                         TextInput::make('password')
-                            ->label('Password')
+                            ->label(__('fields.password'))
                             ->password()
                             ->revealable()
                             ->dehydrateStateUsing(fn ($state) => filled($state) ? Hash::make($state) : null)

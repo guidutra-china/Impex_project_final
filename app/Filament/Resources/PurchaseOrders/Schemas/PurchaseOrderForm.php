@@ -78,7 +78,7 @@ class PurchaseOrderForm
                             ->state(fn (PurchaseOrder $record): ?string => $record->sent_at?->diffForHumans() ?? 'Not sent'),
 
                         TextEntry::make('confirmed_at')
-                            ->label('Confirmed')
+                            ->label(__('common.confirmed'))
                             ->state(fn (PurchaseOrder $record): ?string => $record->confirmed_at?->diffForHumans() ?? 'Not confirmed'),
                     ])
                     ->columnSpan(['lg' => 1])
@@ -94,14 +94,14 @@ class PurchaseOrderForm
     {
         return [
             TextInput::make('po_number')
-                ->label('PO Number')
+                ->label(__('fields.po_number'))
                 ->unique(ignoreRecord: true)
                 ->maxLength(50)
                 ->placeholder('Auto-generated (Format: PO-YY-NNNN)')
                 ->helperText('Leave empty to auto-generate'),
 
             TextInput::make('revision_number')
-                ->label('Revision')
+                ->label(__('fields.revision'))
                 ->numeric()
                 ->default(1)
                 ->required()
@@ -127,7 +127,7 @@ class PurchaseOrderForm
                 ->native(false),
 
             Select::make('order_id')
-                ->label('RFQ')
+                ->label(__('fields.rfq'))
                 ->relationship('order', 'order_number')
                 ->searchable()
                 ->preload()
@@ -181,7 +181,7 @@ class PurchaseOrderForm
                 }),
 
             Select::make('supplier_id')
-                ->label('Supplier')
+                ->label(__('fields.supplier'))
                 ->relationship('supplier', 'name')
                 ->searchable()
                 ->preload()
@@ -213,7 +213,7 @@ class PurchaseOrderForm
                 }),
 
             TextInput::make('exchange_rate')
-                ->label('Exchange Rate')
+                ->label(__('fields.exchange_rate'))
                 ->numeric()
                 ->required()
                 ->minValue(0.000001)
@@ -241,7 +241,7 @@ class PurchaseOrderForm
             ->relationship('items')
             ->schema([
                 Select::make('product_id')
-                    ->label('Product')
+                    ->label(__('fields.product'))
                     ->relationship('product', 'name')
                     ->searchable()
                     ->preload()
@@ -261,7 +261,7 @@ class PurchaseOrderForm
                     ->columnSpan(3),
                 
                 TextInput::make('quantity')
-                    ->label('Qty')
+                    ->label(__('fields.qty'))
                     ->numeric()
                     ->required()
                     ->minValue(0.01)
@@ -304,7 +304,7 @@ class PurchaseOrderForm
                     ->columnSpan(2),
                 
                 Textarea::make('notes')
-                    ->label('Notes')
+                    ->label(__('fields.notes'))
                     ->rows(1)
                     ->columnSpanFull(),
             ])
@@ -349,7 +349,7 @@ class PurchaseOrderForm
                 ->helperText('INCOTERMS 2020'),
 
             TextInput::make('incoterm_location')
-                ->label('Location')
+                ->label(__('fields.location'))
                 ->placeholder('e.g., Shanghai Port')
                 ->maxLength(255),
 
@@ -415,7 +415,7 @@ class PurchaseOrderForm
                 ->afterStateUpdated(fn (Get $get, Set $set) => self::updateTotals($get, $set)),
 
             TextInput::make('insurance_cost')
-                ->label('Insurance Cost')
+                ->label(__('fields.insurance_cost'))
                 ->numeric()
                 ->default(0)
                 ->minValue(0)
@@ -433,7 +433,7 @@ class PurchaseOrderForm
                 ->afterStateUpdated(fn (Get $get, Set $set) => self::updateTotals($get, $set)),
 
             TextInput::make('discount')
-                ->label('Discount')
+                ->label(__('fields.discount'))
                 ->numeric()
                 ->default(0)
                 ->minValue(0)
@@ -442,7 +442,7 @@ class PurchaseOrderForm
                 ->afterStateUpdated(fn (Get $get, Set $set) => self::updateTotals($get, $set)),
 
             TextInput::make('tax')
-                ->label('Tax')
+                ->label(__('fields.tax'))
                 ->numeric()
                 ->default(0)
                 ->minValue(0)
@@ -459,7 +459,7 @@ class PurchaseOrderForm
     {
         return [
             TextInput::make('subtotal')
-                ->label('Subtotal')
+                ->label(__('fields.subtotal'))
                 ->formatStateUsing(fn ($state) => $state ? number_format($state, 2, '.', ',') : '0.00')
                 ->prefix('$')
                 ->disabled()
@@ -467,7 +467,7 @@ class PurchaseOrderForm
                 ->default(0),
 
             TextInput::make('total')
-                ->label('Total')
+                ->label(__('fields.total'))
                 ->formatStateUsing(fn ($state) => $state ? number_format($state, 2, '.', ',') : '0.00')
                 ->prefix('$')
                 ->disabled()

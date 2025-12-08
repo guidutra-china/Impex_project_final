@@ -14,23 +14,23 @@ class RecurringTransactionForm
     {
         return $schema->components([
             Section::make('Basic Information')->schema([
-                TextInput::make('name')->label('Name')->required()->maxLength(255)->columnSpanFull(),
-                Textarea::make('description')->label('Description')->maxLength(65535)->columnSpanFull(),
-                Select::make('type')->label('Type')->required()->options(['payable' => 'Payable', 'receivable' => 'Receivable'])->default('payable')->live(),
-                Select::make('financial_category_id')->label('Category')->relationship('category', 'name')->searchable()->preload()->required(),
+                TextInput::make('name')->label(__('fields.name'))->required()->maxLength(255)->columnSpanFull(),
+                Textarea::make('description')->label(__('fields.description'))->maxLength(65535)->columnSpanFull(),
+                Select::make('type')->label(__('fields.type'))->required()->options(['payable' => 'Payable', 'receivable' => 'Receivable'])->default('payable')->live(),
+                Select::make('financial_category_id')->label(__('fields.category'))->relationship('category', 'name')->searchable()->preload()->required(),
             ])->columns(2),
             Section::make('Values')->schema([
-                TextInput::make('amount')->label('Amount')->required()->numeric()->prefix(fn ($get) => Currency::find($get('currency_id'))?->symbol ?? '$'),
-                Select::make('currency_id')->label('Currency')->relationship('currency', 'code')->searchable()->preload()->required(),
+                TextInput::make('amount')->label(__('fields.amount'))->required()->numeric()->prefix(fn ($get) => Currency::find($get('currency_id'))?->symbol ?? '$'),
+                Select::make('currency_id')->label(__('fields.currency'))->relationship('currency', 'code')->searchable()->preload()->required(),
             ])->columns(2),
             Section::make('Recurrence')->schema([
                 Select::make('frequency')->label('Frequency')->required()->options(['daily' => 'Daily', 'weekly' => 'Weekly', 'monthly' => 'Monthly', 'quarterly' => 'Quarterly', 'yearly' => 'Yearly'])->default('monthly')->live(),
                 TextInput::make('interval')->label('Interval')->numeric()->default(1)->minValue(1),
-                DatePicker::make('start_date')->label('Start Date')->required()->default(now()),
+                DatePicker::make('start_date')->label(__('fields.start_date'))->required()->default(now()),
                 DatePicker::make('next_due_date')->label('Next Due Date')->required()->default(now()),
             ])->columns(2),
             Section::make('Settings')->schema([
-                Toggle::make('is_active')->label('Active')->default(true),
+                Toggle::make('is_active')->label(__('common.active'))->default(true),
                 Toggle::make('auto_generate')->label('Auto Generate')->default(true),
             ])->columns(2),
         ]);

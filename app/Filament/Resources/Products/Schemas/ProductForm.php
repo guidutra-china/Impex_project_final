@@ -44,20 +44,20 @@ class ProductForm
                                     ->columnSpan(1),
 
                                 TextInput::make('name')
-                                    ->label('Product Name')
+                                    ->label(__('fields.product_name'))
                                     ->required()
                                     ->maxLength(255)
                                     ->columnSpan(1),
 
 
                                 TextInput::make('sku')
-                                    ->label('SKU')
+                                    ->label(__('fields.product_code'))
 //                            ->required()
 //                                    ->unique(ignoreRecord: true)
                                     ->maxLength(255),
 
                                 Select::make('status')
-                                    ->label('Status')
+                                    ->label(__('fields.status'))
                                     ->options([
                                         'active' => 'Active',
                                         'inactive' => 'Inactive',
@@ -66,7 +66,7 @@ class ProductForm
                                     ->required(),
 
                                 Select::make('currency_id')
-                                    ->label('Currency')
+                                    ->label(__('fields.currency'))
                                     ->relationship('currency', 'code', fn($query) => $query->where('is_active', true))
                                     ->searchable()
                                     ->default('USD')
@@ -146,7 +146,7 @@ class ProductForm
                 Section::make('Supplier & Customer Information')
                     ->schema([
                         Select::make('supplier_id')
-                            ->label('Supplier')
+                            ->label(__('fields.supplier'))
                             ->relationship('supplier', 'name')
                             ->searchable()
                             ->preload(),
@@ -157,7 +157,7 @@ class ProductForm
                             ->helperText('Supplier\'s reference code for this product'),
 
                         Select::make('client_id')
-                            ->label('Customer')
+                            ->label(__('fields.customer'))
                             ->relationship('client', 'name')
                             ->searchable()
                             ->preload(),
@@ -180,12 +180,12 @@ class ProductForm
                 Section::make('International Trade & Compliance')
                     ->schema([
                         TextInput::make('hs_code')
-                            ->label('HS Code')
+                            ->label(__('fields.hs_code'))
                             ->maxLength(255)
                             ->helperText('Harmonized System Code for customs'),
 
                         Select::make('origin_country')
-                            ->label('Country of Origin')
+                            ->label(__('fields.country_of_origin'))
                             ->searchable()
                             ->options(CountryTypeEnum::toArray()),
 
@@ -306,7 +306,7 @@ class ProductForm
                     ->description('Standard shipping unit for sea freight - used for packing lists and CBM calculations')
                     ->schema([
                         TextInput::make('pcs_per_carton')
-                            ->label('Pieces per Carton')
+                            ->label(__('fields.pcs_per_carton'))
                             ->numeric()
                             ->minValue(1)
                             ->live(onBlur: true)
