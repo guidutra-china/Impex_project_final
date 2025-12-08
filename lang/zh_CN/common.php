@@ -29,14 +29,26 @@ return [
     'print' => '打印',
     
     // Status
-    'active' => '激活',
-    'inactive' => '未激活',
+    'active' => '启用',
+    'inactive' => '停用',
+    'add' => '添加',
+    'add_item' => '添加项目',
     'pending' => '待处理',
     'approved' => '已批准',
     'rejected' => '已拒绝',
     'completed' => '已完成',
     'cancelled' => '已取消',
     'draft' => '草稿',
+    'published' => '已发布',
+    'archived' => '已归档',
+    'confirmed' => '已确认',
+    'processing' => '处理中',
+    'shipped' => '已发货',
+    'delivered' => '已送达',
+    'received' => '已收货',
+    'on_hold' => '暂停',
+    'in_transit' => '运输中',
+    'in_progress' => '进行中',
     
     // Common labels
     'total' => '总计',
@@ -56,6 +68,19 @@ return [
     'all' => '全部',
     'none' => '无',
     'other' => '其他',
+    
+    // Sections
+    'basic_information' => '基本信息',
+    'contact_information' => '联系信息',
+    'address_information' => '地址信息',
+    'financial_information' => '财务信息',
+    'shipping_information' => '运输信息',
+    'additional_information' => '附加信息',
+    'settings' => '设置',
+    'details' => '详情',
+    'general' => '常规',
+    'advanced' => '高级',
+    'options' => '选项',
     
     // Messages
     'loading' => '加载中...',
