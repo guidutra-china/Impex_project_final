@@ -24,14 +24,14 @@ class PurchaseOrdersTable
         return $table
             ->columns([
                 TextColumn::make('po_number')
-                    ->label('PO Number')
+                    ->label(__('fields.po_number'))
                     ->searchable()
                     ->sortable()
                     ->copyable()
                     ->weight('bold'),
                 
                 TextColumn::make('supplier.name')
-                    ->label('Supplier')
+                    ->label(__('fields.supplier'))
                     ->searchable()
                     ->sortable()
                     ->limit(30),
@@ -56,14 +56,14 @@ class PurchaseOrdersTable
                     ->sortable(),
                 
                 TextColumn::make('total')
-                    ->label('Total')
+                    ->label(__('fields.total'))
                     ->money(fn ($record) => $record->currency?->code ?? 'USD')
                     ->sortable()
                     ->alignEnd()
                     ->weight('bold'),
                 
                 TextColumn::make('currency.code')
-                    ->label('Currency')
+                    ->label(__('fields.currency'))
                     ->badge()
                     ->sortable(),
                 
@@ -110,7 +110,7 @@ class PurchaseOrdersTable
                     ->toggleable(isToggledHiddenByDefault: true),
                 
                 TextColumn::make('subtotal')
-                    ->label('Subtotal')
+                    ->label(__('fields.subtotal'))
                     ->money(fn ($record) => $record->currency?->code ?? 'USD')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -127,7 +127,7 @@ class PurchaseOrdersTable
                     ->toggleable(isToggledHiddenByDefault: true),
                 
                 TextColumn::make('paymentTerm.name')
-                    ->label('Payment Terms')
+                    ->label(__('fields.payment_terms'))
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 
@@ -150,13 +150,13 @@ class PurchaseOrdersTable
                     ->toggleable(isToggledHiddenByDefault: true),
                 
                 TextColumn::make('created_at')
-                    ->label('Created')
+                    ->label(__('fields.created_at'))
                     ->dateTime('M d, Y H:i')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 
                 TextColumn::make('updated_at')
-                    ->label('Updated')
+                    ->label(__('fields.updated_at'))
                     ->dateTime('M d, Y H:i')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -172,19 +172,19 @@ class PurchaseOrdersTable
                         'cancelled' => 'Cancelled',
                     ])
                     ->multiple()
-                    ->label('Status'),
+                    ->label(__('fields.status')),
                 
                 SelectFilter::make('supplier_id')
                     ->relationship('supplier', 'name')
                     ->searchable()
                     ->preload()
-                    ->label('Supplier'),
+                    ->label(__('fields.supplier')),
                 
                 SelectFilter::make('currency_id')
                     ->relationship('currency', 'code')
                     ->searchable()
                     ->preload()
-                    ->label('Currency'),
+                    ->label(__('fields.currency')),
                 
                 SelectFilter::make('incoterm')
                     ->options([

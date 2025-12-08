@@ -17,12 +17,12 @@ class PaymentMethodsTable
         return $table
             ->columns([
                 TextColumn::make('name')
-                    ->label('Name')
+                    ->label(__('fields.name'))
                     ->searchable()
                     ->sortable(),
 
                 TextColumn::make('type')
-                    ->label('Type')
+                    ->label(__('fields.type'))
                     ->badge()
                     ->formatStateUsing(fn (string $state): string => match($state) {
                         'bank_transfer' => 'Bank Transfer',
@@ -94,19 +94,19 @@ class PaymentMethodsTable
                     }),
 
                 IconColumn::make('is_active')
-                    ->label('Active')
+                    ->label(__('common.active'))
                     ->boolean()
                     ->sortable(),
 
                 TextColumn::make('created_at')
-                    ->label('Created')
+                    ->label(__('fields.created_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 SelectFilter::make('type')
-                    ->label('Type')
+                    ->label(__('fields.type'))
                     ->options([
                         'bank_transfer' => 'Bank Transfer',
                         'wire_transfer' => 'Wire Transfer',
@@ -121,7 +121,7 @@ class PaymentMethodsTable
                     ]),
 
                 SelectFilter::make('is_active')
-                    ->label('Status')
+                    ->label(__('fields.status'))
                     ->options([
                         true => 'Active',
                         false => 'Inactive',

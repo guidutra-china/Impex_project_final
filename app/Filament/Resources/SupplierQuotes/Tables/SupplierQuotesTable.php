@@ -45,10 +45,10 @@ class SupplierQuotesTable
                     ]),
 
                 TextColumn::make('currency.code')
-                    ->label('Currency'),
+                    ->label(__('fields.currency')),
 
                 TextColumn::make('total_price_after_commission')
-                    ->label('Total')
+                    ->label(__('fields.total'))
                     ->money(fn ($record) => $record->currency?->code ?? 'USD', divideBy: 100)
                     ->sortable(),
 
@@ -83,11 +83,11 @@ class SupplierQuotesTable
 
                 SelectFilter::make('order_id')
                     ->relationship('order', 'order_number')
-                    ->label('Order'),
+                    ->label(__('fields.order')),
 
                 SelectFilter::make('supplier_id')
                     ->relationship('supplier', 'name')
-                    ->label('Supplier'),
+                    ->label(__('fields.supplier')),
 
                 TernaryFilter::make('is_latest')
                     ->label('Latest Version Only'),

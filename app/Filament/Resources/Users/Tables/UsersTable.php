@@ -27,13 +27,13 @@ class UsersTable
                     ->size(40),
 
                 TextColumn::make('name')
-                    ->label('Name')
+                    ->label(__('fields.name'))
                     ->sortable()
                     ->searchable()
                     ->weight('medium'),
 
                 TextColumn::make('email')
-                    ->label('Email')
+                    ->label(__('fields.email'))
                     ->sortable()
                     ->searchable()
                     ->copyable()
@@ -41,14 +41,14 @@ class UsersTable
                     ->color('gray'),
 
                 TextColumn::make('phone')
-                    ->label('Phone')
+                    ->label(__('fields.phone'))
                     ->searchable()
                     ->icon('heroicon-o-phone')
                     ->placeholder('—')
                     ->toggleable(),
 
                 TextColumn::make('status')
-                    ->label('Status')
+                    ->label(__('fields.status'))
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
                         'active' => 'success',
@@ -99,13 +99,13 @@ class UsersTable
                     ->toggleable(),
 
                 TextColumn::make('created_at')
-                    ->label('Created')
+                    ->label(__('fields.created_at'))
                     ->dateTime('M d, Y')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
 
                 TextColumn::make('updated_at')
-                    ->label('Updated')
+                    ->label(__('fields.updated_at'))
                     ->dateTime('M d, Y')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),

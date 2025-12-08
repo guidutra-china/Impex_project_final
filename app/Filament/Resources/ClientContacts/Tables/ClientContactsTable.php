@@ -22,7 +22,7 @@ class ClientContactsTable
                     ->sortable()
                     ->searchable(),
                 TextColumn::make('phone')
-                    ->label('Phone')
+                    ->label(__('fields.phone'))
                     ->sortable()
                     ->searchable(),
                 TextColumn::make('wechat')

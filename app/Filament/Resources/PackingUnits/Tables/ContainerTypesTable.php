@@ -22,13 +22,13 @@ class ContainerTypesTable
         return $table
             ->columns([
                 TextColumn::make('name')
-                    ->label('Name')
+                    ->label(__('fields.name'))
                     ->searchable()
                     ->sortable()
                     ->weight('bold'),
 
                 TextColumn::make('code')
-                    ->label('Code')
+                    ->label(__('fields.code'))
                     ->searchable()
                     ->sortable()
                     ->badge()
@@ -75,19 +75,19 @@ class ContainerTypesTable
                     ->toggleable(isToggledHiddenByDefault: true),
 
                 IconColumn::make('is_active')
-                    ->label('Active')
+                    ->label(__('common.active'))
                     ->boolean()
                     ->sortable()
                     ->alignCenter(),
 
                 TextColumn::make('created_at')
-                    ->label('Created')
+                    ->label(__('fields.created_at'))
                     ->dateTime('Y-m-d H:i')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
 
                 TextColumn::make('updated_at')
-                    ->label('Updated')
+                    ->label(__('fields.updated_at'))
                     ->dateTime('Y-m-d H:i')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),

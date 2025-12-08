@@ -30,14 +30,14 @@ class ProductsTable
                     ->default('No Picture'),
 
                 TextColumn::make('name')
-                    ->label('Product Name')
+                    ->label(__('fields.product_name'))
                     ->searchable()
                     ->sortable()
                     ->limit(30)
                     ->weight('bold'),
 
                 TextColumn::make('sku')
-                    ->label('SKU')
+                    ->label(__('fields.code'))
                     ->searchable()
                     ->sortable()
                     ->copyable()
@@ -48,7 +48,7 @@ class ProductsTable
                     ->toggleable(isToggledHiddenByDefault: true), // Hidden by default
 
                 TextColumn::make('supplier_code')
-                    ->label('Supplier Code')
+                    ->label(__('fields.supplier_code'))
                     ->searchable()
                     ->sortable()
                     ->copyable()
@@ -57,7 +57,7 @@ class ProductsTable
                     ->default('-'),
 
                 TextColumn::make('customer_code')
-                    ->label('Customer Code')
+                    ->label(__('fields.customer_code'))
                     ->searchable()
                     ->sortable()
                     ->copyable()
@@ -81,13 +81,13 @@ class ProductsTable
                     ->default('-'),
 
                 TextColumn::make('price')
-                    ->label('Price')
+                    ->label(__('fields.price'))
                     ->sortable()
                     ->money(fn ($record) => $record->currency?->code ?? 'USD', divideBy: 100)
                     ->default('-'),
 
                 TextColumn::make('supplier.name')
-                    ->label('Supplier')
+                    ->label(__('fields.supplier'))
                     ->searchable()
                     ->sortable()
                     ->limit(20)
@@ -95,7 +95,7 @@ class ProductsTable
                     ->default('-'),
 
                 TextColumn::make('client.name')
-                    ->label('Customer')
+                    ->label(__('fields.customer'))
                     ->searchable()
                     ->sortable()
                     ->limit(10)
@@ -103,7 +103,7 @@ class ProductsTable
                     ->default('-'),
 
                 SelectColumn::make('status')
-                    ->label('Status')
+                    ->label(__('fields.status'))
                     ->options([
                         'active' => 'Active',
                         'inactive' => 'Inactive',
@@ -112,47 +112,47 @@ class ProductsTable
                     ->toggleable(isToggledHiddenByDefault: true),
 
                 TextColumn::make('moq')
-                    ->label('MOQ')
+                    ->label(__('fields.moq'))
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->formatStateUsing(fn ($state, $record) => $state ? "{$state} {$record->moq_unit}" : '-'),
 
 
                 TextColumn::make('lead_time_days')
-                    ->label('Lead Time')
+                    ->label(__('fields.lead_time'))
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->formatStateUsing(fn ($state) => $state ? "{$state} days" : '-'),
 
                 TextColumn::make('hs_code')
-                    ->label('HS Code')
+                    ->label(__('fields.hs_code'))
                     ->searchable()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->default('-'),
 
                 TextColumn::make('origin_country')
-                    ->label('Origin')
+                    ->label(__('fields.country_of_origin'))
                     ->searchable()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->default('-'),
 
                 TextColumn::make('model_number')
-                    ->label('Model')
+                    ->label(__('fields.model'))
                     ->searchable()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->default('-'),
 
                 TextColumn::make('net_weight')
-                    ->label('Net Weight')
+                    ->label(__('fields.net_weight'))
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->formatStateUsing(fn ($state) => $state ? "{$state} kg" : '-'),
 
                 TextColumn::make('gross_weight')
-                    ->label('Gross Weight')
+                    ->label(__('fields.gross_weight'))
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->formatStateUsing(fn ($state) => $state ? "{$state} kg" : '-'),
@@ -170,13 +170,13 @@ class ProductsTable
                     ->formatStateUsing(fn ($state) => $state ? "{$state} m³" : '-'),
 
                 TextColumn::make('created_at')
-                    ->label('Created')
+                    ->label(__('fields.created_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
 
                 TextColumn::make('updated_at')
-                    ->label('Updated')
+                    ->label(__('fields.updated_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -203,7 +203,7 @@ class ProductsTable
                     ->relationship('client', 'name')
                     ->searchable()
                     ->preload()
-                    ->label('Customer'),
+                    ->label(__('fields.customer')),
 
                 SelectFilter::make('origin_country')
                     ->label('Country of Origin')

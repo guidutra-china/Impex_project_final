@@ -45,17 +45,17 @@ class CategoriesTable
                     ->toggleable(),
 
                 IconColumn::make('is_active')
-                    ->label('Active')
+                    ->label(__('common.active'))
                     ->boolean()
                     ->sortable(),
 
                 TextColumn::make('sort_order')
-                    ->label('Order')
+                    ->label(__('fields.order'))
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
 
                 TextColumn::make('created_at')
-                    ->label('Created')
+                    ->label(__('fields.created_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),

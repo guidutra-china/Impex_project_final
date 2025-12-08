@@ -15,7 +15,7 @@ class FinancialPaymentsTable
             TextColumn::make('payment_date')->label('Data')->date('d/m/Y')->sortable(),
             TextColumn::make('amount')->label('Valor')->money(fn ($record) => $record->currency->code, divideBy: 100)->sortable(),
             TextColumn::make('bankAccount.name')->label('Conta Bancária')->searchable(),
-            BadgeColumn::make('status')->label('Status')->formatStateUsing(fn (string $state): string => match ($state) {'pending' => 'Pendente', 'completed' => 'Concluído', default => $state})->colors(['secondary' => 'pending', 'success' => 'completed']),
+            BadgeColumn::make('status')->label(__('fields.status'))->formatStateUsing(fn (string $state): string => match ($state) {'pending' => 'Pendente', 'completed' => 'Concluído', default => $state})->colors(['secondary' => 'pending', 'success' => 'completed']),
         ])->filters([
             SelectFilter::make('type')->label('Tipo')->options(['debit' => 'Saída', 'credit' => 'Entrada']),
         ])->actions([EditAction::make()])->defaultSort('payment_date', 'desc');

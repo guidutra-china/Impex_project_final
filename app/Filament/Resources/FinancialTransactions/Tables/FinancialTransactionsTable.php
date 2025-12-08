@@ -23,7 +23,7 @@ class FinancialTransactionsTable
                     ->copyable(),
 
                 BadgeColumn::make('type')
-                    ->label('Type')
+                    ->label(__('fields.type'))
                     ->formatStateUsing(fn (string $state): string => match ($state) {
                         'payable' => 'Payable',
                         'receivable' => 'Receivable',
@@ -35,22 +35,22 @@ class FinancialTransactionsTable
                     ]),
 
                 TextColumn::make('description')
-                    ->label('Description')
+                    ->label(__('fields.description'))
                     ->searchable()
                     ->limit(50),
 
                 TextColumn::make('amount')
-                    ->label('Amount')
+                    ->label(__('fields.amount'))
                     ->money(fn ($record) => $record->currency->code, divideBy: 100)
                     ->sortable(),
 
                 TextColumn::make('due_date')
-                    ->label('Due Date')
+                    ->label(__('fields.due_date'))
                     ->date('Y-m-d')
                     ->sortable(),
 
                 BadgeColumn::make('status')
-                    ->label('Status')
+                    ->label(__('fields.status'))
                     ->formatStateUsing(fn (string $state): string => match ($state) {
                         'pending' => 'Pending',
                         'partially_paid' => 'Partially Paid',
@@ -84,14 +84,14 @@ class FinancialTransactionsTable
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('type')
-                    ->label('Type')
+                    ->label(__('fields.type'))
                     ->options([
                         'payable' => 'Payable',
                         'receivable' => 'Receivable',
                     ]),
 
                 Tables\Filters\SelectFilter::make('status')
-                    ->label('Status')
+                    ->label(__('fields.status'))
                     ->options([
                         'pending' => 'Pending',
                         'paid' => 'Paid',

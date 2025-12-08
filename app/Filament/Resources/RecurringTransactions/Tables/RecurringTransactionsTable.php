@@ -18,12 +18,12 @@ class RecurringTransactionsTable
         return $table
             ->columns([
                 TextColumn::make('name')
-                    ->label('Name')
+                    ->label(__('fields.name'))
                     ->searchable()
                     ->sortable(),
 
                 BadgeColumn::make('type')
-                    ->label('Type')
+                    ->label(__('fields.type'))
                     ->formatStateUsing(fn (string $state): string => match ($state) {
                         'payable' => 'Payable',
                         'receivable' => 'Receivable',
@@ -35,7 +35,7 @@ class RecurringTransactionsTable
                     ]),
 
                 TextColumn::make('amount')
-                    ->label('Amount')
+                    ->label(__('fields.amount'))
                     ->money(fn ($record) => $record->currency->code, divideBy: 100)
                     ->sortable(),
 
@@ -56,19 +56,19 @@ class RecurringTransactionsTable
                     ->sortable(),
 
                 IconColumn::make('is_active')
-                    ->label('Active')
+                    ->label(__('common.active'))
                     ->boolean(),
             ])
             ->filters([
                 SelectFilter::make('type')
-                    ->label('Type')
+                    ->label(__('fields.type'))
                     ->options([
                         'payable' => 'Payable',
                         'receivable' => 'Receivable',
                     ]),
 
                 TernaryFilter::make('is_active')
-                    ->label('Active'),
+                    ->label(__('common.active')),
             ])
             ->actions([
                 ViewAction::make(),

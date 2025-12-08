@@ -66,7 +66,7 @@ class OrdersTable
                     ]),
 
                TextColumn::make('currency.code')
-                    ->label('Currency')
+                    ->label(__('fields.currency'))
                     ->sortable(),
 
                TextColumn::make('commission_percent')
@@ -75,7 +75,7 @@ class OrdersTable
                     ->sortable(),
 
                TextColumn::make('total_amount')
-                    ->label('Total')
+                    ->label(__('fields.total'))
                     ->money(fn ($record) => $record->currency?->code ?? 'USD', divideBy: 100)
                     ->sortable(),
 
@@ -94,20 +94,20 @@ class OrdersTable
                         'cancelled' => 'Cancelled',
                     ])
                     ->multiple()
-                    ->label('Status'),
+                    ->label(__('fields.status')),
 
                 SelectFilter::make('customer_id')
                     ->relationship('customer', 'name')
                     ->searchable()
                     ->preload()
                     ->multiple()
-                    ->label('Customer'),
+                    ->label(__('fields.customer')),
 
                 SelectFilter::make('currency_id')
                     ->relationship('currency', 'code')
                     ->searchable()
                     ->preload()
-                    ->label('Currency'),
+                    ->label(__('fields.currency')),
 
                 self::getDateRangeFilter('created_at', 'Created Date'),
                 

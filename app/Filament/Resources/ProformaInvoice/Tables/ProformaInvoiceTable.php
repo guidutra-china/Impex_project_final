@@ -33,7 +33,7 @@ class ProformaInvoiceTable
                     ->sortable(),
 
                 TextColumn::make('customer.name')
-                    ->label('Customer')
+                    ->label(__('fields.customer'))
                     ->searchable()
                     ->sortable(),
 
@@ -49,7 +49,7 @@ class ProformaInvoiceTable
                     ->color(fn ($record) => $record->isExpired() ? 'danger' : null),
 
                 TextColumn::make('total')
-                    ->label('Total')
+                    ->label(__('fields.total'))
                     ->money(fn ($record) => $record->currency?->code ?? 'USD')
                     ->sortable(),
 
@@ -79,7 +79,7 @@ class ProformaInvoiceTable
                     ->toggleable(),
 
                 TextColumn::make('approved_at')
-                    ->label('Approved')
+                    ->label(__('common.approved'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),

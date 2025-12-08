@@ -28,7 +28,7 @@ class ShipmentsTable
                     ->weight('bold'),
 
                 BadgeColumn::make('shipment_type')
-                    ->label('Type')
+                    ->label(__('fields.type'))
                     ->formatStateUsing(fn ($state) => match($state) {
                         'outbound' => 'Outbound',
                         'inbound' => 'Inbound',
@@ -40,7 +40,7 @@ class ShipmentsTable
                     ]),
 
                 SelectColumn::make('status')
-                    ->label('Status')
+                    ->label(__('fields.status'))
                     ->options([
                         'pending' => 'Pending',
                         'preparing' => 'Preparing',
@@ -57,7 +57,7 @@ class ShipmentsTable
                     ->sortable(),
 
                 TextColumn::make('shipping_method')
-                    ->label('Method')
+                    ->label(__('fields.shipping_method'))
                     ->formatStateUsing(fn ($state) => ucfirst($state))
                     ->badge()
                     ->colors([
@@ -69,13 +69,13 @@ class ShipmentsTable
                     ->sortable(),
 
                 TextColumn::make('carrier')
-                    ->label('Carrier')
+                    ->label(__('fields.carrier'))
                     ->searchable()
                     ->sortable()
                     ->toggleable(),
 
                 TextColumn::make('tracking_number')
-                    ->label('Tracking #')
+                    ->label(__('fields.tracking_number'))
                     ->searchable()
                     ->copyable()
                     ->toggleable(),
@@ -87,7 +87,7 @@ class ShipmentsTable
                     ->toggleable(),
 
                 TextColumn::make('total_quantity')
-                    ->label('Qty')
+                    ->label(__('fields.qty'))
                     ->alignCenter()
                     ->sortable()
                     ->toggleable(),
@@ -114,13 +114,13 @@ class ShipmentsTable
                     ->toggleable(),
 
                 TextColumn::make('total_weight')
-                    ->label('Weight (kg)')
+                    ->label(__('fields.weight'))
                     ->numeric(2)
                     ->sortable()
                     ->toggleable(),
 
                 TextColumn::make('total_volume')
-                    ->label('Volume (m³)')
+                    ->label(__('fields.volume'))
                     ->numeric(3)
                     ->sortable()
                     ->toggleable(),
@@ -149,7 +149,7 @@ class ShipmentsTable
                     ->toggleable(),
 
                 TextColumn::make('currency.code')
-                    ->label('Currency')
+                    ->label(__('fields.currency'))
                     ->searchable()
                     ->toggleable()
                     ->toggledHiddenByDefault(),
@@ -168,14 +168,14 @@ class ShipmentsTable
                     ->toggledHiddenByDefault(),
 
                 TextColumn::make('created_at')
-                    ->label('Created')
+                    ->label(__('fields.created_at'))
                     ->dateTime('Y-m-d H:i')
                     ->sortable()
                     ->toggleable()
                     ->toggledHiddenByDefault(),
 
                 TextColumn::make('updated_at')
-                    ->label('Updated')
+                    ->label(__('fields.updated_at'))
                     ->dateTime('Y-m-d H:i')
                     ->sortable()
                     ->toggleable()
@@ -190,14 +190,14 @@ class ShipmentsTable
             ])
             ->filters([
                 SelectFilter::make('shipment_type')
-                    ->label('Type')
+                    ->label(__('fields.type'))
                     ->options([
                         'outbound' => 'Outbound',
                         'inbound' => 'Inbound',
                     ]),
 
                 SelectFilter::make('status')
-                    ->label('Status')
+                    ->label(__('fields.status'))
                     ->options([
                         'pending' => 'Pending',
                         'preparing' => 'Preparing',

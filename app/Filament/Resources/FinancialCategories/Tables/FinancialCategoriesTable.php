@@ -20,12 +20,12 @@ class FinancialCategoriesTable
         return $table
             ->columns([
                 TextColumn::make('name')
-                    ->label('Name')
+                    ->label(__('fields.name'))
                     ->searchable()
                     ->sortable(),
 
                 BadgeColumn::make('type')
-                    ->label('Type')
+                    ->label(__('fields.type'))
                     ->formatStateUsing(fn (string $state): string => match ($state) {
                         'expense' => 'Expense',
                         'revenue' => 'Revenue',
@@ -55,7 +55,7 @@ class FinancialCategoriesTable
             ])
             ->filters([
                 SelectFilter::make('type')
-                    ->label('Type')
+                    ->label(__('fields.type'))
                     ->options([
                         'expense' => 'Expense',
                         'revenue' => 'Revenue',
