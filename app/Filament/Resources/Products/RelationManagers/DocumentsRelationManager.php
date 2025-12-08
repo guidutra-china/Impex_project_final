@@ -47,14 +47,14 @@ class DocumentsRelationManager extends RelationManager
             ->recordTitleAttribute('original_filename')
             ->columns([
                 TextColumn::make('original_filename')
-                    ->label('Filename')
+                    ->label(__('fields.file'))
                     ->searchable()
                     ->limit(40)
                     ->tooltip(fn ($record) => $record->original_filename)
                     ->icon('heroicon-o-document'),
 
                 TextColumn::make('mime_type')
-                    ->label('Type')
+                    ->label(__('fields.type'))
                     ->badge()
                     ->formatStateUsing(fn ($state) => strtoupper(str_replace('application/', '', $state ?? 'file'))),
 
@@ -64,15 +64,15 @@ class DocumentsRelationManager extends RelationManager
                     ->wrap(),
 
                 TextColumn::make('date_uploaded')
-                    ->label('Upload Date')
+                    ->label(__('fields.created_at'))
                     ->date()
                     ->sortable(),
 
                 TextColumn::make('file_size_formatted')
-                    ->label('Size'),
+                    ->label(__('fields.size')),
 
                 TextColumn::make('sort_order')
-                    ->label('Order')
+                    ->label(__('fields.sort_order'))
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
@@ -89,7 +89,7 @@ class DocumentsRelationManager extends RelationManager
             ])
             ->actions([
                 Action::make('download')
-                    ->label('Download')
+                    ->label(__('common.download'))
                     ->icon('heroicon-o-arrow-down-tray')
                     ->url(fn ($record) => Storage::disk('public')->url($record->file_path))
                     ->openUrlInNewTab(),
@@ -127,7 +127,7 @@ class DocumentsRelationManager extends RelationManager
                     ->default('document'),
 
                 FileUpload::make('file_path')
-                    ->label('Document')
+                    ->label(__('fields.document'))
                     ->disk('public')
                     ->directory('products/documents')
                     ->required()
@@ -143,20 +143,20 @@ class DocumentsRelationManager extends RelationManager
                     ]),
 
                 TextInput::make('original_filename')
-                    ->label('Filename')
+                    ->label(__('fields.file'))
                     ->maxLength(255),
 
                 Textarea::make('description')
-                    ->label('Description')
+                    ->label(__('fields.description'))
                     ->rows(3)
                     ->maxLength(500),
 
                 DatePicker::make('date_uploaded')
-                    ->label('Upload Date')
+                    ->label(__('fields.created_at'))
                     ->default(now()),
 
                 TextInput::make('sort_order')
-                    ->label('Sort Order')
+                    ->label(__('fields.sort_order'))
                     ->numeric()
                     ->default(0),
             ]);

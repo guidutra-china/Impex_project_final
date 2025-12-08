@@ -60,12 +60,12 @@ class FeaturesRelationManager extends RelationManager
                     ->color('gray'),
 
                 TextColumn::make('sort_order')
-                    ->label('Order')
+                    ->label(__('fields.sort_order'))
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
 
                 TextColumn::make('created_at')
-                    ->label('Created')
+                    ->label(__('fields.created_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -197,7 +197,7 @@ class FeaturesRelationManager extends RelationManager
                     ->helperText('Optional unit (leave empty if not applicable)'),
 
                 TextInput::make('sort_order')
-                    ->label('Sort Order')
+                    ->label(__('fields.sort_order'))
                     ->numeric()
                     ->default(0)
                     ->minValue(0)

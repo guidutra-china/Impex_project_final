@@ -140,7 +140,7 @@ Notification::make()
             ->recordTitleAttribute('product.name')
             ->columns([
                 TextColumn::make('product.code')
-                    ->label('Code')
+                    ->label(__('fields.code'))
                     ->searchable(),
 
                 TextColumn::make('product.name')
@@ -161,7 +161,7 @@ Notification::make()
                     ->alignCenter(),
 
                 TextColumn::make('commission_type')
-                    ->label('Type')
+                    ->label(__('fields.type'))
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
                         'embedded' => 'success',

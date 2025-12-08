@@ -53,7 +53,7 @@ class DocumentsRelationManager extends RelationManager
                     ->weight('bold'),
 
                 BadgeColumn::make('document_type')
-                    ->label('Type')
+                    ->label(__('fields.type'))
                     ->colors([
                         'primary' => 'contract',
                         'success' => 'certificate_of_origin',
@@ -86,7 +86,7 @@ class DocumentsRelationManager extends RelationManager
                     ]),
 
                 TextColumn::make('file_size_formatted')
-                    ->label('Size')
+                    ->label(__('fields.size'))
                     ->getStateUsing(fn ($record) => number_format($record->file_size / 1024, 2) . ' KB'),
             ])
             ->headerActions([
@@ -107,7 +107,7 @@ class DocumentsRelationManager extends RelationManager
             ])
             ->recordActions([
                 Action::make('download')
-                    ->label('Download')
+                    ->label(__('common.download'))
                     ->icon('heroicon-o-arrow-down-tray')
                     ->url(fn ($record) => Storage::disk('public')->url($record->file_path))
                     ->openUrlInNewTab(),
@@ -179,7 +179,7 @@ class DocumentsRelationManager extends RelationManager
                     ->default('other'),
 
                 Select::make('status')
-                    ->label('Status')
+                    ->label(__('fields.status'))
                     ->required()
                     ->options([
                         'draft' => 'Draft',
@@ -190,7 +190,7 @@ class DocumentsRelationManager extends RelationManager
                     ->default('valid'),
 
                 Textarea::make('description')
-                    ->label('Description')
+                    ->label(__('fields.description'))
                     ->maxLength(65535)
                     ->rows(3)
                     ->columnSpanFull(),

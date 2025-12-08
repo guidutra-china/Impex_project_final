@@ -73,7 +73,7 @@ class WhatIfScenariosRelationManager extends RelationManager
                     ->toggleable(isToggledHiddenByDefault: true),
 
                 TextColumn::make('created_at')
-                    ->label('Created')
+                    ->label(__('fields.created_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(),
@@ -92,7 +92,7 @@ class WhatIfScenariosRelationManager extends RelationManager
                             ->maxLength(255),
 
                         Textarea::make('description')
-                            ->label('Description')
+                            ->label(__('fields.description'))
                             ->rows(2)
                             ->placeholder('Describe what this scenario tests')
                             ->columnSpan(2),
@@ -222,7 +222,7 @@ class WhatIfScenariosRelationManager extends RelationManager
                     ->maxLength(255),
 
                 Textarea::make('description')
-                    ->label('Description')
+                    ->label(__('fields.description'))
                     ->rows(2),
             ]);
     }

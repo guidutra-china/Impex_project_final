@@ -117,7 +117,7 @@ class PackingBoxesRelationManager extends RelationManager
                 Section::make('Notes')
                     ->schema([
                         Textarea::make('notes')
-                            ->label('Notes')
+                            ->label(__('fields.notes'))
                             ->rows(3)
                             ->columnSpanFull(),
                     ])
@@ -142,7 +142,7 @@ class PackingBoxesRelationManager extends RelationManager
                     ->default('-'),
 
                 BadgeColumn::make('box_type')
-                    ->label('Type')
+                    ->label(__('fields.type'))
                     ->formatStateUsing(fn ($state) => str_replace('_', ' ', ucwords($state, '_')))
                     ->colors([
                         'primary' => 'carton',
@@ -152,7 +152,7 @@ class PackingBoxesRelationManager extends RelationManager
                     ]),
 
                 BadgeColumn::make('packing_status')
-                    ->label('Status')
+                    ->label(__('fields.status'))
                     ->formatStateUsing(fn ($state) => ucfirst($state))
                     ->colors([
                         'secondary' => 'empty',
@@ -168,7 +168,7 @@ class PackingBoxesRelationManager extends RelationManager
                     ->color('primary'),
 
                 TextColumn::make('total_quantity')
-                    ->label('Quantity')
+                    ->label(__('fields.quantity'))
                     ->alignCenter()
                     ->default(0)
                     ->badge()

@@ -30,37 +30,37 @@ class PackingBoxItemsRelationManager extends RelationManager
         return $table
             ->columns([
                 TextColumn::make('shipmentItem.product_sku')
-                    ->label('SKU')
+                    ->label(__('fields.code'))
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('shipmentItem.product_name')
-                    ->label('Product')
+                    ->label(__('fields.product'))
                     ->searchable()
                     ->sortable()
                     ->wrap(),
                 TextColumn::make('quantity')
-                    ->label('Quantity')
+                    ->label(__('fields.quantity'))
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('unit_weight')
-                    ->label('Unit Weight')
+                    ->label(__('fields.weight'))
                     ->numeric(decimalPlaces: 2)
                     ->suffix(' kg')
                     ->sortable(),
                 TextColumn::make('total_weight')
-                    ->label('Total Weight')
+                    ->label(__('fields.weight'))
                     ->state(fn ($record) => $record->quantity * $record->unit_weight)
                     ->numeric(decimalPlaces: 2)
                     ->suffix(' kg')
                     ->weight('bold')
                     ->color('success'),
                 TextColumn::make('unit_volume')
-                    ->label('Unit Volume')
+                    ->label(__('fields.volume'))
                     ->numeric(decimalPlaces: 4)
                     ->suffix(' m³')
                     ->sortable(),
                 TextColumn::make('total_volume')
-                    ->label('Total Volume')
+                    ->label(__('fields.volume'))
                     ->state(fn ($record) => $record->quantity * $record->unit_volume)
                     ->numeric(decimalPlaces: 4)
                     ->suffix(' m³')

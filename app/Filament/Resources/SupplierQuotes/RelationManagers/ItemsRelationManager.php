@@ -64,7 +64,7 @@ class ItemsRelationManager extends RelationManager
                     ->preload()
                     ->disabled()
                     ->dehydrated()
-                    ->label('Product')
+                    ->label(__('fields.product'))
                     ->columnSpan(1),
 
                 TextInput::make('quantity')
@@ -76,7 +76,7 @@ class ItemsRelationManager extends RelationManager
                     ->columnSpan(1),
 
                 TextInput::make('unit_price_before_commission')
-                    ->label('Unit Price')
+                    ->label(__('fields.unit_price'))
                     ->required()
                     ->numeric()
                     ->prefix('$')
@@ -117,22 +117,22 @@ class ItemsRelationManager extends RelationManager
         return $table
             ->columns([
                 TextColumn::make('orderItem.product.name')
-                    ->label('Product')
+                    ->label(__('fields.product'))
                     ->searchable()
                     ->sortable()
                     ->weight('bold'),
 
                 TextColumn::make('quantity')
-                    ->label('Qty')
+                    ->label(__('fields.qty'))
                     ->sortable(),
 
                 TextColumn::make('unit_price_before_dollars')
-                    ->label('Unit Price')
+                    ->label(__('fields.unit_price'))
                     ->money('USD')
                     ->sortable(),
 
                 TextColumn::make('total_price_before_dollars')
-                    ->label('Total Price')
+                    ->label(__('fields.total'))
                     ->money('USD')
                     ->sortable()
                     ->weight('bold'),
@@ -150,7 +150,7 @@ class ItemsRelationManager extends RelationManager
                     ->toggleable(),
 
                 TextColumn::make('supplier_notes')
-                    ->label('Notes')
+                    ->label(__('fields.notes'))
                     ->limit(50)
                     ->placeholder('—')
                     ->toggleable(isToggledHiddenByDefault: true),

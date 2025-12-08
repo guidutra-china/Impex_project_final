@@ -37,7 +37,7 @@ class BomItemsRelationManager extends RelationManager
             ->recordTitleAttribute('componentProduct.name')
             ->columns([
                 TextColumn::make('componentProduct.sku')
-                    ->label('SKU')
+                    ->label(__('fields.code'))
                     ->searchable()
                     ->sortable()
                     ->copyable()
@@ -59,7 +59,7 @@ class BomItemsRelationManager extends RelationManager
                     ->default('-'),
 
                 TextColumn::make('quantity')
-                    ->label('Qty')
+                    ->label(__('fields.qty'))
                     ->numeric(decimalPlaces: 2)
                     ->suffix(fn ($record) => ' ' . $record->unit_of_measure)
                     ->sortable(),
@@ -107,7 +107,7 @@ class BomItemsRelationManager extends RelationManager
                     ->toggleable(isToggledHiddenByDefault: true),
 
                 TextColumn::make('notes')
-                    ->label('Notes')
+                    ->label(__('fields.notes'))
                     ->limit(30)
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
@@ -320,14 +320,14 @@ class BomItemsRelationManager extends RelationManager
                     ->helperText('Check if this component is optional'),
 
                 TextInput::make('sort_order')
-                    ->label('Sort Order')
+                    ->label(__('fields.sort_order'))
                     ->numeric()
                     ->default(0)
                     ->minValue(0)
                     ->helperText('Display order (lower numbers first)'),
 
                 Textarea::make('notes')
-                    ->label('Notes')
+                    ->label(__('fields.notes'))
                     ->rows(3)
                     ->maxLength(1000)
                     ->placeholder('Additional notes or instructions')

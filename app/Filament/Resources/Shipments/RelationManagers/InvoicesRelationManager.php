@@ -34,7 +34,7 @@ class InvoicesRelationManager extends RelationManager
                     ->weight('bold'),
 
                 TextColumn::make('customer.name')
-                    ->label('Customer')
+                    ->label(__('fields.customer'))
                     ->searchable()
                     ->sortable(),
 
@@ -49,7 +49,7 @@ class InvoicesRelationManager extends RelationManager
                     ->sortable(),
 
                 BadgeColumn::make('status')
-                    ->label('Status')
+                    ->label(__('fields.status'))
                     ->formatStateUsing(fn ($state) => ucfirst(str_replace('_', ' ', $state)))
                     ->colors([
                         'warning' => 'draft',
@@ -61,7 +61,7 @@ class InvoicesRelationManager extends RelationManager
                     ]),
 
                 TextColumn::make('total_amount')
-                    ->label('Total')
+                    ->label(__('fields.total'))
                     ->money('USD', 100)
                     ->sortable(),
 

@@ -38,12 +38,12 @@ class AllocationsRelationManager extends RelationManager
                     ->weight('bold'),
 
                 TextColumn::make('transaction.description')
-                    ->label('Description')
+                    ->label(__('fields.description'))
                     ->searchable()
                     ->limit(40),
 
                 TextColumn::make('transaction.type')
-                    ->label('Type')
+                    ->label(__('fields.type'))
                     ->badge()
                     ->formatStateUsing(fn (string $state): string => match($state) {
                         'payable' => 'Payable',
@@ -76,13 +76,13 @@ class AllocationsRelationManager extends RelationManager
                     ->weight('medium'),
 
                 TextColumn::make('allocation_type')
-                    ->label('Type')
+                    ->label(__('fields.type'))
                     ->badge()
                     ->formatStateUsing(fn (string $state): string => ucfirst($state))
                     ->color(fn (string $state): string => $state === 'automatic' ? 'info' : 'gray'),
 
                 TextColumn::make('created_at')
-                    ->label('Created')
+                    ->label(__('fields.created_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -154,7 +154,7 @@ class AllocationsRelationManager extends RelationManager
                             ->required(),
 
                         Textarea::make('notes')
-                            ->label('Notes')
+                            ->label(__('fields.notes'))
                             ->maxLength(65535)
                             ->rows(3)
                             ->placeholder('Optional notes about this allocation...'),
@@ -178,7 +178,7 @@ class AllocationsRelationManager extends RelationManager
                             ->dehydrateStateUsing(fn ($state) => (int) ($state * 100)),
 
                         Textarea::make('notes')
-                            ->label('Notes')
+                            ->label(__('fields.notes'))
                             ->maxLength(65535)
                             ->rows(3),
                     ]),

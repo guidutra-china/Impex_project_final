@@ -211,7 +211,7 @@ class ItemsRelationManager extends RelationManager
 ,
 
                         TextInput::make('total')
-                            ->label('Total')
+                            ->label(__('fields.total'))
                             ->numeric()
                             ->disabled()
                             ->dehydrated()
@@ -239,26 +239,26 @@ class ItemsRelationManager extends RelationManager
             ->modifyQueryUsing(fn ($query) => $query->with(['supplierQuote.supplier', 'product']))
             ->columns([
                 TextColumn::make('product.code')
-                    ->label('Code')
+                    ->label(__('fields.code'))
                     ->searchable()
                     ->sortable(),
 
                 TextColumn::make('product.name')
-                    ->label('Product')
+                    ->label(__('fields.product'))
                     ->searchable()
                     ->sortable()
                     ->wrap()
                     ->weight(FontWeight::Medium),
 
                 TextColumn::make('supplierQuote.supplier.supplier_code')
-                    ->label('Supplier')
+                    ->label(__('fields.supplier'))
                     ->badge()
                     ->color('info')
                     ->default('N/A')
                     ->placeholder('N/A'),
 
                 TextInputColumn::make('quantity')
-                    ->label('Qty')
+                    ->label(__('fields.qty'))
                     ->type('number')
                     ->rules(['required', 'numeric', 'min:1'])
                     ->alignCenter()
@@ -280,7 +280,7 @@ class ItemsRelationManager extends RelationManager
                     ->color(fn ($state) => $state == 0 ? 'success' : 'info'),
 
                 TextColumn::make('shipment_status')
-                    ->label('Status')
+                    ->label(__('fields.status'))
                     ->badge()
                     ->getStateUsing(function ($record) {
                         $shipped = $record->quantity_shipped ?? 0;
@@ -297,7 +297,7 @@ class ItemsRelationManager extends RelationManager
                     ->formatStateUsing(fn (string $state): string => ucfirst($state)),
 
                 TextInputColumn::make('unit_price')
-                    ->label('Unit Price')
+                    ->label(__('fields.unit_price'))
                     ->type('number')
                     ->step(0.01)
                     ->rules(['required', 'numeric', 'min:0'])
@@ -310,7 +310,7 @@ class ItemsRelationManager extends RelationManager
                     ->toggleable(),
 
                 TextColumn::make('commission_type')
-                    ->label('Type')
+                    ->label(__('fields.type'))
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
                         'embedded' => 'success',
@@ -321,7 +321,7 @@ class ItemsRelationManager extends RelationManager
                     ->toggleable(),
 
                 TextColumn::make('total')
-                    ->label('Total')
+                    ->label(__('fields.total'))
                     ->money(fn () => $this->getOwnerRecord()->currency?->code ?? 'USD')
                     ->weight(FontWeight::Bold)
                     ->sortable(),

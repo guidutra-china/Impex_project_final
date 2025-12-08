@@ -54,7 +54,7 @@ class CategoryFeaturesRelationManager extends RelationManager
                     ->sortable(),
 
                 TextColumn::make('sort_order')
-                    ->label('Order')
+                    ->label(__('fields.sort_order'))
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
@@ -109,7 +109,7 @@ class CategoryFeaturesRelationManager extends RelationManager
                     ->helperText('If checked, this feature must be filled in for products'),
 
                 TextInput::make('sort_order')
-                    ->label('Sort Order')
+                    ->label(__('fields.sort_order'))
                     ->numeric()
                     ->default(0)
                     ->minValue(0)

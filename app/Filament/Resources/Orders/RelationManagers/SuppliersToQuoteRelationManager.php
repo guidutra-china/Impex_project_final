@@ -71,7 +71,7 @@ class SuppliersToQuoteRelationManager extends RelationManager
             })
             ->columns([
                 TextColumn::make('name')
-                    ->label('Supplier Name')
+                    ->label(__('fields.supplier_name'))
                     ->searchable()
                     ->sortable()
                     ->weight('bold'),
@@ -169,7 +169,7 @@ class SuppliersToQuoteRelationManager extends RelationManager
             ])
             ->actions([
                 Action::make('import_quote')
-                    ->label('Import')
+                    ->label(__('common.import'))
                     ->icon('heroicon-o-arrow-up-tray')
                     ->color('info')
                     ->form([

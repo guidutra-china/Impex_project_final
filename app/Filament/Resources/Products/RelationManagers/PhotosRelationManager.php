@@ -48,13 +48,13 @@ class PhotosRelationManager extends RelationManager
             ->recordTitleAttribute('original_filename')
             ->columns([
                 ImageColumn::make('file_path')
-                    ->label('Photo')
+                    ->label(__('fields.file'))
                     ->disk('public')
                     ->size(120)
                     ->square(),
 
                 TextColumn::make('original_filename')
-                    ->label('Filename')
+                    ->label(__('fields.file'))
                     ->searchable()
                     ->limit(30)
                     ->tooltip(fn ($record) => $record->original_filename),
@@ -65,15 +65,15 @@ class PhotosRelationManager extends RelationManager
                     ->wrap(),
 
                 TextColumn::make('date_uploaded')
-                    ->label('Upload Date')
+                    ->label(__('fields.created_at'))
                     ->date()
                     ->sortable(),
 
                 TextColumn::make('file_size_formatted')
-                    ->label('Size'),
+                    ->label(__('fields.size')),
 
                 TextColumn::make('sort_order')
-                    ->label('Order')
+                    ->label(__('fields.sort_order'))
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
@@ -90,7 +90,7 @@ class PhotosRelationManager extends RelationManager
             ])
             ->actions([
                 Action::make('download')
-                    ->label('Download')
+                    ->label(__('common.download'))
                     ->icon('heroicon-o-arrow-down-tray')
                     ->url(fn ($record) => Storage::disk('public')->url($record->file_path))
                     ->openUrlInNewTab(),
@@ -128,7 +128,7 @@ class PhotosRelationManager extends RelationManager
                     ->default('photo'),
 
                 FileUpload::make('file_path')
-                    ->label('Photo')
+                    ->label(__('fields.file'))
                     ->image()
                     ->disk('public')
                     ->directory('products/photos')
@@ -143,20 +143,20 @@ class PhotosRelationManager extends RelationManager
                     ]),
 
                 TextInput::make('original_filename')
-                    ->label('Filename')
+                    ->label(__('fields.file'))
                     ->maxLength(255),
 
                 Textarea::make('description')
-                    ->label('Description')
+                    ->label(__('fields.description'))
                     ->rows(3)
                     ->maxLength(500),
 
                 DatePicker::make('date_uploaded')
-                    ->label('Upload Date')
+                    ->label(__('fields.created_at'))
                     ->default(now()),
 
                 TextInput::make('sort_order')
-                    ->label('Sort Order')
+                    ->label(__('fields.sort_order'))
                     ->numeric()
                     ->default(0),
             ]);

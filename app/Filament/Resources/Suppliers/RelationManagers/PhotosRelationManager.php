@@ -39,7 +39,7 @@ class PhotosRelationManager extends RelationManager
             ->recordTitleAttribute('title')
             ->columns([
                 ImageColumn::make('file_path')
-                    ->label('Photo')
+                    ->label(__('fields.file'))
                     ->disk('public')
                     ->size(120)
                     ->square(),
@@ -56,16 +56,16 @@ class PhotosRelationManager extends RelationManager
                     ->wrap(),
 
                 TextColumn::make('issue_date')
-                    ->label('Upload Date')
+                    ->label(__('fields.created_at'))
                     ->date()
                     ->sortable(),
 
                 TextColumn::make('file_size_formatted')
-                    ->label('Size')
+                    ->label(__('fields.size'))
                     ->getStateUsing(fn ($record) => number_format($record->file_size / 1024, 2) . ' KB'),
 
                 TextColumn::make('created_at')
-                    ->label('Created')
+                    ->label(__('fields.created_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -90,7 +90,7 @@ class PhotosRelationManager extends RelationManager
             ])
             ->recordActions([
                 Action::make('download')
-                    ->label('Download')
+                    ->label(__('common.download'))
                     ->icon('heroicon-o-arrow-down-tray')
                     ->url(fn ($record) => Storage::disk('public')->url($record->file_path))
                     ->openUrlInNewTab(),
@@ -124,7 +124,7 @@ class PhotosRelationManager extends RelationManager
         return $schema
             ->components([
                 FileUpload::make('file_path')
-                    ->label('Photo')
+                    ->label(__('fields.file'))
                     ->image()
                     ->disk('public')
                     ->directory('suppliers/photos')
@@ -163,7 +163,7 @@ class PhotosRelationManager extends RelationManager
                     ->columnSpanFull(),
 
                 DatePicker::make('issue_date')
-                    ->label('Upload Date')
+                    ->label(__('fields.created_at'))
                     ->required()
                     ->default(now())
                     ->native(false),

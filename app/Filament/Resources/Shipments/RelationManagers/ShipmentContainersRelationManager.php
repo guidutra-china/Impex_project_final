@@ -148,13 +148,13 @@ class ShipmentContainersRelationManager extends RelationManager
                     ->sortable(),
 
                 TextColumn::make('current_weight')
-                    ->label('Weight')
+                    ->label(__('fields.weight'))
                     ->formatStateUsing(fn($state, $record) => "{$state} / {$record->max_weight} kg")
                     ->sortable()
                     ->alignEnd(),
 
                 TextColumn::make('current_volume')
-                    ->label('Volume')
+                    ->label(__('fields.volume'))
                     ->formatStateUsing(fn($state, $record) => "{$state} / {$record->max_volume} m³")
                     ->sortable()
                     ->alignEnd(),
@@ -165,7 +165,7 @@ class ShipmentContainersRelationManager extends RelationManager
                     ->alignCenter(),
 
                 TextColumn::make('seal_number')
-                    ->label('Seal')
+                    ->label(__('fields.seal_number'))
                     ->searchable()
                     ->toggleable(),
             ])

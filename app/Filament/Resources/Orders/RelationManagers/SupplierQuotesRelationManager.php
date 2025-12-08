@@ -103,7 +103,7 @@ class SupplierQuotesRelationManager extends RelationManager
                     ->wrap(),
 
                 TextColumn::make('currency.code')
-                    ->label('Currency'),
+                    ->label(__('fields.currency')),
 
                 BadgeColumn::make('status')
                     ->colors([
@@ -114,7 +114,7 @@ class SupplierQuotesRelationManager extends RelationManager
                     ]),
 
                 TextColumn::make('total_price_after_commission')
-                    ->label('Total')
+                    ->label(__('fields.total'))
                     ->money(fn ($record) => $record->currency?->code ?? 'USD', divideBy: 100),
 
                 TextColumn::make('locked_exchange_rate')
@@ -169,7 +169,7 @@ class SupplierQuotesRelationManager extends RelationManager
             ])
             ->actions([
                 Action::make('import_from_excel')
-                    ->label('Import')
+                    ->label(__('common.import'))
                     ->icon('heroicon-o-arrow-up-tray')
                     ->form([
                         FileUpload::make('file')
@@ -281,13 +281,13 @@ class SupplierQuotesRelationManager extends RelationManager
                     ->dehydrated(),
 
                 DatePicker::make('date')
-                    ->label('Date')
+                    ->label(__('fields.date'))
                     ->required()
                     ->disabled()
                     ->dehydrated(),
 
                 TextInput::make('rate')
-                    ->label('Exchange Rate')
+                    ->label(__('fields.exchange_rate'))
                     ->required()
                     ->numeric()
                     ->step(0.0001)

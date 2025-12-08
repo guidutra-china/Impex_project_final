@@ -44,7 +44,7 @@ class ShipmentsRelationManager extends RelationManager
                     ->sortable(),
 
                 TextColumn::make('customer.name')
-                    ->label('Customer')
+                    ->label(__('fields.customer'))
                     ->searchable()
                     ->sortable()
                     ->toggleable(),
@@ -100,7 +100,7 @@ class ShipmentsRelationManager extends RelationManager
                     ->toggleable(),
 
                 TextColumn::make('created_at')
-                    ->label('Created')
+                    ->label(__('fields.created_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -113,14 +113,14 @@ class ShipmentsRelationManager extends RelationManager
             ])
             ->recordActions([
                 Action::make('view')
-                    ->label('View')
+                    ->label(__('common.view'))
                     ->icon('heroicon-o-eye')
                     ->color('info')
                     ->url(fn ($record) => route('filament.admin.resources.shipments.view', ['record' => $record->id]))
                     ->openUrlInNewTab(),
 
                 Action::make('edit')
-                    ->label('Edit')
+                    ->label(__('common.edit'))
                     ->icon('heroicon-o-pencil-square')
                     ->color('warning')
                     ->url(fn ($record) => route('filament.admin.resources.shipments.edit', ['record' => $record->id]))

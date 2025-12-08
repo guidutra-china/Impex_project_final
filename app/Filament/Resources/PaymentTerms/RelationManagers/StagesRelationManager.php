@@ -54,7 +54,7 @@ class StagesRelationManager extends RelationManager
                 TextInput::make('sort_order')
                     ->numeric()
                     ->default(1)
-                    ->label('Order')
+                    ->label(__('fields.sort_order'))
                     ->helperText('Stage order (1, 2, 3...)')
                     ->columnSpan(1),
             ])->columns(3);
@@ -66,7 +66,7 @@ class StagesRelationManager extends RelationManager
             ->recordTitleAttribute('percentage')
             ->columns([
                 TextColumn::make('sort_order')
-                    ->label('Order')
+                    ->label(__('fields.sort_order'))
                     ->sortable(),
                 
                 TextColumn::make('percentage')

@@ -38,7 +38,7 @@ class ContainerItemsRelationManager extends RelationManager
                     ->schema([
                         // Show product info when editing
                         TextInput::make('product_info')
-                            ->label('Product')
+                            ->label(__('fields.product'))
                             ->default(fn ($record) => $record ? sprintf('%s - %s', $record->product->sku ?? 'N/A', $record->product->name ?? 'N/A') : null)
                             ->disabled()
                             ->dehydrated(false)
@@ -138,7 +138,7 @@ class ContainerItemsRelationManager extends RelationManager
                     ->description('Auto-calculated based on quantity')
                     ->schema([
                         TextInput::make('total_weight')
-                            ->label('Total Weight')
+                            ->label(__('fields.weight'))
                             ->numeric()
                             ->disabled()
                             ->dehydrated()  // ← SAVE even when disabled
@@ -146,7 +146,7 @@ class ContainerItemsRelationManager extends RelationManager
                             ->columnSpanFull(),
 
                         TextInput::make('total_volume')
-                            ->label('Total Volume')
+                            ->label(__('fields.volume'))
                             ->numeric()
                             ->disabled()
                             ->dehydrated()  // ← SAVE even when disabled
@@ -154,7 +154,7 @@ class ContainerItemsRelationManager extends RelationManager
                             ->columnSpanFull(),
 
                         TextInput::make('customs_value')
-                            ->label('Customs Value')
+                            ->label(__('fields.customs_value'))
                             ->numeric()
                             ->disabled()
                             ->dehydrated()  // ← SAVE even when disabled
@@ -205,30 +205,30 @@ class ContainerItemsRelationManager extends RelationManager
         return $table
             ->columns([
                 TextColumn::make('product.sku')
-                    ->label('SKU')
+                    ->label(__('fields.code'))
                     ->searchable()
                     ->sortable()
                     ->weight('bold'),
 
                 TextColumn::make('product.name')
-                    ->label('Product')
+                    ->label(__('fields.product'))
                     ->searchable()
                     ->limit(30),
 
                 TextColumn::make('quantity')
-                    ->label('Qty')
+                    ->label(__('fields.qty'))
                     ->numeric()
                     ->alignCenter()
                     ->weight('bold'),
 
                 TextColumn::make('total_weight')
-                    ->label('Weight')
+                    ->label(__('fields.weight'))
                     ->numeric(2)
                     ->suffix(' kg')
                     ->alignEnd(),
 
                 TextColumn::make('total_volume')
-                    ->label('Volume')
+                    ->label(__('fields.volume'))
                     ->numeric(4)
                     ->suffix(' m³')
                     ->alignEnd(),

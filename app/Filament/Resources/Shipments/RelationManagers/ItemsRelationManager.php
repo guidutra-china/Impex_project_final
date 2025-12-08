@@ -106,13 +106,13 @@ class ItemsRelationManager extends RelationManager
                             ->columnSpanFull(),
 
                         TextInput::make('product_name')
-                            ->label('Product Name')
+                            ->label(__('fields.product_name'))
                             ->disabled()
                             ->dehydrated(false)
                             ->columnSpanFull(),
 
                         TextInput::make('unit_price')
-                            ->label('Unit Price')
+                            ->label(__('fields.unit_price'))
                             ->numeric()
                             ->prefix('$')
                             ->disabled()
@@ -134,19 +134,19 @@ class ItemsRelationManager extends RelationManager
                     ->sortable(),
 
                 TextColumn::make('product_sku')
-                    ->label('SKU')
+                    ->label(__('fields.code'))
                     ->searchable()
                     ->sortable()
                     ->weight('bold'),
 
                 TextColumn::make('product_name')
-                    ->label('Product')
+                    ->label(__('fields.product'))
                     ->searchable()
                     ->sortable()
                     ->limit(30),
 
                 TextColumn::make('hs_code')
-                    ->label('HS Code')
+                    ->label(__('fields.hs_code'))
                     ->searchable()
                     ->toggleable(),
 
@@ -193,12 +193,12 @@ class ItemsRelationManager extends RelationManager
                     ]),
 
                 TextColumn::make('unit_price')
-                    ->label('Unit Price')
+                    ->label(__('fields.unit_price'))
                     ->money('USD')
                     ->toggleable(),
 
                 TextColumn::make('customs_value')
-                    ->label('Customs Value')
+                    ->label(__('fields.customs_value'))
                     ->money('USD')
                     ->toggleable(),
 

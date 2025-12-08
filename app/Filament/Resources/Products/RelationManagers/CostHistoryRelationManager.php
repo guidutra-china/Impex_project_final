@@ -66,7 +66,7 @@ class CostHistoryRelationManager extends RelationManager
                     ->toggleable(),
 
                 TextColumn::make('created_at')
-                    ->label('Date')
+                    ->label(__('fields.date'))
                     ->dateTime()
                     ->sortable()
                     ->description(fn ($record) => $record->created_at->diffForHumans()),

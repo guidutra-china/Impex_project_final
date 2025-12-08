@@ -46,7 +46,7 @@ class AllContainerItemsRelationManager extends RelationManager
                     ->icon('heroicon-o-adjustments-horizontal')
                     ->form([
                         Select::make('container_id')
-                            ->label('Container')
+                            ->label(__('fields.container_numbers'))
                             ->options($this->getContainerOptions())
                             ->default($this->selectedContainerId)
                             ->required()
@@ -63,31 +63,31 @@ class AllContainerItemsRelationManager extends RelationManager
             ])
             ->columns([
                 TextColumn::make('product.sku')
-                    ->label('SKU')
+                    ->label(__('fields.code'))
                     ->searchable()
                     ->sortable(),
                 
                 TextColumn::make('product.name')
-                    ->label('Product')
+                    ->label(__('fields.product'))
                     ->searchable()
                     ->sortable()
                     ->wrap(),
                 
                 TextColumn::make('quantity')
-                    ->label('Quantity')
+                    ->label(__('fields.quantity'))
                     ->numeric()
                     ->sortable()
                     ->alignEnd(),
                 
                 TextColumn::make('unit_weight')
-                    ->label('Unit Weight')
+                    ->label(__('fields.weight'))
                     ->numeric(2)
                     ->suffix(' kg')
                     ->sortable()
                     ->alignEnd(),
                 
                 TextColumn::make('total_weight')
-                    ->label('Total Weight')
+                    ->label(__('fields.weight'))
                     ->state(fn ($record) => $record->quantity * $record->unit_weight)
                     ->numeric(2)
                     ->suffix(' kg')
@@ -95,14 +95,14 @@ class AllContainerItemsRelationManager extends RelationManager
                     ->alignEnd(),
                 
                 TextColumn::make('unit_volume')
-                    ->label('Unit Volume')
+                    ->label(__('fields.volume'))
                     ->numeric(3)
                     ->suffix(' m³')
                     ->sortable()
                     ->alignEnd(),
                 
                 TextColumn::make('total_volume')
-                    ->label('Total Volume')
+                    ->label(__('fields.volume'))
                     ->state(fn ($record) => $record->quantity * $record->unit_volume)
                     ->numeric(3)
                     ->suffix(' m³')
@@ -110,7 +110,7 @@ class AllContainerItemsRelationManager extends RelationManager
                     ->alignEnd(),
                 
                 TextColumn::make('customs_value')
-                    ->label('Customs Value')
+                    ->label(__('fields.customs_value'))
                     ->money('USD')
                     ->sortable()
                     ->alignEnd(),
