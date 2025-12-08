@@ -2,30 +2,30 @@
 
 ## 📋 **Índice**
 1. [Pré-requisitos](#pré-requisitos)
-2. [Passo 1: Instalar Pacotes](#passo-1-instalar-pacotes)
-3. [Passo 2: Configurar Laravel](#passo-2-configurar-laravel)
-4. [Passo 3: Configurar Banco de Dados](#passo-3-configurar-banco-de-dados)
-5. [Passo 4: Configurar Filament](#passo-4-configurar-filament)
-6. [Passo 5: Criar Middleware](#passo-5-criar-middleware)
-7. [Passo 6: Deploy dos Arquivos](#passo-6-deploy-dos-arquivos)
-8. [Passo 7: Testes](#passo-7-testes)
-9. [Troubleshooting](#troubleshooting)
+2. [Passo 1: Configurar Laravel](#passo-1-configurar-laravel)
+3. [Passo 2: Configurar Banco de Dados](#passo-2-configurar-banco-de-dados)
+4. [Passo 3: Configurar Filament](#passo-3-configurar-filament)
+5. [Passo 4: Criar Middleware](#passo-4-criar-middleware)
+6. [Passo 5: Deploy dos Arquivos](#passo-5-deploy-dos-arquivos)
+7. [Passo 6: Testes](#passo-6-testes)
+8. [Troubleshooting](#troubleshooting)
 
 ---
 
 ## ✅ **Pré-requisitos**
 
 - ✅ Servidor com PHP 8.2+
-- ✅ Composer instalado
-- ✅ MySQL/MariaDB configurado
+- ✅ MySQL/MariaDB configurado com UTF8MB4
 - ✅ Acesso SSH ao servidor
 - ✅ Git configurado
 - ✅ Laravel 12 rodando
 - ✅ Filament 4 instalado
 
+> ⚠️ **IMPORTANTE:** Filament 4 tem suporte **NATIVO** a multi-language. **NÃO é necessário** instalar plugins externos como Spatie Translatable!
+
 ---
 
-## 📦 **Passo 1: Instalar Pacotes**
+## ⚙️ **Passo 1: Configurar Laravel**
 
 ### **1.1 Conectar ao Servidor via SSH**
 
@@ -34,38 +34,7 @@ ssh usuario@seu-servidor.com
 cd /caminho/para/impex_project
 ```
 
-### **1.2 Instalar Filament Translatable Plugin**
-
-```bash
-composer require filament/spatie-laravel-translatable-plugin
-```
-
-**Saída esperada:**
-```
-Using version ^4.0 for filament/spatie-laravel-translatable-plugin
-./composer.json has been updated
-Running composer update filament/spatie-laravel-translatable-plugin
-...
-Package operations: 1 install, 0 updates, 0 removals
-  - Installing filament/spatie-laravel-translatable-plugin (v4.x.x)
-```
-
-### **1.3 Verificar Instalação**
-
-```bash
-composer show | grep translatable
-```
-
-**Deve mostrar:**
-```
-filament/spatie-laravel-translatable-plugin  v4.x.x  ...
-```
-
----
-
-## ⚙️ **Passo 2: Configurar Laravel**
-
-### **2.1 Atualizar `config/app.php`**
+### **1.2 Atualizar `config/app.php`**
 
 Edite o arquivo:
 ```bash
@@ -99,7 +68,7 @@ nano config/app.php
 
 **Salvar:** `Ctrl+O`, Enter, `Ctrl+X`
 
-### **2.2 Atualizar `.env`**
+### **1.3 Atualizar `.env`**
 
 ```bash
 nano .env
@@ -113,7 +82,7 @@ APP_FALLBACK_LOCALE=en
 
 **Salvar e sair**
 
-### **2.3 Limpar Cache de Configuração**
+### **1.4 Limpar Cache de Configuração**
 
 ```bash
 php artisan config:clear
@@ -122,15 +91,15 @@ php artisan config:cache
 
 ---
 
-## 🗄️ **Passo 3: Configurar Banco de Dados**
+## 🗄️ **Passo 2: Configurar Banco de Dados**
 
-### **3.1 Criar Migration para User Locale**
+### **2.1 Criar Migration para User Locale**
 
 ```bash
 php artisan make:migration add_locale_to_users_table
 ```
 
-### **3.2 Editar Migration**
+### **2.2 Editar Migration**
 
 ```bash
 nano database/migrations/*_add_locale_to_users_table.php
@@ -165,7 +134,7 @@ return new class extends Migration
 
 **Salvar e sair**
 
-### **3.3 Rodar Migration**
+### **2.3 Rodar Migration**
 
 ```bash
 php artisan migrate
@@ -177,7 +146,7 @@ Running migrations.
 2025_12_07_120000_add_locale_to_users_table .................... DONE
 ```
 
-### **3.4 Atualizar User Model**
+### **2.4 Atualizar User Model**
 
 ```bash
 nano app/Models/User.php
@@ -196,11 +165,30 @@ protected $fillable = [
 
 **Salvar e sair**
 
+### **2.5 Verificar Charset do Banco (IMPORTANTE para Chinês)**
+
+```bash
+mysql -u root -p
+```
+
+```sql
+-- Verificar charset atual
+SHOW VARIABLES LIKE 'character_set%';
+
+-- Se não for utf8mb4, atualizar:
+ALTER DATABASE seu_banco_de_dados CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- Atualizar tabela users
+ALTER TABLE users CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+exit;
+```
+
 ---
 
-## 🎨 **Passo 4: Configurar Filament**
+## 🎨 **Passo 3: Configurar Filament**
 
-### **4.1 Editar AdminPanelProvider**
+### **3.1 Editar AdminPanelProvider**
 
 ```bash
 nano app/Providers/Filament/AdminPanelProvider.php
@@ -236,17 +224,19 @@ public function panel(Panel $panel): Panel
 
 **Salvar e sair**
 
+> ✅ **Isso é tudo que você precisa no Filament 4!** O locale switcher aparecerá automaticamente no canto superior direito.
+
 ---
 
-## 🔧 **Passo 5: Criar Middleware**
+## 🔧 **Passo 4: Criar Middleware**
 
-### **5.1 Criar Middleware SetLocale**
+### **4.1 Criar Middleware SetLocale**
 
 ```bash
 php artisan make:middleware SetLocale
 ```
 
-### **5.2 Editar Middleware**
+### **4.2 Editar Middleware**
 
 ```bash
 nano app/Http/Middleware/SetLocale.php
@@ -316,7 +306,7 @@ class SetLocale
 
 **Salvar e sair**
 
-### **5.3 Registrar Middleware**
+### **4.3 Registrar Middleware**
 
 ```bash
 nano bootstrap/app.php
@@ -349,9 +339,9 @@ return Application::configure(basePath: dirname(__DIR__))
 
 ---
 
-## 📁 **Passo 6: Deploy dos Arquivos**
+## 📁 **Passo 5: Deploy dos Arquivos**
 
-### **6.1 Pull do GitHub**
+### **5.1 Pull do GitHub**
 
 ```bash
 git pull origin main
@@ -362,7 +352,7 @@ git pull origin main
 - Arquivos de tradução
 - Configurações atualizadas
 
-### **6.2 Verificar Estrutura de Arquivos**
+### **5.2 Verificar Estrutura de Arquivos**
 
 ```bash
 ls -la lang/
@@ -390,7 +380,7 @@ ls -la lang/en/
 -rw-r--r--  validation.php
 ```
 
-### **6.3 Verificar Permissões**
+### **5.3 Verificar Permissões**
 
 ```bash
 chmod -R 755 lang/
@@ -399,9 +389,9 @@ chown -R www-data:www-data lang/
 
 ---
 
-## 🧪 **Passo 7: Testes**
+## 🧪 **Passo 6: Testes**
 
-### **7.1 Limpar Todos os Caches**
+### **6.1 Limpar Todos os Caches**
 
 ```bash
 php artisan cache:clear
@@ -411,13 +401,13 @@ php artisan view:clear
 php artisan optimize:clear
 ```
 
-### **7.2 Recompilar Assets (se necessário)**
+### **6.2 Recompilar Autoload**
 
 ```bash
-npm run build
+composer dump-autoload
 ```
 
-### **7.3 Reiniciar Serviços**
+### **6.3 Reiniciar Serviços**
 
 **Para Nginx + PHP-FPM:**
 ```bash
@@ -435,14 +425,14 @@ sudo systemctl restart apache2
 php artisan octane:reload
 ```
 
-### **7.4 Testar no Browser**
+### **6.4 Testar no Browser**
 
 1. **Acessar admin panel:** `https://seu-dominio.com/admin`
-2. **Verificar locale switcher** no canto superior direito
+2. **Verificar locale switcher** no canto superior direito (ícone de globo 🌐)
 3. **Trocar para Chinês (简体中文)**
 4. **Verificar se interface muda**
 
-### **7.5 Testar via Artisan Tinker**
+### **6.5 Testar via Artisan Tinker**
 
 ```bash
 php artisan tinker
@@ -470,19 +460,26 @@ exit
 
 ### **Problema 1: Locale Switcher não aparece**
 
+**Causa:** Cache não foi limpo ou configuração incorreta
+
 **Solução:**
 ```bash
 php artisan config:clear
 php artisan cache:clear
 php artisan view:clear
+composer dump-autoload
+sudo systemctl restart php8.2-fpm nginx
 ```
 
-### **Problema 2: Traduções não aparecem**
+### **Problema 2: Traduções não aparecem (mostra a key)**
+
+**Exemplo:** Mostra `common.yes` em vez de "Yes"
 
 **Verificar:**
+
 1. Arquivos `lang/` existem?
    ```bash
-   ls -la lang/en/
+   ls -la lang/en/common.php
    ```
 
 2. Permissões corretas?
@@ -495,6 +492,11 @@ php artisan view:clear
    php -l lang/en/common.php
    ```
 
+4. Arquivo retorna array?
+   ```bash
+   php -r "var_dump(require 'lang/en/common.php');"
+   ```
+
 ### **Problema 3: Erro "Class SetLocale not found"**
 
 **Solução:**
@@ -503,7 +505,7 @@ composer dump-autoload
 php artisan config:clear
 ```
 
-### **Problema 4: Migration falha**
+### **Problema 4: Migration falha (coluna já existe)**
 
 **Verificar se coluna já existe:**
 ```bash
@@ -514,20 +516,56 @@ Schema::hasColumn('users', 'locale');
 exit
 ```
 
-**Se retornar `true`, a coluna já existe. Pule a migration.**
+**Se retornar `true`, a coluna já existe. Pule a migration ou use:**
+```bash
+php artisan migrate:rollback --step=1
+php artisan migrate
+```
 
 ### **Problema 5: Caracteres chineses aparecem como "???"**
 
-**Verificar charset do banco:**
+**Causa:** Charset do banco não é UTF8MB4
+
+**Solução:**
+```bash
+mysql -u root -p
+```
 ```sql
+-- Verificar charset
 SHOW VARIABLES LIKE 'character_set%';
+
+-- Atualizar banco
+ALTER DATABASE seu_banco CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- Atualizar todas as tabelas
+ALTER TABLE users CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+ALTER TABLE customers CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+ALTER TABLE products CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+-- ... etc
+
+exit;
 ```
 
-**Deve ser `utf8mb4`. Se não for:**
-```sql
-ALTER DATABASE seu_banco CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-ALTER TABLE users CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-```
+### **Problema 6: Locale não persiste após refresh**
+
+**Causa:** Session não está salvando ou middleware não está registrado
+
+**Verificar:**
+
+1. Middleware registrado?
+   ```bash
+   grep -n "SetLocale" bootstrap/app.php
+   ```
+
+2. Session funcionando?
+   ```bash
+   php artisan tinker
+   ```
+   ```php
+   Session::put('test', 'value');
+   Session::get('test');  // Deve retornar "value"
+   exit
+   ```
 
 ---
 
@@ -543,10 +581,12 @@ ALTER TABLE users CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 - [ ] Migration executada com sucesso
 - [ ] User model atualizado com `locale` no `$fillable`
 - [ ] Charset do banco é `utf8mb4`
+- [ ] Todas as tabelas convertidas para `utf8mb4`
 
 ### **Filament**
 - [ ] `AdminPanelProvider.php` configurado com `locales()`
-- [ ] Locale switcher visível no admin
+- [ ] Locale switcher visível no admin (ícone 🌐)
+- [ ] **NÃO instalou plugins externos** (não é necessário!)
 
 ### **Middleware**
 - [ ] `SetLocale.php` criado
@@ -564,46 +604,53 @@ ALTER TABLE users CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 - [ ] Traduções aparecem corretamente
 - [ ] User locale salva no banco
 - [ ] Caracteres chineses exibem corretamente
-- [ ] PDFs e Excel geram em idioma correto
+- [ ] Locale persiste após refresh
 
 ---
 
 ## 🚀 **Comandos Rápidos (Resumo)**
 
 ```bash
-# 1. Instalar pacote
-composer require filament/spatie-laravel-translatable-plugin
+# 1. Configurar Laravel
+nano config/app.php  # Adicionar available_locales
+nano .env            # APP_LOCALE=en
 
 # 2. Criar migration
 php artisan make:migration add_locale_to_users_table
-# (editar migration manualmente)
+nano database/migrations/*_add_locale_to_users_table.php
 php artisan migrate
 
-# 3. Criar middleware
-php artisan make:middleware SetLocale
-# (editar middleware manualmente)
+# 3. Atualizar User model
+nano app/Models/User.php  # Adicionar 'locale' ao $fillable
 
-# 4. Pull do GitHub
+# 4. Configurar Filament
+nano app/Providers/Filament/AdminPanelProvider.php
+# Adicionar ->locales() e ->defaultLocale()
+
+# 5. Criar middleware
+php artisan make:middleware SetLocale
+nano app/Http/Middleware/SetLocale.php
+nano bootstrap/app.php  # Registrar middleware
+
+# 6. Pull do GitHub
 git pull origin main
 
-# 5. Limpar caches
+# 7. Limpar caches
 php artisan cache:clear
 php artisan config:clear
 php artisan route:clear
 php artisan view:clear
 php artisan optimize:clear
-
-# 6. Recompilar autoload
 composer dump-autoload
 
-# 7. Reiniciar serviços
+# 8. Reiniciar serviços
 sudo systemctl restart php8.2-fpm nginx
 # ou
 sudo systemctl restart apache2
 # ou
 php artisan octane:reload
 
-# 8. Verificar
+# 9. Verificar
 php artisan tinker
 >>> App::setLocale('zh_CN');
 >>> __('common.yes');
@@ -612,11 +659,25 @@ php artisan tinker
 
 ---
 
+## ✅ **Configuração Completa!**
+
+Após seguir todos os passos, seu servidor estará configurado para multi-language com:
+
+✅ **Inglês (EN)** - Idioma padrão  
+✅ **Chinês Simplificado (ZH_CN)** - Idioma secundário  
+✅ **Locale switcher nativo do Filament 4** (ícone 🌐)  
+✅ **Preferência do usuário** salva no banco  
+✅ **Detecção automática** de idioma do browser  
+✅ **Fallback inteligente** para inglês  
+✅ **Sem plugins externos** (100% nativo)  
+
+---
+
 ## 📞 **Suporte**
 
 Se encontrar problemas:
 
-1. **Verificar logs:**
+1. **Verificar logs do Laravel:**
    ```bash
    tail -f storage/logs/laravel.log
    ```
@@ -628,28 +689,22 @@ Se encontrar problemas:
    tail -f /var/log/apache2/error.log
    ```
 
-3. **Modo debug:**
+3. **Modo debug (temporário):**
    ```bash
    # .env
    APP_DEBUG=true
    ```
    ⚠️ **Lembre-se de desativar em produção!**
 
----
-
-## ✅ **Configuração Completa!**
-
-Após seguir todos os passos, seu servidor estará configurado para multi-language com:
-
-✅ **Inglês (EN)** - Idioma padrão  
-✅ **Chinês Simplificado (ZH_CN)** - Idioma secundário  
-✅ **Locale switcher** no Filament  
-✅ **Preferência do usuário** salva no banco  
-✅ **Detecção automática** de idioma do browser  
-✅ **Fallback inteligente** para inglês  
+4. **Verificar versões:**
+   ```bash
+   php --version  # Deve ser 8.2+
+   php artisan --version  # Deve ser Laravel 12.x
+   ```
 
 ---
 
-**Documento criado em:** 07/12/2025  
-**Versão:** 1.0  
-**Para:** Servidor de Produção Impex Project
+**Documento atualizado em:** 07/12/2025  
+**Versão:** 2.0 (Corrigido - SEM plugin Spatie)  
+**Para:** Servidor de Produção Impex Project  
+**Filament:** 4.x (suporte nativo a multi-language)
