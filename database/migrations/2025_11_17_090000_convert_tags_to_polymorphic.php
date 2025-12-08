@@ -15,6 +15,7 @@ return new class extends Migration
     {
         // Create polymorphic taggables table
         Schema::create('taggables', function (Blueprint $table) {
+            $table->id();
             $table->foreignId('tag_id')->constrained()->cascadeOnDelete();
             $table->morphs('taggable'); // Creates taggable_id and taggable_type
             $table->timestamps();
@@ -48,7 +49,8 @@ return new class extends Migration
     public function down(): void
     {
         // Recreate supplier_tag table
-        Schema::create('supplier_tag', function (Blueprint $table) {
+        Schema::create('supplier_tag', func            $table->id();
+tion (Blueprint $table) {
             $table->foreignId('supplier_id')->constrained()->cascadeOnDelete();
             $table->foreignId('tag_id')->constrained()->cascadeOnDelete();
         });

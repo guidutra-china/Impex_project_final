@@ -18,6 +18,7 @@ return new class extends Migration
         });
         // supplier_tag pivot table
         Schema::create('supplier_tag', function (Blueprint $table) {
+            $table->id();
             $table->foreignId('supplier_id')->constrained()->cascadeOnDelete();
             $table->foreignId('tag_id')->constrained()->cascadeOnDelete();
         });
