@@ -28,6 +28,21 @@ class ProductResource extends Resource
 
     protected static UnitEnum|string|null $navigationGroup = 'Inventory';
 
+    public static function getNavigationGroup(): ?string
+    {
+        return __('navigation.inventory');
+    }
+
+    public static function getModelLabel(): string
+    {
+        return __('navigation.products');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('navigation.products');
+    }
+
     protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-cube';
 
     protected static ?int $navigationSort = 10;

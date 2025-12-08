@@ -22,6 +22,21 @@ class ClientResource extends Resource
 
     protected static UnitEnum|string|null $navigationGroup = 'Contacts';
 
+    public static function getNavigationGroup(): ?string
+    {
+        return __('navigation.contacts');
+    }
+
+    public static function getModelLabel(): string
+    {
+        return __('navigation.clients');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('navigation.clients');
+    }
+
     protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-building-office';
 
     protected static ?int $navigationSort = 10;

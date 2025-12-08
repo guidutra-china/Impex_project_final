@@ -23,6 +23,21 @@ class QualityInspectionResource extends Resource
 
     protected static UnitEnum|string|null $navigationGroup = 'Purchasing';
 
+    public static function getNavigationGroup(): ?string
+    {
+        return __('navigation.purchasing');
+    }
+
+    public static function getModelLabel(): string
+    {
+        return __('navigation.quality_inspections');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('navigation.quality_inspections');
+    }
+
     protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-shield-check';
 
     protected static ?int $navigationSort = 20;

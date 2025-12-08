@@ -20,6 +20,26 @@ class UserResource extends Resource
 
     protected static UnitEnum|string|null $navigationGroup = 'Security';
 
+    public static function getNavigationGroup(): ?string
+    {
+        return __('navigation.security');
+    }
+
+    public static function getModelLabel(): string
+    {
+        return __('navigation.users');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('navigation.users');
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return __('navigation.users');
+    }
+
     protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-users';
 
     protected static ?int $navigationSort = 10;

@@ -18,6 +18,26 @@ class PackingBoxResource extends Resource
 
     protected static UnitEnum|string|null $navigationGroup = 'Logistics & Shipping';
 
+    public static function getNavigationGroup(): ?string
+    {
+        return __('navigation.logistics_shipping');
+    }
+
+    public static function getModelLabel(): string
+    {
+        return __('navigation.packing_boxes');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('navigation.packing_boxes');
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return __('navigation.packing_boxes');
+    }
+
     protected static ?string $navigationLabel = 'Packing Boxes';
 
     protected static ?int $navigationSort = 3;

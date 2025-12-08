@@ -21,6 +21,21 @@ class FinancialCategoryResource extends Resource
 
     protected static UnitEnum|string|null $navigationGroup = 'Finance';
 
+    public static function getNavigationGroup(): ?string
+    {
+        return __('navigation.finance');
+    }
+
+    public static function getModelLabel(): string
+    {
+        return __('navigation.financial_categories');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('navigation.financial_categories');
+    }
+
     protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-rectangle-stack';
 
     

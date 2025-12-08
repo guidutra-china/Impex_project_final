@@ -29,6 +29,21 @@ class ShipmentResource extends Resource
 
     protected static UnitEnum|string|null $navigationGroup = 'Logistics & Shipping';
 
+    public static function getNavigationGroup(): ?string
+    {
+        return __('navigation.logistics_shipping');
+    }
+
+    public static function getModelLabel(): string
+    {
+        return __('navigation.shipments');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('navigation.shipments');
+    }
+
     protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-truck';
 
     protected static ?int $navigationSort = 10;

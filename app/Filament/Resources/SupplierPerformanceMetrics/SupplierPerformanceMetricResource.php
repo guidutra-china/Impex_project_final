@@ -21,6 +21,21 @@ class SupplierPerformanceMetricResource extends Resource
 
     protected static UnitEnum|string|null $navigationGroup = 'Purchasing';
 
+    public static function getNavigationGroup(): ?string
+    {
+        return __('navigation.purchasing');
+    }
+
+    public static function getModelLabel(): string
+    {
+        return __('navigation.supplier_performance_metrics');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('navigation.supplier_performance_metrics');
+    }
+
     protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-chart-bar';
 
     protected static ?int $navigationSort = 30;

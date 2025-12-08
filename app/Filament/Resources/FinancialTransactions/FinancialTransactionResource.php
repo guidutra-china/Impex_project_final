@@ -21,6 +21,21 @@ class FinancialTransactionResource extends Resource
 
     protected static UnitEnum|string|null $navigationGroup = 'Finance';
 
+    public static function getNavigationGroup(): ?string
+    {
+        return __('navigation.finance');
+    }
+
+    public static function getModelLabel(): string
+    {
+        return __('navigation.financial_transactions');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('navigation.financial_transactions');
+    }
+
     protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-banknotes';
 
     

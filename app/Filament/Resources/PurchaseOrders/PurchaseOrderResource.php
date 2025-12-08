@@ -23,6 +23,21 @@ class PurchaseOrderResource extends Resource
 
     protected static UnitEnum|string|null $navigationGroup = 'Purchasing';
 
+    public static function getNavigationGroup(): ?string
+    {
+        return __('navigation.purchasing');
+    }
+
+    public static function getModelLabel(): string
+    {
+        return __('navigation.purchase_orders');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('navigation.purchase_orders');
+    }
+
     protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-shopping-cart';
 
     protected static ?int $navigationSort = 10;

@@ -22,6 +22,21 @@ class CategoryResource extends Resource
 
     protected static UnitEnum|string|null $navigationGroup = 'Inventory';
 
+    public static function getNavigationGroup(): ?string
+    {
+        return __('navigation.inventory');
+    }
+
+    public static function getModelLabel(): string
+    {
+        return __('navigation.categories');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('navigation.categories');
+    }
+
     protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-folder';
 
     protected static ?int $navigationSort = 20;

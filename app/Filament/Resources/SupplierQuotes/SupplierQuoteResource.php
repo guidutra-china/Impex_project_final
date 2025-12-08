@@ -22,6 +22,26 @@ class SupplierQuoteResource extends Resource
 
     protected static UnitEnum|string|null $navigationGroup = 'Sales & Quotations';
 
+    public static function getNavigationGroup(): ?string
+    {
+        return __('navigation.sales_quotations');
+    }
+
+    public static function getModelLabel(): string
+    {
+        return __('navigation.supplier_quotes');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('navigation.supplier_quotes');
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return __('navigation.supplier_quotes');
+    }
+
     protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-document-text';
 
     protected static ?int $navigationSort = 20;

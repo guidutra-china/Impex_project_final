@@ -24,6 +24,21 @@ class SupplierResource extends Resource
 
     protected static UnitEnum|string|null $navigationGroup = 'Contacts';
 
+    public static function getNavigationGroup(): ?string
+    {
+        return __('navigation.contacts');
+    }
+
+    public static function getModelLabel(): string
+    {
+        return __('navigation.suppliers');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('navigation.suppliers');
+    }
+
     protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-building-office-2';
 
     protected static ?int $navigationSort = 30;

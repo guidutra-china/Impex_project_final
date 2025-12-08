@@ -25,6 +25,26 @@ class OrderResource extends Resource
 
     protected static UnitEnum|string|null $navigationGroup = 'Sales & Quotations';
 
+    public static function getNavigationGroup(): ?string
+    {
+        return __('navigation.sales_quotations');
+    }
+
+    public static function getModelLabel(): string
+    {
+        return __('navigation.rfqs');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('navigation.rfqs');
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return __('navigation.rfqs');
+    }
+
     protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-clipboard-document-list';
 
     protected static ?int $navigationSort = 10;

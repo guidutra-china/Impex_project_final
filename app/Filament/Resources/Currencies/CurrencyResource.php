@@ -23,6 +23,21 @@ class CurrencyResource extends Resource
 
     protected static UnitEnum|string|null $navigationGroup = 'Settings';
 
+    public static function getNavigationGroup(): ?string
+    {
+        return __('navigation.settings');
+    }
+
+    public static function getModelLabel(): string
+    {
+        return __('navigation.currencies');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('navigation.currencies');
+    }
+
     protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-currency-dollar';
 
     protected static ?int $navigationSort = 20;

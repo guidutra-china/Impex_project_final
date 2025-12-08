@@ -25,6 +25,26 @@ class ProformaInvoiceResource extends Resource
 
     protected static UnitEnum|string|null $navigationGroup = 'Sales & Quotations';
 
+    public static function getNavigationGroup(): ?string
+    {
+        return __('navigation.sales_quotations');
+    }
+
+    public static function getModelLabel(): string
+    {
+        return __('navigation.proforma_invoices');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('navigation.proforma_invoices');
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return __('navigation.proforma_invoices');
+    }
+
     protected static ?int $navigationSort = 30;
 
     public static function form(Schema $schema): Schema

@@ -23,6 +23,21 @@ class WarehouseResource extends Resource
 
     protected static UnitEnum|string|null $navigationGroup = 'Logistics & Shipping';
 
+    public static function getNavigationGroup(): ?string
+    {
+        return __('navigation.logistics_shipping');
+    }
+
+    public static function getModelLabel(): string
+    {
+        return __('navigation.warehouses');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('navigation.warehouses');
+    }
+
     protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-building-storefront';
 
     protected static ?int $navigationSort = 20;

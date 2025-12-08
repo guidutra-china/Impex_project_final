@@ -22,6 +22,21 @@ class PaymentTermResource extends Resource
 
     protected static UnitEnum|string|null $navigationGroup = 'Settings';
 
+    public static function getNavigationGroup(): ?string
+    {
+        return __('navigation.settings');
+    }
+
+    public static function getModelLabel(): string
+    {
+        return __('navigation.payment_terms');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('navigation.payment_terms');
+    }
+
     protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-calendar-days';
 
     protected static ?int $navigationSort = 40;

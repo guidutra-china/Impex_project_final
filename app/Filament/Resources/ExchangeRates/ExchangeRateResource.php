@@ -21,6 +21,21 @@ class ExchangeRateResource extends Resource
 
     protected static UnitEnum|string|null $navigationGroup = 'Settings';
 
+    public static function getNavigationGroup(): ?string
+    {
+        return __('navigation.settings');
+    }
+
+    public static function getModelLabel(): string
+    {
+        return __('navigation.exchange_rates');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('navigation.exchange_rates');
+    }
+
     protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-arrows-right-left';
 
     protected static ?int $navigationSort = 30;

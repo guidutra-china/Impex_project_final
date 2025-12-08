@@ -23,6 +23,21 @@ class BankAccountResource extends Resource
 
     protected static UnitEnum|string|null $navigationGroup = 'Finance';
 
+    public static function getNavigationGroup(): ?string
+    {
+        return __('navigation.finance');
+    }
+
+    public static function getModelLabel(): string
+    {
+        return __('navigation.bank_accounts');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('navigation.bank_accounts');
+    }
+
     protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-building-library';
 
     protected static ?int $navigationSort = 50;

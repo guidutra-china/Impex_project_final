@@ -23,6 +23,26 @@ class DocumentResource extends Resource
 
     protected static UnitEnum|string|null $navigationGroup = 'Contacts';
 
+    public static function getNavigationGroup(): ?string
+    {
+        return __('navigation.contacts');
+    }
+
+    public static function getModelLabel(): string
+    {
+        return __('navigation.suppliers_documents');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('navigation.suppliers_documents');
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return __('navigation.suppliers_documents');
+    }
+
     protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-document';
 
     protected static ?int $navigationSort = 40;

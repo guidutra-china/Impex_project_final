@@ -17,6 +17,26 @@ class GeneratedDocumentResource extends Resource
 
     protected static UnitEnum|string|null $navigationGroup = 'Documents';
 
+    public static function getNavigationGroup(): ?string
+    {
+        return __('navigation.documents');
+    }
+
+    public static function getModelLabel(): string
+    {
+        return __('navigation.document_history');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('navigation.document_history');
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return __('navigation.document_history');
+    }
+
     protected static ?string $navigationLabel = 'Document History';
 
     protected static ?string $modelLabel = 'Document History';

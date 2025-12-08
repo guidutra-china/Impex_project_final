@@ -1,34 +1,68 @@
 <?php
 
 return [
-    // Main navigation
-    'dashboard' => '仪表板',
-    'customers' => '客户',
-    'products' => '产品',
-    'purchase_orders' => '采购订单',
-    'shipments' => '货运',
+    // Navigation Groups
+    'sales_quotations' => '销售与报价',
+    'purchasing' => '采购',
+    'logistics_shipping' => '物流与运输',
+    'finance' => '财务',
     'documents' => '文档',
+    'contacts' => '联系人',
+    'inventory' => '库存',
     'settings' => '设置',
-    'reports' => '报表',
+    'security' => '安全',
     
-    // Sub-navigation
-    'customer_list' => '客户列表',
-    'add_customer' => '添加客户',
-    'product_list' => '产品列表',
-    'add_product' => '添加产品',
-    'po_list' => '采购单列表',
-    'create_po' => '创建采购单',
-    'shipment_list' => '货运列表',
-    'create_shipment' => '创建货运',
+    // Main Navigation Items
+    'dashboard' => '仪表板',
+    'calendar' => '日历',
+    
+    // Sales & Quotations
+    'rfqs' => '询价单',
+    'proforma_invoices' => '形式发票',
+    'supplier_quotes' => '供应商报价',
+    
+    // Purchasing
+    'purchase_orders' => '采购订单',
+    'quality_inspections' => '质量检验',
+    'supplier_performance_metrics' => '供应商绩效指标',
+    
+    // Logistics & Shipping
+    'shipments' => '货运',
+    'packing_boxes' => '包装箱',
+    'packing_units' => '包装单位',
+    'warehouses' => '仓库',
+    
+    // Finance
+    'bank_accounts' => '银行账户',
+    'financial_categories' => '财务类别',
+    'financial_payments' => '财务付款',
+    'financial_transactions' => '财务交易',
+    'recurring_transactions' => '定期交易',
+    'payment_methods' => '付款方式',
+    
+    // Documents
+    'document_history' => '文档历史',
+    'suppliers_documents' => '供应商文档',
+    
+    // Contacts
+    'clients' => '客户',
+    'client_contacts' => '客户联系人',
+    'suppliers' => '供应商',
+    'supplier_contacts' => '供应商联系人',
+    
+    // Inventory
+    'products' => '产品',
+    'categories' => '类别',
     
     // Settings
     'company_settings' => '公司设置',
-    'user_settings' => '用户设置',
-    'system_settings' => '系统设置',
+    'currencies' => '货币',
+    'exchange_rates' => '汇率',
+    'payment_terms' => '付款条款',
+    'tags' => '标签',
     
-    // Groups
-    'sales' => '销售',
-    'purchasing' => '采购',
-    'logistics' => '物流',
-    'administration' => '管理',
+    // Security
+    'users' => '用户',
+    'roles' => '角色',
+    'permissions' => '权限',
 ];

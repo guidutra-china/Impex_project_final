@@ -35,6 +35,26 @@ class EventResource extends Resource
 
     protected static UnitEnum|string|null $navigationGroup = 'Settings';
 
+    public static function getNavigationGroup(): ?string
+    {
+        return __('navigation.settings');
+    }
+
+    public static function getModelLabel(): string
+    {
+        return __('navigation.calendar');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('navigation.calendar');
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return __('navigation.calendar');
+    }
+
     protected static ?int $navigationSort = 60;
     
     public static function shouldRegisterNavigation(): bool
