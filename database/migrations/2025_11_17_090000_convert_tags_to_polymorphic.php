@@ -49,8 +49,8 @@ return new class extends Migration
     public function down(): void
     {
         // Recreate supplier_tag table
-        Schema::create('supplier_tag', func            $table->id();
-tion (Blueprint $table) {
+        Schema::create('supplier_tag', function (Blueprint $table) {
+            $table->id();
             $table->foreignId('supplier_id')->constrained()->cascadeOnDelete();
             $table->foreignId('tag_id')->constrained()->cascadeOnDelete();
         });
