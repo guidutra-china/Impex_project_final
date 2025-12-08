@@ -4,6 +4,7 @@ namespace App\Filament\Pages;
 
 use Filament\Actions\Action;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
@@ -50,6 +51,7 @@ class EditProfile extends Page implements HasForms
             'email' => Auth::user()->email,
             'phone' => Auth::user()->phone,
             'avatar' => Auth::user()->avatar,
+            'locale' => Auth::user()->locale ?? 'en',
         ]);
     }
 
@@ -110,6 +112,20 @@ class EditProfile extends Page implements HasForms
                                             ->columnSpanFull(),
                                     ])
                                     ->columns(2),
+
+                                Section::make('Language Preference')
+                                    ->description('Choose your preferred language for the interface.')
+                                    ->schema([
+                                        Select::make('locale')
+                                            ->label('Interface Language')
+                                            ->options(config('app.available_locales', ['en' => 'English']))
+                                            ->default('en')
+                                            ->required()
+                                            ->prefixIcon('heroicon-o-language')
+                                            ->helperText('Select your preferred language. The interface will update after saving.')
+                                            ->live()
+                                            ->columnSpanFull(),
+                                    ]),
                             ]),
 
                         Tabs\Tab::make('Security')
@@ -245,6 +261,7 @@ class EditProfile extends Page implements HasForms
         $user->name = $data['name'];
         $user->email = $data['email'];
         $user->phone = $data['phone'] ?? null;
+        $user->locale = $data['locale'] ?? 'en';
 
         // Update avatar if changed
         if (isset($data['avatar']) && $data['avatar'] !== $user->avatar) {
@@ -253,12 +270,17 @@ class EditProfile extends Page implements HasForms
 
         $user->save();
 
+        // Update session locale
+        session(['locale' => $user->locale]);
+        app()->setLocale($user->locale);
+
         // Clear password fields
         $this->form->fill([
             'name' => $user->name,
             'email' => $user->email,
             'phone' => $user->phone,
             'avatar' => $user->avatar,
+            'locale' => $user->locale,
             'current_password' => null,
             'password' => null,
             'password_confirmation' => null,
