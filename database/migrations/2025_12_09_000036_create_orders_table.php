@@ -18,21 +18,21 @@ return new class extends Migration
             $table->bigInteger('category_id')->nullable();
             $table->string('order_number', 255);
             $table->string('customer_nr_rfq', 255)->nullable();
-            // TODO: `status` enum('pending','processing','quoted','completed','cancelled') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'pending'
+            $table->enum('status', ['draft', 'pending', 'sent', 'pending_quotes', 'quotes_received', 'under_analysis', 'approved', 'cancelled', 'completed'])->default('draft');
             $table->timestamp('rfq_generated_at')->nullable();
             $table->timestamp('processing_started_at')->nullable();
             $table->timestamp('quoted_at')->nullable();
             $table->timestamp('completed_at')->nullable();
             $table->timestamp('cancelled_at')->nullable();
-            $table->text('cancellation_reason');
-            $table->decimal('commission_percent', 10, 2);
-            // TODO: `commission_type` enum('embedded','separate') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'embedded'
+            $table->text('cancellation_reason')->nullable();
+            $table->decimal('commission_percent', 10, 2)->default(0);
+            $table->enum('commission_type', ['embedded', 'separate'])->default('embedded');
             $table->integer('incoterm')->nullable();
             $table->string('incoterm_location', 255)->nullable();
             $table->decimal('commission_percent_average', 10, 2)->nullable();
-            $table->text('customer_notes');
-            $table->text('notes');
-            $table->integer('total_amount');
+            $table->text('customer_notes')->nullable();
+            $table->text('notes')->nullable();
+            $table->integer('total_amount')->default(0);
             $table->bigInteger('selected_quote_id')->nullable();
             $table->bigInteger('created_by')->nullable();
             $table->bigInteger('updated_by')->nullable();
