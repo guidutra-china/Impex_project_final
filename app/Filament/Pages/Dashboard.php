@@ -5,7 +5,7 @@ namespace App\Filament\Pages;
 use App\Filament\Widgets\CalendarWidget;
 use App\Filament\Widgets\RfqStatsWidget;
 use App\Filament\Widgets\PurchaseOrderStatsWidget;
-use App\Filament\Widgets\FinancialOverviewWidget;
+// use App\Filament\Widgets\FinancialOverviewWidget; // Temporarily disabled - sales_invoices table needs status column
 use App\Services\DashboardConfigurationService;
 use BackedEnum;
 use Filament\Pages\Dashboard as BaseDashboard;
@@ -35,7 +35,7 @@ class Dashboard extends BaseDashboard
         'calendar' => CalendarWidget::class,
         'rfq_stats' => RfqStatsWidget::class,
         'purchase_order_stats' => PurchaseOrderStatsWidget::class,
-        'financial_overview' => FinancialOverviewWidget::class,
+        // 'financial_overview' => FinancialOverviewWidget::class, // Temporarily disabled
     ];
 
     /**
@@ -103,7 +103,7 @@ class Dashboard extends BaseDashboard
             CalendarWidget::class,
             RfqStatsWidget::class,
             PurchaseOrderStatsWidget::class,
-            FinancialOverviewWidget::class,
+            // FinancialOverviewWidget::class, // Temporarily disabled
         ];
     }
 
