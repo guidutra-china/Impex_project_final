@@ -68,6 +68,9 @@ class ManageCompanySettings extends Page implements HasForms
     {
         $data = $this->form->getState();
 
+        // Debug: Log what's being saved
+        \Log::info('Company Settings Save Data:', $data);
+
         $settings = CompanySetting::first();
         
         if ($settings) {
@@ -75,6 +78,9 @@ class ManageCompanySettings extends Page implements HasForms
         } else {
             CompanySetting::create($data);
         }
+
+        // Debug: Log what was actually saved
+        \Log::info('Company Settings After Save:', $settings->fresh()->toArray());
 
         Notification::make()
             ->success()
