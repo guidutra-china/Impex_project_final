@@ -3,9 +3,9 @@
 namespace App\Filament\Pages;
 
 use App\Filament\Widgets\CalendarWidget;
-// use App\Filament\Widgets\RfqStatsWidget; // Temporarily disabled due to database issues
-// use App\Filament\Widgets\PurchaseOrderStatsWidget; // Temporarily disabled due to database issues
-// use App\Filament\Widgets\FinancialOverviewWidget; // Temporarily disabled due to database issues
+use App\Filament\Widgets\RfqStatsWidget;
+use App\Filament\Widgets\PurchaseOrderStatsWidget;
+use App\Filament\Widgets\FinancialOverviewWidget;
 use App\Services\DashboardConfigurationService;
 use BackedEnum;
 use Filament\Pages\Dashboard as BaseDashboard;
@@ -33,9 +33,9 @@ class Dashboard extends BaseDashboard
      */
     protected array $widgetClassMap = [
         'calendar' => CalendarWidget::class,
-        // 'rfq_stats' => RfqStatsWidget::class, // Temporarily disabled due to database issues
-        // 'purchase_order_stats' => PurchaseOrderStatsWidget::class, // Temporarily disabled due to database issues
-        // 'financial_overview' => FinancialOverviewWidget::class, // Temporarily disabled due to database issues
+        'rfq_stats' => RfqStatsWidget::class,
+        'purchase_order_stats' => PurchaseOrderStatsWidget::class,
+        'financial_overview' => FinancialOverviewWidget::class,
     ];
 
     /**
@@ -101,9 +101,9 @@ class Dashboard extends BaseDashboard
     {
         return [
             CalendarWidget::class,
-            // RfqStatsWidget::class, // Temporarily disabled due to database issues
-            // PurchaseOrderStatsWidget::class, // Temporarily disabled due to database issues
-            // FinancialOverviewWidget::class, // Temporarily disabled due to database issues
+            RfqStatsWidget::class,
+            PurchaseOrderStatsWidget::class,
+            FinancialOverviewWidget::class,
         ];
     }
 
