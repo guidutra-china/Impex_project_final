@@ -21,12 +21,51 @@ class Client extends Model
     {
         parent::boot();
 
-        // Ensure every client has a valid code
+        // Auto-generate client code if not provided
         static::creating(function ($client) {
-            if (empty($client->code) || strlen($client->code) < 2) {
+            if (empty($client->code)) {
+                $client->code = static::generateCode($client->name);
+            }
+            
+            // Validate code length
+            if (strlen($client->code) < 2) {
                 throw new \Exception('Client must have a valid code of at least 2 characters. Got: ' . ($client->code ?? 'null'));
             }
         });
+    }
+    
+    /**
+     * Generate a 5-letter code from company name
+     */
+    protected static function generateCode(string $name): string
+    {
+        // Remove special characters and get first 5 consonants
+        $clean = strtoupper(preg_replace('/[^A-Z]/i', '', $name));
+        
+        // Try to get 5 characters, prioritizing consonants
+        $consonants = preg_replace('/[AEIOU]/', '', $clean);
+        $code = substr($consonants, 0, 5);
+        
+        // If not enough consonants, use all characters
+        if (strlen($code) < 5) {
+            $code = substr($clean, 0, 5);
+        }
+        
+        // If still not enough, pad with X
+        $code = str_pad($code, 5, 'X');
+        
+        // Ensure uniqueness
+        $originalCode = $code;
+        $counter = 1;
+        while (static::where('code', $code)->exists()) {
+            $code = substr($originalCode, 0, 4) . $counter;
+            $counter++;
+            if ($counter > 9) {
+                $code = substr($originalCode, 0, 3) . sprintf('%02d', $counter);
+            }
+        }
+        
+        return $code;
     }
     
     protected $fillable = [
