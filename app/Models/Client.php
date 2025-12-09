@@ -36,32 +36,32 @@ class Client extends Model
     
     /**
      * Generate a 5-letter code from company name
+     * Uses first 5 letters, if duplicate replaces last char with number
      */
     protected static function generateCode(string $name): string
     {
-        // Remove special characters and get first 5 consonants
+        // Remove special characters and spaces, keep only letters
         $clean = strtoupper(preg_replace('/[^A-Z]/i', '', $name));
         
-        // Try to get 5 characters, prioritizing consonants
-        $consonants = preg_replace('/[AEIOU]/', '', $clean);
-        $code = substr($consonants, 0, 5);
+        // Get first 5 characters
+        $code = substr($clean, 0, 5);
         
-        // If not enough consonants, use all characters
-        if (strlen($code) < 5) {
-            $code = substr($clean, 0, 5);
-        }
-        
-        // If still not enough, pad with X
+        // If not enough characters, pad with X
         $code = str_pad($code, 5, 'X');
         
-        // Ensure uniqueness
-        $originalCode = $code;
-        $counter = 1;
-        while (static::where('code', $code)->exists()) {
-            $code = substr($originalCode, 0, 4) . $counter;
-            $counter++;
-            if ($counter > 9) {
-                $code = substr($originalCode, 0, 3) . sprintf('%02d', $counter);
+        // Ensure uniqueness by replacing last character with number
+        if (static::where('code', $code)->exists()) {
+            $baseCode = substr($code, 0, 4);
+            $counter = 1;
+            
+            do {
+                $code = $baseCode . $counter;
+                $counter++;
+            } while (static::where('code', $code)->exists() && $counter < 10);
+            
+            // If still not unique after 1-9, throw exception
+            if ($counter >= 10 && static::where('code', $code)->exists()) {
+                throw new \Exception("Unable to generate unique code for: {$name}");
             }
         }
         
