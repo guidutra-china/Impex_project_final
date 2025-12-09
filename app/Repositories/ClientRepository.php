@@ -38,12 +38,11 @@ class ClientRepository extends BaseRepository
     }
 
     /**
-     * Obtém clientes ativos
+     * Obtém todos os clientes
      */
-    public function getActiveClients(): Collection
+    public function getAllClients(): Collection
     {
         return $this->query()
-            ->where('status', 'active')
             ->with('user')
             ->orderBy('name')
             ->get();
@@ -62,26 +61,25 @@ class ClientRepository extends BaseRepository
     }
 
     /**
-     * Obtém clientes por região/estado
+     * Obtém clientes por estado
      */
-    public function getClientsByRegion(string $region): Collection
+    public function getClientsByState(string $state): Collection
     {
         return $this->query()
-            ->where('region', $region)
+            ->where('state', $state)
             ->with('user')
             ->orderBy('name')
             ->get();
     }
 
     /**
-     * Busca clientes por nome, email ou código
+     * Busca clientes por nome ou código
      */
     public function searchClients(string $query): Collection
     {
         return $this->query()
             ->where('name', 'like', "%{$query}%")
             ->orWhere('code', 'like', "%{$query}%")
-            ->orWhere('email', 'like', "%{$query}%")
             ->with('user')
             ->orderBy('name')
             ->get();
@@ -187,12 +185,12 @@ class ClientRepository extends BaseRepository
     }
 
     /**
-     * Conta clientes por status
+     * Conta clientes por país
      */
-    public function countByStatus(string $status): int
+    public function countClientsInCountry(string $country): int
     {
         return $this->query()
-            ->where('status', $status)
+            ->where('country', $country)
             ->count();
     }
 
@@ -225,7 +223,6 @@ class ClientRepository extends BaseRepository
     {
         return [
             'total_clients' => $this->count(),
-            'active_clients' => $this->query()->where('status', 'active')->count(),
             'clients_with_orders' => $this->query()->whereHas('orders')->count(),
             'total_order_value' => $this->query()->with('orders')->get()->sum(function ($client) {
                 return $client->orders->sum('total_amount');
