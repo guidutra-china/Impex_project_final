@@ -101,7 +101,6 @@ class UserForm
                             ->label(__('fields.password'))
                             ->password()
                             ->revealable()
-                            ->dehydrateStateUsing(fn ($state) => filled($state) ? Hash::make($state) : null)
                             ->dehydrated(fn ($state) => filled($state))
                             ->required(fn (string $context): bool => $context === 'create')
                             ->rules([
