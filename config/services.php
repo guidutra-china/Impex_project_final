@@ -39,4 +39,10 @@ return [
         'api_key' => env('EXCHANGERATE_API_KEY'),
     ],
 
+    'deepseek' => [
+        'api_key' => env('DEEP_SEEK') ?? env('DEEP_SEEK_2'),
+        'base_url' => env('DEEPSEEK_BASE_URL', 'https://api.deepseek.com/v1'),
+        'model' => env('DEEPSEEK_MODEL', 'deepseek-chat'),
+    ],
+
 ];
