@@ -69,10 +69,10 @@ class ExcelParser
             $hasData = false;
 
             for ($col = 1; $col <= min(50, $maxCol); $col++) {
-                $value = $worksheet->getCellByColumnAndRow($col, $row)->getValue();
+                $columnLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col);
+                $value = $worksheet->getCell($columnLetter . $row)->getValue();
                 if ($value !== null && $value !== '') {
                     $hasData = true;
-                    $columnLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col);
                     $rowData[$columnLetter] = $value;
                 }
             }
@@ -108,11 +108,11 @@ class ExcelParser
             $isEmpty = true;
 
             for ($col = 1; $col <= min(50, $maxCol); $col++) {
-                $value = $worksheet->getCellByColumnAndRow($col, $row)->getValue();
+                $columnLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col);
+                $value = $worksheet->getCell($columnLetter . $row)->getValue();
                 if ($value !== null && $value !== '') {
                     $isEmpty = false;
                 }
-                $columnLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col);
                 $rowData[$columnLetter] = $value;
             }
 
@@ -145,11 +145,11 @@ class ExcelParser
             $isEmpty = true;
 
             for ($col = 1; $col <= min(50, $maxCol); $col++) {
-                $value = $worksheet->getCellByColumnAndRow($col, $row)->getValue();
+                $columnLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col);
+                $value = $worksheet->getCell($columnLetter . $row)->getValue();
                 if ($value !== null && $value !== '') {
                     $isEmpty = false;
                 }
-                $columnLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col);
                 $rowData[$columnLetter] = $value;
             }
 
