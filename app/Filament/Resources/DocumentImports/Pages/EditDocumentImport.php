@@ -3,17 +3,17 @@
 namespace App\Filament\Resources\DocumentImports\Pages;
 
 use App\Filament\Resources\DocumentImports\DocumentImportResource;
-use Filament\Actions\CreateAction;
-use Filament\Resources\Pages\ListRecords;
+use Filament\Actions\DeleteAction;
+use Filament\Resources\Pages\EditRecord;
 
-class ListDocumentImports extends ListRecords
+class EditDocumentImport extends EditRecord
 {
     protected static string $resource = DocumentImportResource::class;
 
     protected function getHeaderActions(): array
     {
         return [
-            CreateAction::make(),
+            DeleteAction::make(),
         ];
     }
 }
