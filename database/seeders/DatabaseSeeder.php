@@ -25,15 +25,24 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         // Create admin user using firstOrCreate to avoid duplicate entry errors
-        User::firstOrCreate(
+        $admin = User::firstOrCreate(
             ['email' => 'admin@impex.com'],
             [
                 'name' => 'Admin User',
                 'password' => bcrypt('12345678'),
+                'is_admin' => true,
+                'email_verified_at' => now(),
             ]
         );
 
+        // Assign super_admin role if it exists
+        if (\Spatie\Permission\Models\Role::where('name', 'super_admin')->exists()) {
+            $admin->assignRole('super_admin');
+        }
+
         $this->command->info('✓ Created admin user');
+        $this->command->info('  Email: admin@impex.com');
+        $this->command->info('  Password: 12345678');
 
         // Create currencies
         $this->createCurrencies();
