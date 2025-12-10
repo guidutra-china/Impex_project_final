@@ -29,8 +29,7 @@ class CompanySettingsForm
                         ->imageEditor()
                         ->maxSize(2048)
                         ->helperText('Upload your company logo (max 2MB). Recommended size: 300x100px')
-                        ->columnSpan(2)
-                        ->storeFiles(false),
+                        ->columnSpan(2),
 
                     Textarea::make('address')
                         ->label(__('fields.address'))

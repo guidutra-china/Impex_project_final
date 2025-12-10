@@ -68,29 +68,6 @@ class ManageCompanySettings extends Page implements HasForms
     {
         $data = $this->form->getState();
 
-        // Handle logo file upload using Livewire temporary uploads
-        if (isset($data['logo_path'])) {
-            $logoValue = $data['logo_path'];
-            
-            \Log::info('Logo value type: ' . gettype($logoValue));
-            \Log::info('Logo value: ' . json_encode($logoValue));
-            
-            // If it's a TemporaryUploadedFile object
-            if (is_object($logoValue) && method_exists($logoValue, 'store')) {
-                // Store the file permanently
-                $path = $logoValue->store('company', 'public');
-                $data['logo_path'] = $path;
-                \Log::info('Logo stored to: ' . $path);
-            }
-            // If it's already a string path, keep it
-            elseif (is_string($logoValue)) {
-                \Log::info('Logo is already a string path: ' . $logoValue);
-            }
-        }
-
-        // Debug: Log what's being saved
-        \Log::info('Company Settings Save Data:', $data);
-
         $settings = CompanySetting::first();
         
         if ($settings) {
@@ -98,9 +75,6 @@ class ManageCompanySettings extends Page implements HasForms
         } else {
             CompanySetting::create($data);
         }
-
-        // Debug: Log what was actually saved
-        \Log::info('Company Settings After Save:', $settings->fresh()->toArray());
 
         Notification::make()
             ->success()
