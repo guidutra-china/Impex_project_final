@@ -14,12 +14,12 @@ return new class extends Migration
         Schema::create('categories', function (Blueprint $table) {
             $table->id();
             $table->string('name', 255);
-            $table->string('slug', 255);
-            $table->text('description');
+            $table->string('slug', 255)->unique();
+            $table->text('description')->nullable();
             $table->string('icon', 255)->nullable();
             $table->string('color', 255)->nullable();
-            $table->integer('sort_order');
-            $table->integer('is_active');
+            $table->integer('sort_order')->default(0)->comment('Display order');
+            $table->boolean('is_active')->default(true)->comment('Indicates if category is active');
             $table->timestamps();
         });
     }
