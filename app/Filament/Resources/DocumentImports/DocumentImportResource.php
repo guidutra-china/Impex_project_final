@@ -5,6 +5,7 @@ namespace App\Filament\Resources\DocumentImports;
 use App\Filament\Resources\DocumentImports\Pages\ListDocumentImports;
 use App\Filament\Resources\DocumentImports\Pages\ViewDocumentImport;
 use App\Filament\Resources\DocumentImports\Pages\CreateDocumentImport;
+use App\Filament\Resources\DocumentImports\Schemas\DocumentImportForm;
 use App\Filament\Resources\DocumentImports\Tables\DocumentImportTable;
 use App\Models\ImportHistory;
 use BackedEnum;
@@ -40,8 +41,7 @@ class DocumentImportResource extends Resource
 
     public static function form(Schema $schema): Schema
     {
-        // No form needed - imports are created via wizard
-        return $schema;
+        return DocumentImportForm::configure($schema);
     }
 
     public static function table(Table $table): Table
