@@ -14,14 +14,14 @@ return new class extends Migration
         Schema::create('financial_categories', function (Blueprint $table) {
             $table->id();
             $table->string('name', 255);
-            $table->string('code', 20);
-            $table->text('description');
-            // TODO: `type` enum('expense','revenue','exchange_variation') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'expense'
-            $table->bigInteger('parent_id')->nullable();
-            $table->integer('is_active');
-            $table->integer('is_system');
-            $table->integer('sort_order');
-            $table->timestamp('deleted_at')->nullable();
+            $table->string('code', 20)->unique();
+            $table->text('description')->nullable();
+            $table->enum('type', ['expense', 'revenue', 'exchange_variation'])->default('expense')->comment('Type of financial category');
+            $table->foreignId('parent_id')->nullable()->constrained('financial_categories')->onDelete('cascade');
+            $table->boolean('is_active')->default(true)->comment('Indicates if category is active');
+            $table->boolean('is_system')->default(false)->comment('System categories cannot be deleted');
+            $table->integer('sort_order')->default(0)->comment('Display order');
+            $table->softDeletes();
             $table->timestamps();
         });
     }
