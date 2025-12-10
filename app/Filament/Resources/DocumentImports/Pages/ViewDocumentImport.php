@@ -3,30 +3,32 @@
 namespace App\Filament\Resources\DocumentImports\Pages;
 
 use App\Filament\Resources\DocumentImports\DocumentImportResource;
+use Filament\Infolists\Components\Section;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Infolists\Infolist;
 use Filament\Resources\Pages\ViewRecord;
-use Filament\Schemas\Schema;
-use Filament\Schemas\Components\Section;
-use Filament\Schemas\Components\TextEntry;
-use Filament\Schemas\Components\BadgeEntry;
 
 class ViewDocumentImport extends ViewRecord
 {
     protected static string $resource = DocumentImportResource::class;
 
-    public function infolist(Schema $schema): Schema
+    public function infolist(Infolist $infolist): Infolist
     {
-        return $schema
-            ->components([
+        return $infolist
+            ->schema([
                 Section::make('Import Information')
                     ->schema([
                         TextEntry::make('file_name')
                             ->label('File Name'),
                         
-                        BadgeEntry::make('status')
-                            ->label('Status'),
+                        TextEntry::make('status')
+                            ->label('Status')
+                            ->badge()
+                            ->color(fn ($record) => $record->status_color),
                         
                         TextEntry::make('import_type')
-                            ->label('Import Type'),
+                            ->label('Import Type')
+                            ->badge(),
                         
                         TextEntry::make('document_type')
                             ->label('Document Type')
@@ -57,27 +59,34 @@ class ViewDocumentImport extends ViewRecord
                 Section::make('Import Results')
                     ->schema([
                         TextEntry::make('total_rows')
-                            ->label('Total Rows'),
+                            ->label('Total Rows')
+                            ->badge(),
                         
                         TextEntry::make('success_count')
                             ->label('Success')
+                            ->badge()
                             ->color('success'),
                         
                         TextEntry::make('updated_count')
                             ->label('Updated')
+                            ->badge()
                             ->color('info'),
                         
                         TextEntry::make('skipped_count')
                             ->label('Skipped')
+                            ->badge()
                             ->color('warning'),
                         
                         TextEntry::make('error_count')
                             ->label('Errors')
+                            ->badge()
                             ->color('danger'),
                         
                         TextEntry::make('success_rate')
                             ->label('Success Rate')
-                            ->suffix('%'),
+                            ->suffix('%')
+                            ->badge()
+                            ->color('success'),
                     ])
                     ->columns(3)
                     ->visible(fn ($record) => $record->isCompleted()),
