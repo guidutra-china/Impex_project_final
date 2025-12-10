@@ -95,22 +95,8 @@ class ProductForm
                                     )
                                     ->live(),
 
-                                Select::make('category_id')
-                                    ->label(__('fields.category'))
-                                    ->relationship('category', 'name')
-                                    ->searchable()
-                                    ->preload()
-                                    ->createOptionForm([
-                                        TextInput::make('name')
-                                            ->required()
-                                            ->maxLength(255),
-                                        Textarea::make('description')
-                                            ->maxLength(500),
-                                    ])
-                                    ->helperText('Select or create a category for this product'),
-
                                 TextInput::make('brand')
-                                    ->label(__('fields.brand'))
+                                    ->label(__('fields.category'))
                                     ->maxLength(255),
 
                                 TextInput::make('model_number')
