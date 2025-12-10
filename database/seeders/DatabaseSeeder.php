@@ -44,6 +44,11 @@ class DatabaseSeeder extends Seeder
         $this->command->info('  Email: admin@impex.com');
         $this->command->info('  Password: 12345678');
 
+        // Sync Shield permissions automatically
+        $this->command->info('');
+        $this->command->info('🔄 Syncing Shield permissions...');
+        \Illuminate\Support\Facades\Artisan::call('shield:sync', [], $this->command->getOutput());
+
         // Create currencies
         $this->createCurrencies();
         $this->command->info('✓ Created currencies');
