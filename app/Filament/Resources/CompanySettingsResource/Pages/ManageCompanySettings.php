@@ -68,34 +68,23 @@ class ManageCompanySettings extends Page implements HasForms
     {
         $data = $this->form->getState();
 
-        // Handle logo file upload manually
-        if (isset($data['logo_path']) && is_string($data['logo_path'])) {
-            $tempPath = $data['logo_path'];
+        // Handle logo file upload using Livewire temporary uploads
+        if (isset($data['logo_path'])) {
+            $logoValue = $data['logo_path'];
             
-            // Check if file exists in livewire-tmp
-            $livewireTempPath = storage_path('app/livewire-tmp/' . $tempPath);
+            \Log::info('Logo value type: ' . gettype($logoValue));
+            \Log::info('Logo value: ' . json_encode($logoValue));
             
-            if (file_exists($livewireTempPath)) {
-                // Generate new filename
-                $filename = basename($tempPath);
-                $destinationPath = 'company/' . $filename;
-                
-                // Ensure company directory exists
-                $companyDir = storage_path('app/public/company');
-                if (!is_dir($companyDir)) {
-                    mkdir($companyDir, 0755, true);
-                }
-                
-                // Copy file to public storage
-                $destination = storage_path('app/public/' . $destinationPath);
-                copy($livewireTempPath, $destination);
-                
-                // Update data with final path
-                $data['logo_path'] = $destinationPath;
-                
-                \Log::info('Logo moved from temp to: ' . $destination);
-            } else {
-                \Log::warning('Livewire temp file not found: ' . $livewireTempPath);
+            // If it's a TemporaryUploadedFile object
+            if (is_object($logoValue) && method_exists($logoValue, 'store')) {
+                // Store the file permanently
+                $path = $logoValue->store('company', 'public');
+                $data['logo_path'] = $path;
+                \Log::info('Logo stored to: ' . $path);
+            }
+            // If it's already a string path, keep it
+            elseif (is_string($logoValue)) {
+                \Log::info('Logo is already a string path: ' . $logoValue);
             }
         }
 
