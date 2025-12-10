@@ -11,7 +11,7 @@ class DocumentImportForm
     public static function configure(Schema $schema): Schema
     {
         return $schema
-            ->components([
+            ->schema([
                 Select::make('import_type')
                     ->label('Import Type')
                     ->options([
