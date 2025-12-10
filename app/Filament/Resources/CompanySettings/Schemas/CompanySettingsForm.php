@@ -29,11 +29,10 @@ class CompanySettingsForm
                         ->directory('company')
                         ->visibility('public')
                         ->imageEditor()
-                        ->acceptedFileTypes(self::getAcceptedFileTypes('images'))
-                        ->maxSize(self::getMaxFileSize('images'))
+                        ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/gif', 'image/webp'])
+                        ->maxSize(5120)
                         ->helperText('Upload your company logo (max 5MB, JPG/PNG/GIF/WEBP only). Recommended size: 300x100px')
-                        ->columnSpan(2)
-                        ->saveUploadedFileUsing(self::secureUploadPublic('images', 'company')),
+                        ->columnSpan(2),
 
                     Textarea::make('address')
                         ->label(__('fields.address'))
