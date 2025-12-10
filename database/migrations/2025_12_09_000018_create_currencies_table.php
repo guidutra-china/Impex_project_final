@@ -17,9 +17,9 @@ return new class extends Migration
             $table->string('name', 255);
             $table->string('name_plural', 255);
             $table->string('symbol', 255);
-            $table->decimal('exchange_rate', 10, 2);
-            $table->integer('is_base');
-            $table->integer('is_active');
+            $table->decimal('exchange_rate', 10, 6)->default(1.000000)->comment('Exchange rate relative to base currency');
+            $table->boolean('is_base')->default(false)->comment('Indicates if this is the base currency');
+            $table->boolean('is_active')->default(true)->comment('Indicates if currency is active for use');
             $table->timestamps();
         });
     }
