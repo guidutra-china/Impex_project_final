@@ -8,19 +8,14 @@ use App\Services\AI\AIFileAnalyzerService;
 use App\Services\AI\DynamicProductImporter;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Wizard;
 use Filament\Forms\Components\Placeholder;
-use Filament\Forms\Components\ViewField;
 use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
-use Filament\Resources\Pages\CreateRecord\Concerns\HasWizard;
 use Illuminate\Support\Facades\Storage;
 
 class CreateDocumentImport extends CreateRecord
 {
-    use HasWizard;
-
     protected static string $resource = DocumentImportResource::class;
 
     protected static bool $canCreateAnother = false;
@@ -31,66 +26,39 @@ class CreateDocumentImport extends CreateRecord
     {
         return $form
             ->schema([
-                Wizard::make([
-                    Wizard\Step::make('Upload File')
-                        ->description('Upload Excel or PDF file for import')
-                        ->schema([
-                            Select::make('import_type')
-                                ->label('Import Type')
-                                ->options([
-                                    'products' => 'Products',
-                                    'suppliers' => 'Suppliers (Coming Soon)',
-                                    'clients' => 'Clients (Coming Soon)',
-                                    'quotes' => 'Supplier Quotes (Coming Soon)',
-                                ])
-                                ->default('products')
-                                ->required()
-                                ->helperText('Select what type of data you want to import'),
+                Select::make('import_type')
+                    ->label('Import Type')
+                    ->options([
+                        'products' => 'Products',
+                        'suppliers' => 'Suppliers (Coming Soon)',
+                        'clients' => 'Clients (Coming Soon)',
+                        'quotes' => 'Supplier Quotes (Coming Soon)',
+                    ])
+                    ->default('products')
+                    ->required()
+                    ->helperText('Select what type of data you want to import'),
 
-                            FileUpload::make('file')
-                                ->label('File')
-                                ->acceptedFileTypes([
-                                    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-                                    'application/vnd.ms-excel',
-                                    'application/pdf',
-                                ])
-                                ->maxSize(20480) // 20MB
-                                ->required()
-                                ->helperText('Upload Excel (.xlsx, .xls) or PDF file. Max size: 20MB')
-                                ->live()
-                                ->afterStateUpdated(function ($state, $set) {
-                                    if ($state) {
-                                        // Trigger analysis when file is uploaded
-                                        $this->analyzeFile($state, $set);
-                                    }
-                                }),
-                        ]),
+                FileUpload::make('file')
+                    ->label('File')
+                    ->acceptedFileTypes([
+                        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                        'application/vnd.ms-excel',
+                        'application/pdf',
+                    ])
+                    ->maxSize(20480) // 20MB
+                    ->required()
+                    ->helperText('Upload Excel (.xlsx, .xls) or PDF file. Max size: 20MB. AI will analyze automatically after upload.')
+                    ->live()
+                    ->afterStateUpdated(function ($state, $set) {
+                        if ($state) {
+                            $this->analyzeFile($state, $set);
+                        }
+                    }),
 
-                    Wizard\Step::make('AI Analysis')
-                        ->description('Review AI-powered analysis')
-                        ->schema([
-                            Placeholder::make('analysis_status')
-                                ->label('Analysis Status')
-                                ->content(fn ($get) => $this->getAnalysisStatus($get)),
-
-                            ViewField::make('analysis_result')
-                                ->label('Analysis Result')
-                                ->view('filament.forms.components.import-analysis')
-                                ->viewData(fn () => [
-                                    'analysis' => $this->analysisResult,
-                                ]),
-                        ]),
-
-                    Wizard\Step::make('Confirm Import')
-                        ->description('Review and confirm import')
-                        ->schema([
-                            Placeholder::make('import_summary')
-                                ->label('Import Summary')
-                                ->content(fn ($get) => $this->getImportSummary($get)),
-                        ]),
-                ])
-                    ->submitAction(view('filament.pages.actions.wizard-submit'))
-                    ->skippable(false),
+                Placeholder::make('analysis_info')
+                    ->label('AI Analysis')
+                    ->content(fn ($get) => $this->getAnalysisInfo($get))
+                    ->visible(fn () => $this->analysisResult !== null),
             ]);
     }
 
@@ -120,7 +88,7 @@ class CreateDocumentImport extends CreateRecord
             Notification::make()
                 ->success()
                 ->title('Analysis Complete')
-                ->body('File analyzed successfully by AI')
+                ->body('File analyzed successfully by AI. Review the results below.')
                 ->send();
 
         } catch (\Throwable $e) {
@@ -137,40 +105,34 @@ class CreateDocumentImport extends CreateRecord
         }
     }
 
-    protected function getAnalysisStatus($get): string
+    protected function getAnalysisInfo($get): string
     {
         if (!$this->analysisResult) {
             return '⏳ Waiting for file upload...';
         }
 
         $aiAnalysis = $this->analysisResult['ai_analysis'] ?? [];
-
+        
         if (empty($aiAnalysis)) {
             return '⚠️ Analysis completed but no AI insights available';
         }
 
-        return '✅ Analysis completed successfully!';
-    }
-
-    protected function getImportSummary($get): string
-    {
-        if (!$this->analysisResult) {
-            return 'No analysis available';
-        }
-
-        $aiAnalysis = $this->analysisResult['ai_analysis'] ?? [];
         $documentType = $aiAnalysis['document_type'] ?? 'Unknown';
         $productsCount = $aiAnalysis['products_count'] ?? 0;
         $supplierName = $aiAnalysis['supplier']['name'] ?? 'Unknown';
         $hasImages = $this->analysisResult['has_images'] ?? false;
+        $imageCount = count($this->analysisResult['images'] ?? []);
+        $currency = $aiAnalysis['currency'] ?? 'USD';
 
-        $summary = "**Document Type:** {$documentType}\n\n";
-        $summary .= "**Products to Import:** {$productsCount}\n\n";
-        $summary .= "**Supplier:** {$supplierName}\n\n";
-        $summary .= "**Has Images:** " . ($hasImages ? 'Yes' : 'No') . "\n\n";
-        $summary .= "Click **Create** to start the import process.";
+        $info = "✅ **Analysis Complete!**\n\n";
+        $info .= "📄 **Document Type:** {$documentType}\n";
+        $info .= "📦 **Products Found:** {$productsCount}\n";
+        $info .= "🏭 **Supplier:** {$supplierName}\n";
+        $info .= "💰 **Currency:** {$currency}\n";
+        $info .= "📷 **Images:** " . ($hasImages ? "{$imageCount} found" : "None") . "\n\n";
+        $info .= "Click **Create** below to start the import process.";
 
-        return $summary;
+        return $info;
     }
 
     protected function mutateFormDataBeforeCreate(array $data): array

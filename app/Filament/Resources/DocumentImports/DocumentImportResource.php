@@ -7,6 +7,7 @@ use App\Filament\Resources\DocumentImports\Pages\ViewDocumentImport;
 use App\Filament\Resources\DocumentImports\Pages\CreateDocumentImport;
 use App\Filament\Resources\DocumentImports\Tables\DocumentImportTable;
 use App\Models\ImportHistory;
+use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
@@ -15,17 +16,11 @@ class DocumentImportResource extends Resource
 {
     protected static ?string $model = ImportHistory::class;
 
-    protected static ?string $navigationGroup = 'System';
+    protected static BackedEnum|string|null $navigationGroup = 'System';
 
-    protected static ?string $navigationIcon = 'heroicon-o-arrow-up-tray';
+    protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-arrow-up-tray';
 
     protected static ?int $navigationSort = 100;
-
-    protected static ?string $navigationLabel = 'Document Imports';
-
-    protected static ?string $modelLabel = 'Document Import';
-
-    protected static ?string $pluralModelLabel = 'Document Imports';
 
     public static function getNavigationGroup(): ?string
     {
@@ -42,14 +37,9 @@ class DocumentImportResource extends Resource
         return 'Document Imports';
     }
 
-    public static function getNavigationLabel(): string
-    {
-        return 'Document Imports';
-    }
-
     public static function form(Schema $schema): Schema
     {
-        // No form needed - imports are created via action
+        // No form needed - imports are created via wizard
         return $schema;
     }
 

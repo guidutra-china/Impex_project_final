@@ -4,19 +4,19 @@ namespace App\Filament\Resources\DocumentImports\Pages;
 
 use App\Filament\Resources\DocumentImports\DocumentImportResource;
 use Filament\Resources\Pages\ViewRecord;
-use Filament\Infolists\Infolist;
-use Filament\Infolists\Components\Section;
-use Filament\Infolists\Components\TextEntry;
-use Filament\Infolists\Components\BadgeEntry;
+use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\TextEntry;
+use Filament\Schemas\Components\BadgeEntry;
 
 class ViewDocumentImport extends ViewRecord
 {
     protected static string $resource = DocumentImportResource::class;
 
-    public function infolist(Infolist $infolist): Infolist
+    public function infolist(Schema $schema): Schema
     {
-        return $infolist
-            ->schema([
+        return $schema
+            ->components([
                 Section::make('Import Information')
                     ->schema([
                         TextEntry::make('file_name')
