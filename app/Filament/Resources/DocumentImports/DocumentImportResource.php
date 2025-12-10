@@ -11,12 +11,13 @@ use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use UnitEnum;
 
 class DocumentImportResource extends Resource
 {
     protected static ?string $model = ImportHistory::class;
 
-    protected static BackedEnum|string|null $navigationGroup = 'System';
+    protected static UnitEnum|string|null $navigationGroup = 'System';
 
     protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-arrow-up-tray';
 
