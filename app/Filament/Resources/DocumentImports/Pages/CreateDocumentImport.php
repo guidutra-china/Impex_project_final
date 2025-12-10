@@ -3,7 +3,10 @@
 namespace App\Filament\Resources\DocumentImports\Pages;
 
 use App\Filament\Resources\DocumentImports\DocumentImportResource;
+use App\Jobs\AnalyzeImportFileJob;
+use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
@@ -36,6 +39,34 @@ class CreateDocumentImport extends CreateRecord
             unset($data['file']);
         }
         
+        // Set initial status
+        $data['status'] = 'pending';
+        
         return $data;
+    }
+    
+    /**
+     * After creating the record, dispatch AI analysis job
+     */
+    protected function afterCreate(): void
+    {
+        // Dispatch AI analysis job
+        AnalyzeImportFileJob::dispatch($this->record);
+        
+        // Show notification
+        Notification::make()
+            ->title('Import Created Successfully')
+            ->body('AI analysis has been queued. You will be notified when it\'s ready.')
+            ->success()
+            ->send();
+    }
+    
+    /**
+     * Get redirect URL after creation
+     */
+    protected function getRedirectUrl(): string
+    {
+        // Redirect to view page to see analysis progress
+        return $this->getResource()::getUrl('view', ['record' => $this->record]);
     }
 }

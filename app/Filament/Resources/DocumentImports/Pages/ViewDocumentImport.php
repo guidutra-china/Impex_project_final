@@ -3,7 +3,11 @@
 namespace App\Filament\Resources\DocumentImports\Pages;
 
 use App\Filament\Resources\DocumentImports\DocumentImportResource;
+use App\Jobs\AnalyzeImportFileJob;
+use App\Jobs\ProcessProductImportJob;
+use Filament\Actions\Action;
 use Filament\Infolists\Components\TextEntry;
+use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
@@ -11,6 +15,77 @@ use Filament\Schemas\Schema;
 class ViewDocumentImport extends ViewRecord
 {
     protected static string $resource = DocumentImportResource::class;
+
+    /**
+     * Get header actions
+     */
+    protected function getHeaderActions(): array
+    {
+        return [
+            // Re-analyze action (visible when failed or ready)
+            Action::make('reanalyze')
+                ->label('Re-analyze File')
+                ->icon('heroicon-o-arrow-path')
+                ->color('warning')
+                ->visible(fn () => in_array($this->record->status, ['failed', 'ready']))
+                ->requiresConfirmation()
+                ->modalHeading('Re-analyze File')
+                ->modalDescription('This will re-analyze the file with AI. Any previous analysis will be replaced.')
+                ->action(function () {
+                    $this->record->update([
+                        'status' => 'pending',
+                        'ai_analysis' => null,
+                        'column_mapping' => null,
+                        'analyzed_at' => null,
+                    ]);
+                    
+                    AnalyzeImportFileJob::dispatch($this->record);
+                    
+                    Notification::make()
+                        ->title('Re-analysis Started')
+                        ->body('The file is being re-analyzed. Please wait...')
+                        ->success()
+                        ->send();
+                }),
+
+            // Start import action (visible when ready)
+            Action::make('startImport')
+                ->label('Start Import')
+                ->icon('heroicon-o-arrow-down-tray')
+                ->color('success')
+                ->visible(fn () => $this->record->status === 'ready')
+                ->requiresConfirmation()
+                ->modalHeading('Start Product Import')
+                ->modalDescription(function () {
+                    $count = $this->record->total_rows ?? 0;
+                    return "This will import {$count} products based on the AI analysis. This process may take several minutes.";
+                })
+                ->action(function () {
+                    ProcessProductImportJob::dispatch($this->record);
+                    
+                    Notification::make()
+                        ->title('Import Started')
+                        ->body('Products are being imported. You will be notified when it\'s complete.')
+                        ->success()
+                        ->send();
+                }),
+
+            // View AI Analysis action (visible when analyzed)
+            Action::make('viewAnalysis')
+                ->label('View AI Analysis')
+                ->icon('heroicon-o-eye')
+                ->color('info')
+                ->visible(fn () => !empty($this->record->ai_analysis))
+                ->modalHeading('AI Analysis Results')
+                ->modalContent(function () {
+                    $analysis = $this->record->ai_analysis;
+                    return view('filament.modals.ai-analysis', [
+                        'analysis' => $analysis,
+                        'mapping' => $this->record->column_mapping,
+                    ]);
+                }),
+        ];
+    }
 
     public function infolist(Schema $schema): Schema
     {
@@ -40,6 +115,18 @@ class ViewDocumentImport extends ViewRecord
                         TextEntry::make('created_at')
                             ->label('Created At')
                             ->dateTime(),
+                        
+                        TextEntry::make('analyzed_at')
+                            ->label('Analyzed At')
+                            ->dateTime()
+                            ->default('Not analyzed yet')
+                            ->visible(fn ($record) => !empty($record->analyzed_at)),
+                        
+                        TextEntry::make('imported_at')
+                            ->label('Imported At')
+                            ->dateTime()
+                            ->default('Not imported yet')
+                            ->visible(fn ($record) => !empty($record->imported_at)),
                     ])
                     ->columns(2),
 
