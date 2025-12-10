@@ -19,11 +19,11 @@ class DocumentImportResource extends Resource
 {
     protected static ?string $model = ImportHistory::class;
 
-    protected static UnitEnum|string|null $navigationGroup = 'System';
+    protected static UnitEnum|string|null $navigationGroup = 'Documents';
 
     public static function getNavigationGroup(): ?string
     {
-        return __('navigation.system');
+        return __('navigation.documents');
     }
 
     public static function getModelLabel(): string
