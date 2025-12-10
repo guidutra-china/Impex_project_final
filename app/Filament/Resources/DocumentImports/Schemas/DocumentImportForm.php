@@ -2,12 +2,15 @@
 
 namespace App\Filament\Resources\DocumentImports\Schemas;
 
+use App\Filament\Traits\SecureFileUpload;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Schemas\Schema;
 
 class DocumentImportForm
 {
+    use SecureFileUpload;
+
     public static function configure(Schema $schema): Schema
     {
         return $schema
@@ -26,14 +29,14 @@ class DocumentImportForm
 
                 FileUpload::make('file')
                     ->label('File')
-                    ->acceptedFileTypes([
-                        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-                        'application/vnd.ms-excel',
-                        'application/pdf',
-                    ])
-                    ->maxSize(20480) // 20MB
+                    ->disk('private')
+                    ->directory('imports')
+                    ->visibility('private')
+                    ->acceptedFileTypes(self::getAcceptedFileTypes('spreadsheets'))
+                    ->maxSize(self::getMaxFileSize('spreadsheets'))
                     ->required()
-                    ->helperText('Upload Excel (.xlsx, .xls) or PDF file. Max size: 20MB. AI will analyze automatically after creation.'),
+                    ->helperText('Upload Excel (.xlsx, .xls) or PDF file. Max size: 20MB. AI will analyze automatically after creation.')
+                    ->saveUploadedFileUsing(self::secureUploadPrivate('spreadsheets', 'imports')),
             ]);
     }
 }
