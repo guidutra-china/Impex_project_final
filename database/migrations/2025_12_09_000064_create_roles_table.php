@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('name', 255);
             $table->string('guard_name', 255);
-            $table->integer('can_see_all');
+            $table->boolean('can_see_all')->default(false)->comment('Determines if role can see all records (bypasses ownership filters)');
             $table->timestamps();
         });
     }
