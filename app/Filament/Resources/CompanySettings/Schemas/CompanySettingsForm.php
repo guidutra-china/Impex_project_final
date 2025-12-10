@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\CompanySettings\Schemas;
 
+use App\Filament\Traits\SecureFileUpload;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -9,6 +10,7 @@ use Filament\Schemas\Components\Section;
 
 class CompanySettingsForm
 {
+    use SecureFileUpload;
     public static function getSchema(): array
     {
         return [
@@ -27,15 +29,11 @@ class CompanySettingsForm
                         ->directory('company')
                         ->visibility('public')
                         ->imageEditor()
-                        ->maxSize(2048)
-                        ->helperText('Upload your company logo (max 2MB). Recommended size: 300x100px')
+                        ->acceptedFileTypes(self::getAcceptedFileTypes('images'))
+                        ->maxSize(self::getMaxFileSize('images'))
+                        ->helperText('Upload your company logo (max 5MB, JPG/PNG/GIF/WEBP only). Recommended size: 300x100px')
                         ->columnSpan(2)
-                        ->saveUploadedFileUsing(function ($file) {
-                            $filename = uniqid() . '.' . $file->getClientOriginalExtension();
-                            $path = $file->storeAs('company', $filename, 'public');
-                            \Log::info('File saved immediately to: ' . $path);
-                            return $path;
-                        }),
+                        ->saveUploadedFileUsing(self::secureUploadPublic('images', 'company')),
 
                     Textarea::make('address')
                         ->label(__('fields.address'))
