@@ -139,10 +139,18 @@ class ConfigureMapping extends Page implements \Filament\Forms\Contracts\HasForm
     protected function getHeaders(): array
     {
         $analysis = $this->record->ai_analysis;
-        $headers = $analysis['headers'] ?? [];
+        $columnMapping = $analysis['column_mapping'] ?? [];
         
-        // Remove internal fields
-        unset($headers['_detected_row']);
+        $headers = [];
+        
+        foreach ($columnMapping as $mapping) {
+            $column = $mapping['column'] ?? null;
+            $label = $mapping['label'] ?? $column;
+            
+            if ($column) {
+                $headers[$column] = $label;
+            }
+        }
         
         return $headers;
     }
@@ -152,22 +160,21 @@ class ConfigureMapping extends Page implements \Filament\Forms\Contracts\HasForm
      */
     protected function generateDefaultMapping(): array
     {
-        $aiMapping = $this->record->column_mapping ?? [];
+        $analysis = $this->record->ai_analysis;
+        $columnMapping = $analysis['column_mapping'] ?? [];
         
-        if (!empty($aiMapping)) {
-            return $aiMapping;
-        }
-        
-        // If no AI mapping, create empty mapping for all columns
-        $headers = $this->getHeaders();
         $mapping = [];
         
-        foreach ($headers as $column => $label) {
-            $mapping[$column] = [
-                'label' => $label,
-                'field' => null,
-                'confidence' => null,
-            ];
+        foreach ($columnMapping as $item) {
+            $column = $item['column'] ?? null;
+            
+            if ($column) {
+                $mapping[$column] = [
+                    'label' => $item['label'] ?? $column,
+                    'field' => $item['maps_to'] ?? null,
+                    'confidence' => $item['confidence'] ?? null,
+                ];
+            }
         }
         
         return $mapping;
