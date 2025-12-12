@@ -13,6 +13,8 @@ use Filament\Resources\Pages\Page;
 
 class ConfigureMapping extends Page
 {
+    use \Filament\Resources\Pages\Concerns\InteractsWithRecord;
+    
     protected static string $resource = DocumentImportResource::class;
     
     protected string $view = 'filament.resources.document-imports.pages.configure-mapping';

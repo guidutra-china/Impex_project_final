@@ -17,6 +17,7 @@ use Filament\Forms;
 class ReviewPreview extends Page implements HasTable
 {
     use InteractsWithTable;
+    use \Filament\Resources\Pages\Concerns\InteractsWithRecord;
 
     protected static string $resource = DocumentImportResource::class;
     
