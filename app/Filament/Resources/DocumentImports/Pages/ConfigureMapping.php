@@ -7,7 +7,7 @@ use App\Jobs\GenerateImportPreviewJob;
 use App\Services\AI\FieldMappingService;
 use Filament\Actions\Action;
 use Filament\Forms;
-use Filament\Forms\Form;
+use Filament\Schemas\Schema;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\Page;
 
@@ -37,7 +37,7 @@ class ConfigureMapping extends Page implements \Filament\Forms\Contracts\HasForm
         $this->form->fill(['mapping' => $mapping]);
     }
 
-    public function form(Form $form): Form
+    public function form(Schema $form): Schema
     {
         $headers = $this->getHeaders();
         $fieldOptions = FieldMappingService::getFieldOptions();
