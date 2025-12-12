@@ -9,8 +9,8 @@ use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\Page;
 use Filament\Tables;
-use Filament\Tables\Actions\BulkAction;
-use Filament\Tables\Actions\DeleteBulkAction;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
 use Filament\Tables\Table;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
@@ -146,19 +146,20 @@ class ReviewPreview extends Page implements HasTable
                     ),
             ])
             ->bulkActions([
-                BulkAction::make('selectAll')
+                BulkActionGroup::make([
+                    Action::make('selectAll')
                     ->label('Select All')
                     ->icon('heroicon-o-check')
                     ->action(fn ($records) => $records->each->update(['selected' => true]))
                     ->deselectRecordsAfterCompletion(),
                 
-                BulkAction::make('deselectAll')
+                    Action::make('deselectAll')
                     ->label('Deselect All')
                     ->icon('heroicon-o-x-mark')
                     ->action(fn ($records) => $records->each->update(['selected' => false]))
                     ->deselectRecordsAfterCompletion(),
                 
-                BulkAction::make('skipDuplicates')
+                    Action::make('skipDuplicates')
                     ->label('Skip Duplicates')
                     ->icon('heroicon-o-archive-box-x-mark')
                     ->color('warning')
@@ -168,20 +169,21 @@ class ReviewPreview extends Page implements HasTable
                     )
                     ->deselectRecordsAfterCompletion(),
                 
-                BulkAction::make('setActionImport')
+                    Action::make('setActionImport')
                     ->label('Set Action: Import')
                     ->icon('heroicon-o-arrow-down-tray')
                     ->action(fn ($records) => $records->each->update(['action' => 'import']))
                     ->deselectRecordsAfterCompletion(),
                 
-                BulkAction::make('setActionSkip')
+                    Action::make('setActionSkip')
                     ->label('Set Action: Skip')
                     ->icon('heroicon-o-x-circle')
                     ->action(fn ($records) => $records->each->update(['action' => 'skip', 'selected' => false]))
                     ->deselectRecordsAfterCompletion(),
                 
-                DeleteBulkAction::make()
-                    ->label('Remove Selected'),
+                    DeleteBulkAction::make()
+                        ->label('Remove Selected'),
+                ]),
             ])
             ->defaultSort('row_number')
             ->striped()
