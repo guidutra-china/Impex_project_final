@@ -2,8 +2,10 @@
 
 namespace App\Filament\Resources\DocumentImports;
 
+use App\Filament\Resources\DocumentImports\Pages\ConfigureMapping;
 use App\Filament\Resources\DocumentImports\Pages\CreateDocumentImport;
 use App\Filament\Resources\DocumentImports\Pages\ListDocumentImports;
+use App\Filament\Resources\DocumentImports\Pages\ReviewPreview;
 use App\Filament\Resources\DocumentImports\Pages\ViewDocumentImport;
 use App\Filament\Resources\DocumentImports\Schemas\DocumentImportForm;
 use App\Filament\Resources\DocumentImports\Tables\DocumentImportsTable;
@@ -63,6 +65,8 @@ class DocumentImportResource extends Resource
             'index' => ListDocumentImports::route('/'),
             'create' => CreateDocumentImport::route('/create'),
             'view' => ViewDocumentImport::route('/{record}'),
+            'configure-mapping' => ConfigureMapping::route('/{record}/configure-mapping'),
+            'review-preview' => ReviewPreview::route('/{record}/review-preview'),
         ];
     }
 }

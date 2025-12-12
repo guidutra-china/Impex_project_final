@@ -4,7 +4,6 @@ namespace App\Filament\Resources\DocumentImports\Pages;
 
 use App\Filament\Resources\DocumentImports\DocumentImportResource;
 use App\Jobs\AnalyzeImportFileJob;
-use App\Jobs\ProcessProductImportJob;
 use Filament\Actions\Action;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Notifications\Notification;
@@ -27,11 +26,14 @@ class ViewDocumentImport extends ViewRecord
                 ->label('Re-analyze File')
                 ->icon('heroicon-o-arrow-path')
                 ->color('warning')
-                ->visible(fn () => in_array($this->record->status, ['failed', 'ready']))
+                ->visible(fn () => in_array($this->record->status, ['failed', 'ready', 'preview_ready']))
                 ->requiresConfirmation()
                 ->modalHeading('Re-analyze File')
-                ->modalDescription('This will re-analyze the file with AI. Any previous analysis will be replaced.')
+                ->modalDescription('This will re-analyze the file with AI. Any previous analysis and preview will be replaced.')
                 ->action(function () {
+                    // Clear preview items
+                    $this->record->previewItems()->delete();
+                    
                     $this->record->update([
                         'status' => 'pending',
                         'ai_analysis' => null,
@@ -48,27 +50,21 @@ class ViewDocumentImport extends ViewRecord
                         ->send();
                 }),
 
-            // Start import action (visible when ready)
-            Action::make('startImport')
-                ->label('Start Import')
-                ->icon('heroicon-o-arrow-down-tray')
-                ->color('success')
+            // Configure Mapping action (visible when ready)
+            Action::make('configureMapping')
+                ->label('Configure Mapping')
+                ->icon('heroicon-o-cog-6-tooth')
+                ->color('info')
                 ->visible(fn () => $this->record->status === 'ready')
-                ->requiresConfirmation()
-                ->modalHeading('Start Product Import')
-                ->modalDescription(function () {
-                    $count = $this->record->total_rows ?? 0;
-                    return "This will import {$count} products based on the AI analysis. This process may take several minutes.";
-                })
-                ->action(function () {
-                    ProcessProductImportJob::dispatch($this->record);
-                    
-                    Notification::make()
-                        ->title('Import Started')
-                        ->body('Products are being imported. You will be notified when it\'s complete.')
-                        ->success()
-                        ->send();
-                }),
+                ->url(fn () => DocumentImportResource::getUrl('configure-mapping', ['record' => $this->record])),
+
+            // Review Preview action (visible when preview_ready)
+            Action::make('reviewPreview')
+                ->label('Review Preview')
+                ->icon('heroicon-o-eye')
+                ->color('success')
+                ->visible(fn () => $this->record->status === 'preview_ready')
+                ->url(fn () => DocumentImportResource::getUrl('review-preview', ['record' => $this->record])),
 
             // View AI Analysis action (visible when analyzed)
             Action::make('viewAnalysis')
@@ -77,6 +73,7 @@ class ViewDocumentImport extends ViewRecord
                 ->color('info')
                 ->visible(fn () => !empty($this->record->ai_analysis))
                 ->modalHeading('AI Analysis Results')
+                ->modalWidth('5xl')
                 ->modalContent(function () {
                     $analysis = $this->record->ai_analysis;
                     return view('filament.modals.ai-analysis', [
