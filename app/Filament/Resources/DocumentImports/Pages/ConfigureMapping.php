@@ -11,8 +11,9 @@ use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\Page;
 
-class ConfigureMapping extends Page
+class ConfigureMapping extends Page implements \Filament\Forms\Contracts\HasForms
 {
+    use \Filament\Forms\Concerns\InteractsWithForms;
     use \Filament\Resources\Pages\Concerns\InteractsWithRecord;
     
     protected static string $resource = DocumentImportResource::class;
