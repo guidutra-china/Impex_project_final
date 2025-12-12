@@ -181,6 +181,12 @@ class FieldMappingService
                         'separator' => [',', ';', '\n', '•', '-'],
                     ],
                 ],
+                'photo' => [
+                    'label' => 'Photo (Embedded or URL)',
+                    'type' => 'photo',
+                    'required' => false,
+                    'description' => 'Product photo - can be embedded image or URL',
+                ],
                 'photo_url' => [
                     'label' => 'Photo URL',
                     'type' => 'url',
