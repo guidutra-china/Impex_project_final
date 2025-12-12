@@ -6,7 +6,9 @@ use App\Filament\Resources\DocumentImports\DocumentImportResource;
 use App\Jobs\ImportSelectedItemsJob;
 use App\Models\ImportPreviewItem;
 use Filament\Actions\Action;
+use Filament\Actions\BulkAction;
 use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Notifications\Notification;
@@ -158,7 +160,7 @@ class ReviewPreview extends Page implements HasTable
                     ->falseLabel('Valid'),
             ])
             ->actions([
-                Tables\Actions\ViewAction::make()
+                ViewAction::make()
                     ->modalHeading('Preview Item Details')
                     ->modalWidth('7xl')
                     ->form([
@@ -259,7 +261,7 @@ class ReviewPreview extends Page implements HasTable
                             ]),
                     ]),
                 
-                Tables\Actions\EditAction::make()
+                EditAction::make()
                     ->modalHeading('Edit Preview Item')
                     ->modalWidth('5xl')
                     ->form([
@@ -302,24 +304,24 @@ class ReviewPreview extends Page implements HasTable
                             ]),
                     ]),
                 
-                Tables\Actions\DeleteAction::make()
+                DeleteAction::make()
                     ->label('Remove')
                     ->modalHeading('Remove from Preview'),
             ])
             ->bulkActions([
-                Tables\Actions\BulkAction::make('selectAll')
+                BulkAction::make('selectAll')
                     ->label('Select All')
                     ->icon('heroicon-o-check')
                     ->action(fn ($records) => $records->each->update(['selected' => true]))
                     ->deselectRecordsAfterCompletion(),
                 
-                Tables\Actions\BulkAction::make('deselectAll')
+                BulkAction::make('deselectAll')
                     ->label('Deselect All')
                     ->icon('heroicon-o-x-mark')
                     ->action(fn ($records) => $records->each->update(['selected' => false]))
                     ->deselectRecordsAfterCompletion(),
                 
-                Tables\Actions\BulkAction::make('skipDuplicates')
+                BulkAction::make('skipDuplicates')
                     ->label('Skip Duplicates')
                     ->icon('heroicon-o-archive-box-x-mark')
                     ->color('warning')
@@ -329,19 +331,19 @@ class ReviewPreview extends Page implements HasTable
                     )
                     ->deselectRecordsAfterCompletion(),
                 
-                Tables\Actions\BulkAction::make('setActionImport')
+                BulkAction::make('setActionImport')
                     ->label('Set Action: Import')
                     ->icon('heroicon-o-arrow-down-tray')
                     ->action(fn ($records) => $records->each->update(['action' => 'import']))
                     ->deselectRecordsAfterCompletion(),
                 
-                Tables\Actions\BulkAction::make('setActionSkip')
+                BulkAction::make('setActionSkip')
                     ->label('Set Action: Skip')
                     ->icon('heroicon-o-x-circle')
                     ->action(fn ($records) => $records->each->update(['action' => 'skip', 'selected' => false]))
                     ->deselectRecordsAfterCompletion(),
                 
-                Tables\Actions\DeleteBulkAction::make()
+                DeleteBulkAction::make()
                     ->label('Remove Selected'),
             ])
             ->defaultSort('row_number')
