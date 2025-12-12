@@ -6,7 +6,10 @@ use App\Filament\Resources\DocumentImports\DocumentImportResource;
 use App\Jobs\GenerateImportPreviewJob;
 use App\Services\AI\FieldMappingService;
 use Filament\Actions\Action;
-use Filament\Forms;
+use Filament\Forms\Components\Grid;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\Page;
@@ -45,15 +48,15 @@ class ConfigureMapping extends Page implements \Filament\Forms\Contracts\HasForm
         $mappingFields = [];
         
         foreach ($headers as $column => $label) {
-            $mappingFields[] = Forms\Components\Grid::make(3)
+            $mappingFields[] = Grid::make(3)
                 ->schema([
-                    Forms\Components\TextInput::make("mapping.{$column}.label")
+                    TextInput::make("mapping.{$column}.label")
                         ->label('Column')
                         ->default($label)
                         ->disabled()
                         ->columnSpan(1),
                     
-                    Forms\Components\Select::make("mapping.{$column}.field")
+                    Select::make("mapping.{$column}.field")
                         ->label('Maps To')
                         ->options($fieldOptions)
                         ->searchable()
@@ -61,7 +64,7 @@ class ConfigureMapping extends Page implements \Filament\Forms\Contracts\HasForm
                         ->columnSpan(1)
                         ->live(),
                     
-                    Forms\Components\TextInput::make("mapping.{$column}.confidence")
+                    TextInput::make("mapping.{$column}.confidence")
                         ->label('AI Confidence')
                         ->suffix('%')
                         ->disabled()
@@ -71,7 +74,7 @@ class ConfigureMapping extends Page implements \Filament\Forms\Contracts\HasForm
 
         return $form
             ->schema([
-                Forms\Components\Section::make('Column Mapping Configuration')
+                Section::make('Column Mapping Configuration')
                     ->description('Map Excel columns to product fields. The AI has suggested mappings based on column headers.')
                     ->schema($mappingFields)
                     ->columns(1),
