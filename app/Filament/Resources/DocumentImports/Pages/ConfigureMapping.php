@@ -29,6 +29,12 @@ class ConfigureMapping extends Page implements \Filament\Forms\Contracts\HasForm
     {
         $this->record = $this->resolveRecord($record);
         
+        // DEBUG: Log AI analysis structure
+        \Log::info('AI Analysis Structure', [
+            'ai_analysis' => $this->record->ai_analysis,
+            'column_mapping_db' => $this->record->column_mapping,
+        ]);
+        
         // Load existing mapping or use AI-suggested mapping
         $mapping = $this->record->column_mapping ?? [];
         
