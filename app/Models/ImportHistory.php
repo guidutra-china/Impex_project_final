@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class ImportHistory extends Model
 {
@@ -61,6 +62,14 @@ class ImportHistory extends Model
     }
 
     /**
+     * Get preview items for this import
+     */
+    public function previewItems(): HasMany
+    {
+        return $this->hasMany(ImportPreviewItem::class);
+    }
+
+    /**
      * Get human-readable status
      */
     public function getStatusLabelAttribute(): string
@@ -68,7 +77,9 @@ class ImportHistory extends Model
         return match($this->status) {
             'pending' => 'Pending',
             'analyzing' => 'Analyzing...',
-            'ready' => 'Ready to Import',
+            'ready' => 'Configure Mapping',
+            'generating_preview' => 'Generating Preview...',
+            'preview_ready' => 'Review & Approve',
             'importing' => 'Importing...',
             'completed' => 'Completed',
             'failed' => 'Failed',
@@ -85,6 +96,8 @@ class ImportHistory extends Model
             'pending' => 'gray',
             'analyzing' => 'info',
             'ready' => 'warning',
+            'generating_preview' => 'info',
+            'preview_ready' => 'success',
             'importing' => 'info',
             'completed' => 'success',
             'failed' => 'danger',
