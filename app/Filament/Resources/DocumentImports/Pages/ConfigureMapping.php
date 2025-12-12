@@ -29,12 +29,6 @@ class ConfigureMapping extends Page implements \Filament\Forms\Contracts\HasForm
     {
         $this->record = $this->resolveRecord($record);
         
-        // DEBUG: Log AI analysis structure
-        \Log::info('AI Analysis Structure', [
-            'ai_analysis' => $this->record->ai_analysis,
-            'column_mapping_db' => $this->record->column_mapping,
-        ]);
-        
         // Load existing mapping or use AI-suggested mapping
         $mapping = $this->record->column_mapping ?? [];
         
@@ -149,13 +143,10 @@ class ConfigureMapping extends Page implements \Filament\Forms\Contracts\HasForm
         
         $headers = [];
         
-        foreach ($columnMapping as $mapping) {
-            $column = $mapping['column'] ?? null;
+        // column_mapping is an object with column letters as keys
+        foreach ($columnMapping as $column => $mapping) {
             $label = $mapping['label'] ?? $column;
-            
-            if ($column) {
-                $headers[$column] = $label;
-            }
+            $headers[$column] = $label;
         }
         
         return $headers;
@@ -171,16 +162,13 @@ class ConfigureMapping extends Page implements \Filament\Forms\Contracts\HasForm
         
         $mapping = [];
         
-        foreach ($columnMapping as $item) {
-            $column = $item['column'] ?? null;
-            
-            if ($column) {
-                $mapping[$column] = [
-                    'label' => $item['label'] ?? $column,
-                    'field' => $item['maps_to'] ?? null,
-                    'confidence' => $item['confidence'] ?? null,
-                ];
-            }
+        // column_mapping is an object with column letters as keys
+        foreach ($columnMapping as $column => $item) {
+            $mapping[$column] = [
+                'label' => $item['label'] ?? $column,
+                'field' => $item['field'] ?? null,
+                'confidence' => isset($item['confidence']) ? ($item['confidence'] * 100) : null,
+            ];
         }
         
         return $mapping;
