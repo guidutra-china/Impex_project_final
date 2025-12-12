@@ -21,8 +21,10 @@ class ConfigureMapping extends Page
 
     public ?array $data = [];
     
-    public function mount(): void
+    public function mount(int | string $record): void
     {
+        $this->record = $this->resolveRecord($record);
+        
         // Load existing mapping or use AI-suggested mapping
         $mapping = $this->record->column_mapping ?? [];
         
