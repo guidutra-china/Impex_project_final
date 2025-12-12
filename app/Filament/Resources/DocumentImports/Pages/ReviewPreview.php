@@ -20,7 +20,7 @@ class ReviewPreview extends Page implements HasTable
 
     protected static string $resource = DocumentImportResource::class;
     
-    protected static string $view = 'filament.resources.document-imports.pages.review-preview';
+    protected string $view = 'filament.resources.document-imports.pages.review-preview';
 
     public function table(Table $table): Table
     {

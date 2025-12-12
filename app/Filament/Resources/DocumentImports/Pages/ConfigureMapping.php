@@ -15,7 +15,7 @@ class ConfigureMapping extends Page
 {
     protected static string $resource = DocumentImportResource::class;
     
-    protected static string $view = 'filament.resources.document-imports.pages.configure-mapping';
+    protected string $view = 'filament.resources.document-imports.pages.configure-mapping';
 
     public ?array $data = [];
     
