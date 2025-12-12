@@ -156,7 +156,7 @@ class GenerateImportPreviewJob implements ShouldQueue
             'import_history_id' => $this->importHistory->id,
             'row_number' => $rowNumber,
             'raw_data' => $rowData,
-            ...$mappedData,
+            'data' => $mappedData, // Save all mapped data in JSON field
             'photo_temp_path' => $photoInfo['path'] ?? null,
             'photo_url' => $mappedData['photo_url'] ?? null,
             'photo_status' => $photoInfo['status'] ?? 'none',
