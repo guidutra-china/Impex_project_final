@@ -23,6 +23,11 @@ class ReviewPreview extends Page implements HasTable
     
     protected string $view = 'filament.resources.document-imports.pages.review-preview';
 
+    public function mount(int | string $record): void
+    {
+        $this->record = $this->resolveRecord($record);
+    }
+
     public function table(Table $table): Table
     {
         return $table
