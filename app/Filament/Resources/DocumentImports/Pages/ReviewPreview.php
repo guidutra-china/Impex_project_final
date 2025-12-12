@@ -64,20 +64,23 @@ class ReviewPreview extends Page implements HasTable
                     })
                     ->sortable(),
                 
-                Tables\Columns\TextColumn::make('data.sku')
+                Tables\Columns\TextColumn::make('sku')
                     ->label('SKU')
+                    ->getStateUsing(fn ($record) => $record->data['sku'] ?? '-')
                     ->searchable()
                     ->sortable()
                     ->limit(20),
                 
-                Tables\Columns\TextColumn::make('data.name')
+                Tables\Columns\TextColumn::make('name')
                     ->label('Product Name')
+                    ->getStateUsing(fn ($record) => $record->data['name'] ?? '-')
                     ->searchable()
                     ->limit(40)
                     ->wrap(),
                 
-                Tables\Columns\TextColumn::make('data.price')
+                Tables\Columns\TextColumn::make('price')
                     ->label('Price')
+                    ->getStateUsing(fn ($record) => $record->data['price'] ?? null)
                     ->money('USD')
                     ->sortable(),
                 
