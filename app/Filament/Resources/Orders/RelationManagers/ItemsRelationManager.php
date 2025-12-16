@@ -21,7 +21,7 @@ use Filament\Notifications\Notification;
 use Filament\Actions\Action;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Schemas\Components\Grid;
-use Filament\Forms\Get;
+use Filament\Schemas\Components\Utilities\Get;
 
 class ItemsRelationManager extends RelationManager
 {
