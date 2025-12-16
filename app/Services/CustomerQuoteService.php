@@ -22,11 +22,6 @@ class CustomerQuoteService
     public function generate(Order $order, array $supplierQuoteIds, array $options = []): CustomerQuote
     {
         return DB::transaction(function () use ($order, $supplierQuoteIds, $options) {
-            \Log::info('CustomerQuoteService: Starting generation', [
-                'order_id' => $order->id,
-                'supplier_quote_ids' => $supplierQuoteIds,
-            ]);
-
             // Create the customer quote
             $customerQuote = CustomerQuote::create([
                 'order_id' => $order->id,
@@ -43,44 +38,16 @@ class CustomerQuoteService
                 ->with(['supplier', 'items', 'items.product'])
                 ->get();
 
-            \Log::info('CustomerQuoteService: Loaded supplier quotes', [
-                'count' => $supplierQuotes->count(),
-                'ids' => $supplierQuotes->pluck('id')->toArray(),
-            ]);
-
             // Create customer quote items
             $displayOrder = 1;
             foreach ($supplierQuotes as $supplierQuote) {
-                \Log::info('CustomerQuoteService: Creating item', [
-                    'supplier_quote_id' => $supplierQuote->id,
-                    'display_order' => $displayOrder,
-                ]);
-
-                try {
-                    $item = $this->createQuoteItem(
-                        $customerQuote,
-                        $supplierQuote,
-                        $displayOrder++,
-                        $options['display_names'][$supplierQuote->id] ?? null
-                    );
-
-                    \Log::info('CustomerQuoteService: Item created', [
-                        'item_id' => $item->id,
-                        'display_name' => $item->display_name,
-                    ]);
-                } catch (\Exception $e) {
-                    \Log::error('CustomerQuoteService: Failed to create item', [
-                        'supplier_quote_id' => $supplierQuote->id,
-                        'error' => $e->getMessage(),
-                        'trace' => $e->getTraceAsString(),
-                    ]);
-                    throw $e;
-                }
+                $this->createQuoteItem(
+                    $customerQuote,
+                    $supplierQuote,
+                    $displayOrder++,
+                    $options['display_names'][$supplierQuote->id] ?? null
+                );
             }
-
-            \Log::info('CustomerQuoteService: Finished creating items', [
-                'total_items' => $displayOrder - 1,
-            ]);
 
             return $customerQuote->fresh('items');
         });
