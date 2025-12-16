@@ -4,9 +4,9 @@ namespace App\Filament\Resources\CompanySettings\Schemas;
 
 use App\Filament\Traits\SecureFileUpload;
 use Filament\Forms\Components\FileUpload;
-use Filament\Forms\Components\Tabs;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Section;
 
 class CompanySettingsForm
