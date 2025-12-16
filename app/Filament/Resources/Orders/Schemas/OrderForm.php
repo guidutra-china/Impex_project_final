@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Orders\Schemas;
 
+use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -181,7 +182,14 @@ class OrderForm
                     ->label('RFQ Quotation Instructions')
                     ->helperText('Custom instructions for this RFQ (leave empty to use company default)')
                     ->rows(5)
-                    ->columnSpanFull(),
+                    ->columnSpan(2),
+
+                DatePicker::make('quotation_deadline')
+                    ->label('Quotation Deadline')
+                    ->helperText('Deadline for suppliers to submit their quotations')
+                    ->native(false)
+                    ->displayFormat('d/m/Y')
+                    ->columnSpan(1),
             ]),
 
 

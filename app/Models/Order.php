@@ -40,6 +40,7 @@ class Order extends Model
         'customer_notes',
         'notes',
         'quotation_instructions',
+        'quotation_deadline',
         'total_amount',
         'selected_quote_id',
         'created_by',
@@ -50,6 +51,7 @@ class Order extends Model
         'commission_percent' => 'decimal:2',
         'commission_percent_average' => 'decimal:2',
         'total_amount' => 'integer',
+        'quotation_deadline' => 'date',
     ];
 
     /**

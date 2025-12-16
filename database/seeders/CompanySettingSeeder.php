@@ -34,7 +34,7 @@ class CompanySettingSeeder extends Seeder
                 'invoice_prefix' => 'INV',
                 'quote_prefix' => 'QT',
                 'po_prefix' => 'PO',
-                'rfq_default_instructions' => "Please provide your best quotation including:\n\n• Unit price and total price for each item\n• Lead time / delivery time\n• Minimum Order Quantity (MOQ) if applicable\n• Payment terms and conditions\n• Validity period of your quotation\n• Any additional costs (tooling, setup, shipping, etc.)\n\nPlease submit your quotation by the specified deadline.",
+                'rfq_default_instructions' => "Please provide your best quotation including:\n\n• Unit price and total price for each item\n• Lead time / delivery time\n• Minimum Order Quantity (MOQ) if applicable\n• Payment terms and conditions\n• Validity period of your quotation\n• Any additional costs (tooling, setup, shipping, etc.)",
                 'po_terms' => "Standard Purchase Order Terms:\n\n1. Payment terms as agreed\n2. Delivery as per schedule\n3. Quality inspection upon receipt\n4. Warranty as specified\n5. Compliance with all applicable regulations",
                 'packing_list_prefix' => 'PL',
                 'commercial_invoice_prefix' => 'CI',

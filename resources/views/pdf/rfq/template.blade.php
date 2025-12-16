@@ -31,6 +31,9 @@
             <div class="document-number">RFQ #{{ $model->order_number }}</div>
             <div style="margin-top: 15px;">
                 <p><strong>Date:</strong> {{ ($model->order_date ?? $model->created_at)->format('M d, Y') }}</p>
+                @if($model->quotation_deadline)
+                    <p><strong>Deadline:</strong> {{ $model->quotation_deadline->format('M d, Y') }}</p>
+                @endif
                 <p><strong>Valid Until:</strong> {{ $model->valid_until ? $model->valid_until->format('M d, Y') : 'N/A' }}</p>
             </div>
         </td>
@@ -132,7 +135,9 @@
         <td class="info-box">
             <h3>Quotation Instructions</h3>
             <div style="white-space: pre-line;">{{ $instructions }}</div>
-            <p style="margin-top: 15px;"><strong>Please submit your quotation by: {{ $model->valid_until ? $model->valid_until->format('M d, Y') : 'the specified date' }}</strong></p>
+            @if($model->quotation_deadline)
+                <p style="margin-top: 15px;"><strong>Please submit your quotation by: {{ $model->quotation_deadline->format('M d, Y') }}</strong></p>
+            @endif
         </td>
     </tr>
 </table>
