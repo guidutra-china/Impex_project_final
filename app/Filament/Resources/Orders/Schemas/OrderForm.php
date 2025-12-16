@@ -176,6 +176,12 @@ class OrderForm
                     ->helperText('Internal notes (not visible to customer)')
                     ->rows(3)
                     ->columnSpan(1),
+
+                Textarea::make('quotation_instructions')
+                    ->label('RFQ Quotation Instructions')
+                    ->helperText('Custom instructions for this RFQ (leave empty to use company default)')
+                    ->rows(5)
+                    ->columnSpanFull(),
             ]),
 
 

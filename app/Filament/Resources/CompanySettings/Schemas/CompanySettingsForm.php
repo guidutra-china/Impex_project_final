@@ -137,6 +137,13 @@ class CompanySettingsForm
                         ->columnSpan(2)
                         ->helperText('This text will appear at the bottom of all invoices')
                         ->placeholder('Thank you for your business!'),
+
+                    Textarea::make('rfq_default_instructions')
+                        ->label('RFQ Default Quotation Instructions')
+                        ->rows(8)
+                        ->columnSpan(2)
+                        ->helperText('Default instructions shown in all RFQ PDFs (can be overridden per RFQ)')
+                        ->placeholder("Please provide your best quotation including:\n\n• Unit price and total price for each item\n• Lead time / delivery time\n• Minimum Order Quantity (MOQ) if applicable\n• Payment terms and conditions\n• Validity period of your quotation\n• Any additional costs (tooling, setup, shipping, etc.)\n\nPlease submit your quotation by the specified deadline."),
                 ])
                 ->columns(2)
                 ->collapsible(),

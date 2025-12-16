@@ -39,6 +39,7 @@ class Order extends Model
         'incoterm_location',
         'customer_notes',
         'notes',
+        'quotation_instructions',
         'total_amount',
         'selected_quote_id',
         'created_by',

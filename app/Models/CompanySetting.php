@@ -32,6 +32,7 @@ class CompanySetting extends Model
         'invoice_prefix',
         'quote_prefix',
         'po_prefix',
+        'rfq_default_instructions',
     ];
 
     /**

@@ -33,6 +33,7 @@ return new class extends Migration
             $table->string('invoice_prefix', 255);
             $table->string('quote_prefix', 255);
             $table->string('po_prefix', 255);
+            $table->text('rfq_default_instructions')->nullable();
             $table->timestamps();
         });
     }

@@ -121,23 +121,22 @@
 </table>
 
 {{-- Important Instructions --}}
+@php
+    // Hybrid logic: Use Order-specific instructions if set, otherwise use Company default
+    $instructions = $model->quotation_instructions ?? $companySettings->rfq_default_instructions ?? null;
+@endphp
+
+@if($instructions)
 <table style="width: 100%; margin-top: 20px; margin-bottom: 20px;">
     <tr>
         <td class="info-box">
             <h3>Quotation Instructions</h3>
-            <p>Please provide your best quotation including:</p>
-            <ul style="margin-left: 20px; margin-top: 10px;">
-                <li>Unit price and total price for each item</li>
-                <li>Lead time / delivery time</li>
-                <li>Minimum Order Quantity (MOQ) if applicable</li>
-                <li>Payment terms and conditions</li>
-                <li>Validity period of your quotation</li>
-                <li>Any additional costs (tooling, setup, shipping, etc.)</li>
-            </ul>
+            <div style="white-space: pre-line;">{{ $instructions }}</div>
             <p style="margin-top: 15px;"><strong>Please submit your quotation by: {{ $model->valid_until ? $model->valid_until->format('M d, Y') : 'the specified date' }}</strong></p>
         </td>
     </tr>
 </table>
+@endif
 
 {{-- Notes --}}
 @if($model->notes || $model->customer_notes)

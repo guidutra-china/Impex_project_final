@@ -32,6 +32,7 @@ return new class extends Migration
             $table->decimal('commission_percent_average', 10, 2)->nullable();
             $table->text('customer_notes')->nullable();
             $table->text('notes')->nullable();
+            $table->text('quotation_instructions')->nullable()->comment('Custom instructions for this RFQ, overrides company default');
             $table->integer('total_amount')->default(0);
             $table->bigInteger('selected_quote_id')->nullable();
             $table->bigInteger('created_by')->nullable();
