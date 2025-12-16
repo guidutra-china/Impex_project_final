@@ -93,8 +93,12 @@
                 @if($item->product->customer_description)
                     <br><small style="color: #333;">{{ $item->product->customer_description }}</small>
                 @endif
-                @if($item->product->features)
-                    <br><small style="color: #666;">Features: {{ $item->product->features }}</small>
+                @if($item->product->features && $item->product->features->count() > 0)
+                    <br><small style="color: #666;">Features: 
+                    @foreach($item->product->features as $feature)
+                        {{ $feature->feature_name }}: {{ $feature->feature_value }}{{ !$loop->last ? ', ' : '' }}
+                    @endforeach
+                    </small>
                 @endif
                 @if($item->notes)
                     <br><small style="color: #666;">Note: {{ $item->notes }}</small>
