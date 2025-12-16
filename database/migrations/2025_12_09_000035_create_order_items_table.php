@@ -18,7 +18,7 @@ return new class extends Migration
             $table->integer('quantity');
             $table->integer('requested_unit_price')->nullable();
             $table->decimal('commission_percent', 10, 2);
-            // TODO: `commission_type` enum('embedded','separate') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'embedded'
+            $table->enum('commission_type', ['embedded', 'separate'])->default('embedded');
             $table->text('notes');
             $table->timestamp('deleted_at')->nullable();
             $table->timestamps();
