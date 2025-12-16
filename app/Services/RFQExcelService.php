@@ -326,6 +326,13 @@ class RFQExcelService
                 'filename' => $fileName,
             ]);
             
+            // Ensure directory exists
+            $fullDirectory = storage_path('app/' . $directory);
+            if (!file_exists($fullDirectory)) {
+                mkdir($fullDirectory, 0755, true);
+                \Log::info('RFQ: Created directory', ['directory' => $fullDirectory]);
+            }
+            
             // Read file content and store using Storage facade
             $fileContent = file_get_contents($filePath);
             \Log::info('RFQ: File content read', [
