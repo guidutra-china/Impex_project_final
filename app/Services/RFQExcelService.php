@@ -285,10 +285,11 @@ class RFQExcelService
             unlink($logoPngPath);
         }
 
-        // Save to Documents History
-        $this->saveToDocumentHistory($order, $filePath, $fileName);
+        // Save to Documents History and get the document record
+        $document = $this->saveToDocumentHistory($order, $filePath, $fileName);
 
-        return $filePath;
+        // Return the permanent storage path from the document record
+        return $document ? storage_path('app/' . $document->file_path) : $filePath;
     }
 
     /**
@@ -297,9 +298,9 @@ class RFQExcelService
      * @param Order $order
      * @param string $filePath
      * @param string $fileName
-     * @return void
+     * @return \App\Models\GeneratedDocument|null
      */
-    protected function saveToDocumentHistory(Order $order, string $filePath, string $fileName): void
+    protected function saveToDocumentHistory(Order $order, string $filePath, string $fileName): ?\App\Models\GeneratedDocument
     {
         \Log::info('RFQ: saveToDocumentHistory() METHOD CALLED', [
             'order_id' => $order->id,
@@ -366,12 +367,16 @@ class RFQExcelService
                 'file_path' => $storagePath,
                 'document_id' => $document->id,
             ]);
+            
+            return $document;
         } catch (\Exception $e) {
             \Log::error('Failed to save RFQ to document history', [
                 'order_id' => $order->id,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
+            
+            return null;
         }
     }
 
