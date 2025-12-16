@@ -36,8 +36,9 @@ class CustomerQuoteService
                 'created_by' => auth()->id(),
             ]);
 
-            // Get supplier quotes with items
-            $supplierQuotes = SupplierQuote::whereIn('id', $supplierQuoteIds)
+            // Get supplier quotes with items (without global scopes)
+            $supplierQuotes = SupplierQuote::withoutGlobalScopes()
+                ->whereIn('id', $supplierQuoteIds)
                 ->where('order_id', $order->id)
                 ->with(['supplier', 'items', 'items.product'])
                 ->get();
