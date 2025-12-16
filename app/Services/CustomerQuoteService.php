@@ -31,10 +31,10 @@ class CustomerQuoteService
                 'created_by' => auth()->id(),
             ]);
 
-            // Get supplier quotes
+            // Get supplier quotes with items
             $supplierQuotes = SupplierQuote::whereIn('id', $supplierQuoteIds)
                 ->where('order_id', $order->id)
-                ->with('supplier')
+                ->with(['supplier', 'items', 'items.product'])
                 ->get();
 
             // Create customer quote items

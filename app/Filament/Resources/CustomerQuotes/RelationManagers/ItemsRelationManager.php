@@ -15,6 +15,8 @@ class ItemsRelationManager extends RelationManager
 
     protected static ?string $title = 'Quote Options';
 
+    protected static ?string $recordTitleAttribute = 'display_name';
+
     public function form(Schema $schema): Schema
     {
         return $schema
@@ -27,72 +29,102 @@ class ItemsRelationManager extends RelationManager
     {
         return $table
             ->columns([
-                TextColumn::make('option_label')
+                TextColumn::make('display_name')
                     ->label('Option')
                     ->badge()
-                    ->color('info')
-                    ->weight('bold'),
+                    ->color('primary')
+                    ->size('lg')
+                    ->weight('bold')
+                    ->sortable(),
 
                 TextColumn::make('supplierQuote.supplier.name')
-                    ->label('Supplier (Internal)')
+                    ->label('Supplier (Internal Only)')
                     ->toggleable()
-                    ->placeholder('N/A'),
+                    ->toggledHiddenByDefault()
+                    ->description('Hidden from customer')
+                    ->color('gray'),
 
-                TextColumn::make('product.name')
-                    ->label('Product')
-                    ->searchable()
-                    ->sortable()
-                    ->wrap(),
-
-                TextColumn::make('product.sku')
-                    ->label('SKU')
-                    ->searchable()
-                    ->toggleable(),
-
-                TextColumn::make('quantity')
-                    ->label('Quantity')
-                    ->numeric()
-                    ->sortable(),
-
-                TextColumn::make('unit_price')
-                    ->label('Unit Price')
+                TextColumn::make('price_before_commission')
+                    ->label('Base Price')
                     ->money(fn ($record) => $record->customerQuote->order->currency->code ?? 'USD', divideBy: 100)
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable()
+                    ->visible(fn ($record) => $record->commission_amount > 0),
 
-                TextColumn::make('total_price')
+                TextColumn::make('commission_amount')
+                    ->label('Commission')
+                    ->money(fn ($record) => $record->customerQuote->order->currency->code ?? 'USD', divideBy: 100)
+                    ->sortable()
+                    ->toggleable()
+                    ->visible(fn ($record) => $record->commission_amount > 0)
+                    ->color('warning'),
+
+                TextColumn::make('price_after_commission')
                     ->label('Total Price')
                     ->money(fn ($record) => $record->customerQuote->order->currency->code ?? 'USD', divideBy: 100)
                     ->sortable()
-                    ->weight('bold'),
+                    ->weight('bold')
+                    ->size('lg')
+                    ->color('success'),
 
-                TextColumn::make('lead_time_days')
-                    ->label('Lead Time')
-                    ->suffix(' days')
-                    ->sortable()
-                    ->placeholder('N/A'),
+                TextColumn::make('delivery_time')
+                    ->label('Delivery Time')
+                    ->placeholder('Not specified')
+                    ->icon('heroicon-o-clock')
+                    ->sortable(),
 
-                TextColumn::make('is_selected')
-                    ->label('Selected')
+                TextColumn::make('moq')
+                    ->label('MOQ')
+                    ->numeric()
+                    ->placeholder('N/A')
+                    ->toggleable()
+                    ->sortable(),
+
+                TextColumn::make('highlights')
+                    ->label('Highlights')
+                    ->wrap()
+                    ->lineClamp(2)
+                    ->placeholder('No highlights')
+                    ->toggleable(),
+
+                TextColumn::make('is_selected_by_customer')
+                    ->label('Customer Selection')
                     ->badge()
                     ->color(fn (bool $state): string => $state ? 'success' : 'gray')
-                    ->formatStateUsing(fn (bool $state): string => $state ? 'Yes' : 'No'),
+                    ->formatStateUsing(fn (bool $state): string => $state ? '✓ Selected' : 'Not selected')
+                    ->sortable(),
+
+                TextColumn::make('display_order')
+                    ->label('Order')
+                    ->numeric()
+                    ->sortable()
+                    ->toggleable()
+                    ->toggledHiddenByDefault(),
+
+                TextColumn::make('created_at')
+                    ->label('Created')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable()
+                    ->toggledHiddenByDefault(),
             ])
             ->filters([
                 //
             ])
             ->headerActions([
-                // Items are created through the service
+                // Items are created via CustomerQuoteService, not manually
             ])
             ->actions([
-                // Items are not directly editable
+                // View supplier quote details could be added here
             ])
             ->bulkActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),
             ])
-            ->defaultSort('option_label', 'asc')
+            ->defaultSort('display_order', 'asc')
             ->emptyStateHeading('No quote options')
-            ->emptyStateDescription('Quote options are automatically generated from supplier quotes.');
+            ->emptyStateDescription('Generate a customer quote from supplier quotes to see options here.')
+            ->emptyStateIcon('heroicon-o-inbox');
     }
 }
