@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::table('company_settings', function (Blueprint $table) {
             $table->text('po_terms')->nullable()->after('po_prefix');
-            $table->string('packing_list_prefix', 10)->default('PL')->after('po_terms');
-            $table->string('commercial_invoice_prefix', 10)->default('CI')->after('packing_list_prefix');
+            $table->string('packing_list_prefix', 10)->nullable()->default('PL')->after('po_terms');
+            $table->string('commercial_invoice_prefix', 10)->nullable()->default('CI')->after('packing_list_prefix');
         });
     }
 
