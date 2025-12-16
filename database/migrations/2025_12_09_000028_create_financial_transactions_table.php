@@ -15,8 +15,8 @@ return new class extends Migration
             $table->id();
             $table->string('transaction_number', 50);
             $table->text('description');
-            // TODO: `type` enum('payable','receivable') COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'payable = Conta a Pagar, receivable = Conta a Receber'
-            // TODO: `status` enum('pending','partially_paid','paid','overdue','cancelled') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'pending'
+            $table->enum('type', ['payable', 'receivable'])->comment('payable = Conta a Pagar, receivable = Conta a Receber');
+            $table->enum('status', ['pending', 'partially_paid', 'paid', 'overdue', 'cancelled'])->default('pending');
             $table->bigInteger('amount');
             $table->bigInteger('paid_amount');
             $table->bigInteger('currency_id');
