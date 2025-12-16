@@ -10,6 +10,7 @@ use Filament\Actions\EditAction;
 use Filament\Tables\Columns\BadgeColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -94,10 +95,15 @@ class CustomerQuotesTable
                     ->preload()
                     ->label('RFQ'),
 
-                SelectFilter::make('expired')
-                    ->query(fn (Builder $query): Builder => $query->where('expires_at', '<', now()))
-                    ->label('Show Expired Only')
-                    ->toggle(),
+                TernaryFilter::make('expired')
+                    ->label('Expired Status')
+                    ->placeholder('All quotes')
+                    ->trueLabel('Expired only')
+                    ->falseLabel('Not expired only')
+                    ->queries(
+                        true: fn (Builder $query) => $query->where('expires_at', '<', now()),
+                        false: fn (Builder $query) => $query->where('expires_at', '>=', now()),
+                    ),
             ])
             ->actions([
                 Action::make('view')
