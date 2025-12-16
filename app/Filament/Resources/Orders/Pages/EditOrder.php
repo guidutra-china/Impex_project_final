@@ -117,7 +117,7 @@ class EditOrder extends EditRecord
     protected function getFooterWidgets(): array
     {
         return [
-            \App\Filament\Widgets\ProjectExpensesWidget::class,
+            // ProjectExpensesWidget moved to Proforma Invoice
             \App\Filament\Widgets\RelatedDocumentsWidget::class,
         ];
     }
