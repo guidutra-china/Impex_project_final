@@ -27,7 +27,11 @@ class CustomerQuote extends Model
         'approved_at',
         'rejected_at',
         'expires_at',
+        'viewed_at',
+        'responded_at',
         'approved_by_user_id',
+        'commission_type',
+        'commission_percent',
         'customer_notes',
         'internal_notes',
         'created_by',
@@ -39,6 +43,8 @@ class CustomerQuote extends Model
         'approved_at' => 'datetime',
         'rejected_at' => 'datetime',
         'expires_at' => 'datetime',
+        'viewed_at' => 'datetime',
+        'responded_at' => 'datetime',
     ];
 
     /**

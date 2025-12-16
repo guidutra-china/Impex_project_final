@@ -7,6 +7,7 @@ use App\Models\FinancialCategory;
 use App\Repositories\OrderRepository;
 use App\Repositories\FinancialTransactionRepository;
 use App\Services\RFQExcelService;
+use App\Services\CustomerQuoteService;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Forms\Components\DatePicker;
@@ -34,6 +35,50 @@ class EditOrder extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
+            Action::make('generate_customer_quote')
+                ->label('Generate Customer Quote')
+                ->icon('heroicon-o-document-text')
+                ->color('success')
+                ->visible(fn() => $this->record->supplierQuotes()->where('status', '!=', 'draft')->count() > 0)
+                ->form([
+                    \Filament\Forms\Components\CheckboxList::make('supplier_quote_ids')
+                        ->label('Select Supplier Quotes to Include')
+                        ->options(function () {
+                            return $this->record->supplierQuotes()
+                                ->where('status', '!=', 'draft')
+                                ->with('supplier')
+                                ->get()
+                                ->mapWithKeys(function ($quote) {
+                                    $price = number_format($quote->total_price_after_commission / 100, 2);
+                                    $currency = $quote->currency->code ?? 'USD';
+                                    return [
+                                        $quote->id => "{$quote->supplier->name} - {$currency} {$price} ({$quote->quote_number})"
+                                    ];
+                                });
+                        })
+                        ->required()
+                        ->minItems(1)
+                        ->helperText('Select at least one supplier quote to include in the customer quote'),
+                    
+                    TextInput::make('expiry_days')
+                        ->label('Validity Period (Days)')
+                        ->numeric()
+                        ->default(7)
+                        ->required()
+                        ->minValue(1)
+                        ->maxValue(90)
+                        ->helperText('Number of days before the quote expires'),
+                    
+                    Textarea::make('internal_notes')
+                        ->label('Internal Notes')
+                        ->rows(3)
+                        ->maxLength(500)
+                        ->helperText('Notes for internal use (not visible to customer)'),
+                ])
+                ->action(function (array $data) {
+                    $this->handleGenerateCustomerQuote($data);
+                }),
+            
             Action::make('add_project_expense')
                 ->label('Add Project Expense')
                 ->icon('heroicon-o-plus-circle')
@@ -218,6 +263,51 @@ class EditOrder extends EditRecord
                 ->send();
 
             \Log::error('Erro ao adicionar despesa de projeto', [
+                'order_id' => $order->id,
+                'data' => $data,
+                'error' => $e->getMessage(),
+            ]);
+        }
+    }
+
+    /**
+     * Handle customer quote generation
+     * 
+     * @param array $data Form data
+     */
+    protected function handleGenerateCustomerQuote(array $data): void
+    {
+        $order = $this->record;
+
+        try {
+            $service = app(CustomerQuoteService::class);
+            
+            $customerQuote = $service->generate(
+                $order,
+                $data['supplier_quote_ids'],
+                [
+                    'expiry_days' => $data['expiry_days'] ?? 7,
+                    'internal_notes' => $data['internal_notes'] ?? null,
+                ]
+            );
+
+            Notification::make()
+                ->title('Customer Quote Generated')
+                ->success()
+                ->body("Quote {$customerQuote->quote_number} has been created with {$customerQuote->items->count()} options.")
+                ->send();
+
+            // Redirect to the customer quote view (will be implemented in Phase 3)
+            // For now, just refresh the page
+            $this->redirect($this->getResource()::getUrl('edit', ['record' => $order->id]));
+        } catch (\Exception $e) {
+            Notification::make()
+                ->title('Error Generating Quote')
+                ->danger()
+                ->body($e->getMessage())
+                ->send();
+
+            \Log::error('Error generating customer quote', [
                 'order_id' => $order->id,
                 'data' => $data,
                 'error' => $e->getMessage(),
