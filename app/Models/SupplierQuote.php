@@ -142,6 +142,14 @@ class SupplierQuote extends Model
     }
 
     /**
+     * Get the customer quote items that reference this supplier quote
+     */
+    public function customerQuoteItems(): HasMany
+    {
+        return $this->hasMany(CustomerQuoteItem::class);
+    }
+
+    /**
      * Get the user who created this quote
      */
     public function createdBy(): BelongsTo

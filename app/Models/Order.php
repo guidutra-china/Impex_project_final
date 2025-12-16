@@ -117,6 +117,22 @@ class Order extends Model
     }
 
     /**
+     * Get the customer quotes for this order
+     */
+    public function customerQuotes(): HasMany
+    {
+        return $this->hasMany(CustomerQuote::class);
+    }
+
+    /**
+     * Get the latest customer quote
+     */
+    public function latestCustomerQuote()
+    {
+        return $this->customerQuotes()->latest()->first();
+    }
+
+    /**
      * Get quotes that have been sent to customer
      */
     public function sentQuotes(): HasManyThrough
