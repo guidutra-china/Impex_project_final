@@ -152,6 +152,13 @@ class OrderForm
                                     ->placeholder('e.g., Shanghai Port, New York')
                                     ->helperText('Specific location for the INCOTERM')
                                     ->columnSpan(1),
+
+                                DatePicker::make('quotation_deadline')
+                                    ->label('Quotation Deadline')
+                                    ->helperText('Deadline for suppliers to submit their quotations')
+                                    ->native(false)
+                                    ->displayFormat('d/m/Y')
+                                    ->columnSpan(1),
                             ])
                             ->columns([
                                 'default' => 1,  // 1 coluna em mobile
@@ -182,14 +189,7 @@ class OrderForm
                     ->label('RFQ Quotation Instructions')
                     ->helperText('Custom instructions for this RFQ (leave empty to use company default)')
                     ->rows(5)
-                    ->columnSpan(2),
-
-                DatePicker::make('quotation_deadline')
-                    ->label('Quotation Deadline')
-                    ->helperText('Deadline for suppliers to submit their quotations')
-                    ->native(false)
-                    ->displayFormat('d/m/Y')
-                    ->columnSpan(1),
+                    ->columnSpanFull(),
             ]),
 
 
