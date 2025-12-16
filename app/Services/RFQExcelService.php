@@ -353,7 +353,7 @@ class RFQExcelService
             $document = \App\Models\GeneratedDocument::createFromFile(
                 $order,
                 'rfq',
-                'excel',
+                'xlsx',
                 $storagePath,
                 [
                     'document_number' => $order->order_number,
