@@ -10,6 +10,13 @@ class OrderItem extends Model
 {
     use SoftDeletes;
 
+    /**
+     * All of the relationships to be touched.
+     * This will update the parent Order's updated_at timestamp
+     * whenever an OrderItem is created, updated, or deleted.
+     */
+    protected $touches = ['order'];
+
     protected $fillable = [
         'order_id',
         'product_id',
