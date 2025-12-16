@@ -33,6 +33,9 @@ class CompanySetting extends Model
         'quote_prefix',
         'po_prefix',
         'rfq_default_instructions',
+        'po_terms',
+        'packing_list_prefix',
+        'commercial_invoice_prefix',
     ];
 
     /**

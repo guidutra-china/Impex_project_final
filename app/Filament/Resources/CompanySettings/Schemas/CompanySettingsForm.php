@@ -4,6 +4,7 @@ namespace App\Filament\Resources\CompanySettings\Schemas;
 
 use App\Filament\Traits\SecureFileUpload;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Tabs;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Section;
@@ -112,40 +113,91 @@ class CompanySettingsForm
                 ->collapsible(),
 
             Section::make('Document Settings')
+                ->description('Configure settings for different document types')
                 ->schema([
-                    TextInput::make('invoice_prefix')
-                        ->label('Invoice Prefix')
-                        ->default('INV')
-                        ->maxLength(10)
-                        ->helperText('Prefix for invoice numbers (e.g., INV, PI, SI)'),
+                    Tabs::make('DocumentTypes')
+                        ->tabs([
+                            Tabs\Tab::make('RFQ')
+                                ->icon('heroicon-o-document-text')
+                                ->schema([
+                                    TextInput::make('quote_prefix')
+                                        ->label('RFQ Number Prefix')
+                                        ->default('RFQ')
+                                        ->maxLength(10)
+                                        ->required()
+                                        ->helperText('Prefix for RFQ numbers (e.g., RFQ, QT)')
+                                        ->columnSpan(1),
 
-                    TextInput::make('quote_prefix')
-                        ->label('Quote Prefix')
-                        ->default('QT')
-                        ->maxLength(10)
-                        ->helperText('Prefix for quote numbers'),
+                                    Textarea::make('rfq_default_instructions')
+                                        ->label('Default Quotation Instructions')
+                                        ->rows(10)
+                                        ->columnSpanFull()
+                                        ->helperText('Default instructions shown in all RFQ PDFs (can be overridden per RFQ)')
+                                        ->placeholder("Please provide your best quotation including:\n\n• Unit price and total price for each item\n• Lead time / delivery time\n• Minimum Order Quantity (MOQ) if applicable\n• Payment terms and conditions\n• Validity period of your quotation\n• Any additional costs (tooling, setup, shipping, etc.)\n\nPlease submit your quotation by the specified deadline."),
+                                ])
+                                ->columns(2),
 
-                    TextInput::make('po_prefix')
-                        ->label('Purchase Order Prefix')
-                        ->default('PO')
-                        ->maxLength(10)
-                        ->helperText('Prefix for purchase order numbers'),
+                            Tabs\Tab::make('Proforma Invoice')
+                                ->icon('heroicon-o-document-currency-dollar')
+                                ->schema([
+                                    TextInput::make('invoice_prefix')
+                                        ->label('Proforma Invoice Prefix')
+                                        ->default('PI')
+                                        ->maxLength(10)
+                                        ->required()
+                                        ->helperText('Prefix for proforma invoice numbers')
+                                        ->columnSpan(1),
 
-                    Textarea::make('footer_text')
-                        ->label('Invoice Footer Text')
-                        ->rows(3)
-                        ->columnSpan(2)
-                        ->helperText('This text will appear at the bottom of all invoices')
-                        ->placeholder('Thank you for your business!'),
+                                    Textarea::make('footer_text')
+                                        ->label('Footer Text')
+                                        ->rows(3)
+                                        ->columnSpanFull()
+                                        ->helperText('This text will appear at the bottom of proforma invoices')
+                                        ->placeholder('Thank you for your business!'),
+                                ])
+                                ->columns(2),
 
-                    Textarea::make('rfq_default_instructions')
-                        ->label('RFQ Default Quotation Instructions')
-                        ->rows(8)
-                        ->columnSpan(2)
-                        ->helperText('Default instructions shown in all RFQ PDFs (can be overridden per RFQ)')
-                        ->placeholder("Please provide your best quotation including:\n\n• Unit price and total price for each item\n• Lead time / delivery time\n• Minimum Order Quantity (MOQ) if applicable\n• Payment terms and conditions\n• Validity period of your quotation\n• Any additional costs (tooling, setup, shipping, etc.)\n\nPlease submit your quotation by the specified deadline."),
+                            Tabs\Tab::make('Purchase Order')
+                                ->icon('heroicon-o-shopping-cart')
+                                ->schema([
+                                    TextInput::make('po_prefix')
+                                        ->label('Purchase Order Prefix')
+                                        ->default('PO')
+                                        ->maxLength(10)
+                                        ->required()
+                                        ->helperText('Prefix for purchase order numbers')
+                                        ->columnSpan(1),
+
+                                    Textarea::make('po_terms')
+                                        ->label('Default Terms & Conditions')
+                                        ->rows(8)
+                                        ->columnSpanFull()
+                                        ->helperText('Default terms and conditions for purchase orders')
+                                        ->placeholder('Standard purchase order terms and conditions...'),
+                                ])
+                                ->columns(2),
+
+                            Tabs\Tab::make('Other Documents')
+                                ->icon('heroicon-o-document-duplicate')
+                                ->schema([
+                                    TextInput::make('packing_list_prefix')
+                                        ->label('Packing List Prefix')
+                                        ->default('PL')
+                                        ->maxLength(10)
+                                        ->helperText('Prefix for packing list numbers')
+                                        ->columnSpan(1),
+
+                                    TextInput::make('commercial_invoice_prefix')
+                                        ->label('Commercial Invoice Prefix')
+                                        ->default('CI')
+                                        ->maxLength(10)
+                                        ->helperText('Prefix for commercial invoice numbers')
+                                        ->columnSpan(1),
+                                ])
+                                ->columns(2),
+                        ])
+                        ->columnSpanFull(),
                 ])
-                ->columns(2)
                 ->collapsible(),
         ];
     }
