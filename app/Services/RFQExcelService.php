@@ -166,14 +166,14 @@ class RFQExcelService
         $currentRow++;
 
         // Table headers
-        $sheet->setCellValue('A' . $currentRow, 'Product Name');
+        $sheet->setCellValue('A' . $currentRow, 'Product Description');
         $sheet->setCellValue('B' . $currentRow, 'Quantity');
         
         if ($items->isNotEmpty()) {
-            // When items exist: Target Price | Supplier Price | Features
+            // When items exist: Target Price | Supplier Price | Total Target
             $sheet->setCellValue('C' . $currentRow, 'Target Price');
             $sheet->setCellValue('D' . $currentRow, 'Supplier Price');
-            $sheet->setCellValue('E' . $currentRow, 'Features');
+            $sheet->setCellValue('E' . $currentRow, 'Total Target');
             $sheet->getStyle('A' . $currentRow . ':E' . $currentRow)->applyFromArray($labelStyle);
         } else {
             // When no items: Unit Price | Description / Features (no Supplier Price column)
@@ -188,8 +188,35 @@ class RFQExcelService
             foreach ($items as $item) {
                 $startRow = $currentRow;
                 
-                // Product name
-                $sheet->setCellValue('A' . $currentRow, $item->product->name ?? 'N/A');
+                // Product description (name + code + customer description + features)
+                $productDescription = $item->product->name ?? 'N/A';
+                
+                // Add product code
+                if ($item->product->code) {
+                    $productDescription .= "\nCode: " . $item->product->code;
+                }
+                
+                // Add customer description
+                if ($item->product->customer_description) {
+                    $productDescription .= "\n" . $item->product->customer_description;
+                }
+                
+                // Add features
+                $features = $item->product->features ?? collect();
+                if ($features->isNotEmpty()) {
+                    $featuresList = $features->map(function ($feature) {
+                        return "{$feature->feature_name}: {$feature->feature_value}";
+                    })->implode(', ');
+                    $productDescription .= "\nFeatures: " . $featuresList;
+                }
+                
+                // Add item notes
+                if ($item->notes) {
+                    $productDescription .= "\nNote: " . $item->notes;
+                }
+                
+                $sheet->setCellValue('A' . $currentRow, $productDescription);
+                $sheet->getStyle('A' . $currentRow)->getAlignment()->setWrapText(true);
                 
                 // Quantity
                 $sheet->setCellValue('B' . $currentRow, $item->quantity);
@@ -204,22 +231,14 @@ class RFQExcelService
                 $sheet->setCellValue('D' . $currentRow, '');
                 $sheet->getStyle('D' . $currentRow)->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB('FFFFCC'); // Light yellow
                 
-                // Features
-                $features = $item->product->features ?? collect();
-                if ($features->isNotEmpty()) {
-                    $featuresList = $features->map(function ($feature) {
-                        $unit = $feature->unit ? " {$feature->unit}" : '';
-                        return "• {$feature->feature_name}: {$feature->feature_value}{$unit}";
-                    })->implode("\n");
-                    $sheet->setCellValue('E' . $currentRow, $featuresList);
-                    $sheet->getStyle('E' . $currentRow)->getAlignment()->setWrapText(true);
-                    
-                    // Adjust row height based on number of features
-                    $rowHeight = max(30, $features->count() * 15);
-                    $sheet->getRowDimension($currentRow)->setRowHeight($rowHeight);
-                } else {
-                    $sheet->setCellValue('E' . $currentRow, 'No features');
-                }
+                // Total column (optional - can be calculated)
+                $totalTarget = $item->requested_unit_price 
+                    ? number_format($item->requested_unit_price * $item->quantity, 2)
+                    : 'N/A';
+                $sheet->setCellValue('E' . $currentRow, $totalTarget);
+                
+                // Adjust row height for wrapped text
+                $sheet->getRowDimension($currentRow)->setRowHeight(60);
 
                 // Apply borders
                 $sheet->getStyle('A' . $currentRow . ':E' . $currentRow)->applyFromArray([
