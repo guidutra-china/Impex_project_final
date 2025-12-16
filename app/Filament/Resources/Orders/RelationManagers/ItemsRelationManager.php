@@ -14,8 +14,14 @@ use Filament\Forms\Components\TextInput;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\TextInputColumn;
+use Filament\Tables\Columns\SelectColumn;
 use Filament\Tables\Table;
 use Filament\Notifications\Notification;
+use Filament\Actions\Action;
+use Filament\Forms\Components\CheckboxList;
+use Filament\Forms\Components\Grid;
+use Filament\Forms\Get;
 
 class ItemsRelationManager extends RelationManager
 {
@@ -152,29 +158,34 @@ Notification::make()
                     ->searchable()
                     ->wrap(),
 
-                TextColumn::make('quantity')
-                    ->alignCenter(),
+                TextInputColumn::make('quantity')
+                    ->label('Quantity')
+                    ->rules(['required', 'numeric', 'min:1'])
+                    ->alignCenter()
+                    ->sortable(),
 
-                TextColumn::make('requested_unit_price')
+                TextInputColumn::make('requested_unit_price')
                     ->label('Target Price')
-                    ->money(fn () => $this->getOwnerRecord()->currency?->code ?? 'USD')
-                    ->placeholder('Not set'),
+                    ->rules(['nullable', 'numeric', 'min:0'])
+                    ->placeholder('Not set')
+                    ->prefix('$')
+                    ->sortable(),
 
-                TextColumn::make('commission_percent')
-                    ->label('Commission')
+                TextInputColumn::make('commission_percent')
+                    ->label('Commission %')
+                    ->rules(['required', 'numeric', 'min:0', 'max:99.99'])
                     ->suffix('%')
-                    ->alignCenter(),
+                    ->alignCenter()
+                    ->sortable(),
 
-                TextColumn::make('commission_type')
-                    ->label(__('fields.type'))
-                    ->badge()
-                    ->color(fn (string $state): string => match ($state) {
-                        'embedded' => 'success',
-                        'separate' => 'warning',
-                        default => 'gray',
-                    })
-                    ->formatStateUsing(fn (string $state): string => ucfirst($state))
-                    ->alignCenter(),
+                SelectColumn::make('commission_type')
+                    ->label('Type')
+                    ->options([
+                        'embedded' => 'Embedded',
+                        'separate' => 'Separate',
+                    ])
+                    ->alignCenter()
+                    ->sortable(),
 
                 TextColumn::make('notes')
                     ->limit(50)
@@ -185,6 +196,105 @@ Notification::make()
             ])
             ->headerActions([
                 CreateAction::make(),
+                
+                Action::make('bulk_add_items')
+                    ->label('Bulk Add Items')
+                    ->icon('heroicon-o-plus-circle')
+                    ->color('success')
+                    ->form([
+                        CheckboxList::make('products')
+                            ->label('Select Products')
+                            ->options(function () {
+                                $order = $this->getOwnerRecord();
+                                
+                                // Get tags from Order
+                                $orderTagIds = $order->tags()->pluck('tags.id')->toArray();
+                                
+                                $query = \App\Models\Product::query();
+                                
+                                // Filter by tags if order has tags
+                                if (!empty($orderTagIds)) {
+                                    $query->whereHas('tags', function ($q) use ($orderTagIds) {
+                                        $q->whereIn('tags.id', $orderTagIds);
+                                    });
+                                }
+                                
+                                // Exclude products already in order
+                                $existingProductIds = $order->items()->pluck('product_id')->toArray();
+                                if (!empty($existingProductIds)) {
+                                    $query->whereNotIn('id', $existingProductIds);
+                                }
+                                
+                                return $query->orderBy('name')
+                                    ->get()
+                                    ->mapWithKeys(function ($product) {
+                                        return [$product->id => "{$product->name} ({$product->code})"];
+                                    });
+                            })
+                            ->searchable()
+                            ->required()
+                            ->live()
+                            ->columnSpanFull()
+                            ->helperText('Select products to add to this order'),
+                        
+                        Grid::make(3)
+                            ->schema([
+                                TextInput::make('default_quantity')
+                                    ->label('Default Quantity')
+                                    ->numeric()
+                                    ->default(1)
+                                    ->minValue(1)
+                                    ->required()
+                                    ->helperText('Quantity for all selected products'),
+                                
+                                TextInput::make('commission_percent')
+                                    ->label('Commission %')
+                                    ->numeric()
+                                    ->default(fn () => $this->getOwnerRecord()->commission_percent ?? 5.00)
+                                    ->minValue(0)
+                                    ->maxValue(99.99)
+                                    ->step(0.01)
+                                    ->suffix('%')
+                                    ->required()
+                                    ->helperText('Commission for all items'),
+                                
+                                Select::make('commission_type')
+                                    ->options([
+                                        'embedded' => 'Embedded',
+                                        'separate' => 'Separate',
+                                    ])
+                                    ->default(fn () => $this->getOwnerRecord()->commission_type ?? 'embedded')
+                                    ->required()
+                                    ->helperText('How commission is applied'),
+                            ])
+                            ->visible(fn (Get $get) => !empty($get('products'))),
+                    ])
+                    ->action(function (array $data) {
+                        $order = $this->getOwnerRecord();
+                        $productIds = $data['products'];
+                        $quantity = $data['default_quantity'];
+                        $commissionPercent = $data['commission_percent'];
+                        $commissionType = $data['commission_type'];
+                        
+                        $created = 0;
+                        
+                        foreach ($productIds as $productId) {
+                            $order->items()->create([
+                                'product_id' => $productId,
+                                'quantity' => $quantity,
+                                'commission_percent' => $commissionPercent,
+                                'commission_type' => $commissionType,
+                            ]);
+                            $created++;
+                        }
+                        
+                        Notification::make()
+                            ->success()
+                            ->title('Items Added')
+                            ->body("{$created} item(s) added to the order successfully.")
+                            ->send();
+                    })
+                    ->modalWidth('2xl'),
             ])
             ->actions([
                 EditAction::make(),
