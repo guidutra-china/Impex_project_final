@@ -90,8 +90,11 @@
                 @if($item->product->code)
                     <br><small>Code: {{ $item->product->code }}</small>
                 @endif
-                @if($item->product->sku)
-                    <br><small>SKU: {{ $item->product->sku }}</small>
+                @if($item->product->customer_description)
+                    <br><small style="color: #333;">{{ $item->product->customer_description }}</small>
+                @endif
+                @if($item->product->features)
+                    <br><small style="color: #666;">Features: {{ $item->product->features }}</small>
                 @endif
                 @if($item->notes)
                     <br><small style="color: #666;">Note: {{ $item->notes }}</small>
