@@ -143,26 +143,56 @@ class OrdersTable
                 // PDF Export - Now first and with smart label
                 Action::make('export_pdf')
                     ->label(function (Order $record) {
-                        // Check if PDF was already generated
-                        $pdfExists = $record->generatedDocuments()
+                        $latestDoc = $record->generatedDocuments()
                             ->where('document_type', 'rfq')
                             ->where('format', 'pdf')
-                            ->exists();
-                        return $pdfExists ? 'View PDF' : 'Generate PDF';
+                            ->latest('generated_at')
+                            ->first();
+                        
+                        if (!$latestDoc) {
+                            return 'Generate PDF';
+                        }
+                        
+                        // Check if RFQ was modified after last generation
+                        if ($record->updated_at > $latestDoc->generated_at) {
+                            return 'Regenerate PDF';
+                        }
+                        
+                        return 'View PDF';
                     })
                     ->icon(function (Order $record) {
-                        $pdfExists = $record->generatedDocuments()
+                        $latestDoc = $record->generatedDocuments()
                             ->where('document_type', 'rfq')
                             ->where('format', 'pdf')
-                            ->exists();
-                        return $pdfExists ? 'heroicon-o-eye' : 'heroicon-o-document-arrow-down';
+                            ->latest('generated_at')
+                            ->first();
+                        
+                        if (!$latestDoc) {
+                            return 'heroicon-o-document-arrow-down';
+                        }
+                        
+                        if ($record->updated_at > $latestDoc->generated_at) {
+                            return 'heroicon-o-arrow-path';
+                        }
+                        
+                        return 'heroicon-o-eye';
                     })
                     ->color(function (Order $record) {
-                        $pdfExists = $record->generatedDocuments()
+                        $latestDoc = $record->generatedDocuments()
                             ->where('document_type', 'rfq')
                             ->where('format', 'pdf')
-                            ->exists();
-                        return $pdfExists ? 'success' : 'gray';
+                            ->latest('generated_at')
+                            ->first();
+                        
+                        if (!$latestDoc) {
+                            return 'gray';
+                        }
+                        
+                        if ($record->updated_at > $latestDoc->generated_at) {
+                            return 'warning';
+                        }
+                        
+                        return 'success';
                     })
                     ->action(function ($record) {
                         try {
@@ -170,15 +200,18 @@ class OrdersTable
                             $existingDoc = $record->generatedDocuments()
                                 ->where('document_type', 'rfq')
                                 ->where('format', 'pdf')
-                                ->latest()
+                                ->latest('generated_at')
                                 ->first();
                             
-                            if ($existingDoc && Storage::exists($existingDoc->file_path)) {
-                                // Download existing document
+                            // Check if RFQ was modified after last generation
+                            $needsRegeneration = $existingDoc && ($record->updated_at > $existingDoc->generated_at);
+                            
+                            if ($existingDoc && Storage::exists($existingDoc->file_path) && !$needsRegeneration) {
+                                // Download existing document (no changes)
                                 Notification::make()
                                     ->info()
                                     ->title('Downloading existing PDF')
-                                    ->body('This document was already generated. Check Documents for history.')
+                                    ->body('This document is up to date. Check Documents for history.')
                                     ->send();
                                 
                                 return response()->download(
@@ -195,10 +228,13 @@ class OrdersTable
                                 'pdf.rfq.template'
                             );
                             
+                            $message = $needsRegeneration ? 'RFQ PDF regenerated successfully' : 'RFQ PDF generated successfully';
+                            $body = $needsRegeneration ? 'New version created due to RFQ changes' : 'Document saved to Documents History';
+                            
                             Notification::make()
                                 ->success()
-                                ->title('RFQ PDF generated successfully')
-                                ->body('Document saved to Documents History')
+                                ->title($message)
+                                ->body($body)
                                 ->send();
                             
                             return response()->download(
@@ -224,26 +260,56 @@ class OrdersTable
                 // Excel Export - Now second and with smart label
                 Action::make('generate_rfq_excel')
                     ->label(function (Order $record) {
-                        // Check if Excel was already generated
-                        $excelExists = $record->generatedDocuments()
+                        $latestDoc = $record->generatedDocuments()
                             ->where('document_type', 'rfq')
                             ->where('format', 'xlsx')
-                            ->exists();
-                        return $excelExists ? 'View Excel' : 'Generate Excel';
+                            ->latest('generated_at')
+                            ->first();
+                        
+                        if (!$latestDoc) {
+                            return 'Generate Excel';
+                        }
+                        
+                        // Check if RFQ was modified after last generation
+                        if ($record->updated_at > $latestDoc->generated_at) {
+                            return 'Regenerate Excel';
+                        }
+                        
+                        return 'View Excel';
                     })
                     ->icon(function (Order $record) {
-                        $excelExists = $record->generatedDocuments()
+                        $latestDoc = $record->generatedDocuments()
                             ->where('document_type', 'rfq')
                             ->where('format', 'xlsx')
-                            ->exists();
-                        return $excelExists ? 'heroicon-o-eye' : 'heroicon-o-document-arrow-down';
+                            ->latest('generated_at')
+                            ->first();
+                        
+                        if (!$latestDoc) {
+                            return 'heroicon-o-document-arrow-down';
+                        }
+                        
+                        if ($record->updated_at > $latestDoc->generated_at) {
+                            return 'heroicon-o-arrow-path';
+                        }
+                        
+                        return 'heroicon-o-eye';
                     })
                     ->color(function (Order $record) {
-                        $excelExists = $record->generatedDocuments()
+                        $latestDoc = $record->generatedDocuments()
                             ->where('document_type', 'rfq')
                             ->where('format', 'xlsx')
-                            ->exists();
-                        return $excelExists ? 'success' : 'primary';
+                            ->latest('generated_at')
+                            ->first();
+                        
+                        if (!$latestDoc) {
+                            return 'primary';
+                        }
+                        
+                        if ($record->updated_at > $latestDoc->generated_at) {
+                            return 'warning';
+                        }
+                        
+                        return 'success';
                     })
                     ->action(function (Order $record) {
                         try {
@@ -251,15 +317,18 @@ class OrdersTable
                             $existingDoc = $record->generatedDocuments()
                                 ->where('document_type', 'rfq')
                                 ->where('format', 'xlsx')
-                                ->latest()
+                                ->latest('generated_at')
                                 ->first();
                             
-                            if ($existingDoc && Storage::exists($existingDoc->file_path)) {
-                                // Download existing document
+                            // Check if RFQ was modified after last generation
+                            $needsRegeneration = $existingDoc && ($record->updated_at > $existingDoc->generated_at);
+                            
+                            if ($existingDoc && Storage::exists($existingDoc->file_path) && !$needsRegeneration) {
+                                // Download existing document (no changes)
                                 Notification::make()
                                     ->info()
                                     ->title('Downloading existing Excel')
-                                    ->body('This document was already generated. Check Documents for history.')
+                                    ->body('This document is up to date. Check Documents for history.')
                                     ->send();
                                 
                                 return response()->download(
@@ -272,10 +341,13 @@ class OrdersTable
                             $rfqService = app(\App\Services\RFQExcelService::class);
                             $filePath = $rfqService->generateRFQ($record);
                             
+                            $message = $needsRegeneration ? 'RFQ Excel regenerated successfully' : 'RFQ Excel generated successfully';
+                            $body = $needsRegeneration ? 'New version created due to RFQ changes' : 'Document saved to Documents History';
+                            
                             Notification::make()
                                 ->success()
-                                ->title('RFQ Excel generated successfully')
-                                ->body('Document saved to Documents History')
+                                ->title($message)
+                                ->body($body)
                                 ->send();
                             
                             return response()->download($filePath, basename($filePath))->deleteFileAfterSend(true);
