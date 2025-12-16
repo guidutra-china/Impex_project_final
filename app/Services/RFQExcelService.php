@@ -346,29 +346,20 @@ class RFQExcelService
                 \Log::info('RFQ: Created directory', ['directory' => $fullDirectory]);
             }
             
-            // Read file content and store using Storage facade
-            $fileContent = file_get_contents($filePath);
-            \Log::info('RFQ: File content read', [
-                'content_size' => strlen($fileContent),
-            ]);
+            // Copy file from temp to permanent storage using file_put_contents
+            // This is more reliable than Storage::put() on some systems (macOS)
+            $fullPath = storage_path('app/' . $storagePath);
             
-            \Illuminate\Support\Facades\Storage::put($storagePath, $fileContent);
-            \Log::info('RFQ: Storage::put() called', [
-                'storage_path' => $storagePath,
-            ]);
-            
-            // Verify file was saved
-            $exists = \Illuminate\Support\Facades\Storage::exists($storagePath);
-            \Log::info('RFQ: Checking if file exists', [
-                'storage_path' => $storagePath,
-                'exists' => $exists,
-                'full_path' => storage_path('app/' . $storagePath),
-                'full_path_exists' => file_exists(storage_path('app/' . $storagePath)),
-            ]);
-            
-            if (!$exists) {
-                throw new \Exception("Failed to save file to storage: {$storagePath}");
+            if (!copy($filePath, $fullPath)) {
+                throw new \Exception("Failed to copy file to: {$fullPath}");
             }
+            
+            \Log::info('RFQ: File copied successfully', [
+                'from' => $filePath,
+                'to' => $fullPath,
+                'file_exists' => file_exists($fullPath),
+                'file_size' => filesize($fullPath),
+            ]);
             
             // Create database record using the same pattern as PdfExportService
             $document = \App\Models\GeneratedDocument::createFromFile(
