@@ -146,21 +146,21 @@ class OrdersTable
                         // Check if PDF was already generated
                         $pdfExists = $record->generatedDocuments()
                             ->where('document_type', 'rfq')
-                            ->where('file_format', 'pdf')
+                            ->where('format', 'pdf')
                             ->exists();
                         return $pdfExists ? 'View PDF' : 'Generate PDF';
                     })
                     ->icon(function (Order $record) {
                         $pdfExists = $record->generatedDocuments()
                             ->where('document_type', 'rfq')
-                            ->where('file_format', 'pdf')
+                            ->where('format', 'pdf')
                             ->exists();
                         return $pdfExists ? 'heroicon-o-eye' : 'heroicon-o-document-arrow-down';
                     })
                     ->color(function (Order $record) {
                         $pdfExists = $record->generatedDocuments()
                             ->where('document_type', 'rfq')
-                            ->where('file_format', 'pdf')
+                            ->where('format', 'pdf')
                             ->exists();
                         return $pdfExists ? 'success' : 'gray';
                     })
@@ -169,7 +169,7 @@ class OrdersTable
                             // Check if document already exists
                             $existingDoc = $record->generatedDocuments()
                                 ->where('document_type', 'rfq')
-                                ->where('file_format', 'pdf')
+                                ->where('format', 'pdf')
                                 ->latest()
                                 ->first();
                             
@@ -227,21 +227,21 @@ class OrdersTable
                         // Check if Excel was already generated
                         $excelExists = $record->generatedDocuments()
                             ->where('document_type', 'rfq')
-                            ->where('file_format', 'xlsx')
+                            ->where('format', 'xlsx')
                             ->exists();
                         return $excelExists ? 'View Excel' : 'Generate Excel';
                     })
                     ->icon(function (Order $record) {
                         $excelExists = $record->generatedDocuments()
                             ->where('document_type', 'rfq')
-                            ->where('file_format', 'xlsx')
+                            ->where('format', 'xlsx')
                             ->exists();
                         return $excelExists ? 'heroicon-o-eye' : 'heroicon-o-document-arrow-down';
                     })
                     ->color(function (Order $record) {
                         $excelExists = $record->generatedDocuments()
                             ->where('document_type', 'rfq')
-                            ->where('file_format', 'xlsx')
+                            ->where('format', 'xlsx')
                             ->exists();
                         return $excelExists ? 'success' : 'primary';
                     })
@@ -250,7 +250,7 @@ class OrdersTable
                             // Check if document already exists
                             $existingDoc = $record->generatedDocuments()
                                 ->where('document_type', 'rfq')
-                                ->where('file_format', 'xlsx')
+                                ->where('format', 'xlsx')
                                 ->latest()
                                 ->first();
                             

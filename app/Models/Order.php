@@ -241,6 +241,14 @@ class Order extends Model
     }
 
     /**
+     * Get all generated documents for this RFQ
+     */
+    public function generatedDocuments(): \Illuminate\Database\Eloquent\Relations\MorphMany
+    {
+        return $this->morphMany(GeneratedDocument::class, 'documentable');
+    }
+
+    /**
      * Get all financial transactions linked to this RFQ via transactable
      */
     public function financialTransactions(): \Illuminate\Database\Eloquent\Relations\MorphMany
