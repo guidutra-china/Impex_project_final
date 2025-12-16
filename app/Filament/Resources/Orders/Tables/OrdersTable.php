@@ -76,8 +76,17 @@ class OrdersTable
 
                TextColumn::make('total_amount')
                     ->label(__('fields.total'))
-                    ->money(fn ($record) => $record->currency?->code ?? 'USD', divideBy: 100)
-                    ->sortable(),
+                    ->money(fn ($record) => $record->currency?->code ?? 'USD')
+                    ->sortable()
+                    ->getStateUsing(function (Order $record) {
+                        // Calculate total from items if total_amount is 0 or null
+                        if (!$record->total_amount || $record->total_amount == 0) {
+                            return $record->items->sum(function ($item) {
+                                return $item->quantity * $item->requested_unit_price;
+                            });
+                        }
+                        return $record->total_amount / 100;
+                    }),
 
                TextColumn::make('created_at')
                     ->dateTime()
@@ -131,12 +140,54 @@ class OrdersTable
             ->actions([
                 EditAction::make(),
                 
+                // PDF Export - Now first and with smart label
                 Action::make('export_pdf')
-                    ->label('PDF')
-                    ->icon('heroicon-o-document-arrow-down')
-                    ->color('gray')
+                    ->label(function (Order $record) {
+                        // Check if PDF was already generated
+                        $pdfExists = $record->generatedDocuments()
+                            ->where('document_type', 'rfq')
+                            ->where('file_format', 'pdf')
+                            ->exists();
+                        return $pdfExists ? 'View PDF' : 'Generate PDF';
+                    })
+                    ->icon(function (Order $record) {
+                        $pdfExists = $record->generatedDocuments()
+                            ->where('document_type', 'rfq')
+                            ->where('file_format', 'pdf')
+                            ->exists();
+                        return $pdfExists ? 'heroicon-o-eye' : 'heroicon-o-document-arrow-down';
+                    })
+                    ->color(function (Order $record) {
+                        $pdfExists = $record->generatedDocuments()
+                            ->where('document_type', 'rfq')
+                            ->where('file_format', 'pdf')
+                            ->exists();
+                        return $pdfExists ? 'success' : 'gray';
+                    })
                     ->action(function ($record) {
                         try {
+                            // Check if document already exists
+                            $existingDoc = $record->generatedDocuments()
+                                ->where('document_type', 'rfq')
+                                ->where('file_format', 'pdf')
+                                ->latest()
+                                ->first();
+                            
+                            if ($existingDoc && Storage::exists($existingDoc->file_path)) {
+                                // Download existing document
+                                Notification::make()
+                                    ->info()
+                                    ->title('Downloading existing PDF')
+                                    ->body('This document was already generated. Check Documents for history.')
+                                    ->send();
+                                
+                                return response()->download(
+                                    storage_path('app/' . $existingDoc->file_path),
+                                    $existingDoc->filename
+                                );
+                            }
+                            
+                            // Generate new document
                             $pdfService = app(PdfExportService::class);
                             $document = $pdfService->generate(
                                 $record,
@@ -147,6 +198,7 @@ class OrdersTable
                             Notification::make()
                                 ->success()
                                 ->title('RFQ PDF generated successfully')
+                                ->body('Document saved to Documents History')
                                 ->send();
                             
                             return response()->download(
@@ -169,79 +221,85 @@ class OrdersTable
                         }
                     }),
                 
+                // Excel Export - Now second and with smart label
+                Action::make('generate_rfq_excel')
+                    ->label(function (Order $record) {
+                        // Check if Excel was already generated
+                        $excelExists = $record->generatedDocuments()
+                            ->where('document_type', 'rfq')
+                            ->where('file_format', 'xlsx')
+                            ->exists();
+                        return $excelExists ? 'View Excel' : 'Generate Excel';
+                    })
+                    ->icon(function (Order $record) {
+                        $excelExists = $record->generatedDocuments()
+                            ->where('document_type', 'rfq')
+                            ->where('file_format', 'xlsx')
+                            ->exists();
+                        return $excelExists ? 'heroicon-o-eye' : 'heroicon-o-document-arrow-down';
+                    })
+                    ->color(function (Order $record) {
+                        $excelExists = $record->generatedDocuments()
+                            ->where('document_type', 'rfq')
+                            ->where('file_format', 'xlsx')
+                            ->exists();
+                        return $excelExists ? 'success' : 'primary';
+                    })
+                    ->action(function (Order $record) {
+                        try {
+                            // Check if document already exists
+                            $existingDoc = $record->generatedDocuments()
+                                ->where('document_type', 'rfq')
+                                ->where('file_format', 'xlsx')
+                                ->latest()
+                                ->first();
+                            
+                            if ($existingDoc && Storage::exists($existingDoc->file_path)) {
+                                // Download existing document
+                                Notification::make()
+                                    ->info()
+                                    ->title('Downloading existing Excel')
+                                    ->body('This document was already generated. Check Documents for history.')
+                                    ->send();
+                                
+                                return response()->download(
+                                    storage_path('app/' . $existingDoc->file_path),
+                                    $existingDoc->filename
+                                );
+                            }
+                            
+                            // Generate new document
+                            $rfqService = app(\App\Services\RFQExcelService::class);
+                            $filePath = $rfqService->generateRFQ($record);
+                            
+                            Notification::make()
+                                ->success()
+                                ->title('RFQ Excel generated successfully')
+                                ->body('Document saved to Documents History')
+                                ->send();
+                            
+                            return response()->download($filePath, basename($filePath))->deleteFileAfterSend(true);
+                        } catch (\Exception $e) {
+                            Notification::make()
+                                ->danger()
+                                ->title('RFQ Generation Failed')
+                                ->body($e->getMessage())
+                                ->send();
+                            
+                            \Log::error('RFQ Excel generation failed', [
+                                'order_id' => $record->id,
+                                'error' => $e->getMessage(),
+                            ]);
+                        }
+                    }),
+                
                 Action::make('view_comparison')
                     ->label('Compare Quotes')
                     ->icon('heroicon-o-chart-bar')
                     ->url(fn (Order $record): string => route('filament.admin.pages.quote-comparison', ['order' => $record->id]))
                     ->visible(fn (Order $record) => $record->supplierQuotes()->count() > 0),
                 
-                Action::make('request_quotes_bulk')
-                    ->label('Request Quotes')
-                    ->icon('heroicon-o-paper-airplane')
-                    ->color('success')
-                    ->form([
-                        Select::make('suppliers')
-                            ->label('Select Suppliers')
-                            ->multiple()
-                            ->options(Supplier::pluck('name', 'id'))
-                            ->searchable()
-                            ->preload()
-                            ->required()
-                            ->helperText('Select multiple suppliers to request quotes from'),
-                        
-                        Textarea::make('message')
-                            ->label('Message')
-                            ->default('Please provide your best quote for the attached RFQ.')
-                            ->rows(3)
-                            ->helperText('This message will be included in the email to suppliers'),
-                    ])
-                    ->action(function (Order $record, array $data) {
-                        $count = 0;
-                        $emailsSent = 0;
-                        
-                        foreach ($data['suppliers'] as $supplierId) {
-                            $supplier = Supplier::find($supplierId);
-                            
-                            // Create supplier quote if not exists
-                            $existingQuote = SupplierQuote::where('order_id', $record->id)
-                                ->where('supplier_id', $supplierId)
-                                ->first();
-                            
-                            if (!$existingQuote) {
-                                SupplierQuote::create([
-                                    'order_id' => $record->id,
-                                    'supplier_id' => $supplierId,
-                                    'status' => 'sent',
-                                    'currency_id' => $record->currency_id,
-                                ]);
-                                
-                                $count++;
-                            }
-                            
-                            // Send email to supplier if email exists
-                            if ($supplier && $supplier->email) {
-                                try {
-                                    Mail::to($supplier->email)
-                                        ->send(new \App\Mail\QuoteRequestMail($record, $supplier, $data['message']));
-                                    $emailsSent++;
-                                } catch (\Exception $e) {
-                                    \Log::error('Failed to send quote request email to ' . $supplier->email . ': ' . $e->getMessage());
-                                }
-                            }
-                        }
-                        
-                        // Update RFQ status to processing
-                        if ($count > 0 && $record->status === 'pending') {
-                            $record->update(['status' => 'processing']);
-                        }
-                        
-                        Notification::make()
-                            ->success()
-                            ->title('Quote requests sent')
-                            ->body("Created {$count} quote requests. Sent {$emailsSent} emails to suppliers.")
-                            ->send();
-                    })
-                    ->visible(fn (Order $record) => in_array($record->status, ['pending', 'processing'])),
+                // Request Quotes button REMOVED per user request
                 
                 // Status Transition Actions
                 Action::make('start_processing')
@@ -359,40 +417,6 @@ class OrdersTable
                     })
                     ->requiresConfirmation()
                     ->visible(fn (Order $record) => $record->status === 'cancelled'),
-                
-                Action::make('generate_rfq_excel')
-                    ->label(fn (Order $record) => $record->rfq_generated_at ? 'RFQ Generated' : 'Generate RFQ Excel')
-                    ->icon(fn (Order $record) => $record->rfq_generated_at ? 'heroicon-o-check-circle' : 'heroicon-o-document-arrow-down')
-                    ->color(fn (Order $record) => $record->rfq_generated_at ? 'success' : 'primary')
-                    ->disabled(fn (Order $record) => $record->rfq_generated_at !== null)
-                    ->action(function (Order $record) {
-                        try {
-                            $rfqService = app(\App\Services\RFQExcelService::class);
-                            $filePath = $rfqService->generateRFQ($record);
-                            
-                            // Mark as generated
-                            $record->update(['rfq_generated_at' => now()]);
-                            
-                            Notification::make()
-                                ->success()
-                                ->title('RFQ Excel generated successfully')
-                                ->body('Document saved to Documents History')
-                                ->send();
-                            
-                            return response()->download($filePath, basename($filePath))->deleteFileAfterSend(true);
-                        } catch (\Exception $e) {
-                            Notification::make()
-                                ->danger()
-                                ->title('RFQ Generation Failed')
-                                ->body($e->getMessage())
-                                ->send();
-                            
-                            \Log::error('RFQ Excel generation failed', [
-                                'order_id' => $record->id,
-                                'error' => $e->getMessage(),
-                            ]);
-                        }
-                    }),
             ])
             ->bulkActions([
                 BulkActionGroup::make([
