@@ -350,7 +350,8 @@ class OrdersTable
                                 ->body($body)
                                 ->send();
                             
-                            return response()->download($filePath, basename($filePath))->deleteFileAfterSend(true);
+                            // Don't delete the file - it's stored permanently in documents/rfq/
+                            return response()->download($filePath, basename($filePath));
                         } catch (\Exception $e) {
                             Notification::make()
                                 ->danger()
