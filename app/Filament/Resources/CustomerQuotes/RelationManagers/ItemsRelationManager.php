@@ -48,15 +48,13 @@ class ItemsRelationManager extends RelationManager
                     ->label('Base Price')
                     ->money(fn ($record) => $record->customerQuote->order->currency->code ?? 'USD', divideBy: 100)
                     ->sortable()
-                    ->toggleable()
-                    ->visible(fn ($record) => $record->commission_amount > 0),
+                    ->toggleable(),
 
                 TextColumn::make('commission_amount')
                     ->label('Commission')
                     ->money(fn ($record) => $record->customerQuote->order->currency->code ?? 'USD', divideBy: 100)
                     ->sortable()
                     ->toggleable()
-                    ->visible(fn ($record) => $record->commission_amount > 0)
                     ->color('warning'),
 
                 TextColumn::make('price_after_commission')
