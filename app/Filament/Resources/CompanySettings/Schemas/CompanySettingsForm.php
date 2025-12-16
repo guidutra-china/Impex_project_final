@@ -184,6 +184,7 @@ class CompanySettingsForm
                                         ->label('Packing List Prefix')
                                         ->default('PL')
                                         ->maxLength(10)
+                                        ->required()
                                         ->helperText('Prefix for packing list numbers')
                                         ->columnSpan(1),
 
@@ -191,6 +192,7 @@ class CompanySettingsForm
                                         ->label('Commercial Invoice Prefix')
                                         ->default('CI')
                                         ->maxLength(10)
+                                        ->required()
                                         ->helperText('Prefix for commercial invoice numbers')
                                         ->columnSpan(1),
                                 ])
