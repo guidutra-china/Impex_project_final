@@ -289,7 +289,20 @@ class RFQExcelService
         $document = $this->saveToDocumentHistory($order, $filePath, $fileName);
 
         // Return the permanent storage path from the document record
-        return $document ? storage_path('app/' . $document->file_path) : $filePath;
+        if ($document) {
+            $permanentPath = storage_path('app/' . $document->file_path);
+            \Log::info('RFQ Excel: Returning permanent path', [
+                'permanent_path' => $permanentPath,
+                'file_exists' => file_exists($permanentPath),
+            ]);
+            return $permanentPath;
+        }
+        
+        \Log::warning('RFQ Excel: Document not saved, returning temp path', [
+            'temp_path' => $filePath,
+            'file_exists' => file_exists($filePath),
+        ]);
+        return $filePath;
     }
 
     /**
