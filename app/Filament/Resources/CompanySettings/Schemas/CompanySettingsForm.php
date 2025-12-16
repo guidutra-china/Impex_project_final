@@ -184,16 +184,14 @@ class CompanySettingsForm
                                         ->label('Packing List Prefix')
                                         ->default('PL')
                                         ->maxLength(10)
-                                        ->required()
-                                        ->helperText('Prefix for packing list numbers')
+                                        ->helperText('Prefix for packing list numbers (shares numbering with Commercial Invoice)')
                                         ->columnSpan(1),
 
                                     TextInput::make('commercial_invoice_prefix')
                                         ->label('Commercial Invoice Prefix')
                                         ->default('CI')
                                         ->maxLength(10)
-                                        ->required()
-                                        ->helperText('Prefix for commercial invoice numbers')
+                                        ->helperText('Prefix for commercial invoice numbers (shares numbering with Packing List)')
                                         ->columnSpan(1),
                                 ])
                                 ->columns(2),
