@@ -132,8 +132,7 @@ class CompanySettingsForm
                                         ->label('Default Quotation Instructions')
                                         ->rows(10)
                                         ->columnSpanFull()
-                                        ->helperText('Default instructions shown in all RFQ PDFs (can be overridden per RFQ)')
-                                        ->placeholder("Please provide your best quotation including:\n\n• Unit price and total price for each item\n• Lead time / delivery time\n• Minimum Order Quantity (MOQ) if applicable\n• Payment terms and conditions\n• Validity period of your quotation\n• Any additional costs (tooling, setup, shipping, etc.)\n\nPlease submit your quotation by the specified deadline."),
+                                        ->helperText('Default instructions shown in all RFQ PDFs (can be overridden per RFQ)'),
                                 ])
                                 ->columns(2),
 
@@ -172,8 +171,7 @@ class CompanySettingsForm
                                         ->label('Default Terms & Conditions')
                                         ->rows(8)
                                         ->columnSpanFull()
-                                        ->helperText('Default terms and conditions for purchase orders')
-                                        ->placeholder('Standard purchase order terms and conditions...'),
+                                        ->helperText('Default terms and conditions for purchase orders'),
                                 ])
                                 ->columns(2),
 

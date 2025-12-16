@@ -41,6 +41,10 @@ class ManageCompanySettings extends Page implements HasForms
     public ?string $invoice_prefix = null;
     public ?string $quote_prefix = null;
     public ?string $po_prefix = null;
+    public ?string $rfq_default_instructions = null;
+    public ?string $po_terms = null;
+    public ?string $packing_list_prefix = null;
+    public ?string $commercial_invoice_prefix = null;
 
     public function mount(): void
     {
