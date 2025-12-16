@@ -27,7 +27,7 @@ return new class extends Migration
             $table->text('cancellation_reason')->nullable();
             $table->decimal('commission_percent', 10, 2)->default(0);
             $table->enum('commission_type', ['embedded', 'separate'])->default('embedded');
-            $table->integer('incoterm')->nullable();
+            $table->string('incoterm', 10)->nullable()->comment('Incoterm code: EXW, FOB, CIF, etc.');
             $table->string('incoterm_location', 255)->nullable();
             $table->decimal('commission_percent_average', 10, 2)->nullable();
             $table->text('customer_notes')->nullable();
