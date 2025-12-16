@@ -26,8 +26,8 @@ return new class extends Migration
             $table->bigInteger('generated_by')->nullable();
             $table->timestamp('generated_at');
             $table->string('generated_from_ip', 45)->nullable();
-            // TODO: `metadata` json DEFAULT NULL
-            $table->text('notes');
+            $table->json('metadata')->nullable();
+            $table->text('notes')->nullable();
             $table->timestamp('deleted_at')->nullable();
             $table->timestamps();
         });
