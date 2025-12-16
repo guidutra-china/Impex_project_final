@@ -82,9 +82,40 @@ class ItemsRelationManager extends RelationManager
                     ->prefix('$')
                     ->step(0.01)
                     ->minValue(0)
-                    ->helperText('Price will be stored in cents')
+                    ->helperText('Base price from supplier (before commission)')
                     ->dehydrateStateUsing(fn ($state) => $state ? (int) ($state * 100) : null)
                     ->formatStateUsing(fn ($state) => $state ? $state / 100 : null)
+                    ->live()
+                    ->columnSpan(1),
+
+                TextInput::make('commission_percent')
+                    ->label('Commission %')
+                    ->required()
+                    ->numeric()
+                    ->default(function () {
+                        $supplierQuote = $this->getOwnerRecord();
+                        return $supplierQuote->order->commission_percent ?? 5.00;
+                    })
+                    ->minValue(0)
+                    ->maxValue(99.99)
+                    ->step(0.01)
+                    ->suffix('%')
+                    ->helperText('Commission for this item')
+                    ->live()
+                    ->columnSpan(1),
+
+                Select::make('commission_type')
+                    ->options([
+                        'embedded' => 'Embedded (included in price)',
+                        'separate' => 'Separate (added to invoice)',
+                    ])
+                    ->required()
+                    ->default(function () {
+                        $supplierQuote = $this->getOwnerRecord();
+                        return $supplierQuote->order->commission_type ?? 'embedded';
+                    })
+                    ->helperText('How commission is applied')
+                    ->live()
                     ->columnSpan(1),
 
                 TextInput::make('delivery_days')
@@ -127,15 +158,30 @@ class ItemsRelationManager extends RelationManager
                     ->sortable(),
 
                 TextColumn::make('unit_price_before_dollars')
-                    ->label(__('fields.unit_price'))
+                    ->label('Base Price')
                     ->money('USD')
-                    ->sortable(),
+                    ->sortable()
+                    ->description('Before commission'),
 
-                TextColumn::make('total_price_before_dollars')
+                TextColumn::make('commission_percent')
+                    ->label('Commission')
+                    ->suffix('%')
+                    ->alignCenter()
+                    ->toggleable(),
+
+                TextColumn::make('unit_price_after_dollars')
+                    ->label('Final Price')
+                    ->money('USD')
+                    ->sortable()
+                    ->description('With commission')
+                    ->weight('medium'),
+
+                TextColumn::make('total_price_after_dollars')
                     ->label(__('fields.total'))
                     ->money('USD')
                     ->sortable()
-                    ->weight('bold'),
+                    ->weight('bold')
+                    ->description('Final total'),
 
                 TextColumn::make('delivery_days')
                     ->label('Delivery')

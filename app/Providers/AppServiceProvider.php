@@ -3,8 +3,10 @@
 namespace App\Providers;
 
 use App\Models\Client;
+use App\Models\QuoteItem;
 use App\Models\Supplier;
 use App\Observers\ClientObserver;
+use App\Observers\QuoteItemObserver;
 use App\Observers\SupplierObserver;
 use App\Services\FileUploadService;
 use Illuminate\Support\ServiceProvider;
@@ -32,5 +34,6 @@ class AppServiceProvider extends ServiceProvider
         // Register model observers
         Client::observe(ClientObserver::class);
         Supplier::observe(SupplierObserver::class);
+        QuoteItem::observe(QuoteItemObserver::class);
     }
 }

@@ -79,98 +79,7 @@ class EditOrder extends EditRecord
                     $this->handleGenerateCustomerQuote($data);
                 }),
             
-            Action::make('add_project_expense')
-                ->label('Add Project Expense')
-                ->icon('heroicon-o-plus-circle')
-                ->color('warning')
-                ->form([
-                    Select::make('financial_category_id')
-                        ->label(__('fields.category'))
-                        ->options(
-                            FinancialCategory::where('code', 'LIKE', 'RFQ-EXP-%')
-                                ->orWhere('code', 'RFQ-EXPENSES')
-                                ->pluck('name', 'id')
-                        )
-                        ->searchable()
-                        ->required()
-                        ->helperText('Select the type of expense for this RFQ'),
-                    
-                    Select::make('currency_id')
-                        ->label(__('fields.currency'))
-                        ->relationship('currency', 'code')
-                        ->default(fn() => $this->record->currency_id)
-                        ->required()
-                        ->searchable()
-                        ->preload()
-                        ->reactive()
-                        ->afterStateUpdated(function ($state, callable $set) {
-                            if (!$state) return;
-                            
-                            // Get base currency (USD)
-                            $baseCurrency = \App\Models\Currency::where('is_base', true)->first();
-                            if (!$baseCurrency) return;
-                            
-                            // If selected currency is base currency, rate is 1
-                            if ($state == $baseCurrency->id) {
-                                $set('exchange_rate', 1.0000);
-                                return;
-                            }
-                            
-                            // Get latest exchange rate
-                            $rate = \App\Models\ExchangeRate::getConversionRate($state, $baseCurrency->id);
-                            if ($rate) {
-                                $set('exchange_rate', number_format($rate, 4, '.', ''));
-                            }
-                        })
-                        ->helperText('Currency of the expense'),
-                    
-                    TextInput::make('exchange_rate')
-                        ->label('Exchange Rate to USD')
-                        ->numeric()
-                        ->default(1.00)
-                        ->required()
-                        ->minValue(0.0001)
-                        ->step(0.0001)
-                        ->helperText('Automatically loaded from Exchange Rates (editable)'),
-                    
-                    TextInput::make('amount')
-                        ->label(__('fields.amount'))
-                        ->numeric()
-                        ->required()
-                        ->minValue(0.01)
-                        ->step(0.01)
-                        ->helperText('Enter amount in the selected currency'),
-                    
-                    DatePicker::make('transaction_date')
-                        ->label(__('fields.date'))
-                        ->default(now())
-                        ->required()
-                        ->maxDate(now())
-                        ->helperText('Date when the expense occurred'),
-                    
-                    DatePicker::make('due_date')
-                        ->label(__('fields.due_date'))
-                        ->default(now()->addDays(30))
-                        ->required()
-                        ->minDate(now())
-                        ->helperText('Payment due date'),
-                    
-                    Textarea::make('description')
-                        ->label(__('fields.description'))
-                        ->required()
-                        ->rows(3)
-                        ->maxLength(500)
-                        ->helperText('Describe the expense in detail'),
-                    
-                    Textarea::make('notes')
-                        ->label(__('fields.notes'))
-                        ->rows(2)
-                        ->maxLength(500)
-                        ->helperText('Optional additional information'),
-                ])
-                ->action(function (array $data) {
-                    $this->handleAddProjectExpense($data);
-                }),
+            // Project Expenses moved to Proforma Invoice
             
             DeleteAction::make(),
         ];
@@ -214,10 +123,13 @@ class EditOrder extends EditRecord
     }
 
     /**
-     * Manipula a adição de despesa de projeto
+     * Handle adding a project expense
+     * DEPRECATED: Moved to Proforma Invoice module
+     * Kept for reference, can be removed in future cleanup
      * 
-     * @param array $data Dados da despesa
+     * @param array $data Form data
      */
+    /*
     protected function handleAddProjectExpense(array $data): void
     {
         $order = $this->record;
@@ -269,6 +181,7 @@ class EditOrder extends EditRecord
             ]);
         }
     }
+    */
 
     /**
      * Handle customer quote generation

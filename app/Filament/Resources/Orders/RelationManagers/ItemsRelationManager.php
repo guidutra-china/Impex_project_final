@@ -30,6 +30,7 @@ class ItemsRelationManager extends RelationManager
         return $schema
             ->components([
                 Select::make('product_id')
+                    ->label('Product')
                     ->relationship(
                         name: 'product',
                         titleAttribute: 'name',
@@ -46,12 +47,13 @@ class ItemsRelationManager extends RelationManager
                                 });
                             }
                             
-                            return $query;
+                            return $query->orderBy('name');
                         }
                     )
                     ->required()
-                    ->searchable()
+                    ->searchable(['name', 'code', 'sku'])
                     ->preload()
+                    ->getOptionLabelFromRecordUsing(fn ($record) => "{$record->name} ({$record->code})")
                     ->helperText(function () {
                         $order = $this->getOwnerRecord();
                         
@@ -89,10 +91,13 @@ Notification::make()
                     ->columnSpan(2),
 
                 TextInput::make('quantity')
+                    ->label('Quantity')
                     ->required()
                     ->numeric()
                     ->minValue(1)
                     ->default(1)
+                    ->suffix('units')
+                    ->helperText('Number of units to order')
                     ->columnSpan(1),
 
                 TextInput::make('requested_unit_price')
