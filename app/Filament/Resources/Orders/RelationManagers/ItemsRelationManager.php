@@ -20,7 +20,7 @@ use Filament\Tables\Table;
 use Filament\Notifications\Notification;
 use Filament\Actions\Action;
 use Filament\Forms\Components\CheckboxList;
-use Filament\Forms\Components\Grid;
+use Filament\Schemas\Components\Grid;
 use Filament\Forms\Get;
 
 class ItemsRelationManager extends RelationManager
