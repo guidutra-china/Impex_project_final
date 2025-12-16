@@ -24,10 +24,10 @@ return new class extends Migration
             $table->integer('converted_price_cents')->nullable();
             $table->integer('delivery_days')->nullable();
             $table->string('supplier_part_number', 255)->nullable();
-            $table->text('supplier_notes');
+            $table->text('supplier_notes')->nullable();
             $table->decimal('commission_percent', 10, 2);
-            // TODO: `commission_type` enum('embedded','separate') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'embedded'
-            $table->text('notes');
+            $table->enum('commission_type', ['embedded', 'separate'])->default('embedded');
+            $table->text('notes')->nullable();
             $table->timestamp('deleted_at')->nullable();
             $table->timestamps();
         });
