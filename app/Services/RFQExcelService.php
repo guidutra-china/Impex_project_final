@@ -231,11 +231,14 @@ class RFQExcelService
                 $sheet->setCellValue('D' . $currentRow, '');
                 $sheet->getStyle('D' . $currentRow)->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB('FFFFCC'); // Light yellow
                 
-                // Total column (optional - can be calculated)
-                $totalTarget = $item->requested_unit_price 
-                    ? number_format($item->requested_unit_price * $item->quantity, 2)
-                    : 'N/A';
-                $sheet->setCellValue('E' . $currentRow, $totalTarget);
+                // Total Target (calculated)
+                if ($item->requested_unit_price) {
+                    $totalValue = $item->requested_unit_price * $item->quantity;
+                    $sheet->setCellValue('E' . $currentRow, $totalValue);
+                    $sheet->getStyle('E' . $currentRow)->getNumberFormat()->setFormatCode('#,##0.00');
+                } else {
+                    $sheet->setCellValue('E' . $currentRow, 'N/A');
+                }
                 
                 // Adjust row height for wrapped text
                 $sheet->getRowDimension($currentRow)->setRowHeight(60);
@@ -247,6 +250,45 @@ class RFQExcelService
                     ],
                 ]);
 
+                $currentRow++;
+            }
+            
+            // Add Total Target Value row
+            $currentRow++;
+            $sheet->setCellValue('D' . $currentRow, 'Total Target Value:');
+            $sheet->getStyle('D' . $currentRow)->getFont()->setBold(true);
+            $sheet->getStyle('D' . $currentRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+            
+            // Calculate sum using formula
+            $firstItemRow = $currentRow - $items->count();
+            $lastItemRow = $currentRow - 1;
+            $sheet->setCellValue('E' . $currentRow, "=SUM(E{$firstItemRow}:E{$lastItemRow})");
+            $sheet->getStyle('E' . $currentRow)->getNumberFormat()->setFormatCode('#,##0.00');
+            $sheet->getStyle('E' . $currentRow)->getFont()->setBold(true);
+            
+            // Add border
+            $sheet->getStyle('D' . $currentRow . ':E' . $currentRow)->applyFromArray([
+                'borders' => [
+                    'top' => ['borderStyle' => Border::BORDER_DOUBLE, 'color' => ['rgb' => '000000']],
+                ],
+            ]);
+            
+            $currentRow += 2; // Add spacing
+            
+            // Quotation Instructions section
+            $sheet->setCellValue('A' . $currentRow, 'QUOTATION INSTRUCTIONS');
+            $sheet->mergeCells('A' . $currentRow . ':E' . $currentRow);
+            $sheet->getStyle('A' . $currentRow)->applyFromArray($headerStyle);
+            $currentRow++;
+            
+            // Get quotation instructions from order or company settings
+            $instructions = $order->quotation_instructions ?? $order->company->rfq_default_instructions ?? '';
+            
+            if ($instructions) {
+                $sheet->setCellValue('A' . $currentRow, $instructions);
+                $sheet->mergeCells('A' . $currentRow . ':E' . $currentRow);
+                $sheet->getStyle('A' . $currentRow)->getAlignment()->setWrapText(true);
+                $sheet->getRowDimension($currentRow)->setRowHeight(-1); // Auto height
                 $currentRow++;
             }
         } else {
