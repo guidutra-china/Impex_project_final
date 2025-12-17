@@ -77,6 +77,15 @@ class EditProformaInvoice extends EditRecord
                 ->action(function ($record, array $data) {
                     $this->handleMarkDepositReceived($record, $data);
                 }),
+
+            Actions\Action::make('create_purchase_orders')
+                ->label('Create Purchase Orders')
+                ->icon('heroicon-o-document-plus')
+                ->color('success')
+                ->visible(fn ($record) => $record->status === 'approved')
+                ->action(function ($record) {
+                    $this->handleCreatePurchaseOrders($record);
+                }),
         ];
     }
 
@@ -225,6 +234,143 @@ class EditProformaInvoice extends EditRecord
                 'id' => $record->id,
                 'data' => $data,
                 'error' => $e->getMessage(),
+            ]);
+        }
+    }
+}
+
+    /**
+     * Handle creating purchase orders from proforma invoice
+     * 
+     * @param $record Proforma Invoice record
+     */
+    protected function handleCreatePurchaseOrders($record): void
+    {
+        try {
+            // Group items by supplier_quote_id
+            $itemsBySupplier = $record->items()
+                ->with(['supplierQuote.supplier', 'product'])
+                ->get()
+                ->groupBy('supplier_quote_id');
+
+            if ($itemsBySupplier->isEmpty()) {
+                Notification::make()
+                    ->warning()
+                    ->title('No Items Found')
+                    ->body('This proforma invoice has no items to create purchase orders from.')
+                    ->send();
+                return;
+            }
+
+            $createdPOs = [];
+            $errors = [];
+
+            foreach ($itemsBySupplier as $supplierQuoteId => $items) {
+                try {
+                    $supplierQuote = $items->first()->supplierQuote;
+                    
+                    if (!$supplierQuote) {
+                        $errors[] = "Supplier quote not found for some items";
+                        continue;
+                    }
+
+                    // Check if PO already exists for this supplier quote
+                    $existingPO = \App\Models\PurchaseOrder::where('supplier_quote_id', $supplierQuoteId)
+                        ->where('proforma_invoice_id', $record->id)
+                        ->first();
+
+                    if ($existingPO) {
+                        $errors[] = "PO already exists for {$supplierQuote->supplier->name} (PO: {$existingPO->po_number})";
+                        continue;
+                    }
+
+                    // Create Purchase Order
+                    $po = \App\Models\PurchaseOrder::create([
+                        'revision_number' => 1,
+                        'po_date' => now(),
+                        'status' => 'draft',
+                        'order_id' => $supplierQuote->order_id,
+                        'supplier_quote_id' => $supplierQuoteId,
+                        'proforma_invoice_id' => $record->id,
+                        'supplier_id' => $supplierQuote->supplier_id,
+                        'currency_id' => $supplierQuote->currency_id,
+                        'exchange_rate' => $supplierQuote->locked_exchange_rate ?? 1,
+                        'base_currency_id' => \App\Models\Currency::where('code', 'USD')->first()?->id,
+                        'subtotal' => 0,
+                        'total' => 0,
+                        'total_base_currency' => 0,
+                        'created_by' => auth()->id(),
+                    ]);
+
+                    // Create PO items from proforma items
+                    foreach ($items as $proformaItem) {
+                        \App\Models\PurchaseOrderItem::create([
+                            'purchase_order_id' => $po->id,
+                            'product_id' => $proformaItem->product_id,
+                            'product_name' => $proformaItem->product_name ?? $proformaItem->product?->name ?? '',
+                            'product_sku' => $proformaItem->product_sku ?? $proformaItem->product?->sku ?? '',
+                            'quantity' => $proformaItem->quantity,
+                            'unit_cost' => $proformaItem->unit_price,
+                            'total_cost' => $proformaItem->total,
+                            'notes' => $proformaItem->notes ?? '',
+                        ]);
+                    }
+
+                    // Recalculate totals
+                    $po->recalculateTotals();
+
+                    $createdPOs[] = [
+                        'po' => $po,
+                        'supplier' => $supplierQuote->supplier->name,
+                    ];
+
+                } catch (\Exception $e) {
+                    $errors[] = "Error creating PO: {$e->getMessage()}";
+                    \Log::error('Error creating PO from Proforma', [
+                        'proforma_id' => $record->id,
+                        'supplier_quote_id' => $supplierQuoteId,
+                        'error' => $e->getMessage(),
+                    ]);
+                }
+            }
+
+            // Show results
+            if (!empty($createdPOs)) {
+                $poList = collect($createdPOs)->map(fn($item) => 
+                    "{$item['po']->po_number} for {$item['supplier']}"
+                )->join(', ');
+
+                Notification::make()
+                    ->success()
+                    ->title('Purchase Orders Created')
+                    ->body("Created {count($createdPOs)} PO(s): {$poList}")
+                    ->send();
+
+                // Redirect to the first PO
+                return redirect()->route('filament.admin.resources.purchase-orders.edit', [
+                    'record' => $createdPOs[0]['po']->id
+                ]);
+            }
+
+            if (!empty($errors)) {
+                Notification::make()
+                    ->warning()
+                    ->title('Some Issues Occurred')
+                    ->body(implode("\n", $errors))
+                    ->send();
+            }
+
+        } catch (\Exception $e) {
+            Notification::make()
+                ->danger()
+                ->title('Error Creating Purchase Orders')
+                ->body($e->getMessage())
+                ->send();
+
+            \Log::error('Error in handleCreatePurchaseOrders', [
+                'proforma_id' => $record->id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
             ]);
         }
     }
