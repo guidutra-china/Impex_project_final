@@ -9,7 +9,7 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Filament\Tables\Actions\ViewAction;
+use Filament\Actions\ViewAction;
 use Illuminate\Database\Eloquent\Builder;
 use BackedEnum;
 use UnitEnum;
