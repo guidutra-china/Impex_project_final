@@ -34,10 +34,16 @@ class CustomerQuoteResource extends Resource
     
     public static function getEloquentQuery(): Builder
     {
-        return parent::getEloquentQuery()->with(['order' => function ($query) {
-            // Load order without its own scope to avoid conflicts
-            $query->withoutGlobalScopes();
-        }]);
+        return parent::getEloquentQuery()->with([
+            'order' => function ($query) {
+                // Load order without its own scope to avoid conflicts
+                $query->withoutGlobalScopes();
+            },
+            'items.supplierQuote' => function ($query) {
+                // Load supplier quotes without scope to avoid conflicts
+                $query->withoutGlobalScopes()->with(['supplier', 'items.product']);
+            }
+        ]);
     }
 
     // Form not needed - using custom view for display

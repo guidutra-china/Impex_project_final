@@ -156,12 +156,8 @@
         </div>
 
         @php
-            // Load CustomerQuoteItems with their SupplierQuotes and related data
-            $items = $record->items->load([
-                'supplierQuote' => function($query) {
-                    $query->with(['supplier', 'items.product']);
-                }
-            ]);
+            // Items are already eager loaded in Resource::getEloquentQuery()
+            $items = $record->items;
             $cheapestItem = $items->sortBy('price_after_commission')->first();
         @endphp
 
