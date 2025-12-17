@@ -49,14 +49,18 @@ class DebugPortalAccess extends Command
 
         $this->newLine();
         $this->info("=== ALL CUSTOMER QUOTES (WITHOUT SCOPE) ===");
-        $allQuotes = CustomerQuote::withoutGlobalScopes()->with('order.customer')->get();
+        $allQuotes = CustomerQuote::withoutGlobalScopes()->with(['order' => function($q) {
+            $q->withoutGlobalScopes()->with('customer');
+        }])->get();
         
         foreach ($allQuotes as $quote) {
-            $customer = $quote->order->customer ?? null;
-            $customerId = $quote->order->customer_id ?? 'NULL';
+            $order = $quote->order;
+            $customer = $order ? $order->customer : null;
+            $customerId = $order ? $order->customer_id : 'NULL';
             $customerName = $customer ? $customer->name : 'N/A';
+            $orderId = $order ? $order->id : 'NULL';
             
-            $this->line("Quote: {$quote->quote_number} | Order Customer ID: {$customerId} | Customer: {$customerName}");
+            $this->line("Quote: {$quote->quote_number} | Order ID: {$orderId} | Order Customer ID: {$customerId} | Customer: {$customerName}");
         }
 
         $this->newLine();
@@ -65,17 +69,21 @@ class DebugPortalAccess extends Command
         // Simulate login as this user
         Auth::login($user);
         
-        $scopedQuotes = CustomerQuote::with('order.customer')->get();
+        $scopedQuotes = CustomerQuote::with(['order' => function($q) {
+            $q->withoutGlobalScopes()->with('customer');
+        }])->get();
         
         if ($scopedQuotes->isEmpty()) {
             $this->error("NO QUOTES FOUND WITH SCOPE!");
         } else {
             foreach ($scopedQuotes as $quote) {
-                $customer = $quote->order->customer ?? null;
-                $customerId = $quote->order->customer_id ?? 'NULL';
+                $order = $quote->order;
+                $customer = $order ? $order->customer : null;
+                $customerId = $order ? $order->customer_id : 'NULL';
                 $customerName = $customer ? $customer->name : 'N/A';
+                $orderId = $order ? $order->id : 'NULL';
                 
-                $this->line("Quote: {$quote->quote_number} | Order Customer ID: {$customerId} | Customer: {$customerName}");
+                $this->line("Quote: {$quote->quote_number} | Order ID: {$orderId} | Order Customer ID: {$customerId} | Customer: {$customerName}");
             }
         }
 
