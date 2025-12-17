@@ -12,7 +12,10 @@ class ViewCustomerQuote extends ViewRecord
 {
     protected static string $resource = CustomerQuoteResource::class;
 
-    protected static string $view = 'filament.portal.pages.customer-quote-view';
+    protected function getView(): string
+    {
+        return 'filament.portal.pages.customer-quote-view';
+    }
 
     protected function getHeaderActions(): array
     {
