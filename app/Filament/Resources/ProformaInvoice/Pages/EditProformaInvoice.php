@@ -243,7 +243,7 @@ class EditProformaInvoice extends EditRecord
      * 
      * @param $record Proforma Invoice record
      */
-    protected function handleCreatePurchaseOrders($record): void
+    protected function handleCreatePurchaseOrders($record)
     {
         try {
             // Group items by supplier_quote_id
