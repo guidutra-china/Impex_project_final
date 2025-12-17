@@ -9,6 +9,7 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Filament\Tables\Actions\ViewAction;
 use Illuminate\Database\Eloquent\Builder;
 use BackedEnum;
 use UnitEnum;
@@ -103,7 +104,7 @@ class ProformaInvoiceResource extends Resource
                     ]),
             ])
             ->actions([
-                Tables\Actions\ViewAction::make(),
+                ViewAction::make(),
             ])
             ->defaultSort('created_at', 'desc');
     }
