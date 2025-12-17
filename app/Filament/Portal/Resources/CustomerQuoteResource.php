@@ -73,10 +73,9 @@ class CustomerQuoteResource extends Resource
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('order.order_number')
-                    ->label('RFQ #')
+                    ->label('RFQ')
                     ->searchable()
-                    ->placeholder('N/A')
-                    ->default('N/A'),
+                    ->sortable(),
                 Tables\Columns\BadgeColumn::make('status')
                     ->colors([
                         'secondary' => 'draft',
