@@ -234,7 +234,7 @@
                         $allProducts[$productId]['prices']->push([
                             'supplier_quote_id' => $customerQuoteItem->supplier_quote_id,
                             'display_name' => $customerQuoteItem->display_name,
-                            'price' => $quoteItem->unit_price,
+                            'price' => $quoteItem->unit_price_after_commission,
                             'quantity' => $quoteItem->quantity,
                         ]);
                     }
