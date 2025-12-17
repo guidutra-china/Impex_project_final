@@ -31,6 +31,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
         'phone',
         'status',
         'is_admin',
+        'client_id',
         'email_verified_at',
         'last_login_at',
     ];
@@ -62,8 +63,17 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
 
     public function canAccessPanel(Panel $panel): bool
     {
-        // Allow super_admin, panel_user role, or users with is_admin flag
-        return $this->hasRole(['super_admin', 'panel_user']) || $this->is_admin == 1;
+        // Admin panel access
+        if ($panel->getId() === 'admin') {
+            return $this->hasRole(['super_admin', 'panel_user']) || $this->is_admin == 1;
+        }
+
+        // Portal panel access (for customer users)
+        if ($panel->getId() === 'portal') {
+            return $this->hasRole(['purchasing', 'finance', 'logistics']);
+        }
+
+        return false;
     }
 
     /**
@@ -77,5 +87,14 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
 
         // Fallback to UI Avatars if no avatar uploaded
         return 'https://ui-avatars.com/api/?name=' . urlencode($this->name) . '&color=7F9CF5&background=EBF4FF';
+    }
+}
+
+    /**
+     * Get the client that owns the user (for portal users).
+     */
+    public function client()
+    {
+        return $this->belongsTo(Client::class);
     }
 }
