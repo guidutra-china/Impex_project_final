@@ -70,5 +70,25 @@ class ClientOwnershipScope implements Scope
             });
             return;
         }
+
+        // For CustomerQuote (filter by user's client_id)
+        if ($model instanceof \App\Models\CustomerQuote) {
+            if ($user->client_id) {
+                $builder->whereHas('order', function ($query) use ($user) {
+                    $query->where('customer_id', $user->client_id);
+                });
+            }
+            return;
+        }
+
+        // For ProformaInvoice (filter by user's client_id)
+        if ($model instanceof \App\Models\ProformaInvoice) {
+            if ($user->client_id) {
+                $builder->whereHas('order', function ($query) use ($user) {
+                    $query->where('customer_id', $user->client_id);
+                });
+            }
+            return;
+        }
     }
 }
