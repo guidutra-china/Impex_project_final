@@ -116,8 +116,8 @@ class EditCustomerQuote extends EditRecord
                 ->body(count($supplierQuotes) . ' supplier quote(s) added as options for the customer.')
                 ->send();
 
-            // Refresh the record to show new items
-            $this->record->refresh();
+            // Redirect to refresh the page and show new items
+            return redirect()->to($this->getResource()::getUrl('edit', ['record' => $this->record->id]));
 
         } catch (\Exception $e) {
             Notification::make()
