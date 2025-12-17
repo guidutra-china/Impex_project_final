@@ -44,7 +44,7 @@ class CustomerQuoteResource extends Resource
     {
         return $schema
             ->schema([
-                Forms\Components\Section::make('Quote Information')
+                \Filament\Forms\Components\Fieldset::make('Quote Information')
                     ->schema([
                         Forms\Components\TextInput::make('quote_number')
                             ->label('Quote Number')
