@@ -30,6 +30,14 @@ class ProformaInvoiceResource extends Resource
     }
 
     // Multi-tenancy filtering is handled automatically by ClientOwnershipScope global scope
+    
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()->with(['order' => function ($query) {
+            // Load order without its own scope to avoid conflicts
+            $query->withoutGlobalScopes();
+        }]);
+    }
 
     public static function form(Schema $schema): Schema
     {

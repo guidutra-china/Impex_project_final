@@ -34,7 +34,10 @@ class CustomerQuoteResource extends Resource
     
     public static function getEloquentQuery(): Builder
     {
-        return parent::getEloquentQuery()->with('order');
+        return parent::getEloquentQuery()->with(['order' => function ($query) {
+            // Load order without its own scope to avoid conflicts
+            $query->withoutGlobalScopes();
+        }]);
     }
 
     public static function form(Schema $schema): Schema
