@@ -8,7 +8,7 @@ use Illuminate\Support\Carbon;
 
 class CustomerQuoteChartWidget extends ChartWidget
 {
-    protected static ?string $heading = 'Customer Quotes Over Time';
+    protected ?string $heading = 'Customer Quotes Over Time';
 
     protected static ?int $sort = 3;
 
