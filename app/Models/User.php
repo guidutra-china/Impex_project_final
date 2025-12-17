@@ -88,7 +88,6 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
         // Fallback to UI Avatars if no avatar uploaded
         return 'https://ui-avatars.com/api/?name=' . urlencode($this->name) . '&color=7F9CF5&background=EBF4FF';
     }
-}
 
     /**
      * Get the client that owns the user (for portal users).
