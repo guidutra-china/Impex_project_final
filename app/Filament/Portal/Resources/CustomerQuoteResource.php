@@ -9,6 +9,7 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Filament\Tables\Columns\BadgeColumn;
 use Filament\Actions\ViewAction;
 use Illuminate\Database\Eloquent\Builder;
 use BackedEnum;
@@ -30,6 +31,11 @@ class CustomerQuoteResource extends Resource
     }
 
     // Multi-tenancy filtering is handled automatically by ClientOwnershipScope global scope
+    
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()->with('order');
+    }
 
     public static function form(Schema $schema): Schema
     {
