@@ -156,7 +156,12 @@
         </div>
 
         @php
-            $items = $record->items->load('supplierQuote.supplier', 'supplierQuote.items.product');
+            // Load CustomerQuoteItems with their SupplierQuotes and related data
+            $items = $record->items->load([
+                'supplierQuote' => function($query) {
+                    $query->with(['supplier', 'items.product']);
+                }
+            ]);
             $cheapestItem = $items->sortBy('price_after_commission')->first();
         @endphp
 
@@ -219,21 +224,22 @@
         @php
             // Group products from all supplier quotes
             $allProducts = collect();
-            foreach($items as $item) {
-                if($item->supplierQuote && $item->supplierQuote->items) {
-                    foreach($item->supplierQuote->items as $sqItem) {
-                        $productId = $sqItem->product_id;
+            foreach($items as $customerQuoteItem) {
+                $supplierQuote = $customerQuoteItem->supplierQuote;
+                if($supplierQuote && $supplierQuote->items) {
+                    foreach($supplierQuote->items as $quoteItem) {
+                        $productId = $quoteItem->product_id;
                         if(!$allProducts->has($productId)) {
                             $allProducts->put($productId, [
-                                'product' => $sqItem->product,
+                                'product' => $quoteItem->product,
                                 'prices' => collect()
                             ]);
                         }
                         $allProducts[$productId]['prices']->push([
-                            'supplier_quote_id' => $item->supplier_quote_id,
-                            'display_name' => $item->display_name,
-                            'price' => $sqItem->unit_price,
-                            'quantity' => $sqItem->quantity,
+                            'supplier_quote_id' => $customerQuoteItem->supplier_quote_id,
+                            'display_name' => $customerQuoteItem->display_name,
+                            'price' => $quoteItem->unit_price,
+                            'quantity' => $quoteItem->quantity,
                         ]);
                     }
                 }
