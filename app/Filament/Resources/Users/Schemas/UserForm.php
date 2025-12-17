@@ -91,6 +91,15 @@ class UserForm
                             ->helperText('Grants full system access and administrative privileges')
                             ->inline(false)
                             ->columnSpan(1),
+
+                        Select::make('client_id')
+                            ->label('Customer Portal Client')
+                            ->relationship('client', 'name')
+                            ->searchable()
+                            ->preload()
+                            ->native(false)
+                            ->helperText('Assign this user to a client for Customer Portal access')
+                            ->columnSpanFull(),
                     ])
                     ->columns(2),
 
