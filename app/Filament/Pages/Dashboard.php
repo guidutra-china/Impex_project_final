@@ -3,6 +3,8 @@
 namespace App\Filament\Pages;
 
 use App\Filament\Widgets\CalendarWidget;
+use App\Filament\Widgets\CustomerQuoteStatsWidget;
+use App\Filament\Widgets\CustomerQuoteChartWidget;
 use App\Filament\Widgets\RfqStatsWidget;
 use App\Filament\Widgets\PurchaseOrderStatsWidget;
 // use App\Filament\Widgets\FinancialOverviewWidget; // Temporarily disabled - sales_invoices table needs status column
@@ -33,6 +35,8 @@ class Dashboard extends BaseDashboard
      */
     protected array $widgetClassMap = [
         'calendar' => CalendarWidget::class,
+        'customer_quote_stats' => CustomerQuoteStatsWidget::class,
+        'customer_quote_chart' => CustomerQuoteChartWidget::class,
         'rfq_stats' => RfqStatsWidget::class,
         'purchase_order_stats' => PurchaseOrderStatsWidget::class,
         // 'financial_overview' => FinancialOverviewWidget::class, // Temporarily disabled
@@ -101,6 +105,8 @@ class Dashboard extends BaseDashboard
     {
         return [
             CalendarWidget::class,
+            CustomerQuoteStatsWidget::class,
+            CustomerQuoteChartWidget::class,
             RfqStatsWidget::class,
             PurchaseOrderStatsWidget::class,
             // FinancialOverviewWidget::class, // Temporarily disabled
