@@ -242,23 +242,6 @@
             }
         @endphp
 
-        {{-- DEBUG INFO --}}
-        <div style="background: #fef3c7; padding: 16px; border-radius: 8px; margin-bottom: 16px; font-family: monospace; font-size: 12px;">
-            <strong>DEBUG:</strong><br>
-            Total CustomerQuoteItems: {{ $items->count() }}<br>
-            @foreach($items as $idx => $cqi)
-                <br>CustomerQuoteItem #{{ $idx + 1 }}:<br>
-                - ID: {{ $cqi->id }}<br>
-                - Display Name: {{ $cqi->display_name }}<br>
-                - Supplier Quote ID: {{ $cqi->supplier_quote_id }}<br>
-                - Has SupplierQuote: {{ $cqi->supplierQuote ? 'YES' : 'NO' }}<br>
-                @if($cqi->supplierQuote)
-                    - SupplierQuote Items Count: {{ $cqi->supplierQuote->items ? $cqi->supplierQuote->items->count() : 'NULL' }}<br>
-                @endif
-            @endforeach
-            <br>All Products Count: {{ $allProducts->count() }}
-        </div>
-        
         @if($allProducts->isNotEmpty())
             <div class="products-section">
                 <div style="font-size: 16px; font-weight: 700; color: #0f172a; margin-bottom: 16px;">
