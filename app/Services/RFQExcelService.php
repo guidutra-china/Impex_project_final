@@ -359,6 +359,15 @@ class RFQExcelService
 
         // Save to Documents History and get the document record
         $document = $this->saveToDocumentHistory($order, $filePath, $fileName);
+        
+        // Auto-transition: draft → sent when RFQ is generated for the first time
+        if ($order->status === 'draft' && !$order->sent_at) {
+            $order->update([
+                'status' => 'sent',
+                'sent_at' => now(),
+            ]);
+            \Log::info('RFQ Auto-transition: draft → sent', ['order_id' => $order->id]);
+        }
 
         // Return the permanent storage path from the document record
         if ($document) {

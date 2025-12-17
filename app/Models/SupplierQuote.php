@@ -79,6 +79,21 @@ class SupplierQuote extends Model
                 $quote->valid_until = now()->addDays($quote->validity_days);
             }
         });
+        
+        // Auto-transition: sent → under_analysis when first quote is received
+        static::created(function ($quote) {
+            $order = $quote->order;
+            if ($order && $order->status === 'sent' && !$order->under_analysis_at) {
+                $order->update([
+                    'status' => 'under_analysis',
+                    'under_analysis_at' => now(),
+                ]);
+                \Log::info('RFQ Auto-transition: sent → under_analysis', [
+                    'order_id' => $order->id,
+                    'quote_id' => $quote->id
+                ]);
+            }
+        });
 
         // Lock exchange rate and calculate commission when quote is created
         static::created(function ($quote) {

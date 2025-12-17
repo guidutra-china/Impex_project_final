@@ -43,6 +43,9 @@ class Order extends Model
         'quotation_deadline',
         'total_amount',
         'selected_quote_id',
+        'sent_at',
+        'under_analysis_at',
+        'approved_at',
         'created_by',
         'updated_by',
     ];
@@ -52,6 +55,11 @@ class Order extends Model
         'commission_percent_average' => 'decimal:2',
         'total_amount' => 'integer',
         'quotation_deadline' => 'date',
+        'sent_at' => 'datetime',
+        'under_analysis_at' => 'datetime',
+        'approved_at' => 'datetime',
+        'completed_at' => 'datetime',
+        'cancelled_at' => 'datetime',
     ];
 
     /**
