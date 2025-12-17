@@ -6,10 +6,10 @@ use App\Filament\Portal\Resources\CustomerQuoteResource;
 use App\Services\CustomerQuoteService;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
-use Filament\Infolists\Components\Grid;
-use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Components\RepeatableEntry;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Grid;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Schemas\Schema;
 
@@ -20,7 +20,7 @@ class ViewCustomerQuote extends ViewRecord
     public function infolist(Schema $schema): Schema
     {
         return $schema
-            ->schema([
+            ->components([
                 Section::make('Quote Information')
                     ->schema([
                         Grid::make(3)
