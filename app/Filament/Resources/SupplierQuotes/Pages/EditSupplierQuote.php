@@ -3,7 +3,7 @@
 namespace App\Filament\Resources\SupplierQuotes\Pages;
 
 use App\Filament\Resources\SupplierQuotes\SupplierQuoteResource;
-use App\Repositories\SupplierQuoteRepository;
+
 use App\Services\SupplierQuoteImportService;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
@@ -15,13 +15,7 @@ class EditSupplierQuote extends EditRecord
 {
     protected static string $resource = SupplierQuoteResource::class;
 
-    protected ?SupplierQuoteRepository $quoteRepository = null;
 
-    public function mount(string|int $record): void
-    {
-        parent::mount($record);
-        $this->quoteRepository = app(SupplierQuoteRepository::class);
-    }
 
     protected function getHeaderActions(): array
     {
@@ -44,14 +38,6 @@ class EditSupplierQuote extends EditRecord
                     $this->handleImportExcel($data, $importService);
                 }),
             DeleteAction::make(),
-            Action::make('recalculate')
-                ->label('Recalculate All')
-                ->icon('heroicon-o-calculator')
-                ->action(function () {
-                    $this->handleRecalculate();
-                })
-                ->requiresConfirmation()
-                ->color('warning'),
         ];
     }
 
@@ -129,33 +115,5 @@ class EditSupplierQuote extends EditRecord
         }
     }
 
-    /**
-     * Manipula o recalcular de todos os valores
-     */
-    protected function handleRecalculate(): void
-    {
-        try {
-            $this->quoteRepository->recalculateAll($this->record->id);
 
-            Notification::make()
-                ->success()
-                ->title('Recalculation Complete')
-                ->body('All values have been recalculated successfully.')
-                ->send();
-
-            // Refresh the record
-            $this->record->refresh();
-        } catch (\Exception $e) {
-            Notification::make()
-                ->danger()
-                ->title('Error Recalculating')
-                ->body($e->getMessage())
-                ->send();
-
-            \Log::error('Erro ao recalcular cotação', [
-                'id' => $this->record->id,
-                'error' => $e->getMessage(),
-            ]);
-        }
-    }
 }
