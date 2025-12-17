@@ -4,10 +4,12 @@ namespace App\Filament\Resources\CustomerQuotes\Pages;
 
 use App\Filament\Resources\CustomerQuotes\CustomerQuoteResource;
 use App\Filament\Resources\CustomerQuotes\Schemas\CustomerQuoteInfolist;
+use App\Mail\CustomerQuoteSent;
 use Filament\Actions\EditAction;
 use Filament\Actions\Action;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Schemas\Schema;
+use Illuminate\Support\Facades\Mail;
 
 class ViewCustomerQuote extends ViewRecord
 {
@@ -22,24 +24,46 @@ class ViewCustomerQuote extends ViewRecord
                 ->color('success')
                 ->visible(fn () => $this->record->status === 'draft')
                 ->requiresConfirmation()
-                ->action(function () {
-                    $this->record->update([
-                        'status' => 'sent',
-                        'sent_at' => now(),
-                    ]);
-                    
-                    \Filament\Notifications\Notification::make()
-                        ->title('Quote Sent')
-                        ->success()
-                        ->body('The quote has been marked as sent.')
-                        ->send();
+                ->modalHeading('Send Quote to Customer')
+                ->modalDescription('This will send an email with a link to view and select quote options.')
+                ->form([
+                    \Filament\Forms\Components\TextInput::make('email')
+                        ->label('Customer Email')
+                        ->email()
+                        ->default(fn () => $this->record->order->customer->email)
+                        ->required()
+                        ->helperText('Email will be sent to this address'),
+                ])
+                ->action(function (array $data) {
+                    try {
+                        // Send email
+                        Mail::to($data['email'])->send(new CustomerQuoteSent($this->record));
+                        
+                        // Update quote status
+                        $this->record->update([
+                            'status' => 'sent',
+                            'sent_at' => now(),
+                        ]);
+                        
+                        \Filament\Notifications\Notification::make()
+                            ->title('Quote Sent Successfully')
+                            ->success()
+                            ->body('Email sent to ' . $data['email'])
+                            ->send();
+                    } catch (\Exception $e) {
+                        \Filament\Notifications\Notification::make()
+                            ->title('Error Sending Email')
+                            ->danger()
+                            ->body($e->getMessage())
+                            ->send();
+                    }
                 }),
             
             Action::make('copy_public_link')
                 ->label('Copy Public Link')
                 ->icon('heroicon-o-link')
                 ->action(function () {
-                    $url = route('customer-quote.public', ['token' => $this->record->public_token]);
+                    $url = route('public.customer-quote.show', ['token' => $this->record->public_token]);
                     \Filament\Notifications\Notification::make()
                         ->title('Public Link')
                         ->body($url)
