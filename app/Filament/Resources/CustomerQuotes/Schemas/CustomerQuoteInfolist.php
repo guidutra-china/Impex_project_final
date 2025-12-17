@@ -68,9 +68,9 @@ class CustomerQuoteInfolist
 
                         TextEntry::make('public_url')
                             ->label('Public URL')
-                            ->state(fn ($record) => route('customer-quote.public', ['token' => $record->public_token]))
+                            ->state(fn ($record) => route('public.customer-quote.show', ['token' => $record->public_token]))
                             ->copyable()
-                            ->url(fn ($record) => route('customer-quote.public', ['token' => $record->public_token]))
+                            ->url(fn ($record) => route('public.customer-quote.show', ['token' => $record->public_token]))
                             ->openUrlInNewTab(),
                     ])
                     ->columns(1)

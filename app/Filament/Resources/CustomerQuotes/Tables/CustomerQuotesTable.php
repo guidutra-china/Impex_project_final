@@ -116,7 +116,7 @@ class CustomerQuotesTable
                     ->label('Copy Public Link')
                     ->icon('heroicon-o-link')
                     ->action(function ($record) {
-                        $url = route('customer-quote.public', ['token' => $record->public_token]);
+                        $url = route('public.customer-quote.show', ['token' => $record->public_token]);
                         // Copy to clipboard would be handled by frontend JS
                         \Filament\Notifications\Notification::make()
                             ->title('Public Link')
