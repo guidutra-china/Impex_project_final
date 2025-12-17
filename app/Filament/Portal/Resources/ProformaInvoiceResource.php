@@ -10,14 +10,16 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use BackedEnum;
+use UnitEnum;
 
 class ProformaInvoiceResource extends Resource
 {
     protected static ?string $model = ProformaInvoice::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-document-currency-dollar';
+    protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-document-currency-dollar';
 
-    protected static ?string $navigationGroup = 'Finance';
+    protected static UnitEnum|string|null $navigationGroup = 'Finance';
 
     protected static ?int $navigationSort = 1;
 

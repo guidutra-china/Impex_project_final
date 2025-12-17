@@ -10,14 +10,16 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use BackedEnum;
+use UnitEnum;
 
 class CustomerQuoteResource extends Resource
 {
     protected static ?string $model = CustomerQuote::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-document-text';
+    protected static BackedEnum|string|null $navigationIcon = 'heroicon-o-document-text';
 
-    protected static ?string $navigationGroup = 'Purchasing';
+    protected static UnitEnum|string|null $navigationGroup = 'Purchasing';
 
     protected static ?int $navigationSort = 1;
 
