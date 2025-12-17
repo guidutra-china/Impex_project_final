@@ -23,6 +23,7 @@ class CustomerQuote extends Model
         'quote_number',
         'status',
         'show_supplier_names',
+        'show_as_unified_quote',
         'public_token',
         'sent_at',
         'approved_at',
@@ -47,6 +48,7 @@ class CustomerQuote extends Model
         'viewed_at' => 'datetime',
         'responded_at' => 'datetime',
         'show_supplier_names' => 'boolean',
+        'show_as_unified_quote' => 'boolean',
     ];
 
     /**

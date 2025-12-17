@@ -61,6 +61,12 @@ class CustomerQuoteForm
                                     ->helperText('If enabled, customer will see actual supplier names. If disabled, they will see generic labels like "Option A", "Option B".')
                                     ->default(false)
                                     ->columnSpan(2),
+
+                                Toggle::make('show_as_unified_quote')
+                                    ->label('Show as Unified Quote')
+                                    ->helperText('If enabled, customer will see only selected products in a simple list without any supplier information or comparison.')
+                                    ->default(false)
+                                    ->columnSpan(2),
                             ]),
                     ]),
 

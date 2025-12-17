@@ -1,4 +1,11 @@
 <x-filament-panels::page>
+    @php
+        // Check if we should show unified quote mode
+        $showUnifiedMode = $record->show_as_unified_quote ?? false;
+        // Filter visible items only
+        $visibleItems = $record->items->where('is_visible_to_customer', true);
+    @endphp
+
     <style>
         .quote-compare-container {
             background: #f8fafc;
@@ -156,15 +163,19 @@
         </div>
 
         @php
-            // Items are already eager loaded in Resource::getEloquentQuery()
-            $items = $record->items;
+            // Use only visible items
+            $items = $visibleItems;
             $cheapestItem = $items->sortBy('price_after_commission')->first();
         @endphp
 
-        {{-- Supplier Cards Comparison --}}
-        <div class="compare-area">
-            <div class="compare-grid">
-                @foreach($items as $item)
+        @if($showUnifiedMode)
+            {{-- UNIFIED MODE: Simple product list without supplier comparison --}}
+            @include('filament.portal.pages.partials.unified-quote-view', ['items' => $items, 'record' => $record])
+        @else
+            {{-- COMPARISON MODE: Supplier Cards Comparison --}}
+            <div class="compare-area">
+                <div class="compare-grid">
+                    @foreach($items as $item)
                     @php
                         $isBest = $item->id === $cheapestItem->id;
                         $supplierQuote = $item->supplierQuote;
@@ -216,8 +227,8 @@
             </div>
         </div>
 
-        {{-- Products Grid --}}
-        @php
+            {{-- Products Grid --}}
+            @php
             // Group products from all supplier quotes
             $allProducts = collect();
             foreach($items as $customerQuoteItem) {
@@ -297,6 +308,7 @@
                     @endforeach
                 </div>
             </div>
+            @endif
         @endif
     </div>
 </x-filament-panels::page>

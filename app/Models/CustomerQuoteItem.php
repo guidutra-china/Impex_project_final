@@ -19,6 +19,7 @@ class CustomerQuoteItem extends Model
         'highlights',
         'notes',
         'is_selected_by_customer',
+        'is_visible_to_customer',
         'selected_at',
         'display_order',
     ];
@@ -29,6 +30,7 @@ class CustomerQuoteItem extends Model
         'price_after_commission' => 'integer',
         'moq' => 'integer',
         'is_selected_by_customer' => 'boolean',
+        'is_visible_to_customer' => 'boolean',
         'selected_at' => 'datetime',
         'display_order' => 'integer',
     ];
