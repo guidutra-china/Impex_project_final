@@ -4,13 +4,13 @@ namespace App\Filament\Portal\Resources;
 
 use App\Filament\Portal\Resources\CustomerQuoteResource\Pages;
 use App\Models\CustomerQuote;
+use Filament\Actions\Action;
 use Filament\Forms;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Tables\Columns\BadgeColumn;
-use Filament\Actions\ViewAction;
 use Illuminate\Database\Eloquent\Builder;
 use BackedEnum;
 use UnitEnum;
@@ -74,7 +74,9 @@ class CustomerQuoteResource extends Resource
                     ->sortable(),
                 Tables\Columns\TextColumn::make('order.order_number')
                     ->label('RFQ #')
-                    ->searchable(),
+                    ->searchable()
+                    ->placeholder('N/A')
+                    ->default('N/A'),
                 Tables\Columns\BadgeColumn::make('status')
                     ->colors([
                         'secondary' => 'draft',
@@ -108,7 +110,10 @@ class CustomerQuoteResource extends Resource
                     ]),
             ])
             ->actions([
-                ViewAction::make(),
+                Action::make('view')
+                    ->label('View')
+                    ->icon('heroicon-o-eye')
+                    ->url(fn ($record) => static::getUrl('view', ['record' => $record])),
             ])
             ->defaultSort('created_at', 'desc');
     }
