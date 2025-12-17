@@ -49,9 +49,12 @@ class DebugPortalAccess extends Command
 
         $this->newLine();
         $this->info("=== ALL CUSTOMER QUOTES (WITHOUT SCOPE) ===");
-        $allQuotes = CustomerQuote::withoutGlobalScopes()->with(['order' => function($q) {
-            $q->withoutGlobalScopes()->with('customer');
-        }])->get();
+        $this->line("Including soft deleted quotes...");
+        $allQuotes = CustomerQuote::withoutGlobalScopes()
+            ->withTrashed()
+            ->with(['order' => function($q) {
+                $q->withoutGlobalScopes()->with('customer');
+            }])->get();
         
         foreach ($allQuotes as $quote) {
             $order = $quote->order;
@@ -60,7 +63,8 @@ class DebugPortalAccess extends Command
             $customerName = $customer ? $customer->name : 'N/A';
             $orderId = $order ? $order->id : 'NULL';
             
-            $this->line("Quote: {$quote->quote_number} | Order ID: {$orderId} | Order Customer ID: {$customerId} | Customer: {$customerName}");
+            $deleted = $quote->trashed() ? ' [DELETED]' : '';
+            $this->line("Quote: {$quote->quote_number} | Order ID: {$orderId} | Order Customer ID: {$customerId} | Customer: {$customerName}{$deleted}");
         }
 
         $this->newLine();
@@ -83,7 +87,8 @@ class DebugPortalAccess extends Command
                 $customerName = $customer ? $customer->name : 'N/A';
                 $orderId = $order ? $order->id : 'NULL';
                 
-                $this->line("Quote: {$quote->quote_number} | Order ID: {$orderId} | Order Customer ID: {$customerId} | Customer: {$customerName}");
+                $deleted = $quote->trashed() ? ' [DELETED]' : '';
+            $this->line("Quote: {$quote->quote_number} | Order ID: {$orderId} | Order Customer ID: {$customerId} | Customer: {$customerName}{$deleted}");
             }
         }
 
