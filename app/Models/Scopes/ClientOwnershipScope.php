@@ -75,7 +75,9 @@ class ClientOwnershipScope implements Scope
         if ($model instanceof \App\Models\CustomerQuote) {
             if ($user->client_id) {
                 $builder->whereHas('order', function ($query) use ($user) {
-                    $query->where('customer_id', $user->client_id);
+                    // Disable Order's own scope to avoid double filtering
+                    $query->withoutGlobalScopes([self::class])
+                          ->where('customer_id', $user->client_id);
                 });
             }
             return;
@@ -85,7 +87,9 @@ class ClientOwnershipScope implements Scope
         if ($model instanceof \App\Models\ProformaInvoice) {
             if ($user->client_id) {
                 $builder->whereHas('order', function ($query) use ($user) {
-                    $query->where('customer_id', $user->client_id);
+                    // Disable Order's own scope to avoid double filtering
+                    $query->withoutGlobalScopes([self::class])
+                          ->where('customer_id', $user->client_id);
                 });
             }
             return;

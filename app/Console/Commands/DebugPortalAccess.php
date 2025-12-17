@@ -82,6 +82,14 @@ class DebugPortalAccess extends Command
         $this->newLine();
         $this->info("=== DIAGNOSIS ===");
         
+        // Test without Order scope
+        $quotesWithoutOrderScope = CustomerQuote::withoutGlobalScopes()
+            ->whereHas('order', function ($query) use ($user) {
+                $query->withoutGlobalScopes()->where('customer_id', $user->client_id);
+            })
+            ->count();
+        $this->line("CustomerQuotes (bypassing Order scope): {$quotesWithoutOrderScope}");
+        
         if ($user->client_id) {
             $matchingOrders = Order::where('customer_id', $user->client_id)->count();
             $this->line("Orders with customer_id = {$user->client_id}: {$matchingOrders}");
