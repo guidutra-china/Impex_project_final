@@ -63,14 +63,20 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
 
     public function canAccessPanel(Panel $panel): bool
     {
+        // Portal panel access (for customer users)
+        if ($panel->getId() === 'portal') {
+            // Allow unauthenticated access to login page
+            if (!auth()->check()) {
+                return true;
+            }
+            // After login, verify user has portal role and client_id
+            return $this->client_id !== null && 
+                   $this->hasRole(['purchasing', 'finance', 'logistics']);
+        }
+
         // Admin panel access
         if ($panel->getId() === 'admin') {
             return $this->hasRole(['super_admin', 'panel_user']) || $this->is_admin == 1;
-        }
-
-        // Portal panel access (for customer users)
-        if ($panel->getId() === 'portal') {
-            return $this->hasRole(['purchasing', 'finance', 'logistics']);
         }
 
         return false;
