@@ -29,14 +29,7 @@ class PurchaseOrderResource extends Resource
         return auth()->user()->hasRole('purchasing');
     }
 
-    public static function getEloquentQuery(): Builder
-    {
-        // Filter by client_id through proforma_invoice
-        return parent::getEloquentQuery()
-            ->whereHas('proformaInvoice.order', function ($query) {
-                $query->where('client_id', auth()->user()->client_id);
-            });
-    }
+    // Multi-tenancy filtering is handled automatically by ClientOwnershipScope global scope
 
     public static function form(Schema $schema): Schema
     {
