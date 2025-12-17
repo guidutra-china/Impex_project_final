@@ -293,7 +293,13 @@ class RFQExcelService
                 $sheet->setCellValue('A' . $currentRow, $instructions);
                 $sheet->mergeCells('A' . $currentRow . ':E' . $currentRow);
                 $sheet->getStyle('A' . $currentRow)->getAlignment()->setWrapText(true);
-                $sheet->getRowDimension($currentRow)->setRowHeight(-1); // Auto height
+                $sheet->getStyle('A' . $currentRow)->getAlignment()->setVertical(Alignment::VERTICAL_TOP);
+                
+                // Calculate height based on text length (rough estimate: ~15 height per line)
+                $lineCount = substr_count($instructions, "\n") + 1;
+                $estimatedHeight = max(30, $lineCount * 15); // Minimum 30, ~15 per line
+                $sheet->getRowDimension($currentRow)->setRowHeight($estimatedHeight);
+                
                 $currentRow++;
             }
         } else {
