@@ -282,7 +282,23 @@ class RFQExcelService
             $currentRow++;
             
             // Get quotation instructions from order or company settings
-            $instructions = $order->quotation_instructions ?? $order->company->rfq_default_instructions ?? '';
+            // Ensure company relationship is loaded
+            if (!$order->relationLoaded('company')) {
+                $order->load('company.companySetting');
+            }
+            
+            $instructions = $order->quotation_instructions 
+                ?? optional($order->company)->companySetting->rfq_default_instructions 
+                ?? '';
+            
+            \Log::info('RFQ Excel: Quotation Instructions', [
+                'order_instructions' => $order->quotation_instructions,
+                'company_loaded' => $order->relationLoaded('company'),
+                'company_id' => $order->company_id,
+                'company_setting' => optional($order->company)->companySetting?->rfq_default_instructions,
+                'final_instructions' => $instructions,
+                'has_content' => !empty($instructions)
+            ]);
             
             if ($instructions) {
                 $sheet->setCellValue('A' . $currentRow, $instructions);
