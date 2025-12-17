@@ -114,6 +114,25 @@ class SupplierQuote extends Model
                 throw $e;
             }
         });
+        
+        // Auto-transition: under_analysis → approved when quote is accepted
+        static::updated(function ($quote) {
+            // Check if status changed to 'accepted'
+            if ($quote->isDirty('status') && $quote->status === 'accepted') {
+                $order = $quote->order;
+                if ($order && $order->status === 'under_analysis' && !$order->approved_at) {
+                    $order->update([
+                        'status' => 'approved',
+                        'approved_at' => now(),
+                        'selected_quote_id' => $quote->id,
+                    ]);
+                    \Log::info('RFQ Auto-transition: under_analysis → approved', [
+                        'order_id' => $order->id,
+                        'quote_id' => $quote->id
+                    ]);
+                }
+            }
+        });
     }
 
     /**
