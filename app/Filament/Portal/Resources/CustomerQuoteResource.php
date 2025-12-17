@@ -5,8 +5,8 @@ namespace App\Filament\Portal\Resources;
 use App\Filament\Portal\Resources\CustomerQuoteResource\Pages;
 use App\Models\CustomerQuote;
 use Filament\Forms;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
@@ -37,9 +37,9 @@ class CustomerQuoteResource extends Resource
             });
     }
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
+        return $schema
             ->schema([
                 Forms\Components\Section::make('Quote Information')
                     ->schema([
