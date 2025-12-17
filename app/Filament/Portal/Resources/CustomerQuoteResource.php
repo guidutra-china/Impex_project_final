@@ -40,32 +40,7 @@ class CustomerQuoteResource extends Resource
         }]);
     }
 
-    public static function form(Schema $schema): Schema
-    {
-        return $schema
-            ->schema([
-                \Filament\Forms\Components\Fieldset::make('Quote Information')
-                    ->schema([
-                        Forms\Components\TextInput::make('quote_number')
-                            ->label('Quote Number')
-                            ->disabled(),
-                        Forms\Components\Select::make('status')
-                            ->options([
-                                'draft' => 'Draft',
-                                'sent' => 'Sent',
-                                'viewed' => 'Viewed',
-                                'accepted' => 'Accepted',
-                                'rejected' => 'Rejected',
-                                'expired' => 'Expired',
-                            ])
-                            ->disabled(),
-                        Forms\Components\DateTimePicker::make('expires_at')
-                            ->label('Expires At')
-                            ->disabled(),
-                    ])
-                    ->columns(3),
-            ]);
-    }
+    // Form not needed - using custom view for display
 
     public static function table(Table $table): Table
     {
