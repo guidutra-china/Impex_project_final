@@ -237,7 +237,6 @@ class EditProformaInvoice extends EditRecord
             ]);
         }
     }
-}
 
     /**
      * Handle creating purchase orders from proforma invoice
