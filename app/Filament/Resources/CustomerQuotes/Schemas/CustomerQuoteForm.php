@@ -6,6 +6,7 @@ use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
@@ -54,6 +55,12 @@ class CustomerQuoteForm
                                     ->required()
                                     ->minDate(now())
                                     ->columnSpan(1),
+
+                                Toggle::make('show_supplier_names')
+                                    ->label('Show Supplier Names to Customer')
+                                    ->helperText('If enabled, customer will see actual supplier names. If disabled, they will see generic labels like "Option A", "Option B".')
+                                    ->default(false)
+                                    ->columnSpan(2),
                             ]),
                     ]),
 

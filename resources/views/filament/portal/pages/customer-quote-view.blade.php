@@ -175,7 +175,7 @@
                         {{-- Header --}}
                         <div class="quote-card-header">
                             <div class="supplier-name">{{ $item->display_name }}</div>
-                            @if($supplier)
+                            @if($record->show_supplier_names && $supplier)
                                 <div style="font-size: 13px; color: #6b7280;">{{ $supplier->name }}</div>
                             @endif
                             

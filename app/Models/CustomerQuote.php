@@ -22,6 +22,7 @@ class CustomerQuote extends Model
         'order_id',
         'quote_number',
         'status',
+        'show_supplier_names',
         'public_token',
         'sent_at',
         'approved_at',
@@ -45,6 +46,7 @@ class CustomerQuote extends Model
         'expires_at' => 'datetime',
         'viewed_at' => 'datetime',
         'responded_at' => 'datetime',
+        'show_supplier_names' => 'boolean',
     ];
 
     /**
