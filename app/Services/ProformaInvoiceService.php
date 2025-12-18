@@ -33,6 +33,7 @@ class ProformaInvoiceService
                 'customer_quote_id' => $customerQuote->id,
                 'customer_id' => $order->customer_id,
                 'public_token' => \Str::random(32),
+                'revision_number' => 1,
                 'status' => 'draft',
                 'issue_date' => now(),
                 'valid_until' => now()->addDays(30),
@@ -40,8 +41,14 @@ class ProformaInvoiceService
                 'subtotal' => 0,
                 'tax' => 0,
                 'total' => 0,
+                'exchange_rate' => 1.00,
                 'currency_id' => $order->currency_id ?? 1, // Default to currency ID 1 if null
+                'rejection_reason' => '',
+                'deposit_required' => false,
+                'deposit_received' => false,
                 'notes' => 'Generated from Customer Quote: ' . $customerQuote->quote_number,
+                'terms_and_conditions' => '',
+                'customer_notes' => '',
                 'created_by' => auth()->id() ?? $order->user_id ?? null,
             ]);
 
