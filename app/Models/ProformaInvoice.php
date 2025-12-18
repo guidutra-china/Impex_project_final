@@ -204,6 +204,16 @@ class ProformaInvoice extends Model
     /**
      * Relationships
      */
+    public function order(): BelongsTo
+    {
+        return $this->belongsTo(Order::class);
+    }
+
+    public function customerQuote(): BelongsTo
+    {
+        return $this->belongsTo(CustomerQuote::class);
+    }
+
     public function customer(): BelongsTo
     {
         return $this->belongsTo(Client::class, 'customer_id');
