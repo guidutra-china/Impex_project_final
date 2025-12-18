@@ -27,18 +27,18 @@ class ProformaInvoiceService
             $proformaInvoice = ProformaInvoice::create([
                 'order_id' => $order->id,
                 'customer_quote_id' => $customerQuote->id,
-                'invoice_number' => $this->generateInvoiceNumber(),
+                'customer_id' => $order->customer_id,
                 'public_token' => \Str::random(32),
                 'status' => 'draft',
                 'issue_date' => now(),
+                'valid_until' => now()->addDays(30),
                 'due_date' => now()->addDays(30),
                 'subtotal' => 0,
-                'tax_amount' => 0,
-                'shipping_cost' => 0,
-                'total_amount' => 0,
-                'currency_id' => $order->currency_id,
+                'tax' => 0,
+                'total' => 0,
+                'currency_id' => $order->currency_id ?? 1, // Default to currency ID 1 if null
                 'notes' => 'Generated from Customer Quote: ' . $customerQuote->quote_number,
-                'created_by' => auth()->id(),
+                'created_by' => auth()->id() ?? $order->user_id ?? null,
             ]);
 
             // Get selected quote items
@@ -55,11 +55,16 @@ class ProformaInvoiceService
 
                 ProformaInvoiceItem::create([
                     'proforma_invoice_id' => $proformaInvoice->id,
+                    'supplier_quote_id' => $quoteItem->supplier_quote_id,
+                    'quote_item_id' => $quoteItem->id,
                     'product_id' => $quoteItem->product_id,
-                    'description' => $quoteItem->product->name ?? 'Product',
+                    'product_name' => $quoteItem->product->name ?? 'Product',
+                    'product_sku' => $quoteItem->product->code ?? null,
                     'quantity' => $quoteItem->quantity,
+                    'quantity_remaining' => $quoteItem->quantity,
                     'unit_price' => $quoteItem->unit_price_after_commission,
-                    'total_price' => $itemTotal,
+                    'total' => $itemTotal,
+                    'delivery_days' => $quoteItem->lead_time_days,
                     'notes' => 'From Supplier: ' . ($quoteItem->supplierQuote->supplier->name ?? 'N/A'),
                 ]);
             }
@@ -67,7 +72,7 @@ class ProformaInvoiceService
             // Update totals
             $proformaInvoice->update([
                 'subtotal' => $subtotal,
-                'total_amount' => $subtotal, // Will be updated if tax/shipping is added
+                'total' => $subtotal, // Will be updated if tax is added
             ]);
 
             return $proformaInvoice->fresh();

@@ -56,9 +56,12 @@ class ProformaInvoice extends Model
     protected $fillable = [
         'proforma_number',
         'revision_number',
+        'order_id',
+        'customer_quote_id',
         'customer_id',
         'currency_id',
         'payment_term_id',
+        'public_token',
         'incoterm',
         'incoterm_location',
         'subtotal',
