@@ -118,6 +118,14 @@ class CustomerQuote extends Model
     }
 
     /**
+     * Get the product selections for this quote
+     */
+    public function productSelections(): HasMany
+    {
+        return $this->hasMany(CustomerQuoteProductSelection::class);
+    }
+
+    /**
      * Get the user who approved the quote
      */
     public function approvedBy(): BelongsTo

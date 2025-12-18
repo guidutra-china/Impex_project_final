@@ -9,6 +9,7 @@ use App\Filament\Resources\CustomerQuotes\Pages\ViewCustomerQuote;
 use App\Filament\Resources\CustomerQuotes\Schemas\CustomerQuoteForm;
 use App\Filament\Resources\CustomerQuotes\Tables\CustomerQuotesTable;
 use App\Filament\Resources\CustomerQuotes\RelationManagers\ItemsRelationManager;
+use App\Filament\Resources\CustomerQuotes\RelationManagers\ProductSelectionsRelationManager;
 use App\Models\CustomerQuote;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
@@ -90,6 +91,7 @@ class CustomerQuoteResource extends Resource
     {
         return [
             ItemsRelationManager::class,
+            ProductSelectionsRelationManager::class,
         ];
     }
 

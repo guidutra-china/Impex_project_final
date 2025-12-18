@@ -169,8 +169,8 @@
         @endphp
 
         @if($showUnifiedMode)
-            {{-- UNIFIED MODE: Simple product list without supplier comparison --}}
-            @include('filament.portal.pages.partials.unified-quote-view', ['items' => $items, 'record' => $record])
+            {{-- UNIFIED MODE: Simple product list using product selections --}}
+            @include('filament.portal.pages.partials.unified-quote-products', ['record' => $record])
         @else
             {{-- COMPARISON MODE: Supplier Cards Comparison --}}
             <div class="compare-area">
