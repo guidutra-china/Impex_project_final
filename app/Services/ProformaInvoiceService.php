@@ -22,6 +22,10 @@ class ProformaInvoiceService
         return DB::transaction(function () use ($customerQuote, $selectedQuoteItemIds) {
             // Get the order
             $order = $customerQuote->order;
+            
+            if (!$order) {
+                throw new \Exception('CustomerQuote does not have an associated Order');
+            }
 
             // Create Proforma Invoice
             $proformaInvoice = ProformaInvoice::create([
@@ -43,8 +47,12 @@ class ProformaInvoiceService
 
             // Get selected quote items
             $quoteItems = QuoteItem::whereIn('id', $selectedQuoteItemIds)
-                ->with(['product', 'supplierQuote'])
+                ->with(['product', 'supplierQuote.supplier'])
                 ->get();
+                
+            if ($quoteItems->isEmpty()) {
+                throw new \Exception('No quote items found for the selected IDs');
+            }
 
             $subtotal = 0;
 
