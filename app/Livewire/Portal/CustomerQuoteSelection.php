@@ -53,13 +53,18 @@ class CustomerQuoteSelection extends Component
         $this->isSubmitting = true;
 
         try {
+            // Reload CustomerQuote with order (without scope)
+            $customerQuote = CustomerQuote::with(['order' => function($query) {
+                $query->withoutGlobalScopes();
+            }])->findOrFail($this->customerQuote->id);
+            
             // Update product selections
-            $this->customerQuote->productSelections()->update([
+            $customerQuote->productSelections()->update([
                 'is_selected_by_customer' => false,
                 'selected_at' => null,
             ]);
 
-            $this->customerQuote->productSelections()
+            $customerQuote->productSelections()
                 ->whereIn('quote_item_id', $this->selectedProducts)
                 ->update([
                     'is_selected_by_customer' => true,
@@ -69,12 +74,12 @@ class CustomerQuoteSelection extends Component
             // Create Proforma Invoice
             $proformaInvoiceService = app(ProformaInvoiceService::class);
             $proformaInvoice = $proformaInvoiceService->createFromCustomerQuoteSelection(
-                $this->customerQuote,
+                $customerQuote,
                 $this->selectedProducts
             );
 
             // Update customer quote status
-            $this->customerQuote->update([
+            $customerQuote->update([
                 'status' => 'accepted',
                 'approved_at' => now(),
             ]);
