@@ -16,6 +16,11 @@ class CustomerQuoteSelection extends Component
 
     public function mount(CustomerQuote $customerQuote)
     {
+        // Load order without scope to avoid conflicts
+        $customerQuote->load(['order' => function($query) {
+            $query->withoutGlobalScopes();
+        }]);
+        
         $this->customerQuote = $customerQuote;
         
         // Load already selected products
