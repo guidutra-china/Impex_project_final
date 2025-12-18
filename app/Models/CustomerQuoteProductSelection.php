@@ -11,12 +11,16 @@ class CustomerQuoteProductSelection extends Model
         'customer_quote_id',
         'quote_item_id',
         'is_visible_to_customer',
+        'is_selected_by_customer',
+        'selected_at',
         'display_order',
         'custom_notes',
     ];
 
     protected $casts = [
         'is_visible_to_customer' => 'boolean',
+        'is_selected_by_customer' => 'boolean',
+        'selected_at' => 'datetime',
         'display_order' => 'integer',
     ];
 

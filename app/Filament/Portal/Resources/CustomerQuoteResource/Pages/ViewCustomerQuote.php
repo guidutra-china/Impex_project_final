@@ -14,7 +14,7 @@ class ViewCustomerQuote extends ViewRecord
 
     public function getView(): string
     {
-        return 'filament.portal.pages.customer-quote-view';
+        return 'filament.portal.pages.customer-quote-livewire-wrapper';
     }
 
     protected function getHeaderActions(): array
