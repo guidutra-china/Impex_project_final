@@ -38,8 +38,10 @@ class CustomerQuoteForm
                                     ->columnSpan(1),
 
                                 Select::make('status')
+                                    ->label('Status')
                                     ->options([
                                         'draft' => 'Draft',
+                                        'pending' => 'Pending',
                                         'sent' => 'Sent',
                                         'viewed' => 'Viewed',
                                         'accepted' => 'Accepted',
@@ -48,6 +50,7 @@ class CustomerQuoteForm
                                     ])
                                     ->required()
                                     ->default('draft')
+                                    ->helperText('Change status manually or use actions in View page')
                                     ->columnSpan(1),
 
                                 DatePicker::make('expires_at')
