@@ -69,9 +69,11 @@ class CustomerQuoteResource extends Resource
                         'danger' => 'rejected',
                         'gray' => 'expired',
                     ]),
-                Tables\Columns\TextColumn::make('items_count')
-                    ->label('Options')
-                    ->counts('items'),
+                Tables\Columns\TextColumn::make('order.customer_ref')
+                    ->label('Customer Ref.')
+                    ->searchable()
+                    ->sortable()
+                    ->default('—'),
                 Tables\Columns\TextColumn::make('expires_at')
                     ->label('Expires')
                     ->dateTime()

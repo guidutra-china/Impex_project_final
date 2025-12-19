@@ -12,6 +12,16 @@ class ViewCustomerQuote extends ViewRecord
 {
     protected static string $resource = CustomerQuoteResource::class;
 
+    public function mount(int | string $record): void
+    {
+        parent::mount($record);
+        
+        // Update status to 'viewed' when customer opens the quote
+        if ($this->record->status === 'sent') {
+            $this->record->update(['status' => 'viewed']);
+        }
+    }
+
     public function getView(): string
     {
         return 'filament.portal.pages.customer-quote-livewire-wrapper';
