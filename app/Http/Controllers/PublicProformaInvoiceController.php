@@ -16,11 +16,13 @@ class PublicProformaInvoiceController extends Controller
         $proformaInvoice = ProformaInvoice::where('public_token', $token)
             ->with([
                 'customer',
+                'customer.country',
                 'order',
                 'customerQuote',
                 'items.product',
                 'items.supplierQuote.supplier',
                 'currency',
+                'paymentTerm',
             ])
             ->firstOrFail();
 
@@ -32,16 +34,11 @@ class PublicProformaInvoiceController extends Controller
         }
 
         // Generate PDF
-        $pdf = Pdf::loadView('pdf.proforma-invoice', [
-            'proformaInvoice' => $proformaInvoice,
+        $pdf = Pdf::loadView('pdf.proforma-invoice.template', [
+            'model' => $proformaInvoice,
+            'generated_at' => now(),
             'isDraft' => $proformaInvoice->status === 'draft',
         ]);
-
-        // Add watermark if draft
-        if ($proformaInvoice->status === 'draft') {
-            $pdf->setOption('watermark', 'DRAFT');
-            $pdf->setOption('show_watermark', true);
-        }
 
         return $pdf->stream('Proforma_Invoice_' . $proformaInvoice->proforma_number . '.pdf');
     }
@@ -55,25 +52,22 @@ class PublicProformaInvoiceController extends Controller
         $proformaInvoice = ProformaInvoice::where('public_token', $token)
             ->with([
                 'customer',
+                'customer.country',
                 'order',
                 'customerQuote',
                 'items.product',
                 'items.supplierQuote.supplier',
                 'currency',
+                'paymentTerm',
             ])
             ->firstOrFail();
 
         // Generate PDF
-        $pdf = Pdf::loadView('pdf.proforma-invoice', [
-            'proformaInvoice' => $proformaInvoice,
+        $pdf = Pdf::loadView('pdf.proforma-invoice.template', [
+            'model' => $proformaInvoice,
+            'generated_at' => now(),
             'isDraft' => $proformaInvoice->status === 'draft',
         ]);
-
-        // Add watermark if draft
-        if ($proformaInvoice->status === 'draft') {
-            $pdf->setOption('watermark', 'DRAFT');
-            $pdf->setOption('show_watermark', true);
-        }
 
         return $pdf->download('Proforma_Invoice_' . $proformaInvoice->proforma_number . '.pdf');
     }

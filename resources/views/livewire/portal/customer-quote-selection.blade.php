@@ -65,19 +65,31 @@
                     @endif
                 </div>
             </div>
-            <button 
-                wire:click="submitSelection" 
-                wire:loading.attr="disabled"
-                class="submit-selection-btn"
-                {{ ($this->selectedProductCount === 0 || $isLocked) ? 'disabled' : '' }}
-            >
-                <span wire:loading.remove wire:target="submitSelection">
-                    ✓ Submit Selection
-                </span>
-                <span wire:loading wire:target="submitSelection">
-                    Processing...
-                </span>
-            </button>
+            @if($isLocked && $createdProformaInvoiceId)
+                @php
+                    $proformaInvoice = \App\Models\ProformaInvoice::find($createdProformaInvoiceId);
+                    $pdfUrl = $proformaInvoice ? route('public.proforma-invoice.show', ['token' => $proformaInvoice->public_token]) : null;
+                @endphp
+                @if($pdfUrl)
+                <a href="{{ $pdfUrl }}" target="_blank" class="submit-selection-btn" style="display: inline-block; text-decoration: none;">
+                    📄 View Proforma Invoice PDF
+                </a>
+                @endif
+            @else
+                <button 
+                    wire:click="submitSelection" 
+                    wire:loading.attr="disabled"
+                    class="submit-selection-btn"
+                    {{ ($this->selectedProductCount === 0 || $isLocked) ? 'disabled' : '' }}
+                >
+                    <span wire:loading.remove wire:target="submitSelection">
+                        ✓ Submit Selection
+                    </span>
+                    <span wire:loading wire:target="submitSelection">
+                        Processing...
+                    </span>
+                </button>
+            @endif
         </div>
     @endif
 

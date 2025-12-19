@@ -126,6 +126,14 @@ class CustomerQuote extends Model
     }
 
     /**
+     * Get the proforma invoices created from this quote
+     */
+    public function proformaInvoices(): HasMany
+    {
+        return $this->hasMany(ProformaInvoice::class);
+    }
+
+    /**
      * Get the user who approved the quote
      */
     public function approvedBy(): BelongsTo

@@ -9,6 +9,7 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Filament\Tables\Actions\Action as TablesActionsAction;
 use Filament\Actions\ViewAction;
 use Illuminate\Database\Eloquent\Builder;
 use BackedEnum;
@@ -26,7 +27,8 @@ class ProformaInvoiceResource extends Resource
 
     public static function canAccess(): bool
     {
-        return auth()->user()->hasRole('finance');
+        // Allow all authenticated users in Portal (filtering is done by ClientOwnershipScope)
+        return auth()->check();
     }
 
     // Multi-tenancy filtering is handled automatically by ClientOwnershipScope global scope
@@ -68,9 +70,12 @@ class ProformaInvoiceResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('invoice_number')
-                    ->label('Invoice #')
+                Tables\Columns\TextColumn::make('proforma_number')
+                    ->label('PI Number')
                     ->searchable()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('revision_number')
+                    ->label('Rev')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('order.order_number')
                     ->label('Order #')
@@ -82,12 +87,12 @@ class ProformaInvoiceResource extends Resource
                         'success' => 'approved',
                         'danger' => 'rejected',
                     ]),
-                Tables\Columns\TextColumn::make('total_amount')
+                Tables\Columns\TextColumn::make('total')
                     ->label('Total')
-                    ->money(fn ($record) => $record->currency ?? 'USD')
+                    ->money('USD', divideBy: 100)
                     ->sortable(),
-                Tables\Columns\TextColumn::make('invoice_date')
-                    ->label('Date')
+                Tables\Columns\TextColumn::make('issue_date')
+                    ->label('Issue Date')
                     ->date()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')
@@ -105,6 +110,12 @@ class ProformaInvoiceResource extends Resource
                     ]),
             ])
             ->actions([
+                TablesActionsAction::make('view_pdf')
+                    ->label('View PDF')
+                    ->icon('heroicon-o-document-text')
+                    ->url(fn (ProformaInvoice $record) => route('public.proforma-invoice.show', ['token' => $record->public_token]))
+                    ->openUrlInNewTab()
+                    ->color('primary'),
                 ViewAction::make(),
             ])
             ->defaultSort('created_at', 'desc');

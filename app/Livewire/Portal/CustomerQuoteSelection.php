@@ -14,6 +14,7 @@ class CustomerQuoteSelection extends Component
     public array $selectedProducts = [];
     public bool $isSubmitting = false;
     public bool $isLocked = false;
+    public ?int $createdProformaInvoiceId = null;
 
     public function mount(CustomerQuote $customerQuote)
     {
@@ -33,6 +34,15 @@ class CustomerQuoteSelection extends Component
                 ->where('is_selected_by_customer', true)
                 ->pluck('quote_item_id')
                 ->toArray();
+            
+            // Load the last created Proforma Invoice for this quote
+            $lastPI = $customerQuote->proformaInvoices()
+                ->orderBy('revision_number', 'desc')
+                ->first();
+            
+            if ($lastPI) {
+                $this->createdProformaInvoiceId = $lastPI->id;
+            }
         }
     }
 
@@ -123,14 +133,27 @@ class CustomerQuoteSelection extends Component
                 'approved_at' => now(),
             ]);
 
+            // Store created PI ID
+            $this->createdProformaInvoiceId = $proformaInvoice->id;
+            
+            // Build PDF URL
+            $pdfUrl = route('public.proforma-invoice.show', ['token' => $proformaInvoice->public_token]);
+
             Notification::make()
                 ->success()
                 ->title('Selection submitted successfully!')
                 ->body('Proforma Invoice #' . $proformaInvoice->proforma_number . ' has been created in draft status.')
+                ->actions([
+                    \Filament\Notifications\Actions\Action::make('view_pdf')
+                        ->label('View PDF')
+                        ->url($pdfUrl)
+                        ->openUrlInNewTab()
+                        ->icon('heroicon-o-document-text'),
+                ])
                 ->send();
 
-            // Reload the page to clear selections
-            $this->selectedProducts = [];
+            // Update locked state and reload
+            $this->isLocked = true;
             $this->isSubmitting = false;
 
         } catch (\Exception $e) {

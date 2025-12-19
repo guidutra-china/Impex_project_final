@@ -223,10 +223,26 @@
         @page {
             margin: 15mm;
         }
+        
+        /* Watermark */
+        .watermark {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-45deg);
+            font-size: 120pt;
+            font-weight: bold;
+            color: rgba(220, 38, 38, 0.1);
+            z-index: -1;
+            pointer-events: none;
+        }
     </style>
     @yield('styles')
 </head>
 <body>
+    @if(isset($isDraft) && $isDraft)
+    <div class="watermark">DRAFT</div>
+    @endif
     <div class="container">
         @yield('content')
     </div>
