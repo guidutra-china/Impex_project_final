@@ -69,7 +69,7 @@ class CustomerQuoteResource extends Resource
                         'danger' => 'rejected',
                         'gray' => 'expired',
                     ]),
-                Tables\Columns\TextColumn::make('order.customer_ref')
+                Tables\Columns\TextColumn::make('order.customer_nr_rfq')
                     ->label('Customer Ref.')
                     ->searchable()
                     ->sortable()
