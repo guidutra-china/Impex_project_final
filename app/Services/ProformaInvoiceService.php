@@ -65,8 +65,11 @@ class ProformaInvoiceService
 
             // Create Proforma Invoice Items
             foreach ($quoteItems as $quoteItem) {
-                $itemTotal = $quoteItem->unit_price_after_commission * $quoteItem->quantity;
-                $subtotal += $itemTotal;
+                // Convert cents to dollars for ProformaInvoiceItem (it has mutator that multiplies by 100)
+                $unitPriceDollars = $quoteItem->unit_price_after_commission / 100;
+                $commissionAmountDollars = ($quoteItem->commission_amount ?? 0) / 100;
+                $itemTotalDollars = $unitPriceDollars * $quoteItem->quantity;
+                $subtotal += $itemTotalDollars;
 
                 ProformaInvoiceItem::create([
                     'proforma_invoice_id' => $proformaInvoice->id,
@@ -79,10 +82,10 @@ class ProformaInvoiceService
                     'quantity_shipped' => 0,
                     'quantity_remaining' => $quoteItem->quantity,
                     'shipment_count' => 0,
-                    'unit_price' => $quoteItem->unit_price_after_commission,
-                    'commission_amount' => $quoteItem->commission_amount ?? 0,
+                    'unit_price' => $unitPriceDollars, // Pass in dollars, mutator will convert to cents
+                    'commission_amount' => $commissionAmountDollars,
                     'commission_percent' => $quoteItem->commission_percent ?? 0,
-                    'total' => $itemTotal,
+                    'total' => $itemTotalDollars, // Pass in dollars, mutator will convert to cents
                     'delivery_days' => $quoteItem->lead_time_days,
                     'notes' => 'From Supplier: ' . ($quoteItem->supplierQuote->supplier->name ?? 'N/A'),
                 ]);
