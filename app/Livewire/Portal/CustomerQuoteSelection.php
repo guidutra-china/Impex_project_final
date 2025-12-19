@@ -135,21 +135,12 @@ class CustomerQuoteSelection extends Component
 
             // Store created PI ID
             $this->createdProformaInvoiceId = $proformaInvoice->id;
-            
-            // Build PDF URL
-            $pdfUrl = route('public.proforma-invoice.show', ['token' => $proformaInvoice->public_token]);
 
             Notification::make()
                 ->success()
                 ->title('Selection submitted successfully!')
-                ->body('Proforma Invoice #' . $proformaInvoice->proforma_number . ' has been created in draft status.')
-                ->actions([
-                    \Filament\Notifications\Actions\Action::make('view_pdf')
-                        ->label('View PDF')
-                        ->url($pdfUrl)
-                        ->openUrlInNewTab()
-                        ->icon('heroicon-o-document-text'),
-                ])
+                ->body('Proforma Invoice #' . $proformaInvoice->proforma_number . ' has been created in draft status. Click the "View PDF" button below to see it.')
+                ->duration(8000)
                 ->send();
 
             // Update locked state and reload
