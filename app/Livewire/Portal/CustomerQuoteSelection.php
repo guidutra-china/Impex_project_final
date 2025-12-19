@@ -87,13 +87,12 @@ class CustomerQuoteSelection extends Component
             Notification::make()
                 ->success()
                 ->title('Selection submitted successfully!')
-                ->body('Your Proforma Invoice has been created.')
+                ->body('Proforma Invoice #' . $proformaInvoice->proforma_number . ' has been created in draft status.')
                 ->send();
 
-            // Redirect to Proforma Invoice PDF
-            return redirect()->route('public.proforma-invoice.show', [
-                'token' => $proformaInvoice->public_token
-            ]);
+            // Reload the page to clear selections
+            $this->selectedProducts = [];
+            $this->isSubmitting = false;
 
         } catch (\Exception $e) {
             $this->isSubmitting = false;
