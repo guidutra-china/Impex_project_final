@@ -9,7 +9,7 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Filament\Tables\Actions\Action as TablesActionsAction;
+use Filament\Tables\Actions\Action;
 use Filament\Actions\ViewAction;
 use Illuminate\Database\Eloquent\Builder;
 use BackedEnum;
@@ -110,7 +110,7 @@ class ProformaInvoiceResource extends Resource
                     ]),
             ])
             ->actions([
-                TablesActionsAction::make('view_pdf')
+                Action::make('view_pdf')
                     ->label('View PDF')
                     ->icon('heroicon-o-document-text')
                     ->url(fn (ProformaInvoice $record) => route('public.proforma-invoice.show', ['token' => $record->public_token]))
