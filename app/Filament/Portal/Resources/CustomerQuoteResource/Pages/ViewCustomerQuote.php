@@ -20,44 +20,7 @@ class ViewCustomerQuote extends ViewRecord
     protected function getHeaderActions(): array
     {
         return [
-            Action::make('select_option')
-                ->label('Select Option')
-                ->icon('heroicon-o-check-circle')
-                ->color('success')
-                ->visible(fn () => $this->record->status !== 'accepted')
-                ->form([
-                    \Filament\Forms\Components\Select::make('item_id')
-                        ->label('Choose Your Preferred Option')
-                        ->options(function () {
-                            return $this->record->items->mapWithKeys(function ($item) {
-                                return [
-                                    $item->id => "{$item->display_name} - $" . number_format($item->price_after_commission / 100, 2) . 
-                                        ($item->delivery_time ? " - Delivery: {$item->delivery_time}" : "")
-                                ];
-                            });
-                        })
-                        ->required()
-                        ->helperText('Select the option that best meets your requirements'),
-                ])
-                ->action(function (array $data, CustomerQuoteService $service) {
-                    try {
-                        $service->approveItem($this->record, $data['item_id']);
-
-                        Notification::make()
-                            ->success()
-                            ->title('Option Selected')
-                            ->body('Your selection has been recorded. Our team will process your order.')
-                            ->send();
-
-                        return redirect()->to(static::getResource()::getUrl('view', ['record' => $this->record]));
-                    } catch (\Exception $e) {
-                        Notification::make()
-                            ->danger()
-                            ->title('Error')
-                            ->body($e->getMessage())
-                            ->send();
-                    }
-                }),
+            // Select Option action removed - product selection now handled by Livewire component
         ];
     }
 }
