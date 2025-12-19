@@ -73,18 +73,21 @@ class CustomerQuoteForm
                             ]),
                     ]),
 
-                Section::make('Customer Access')
+                Section::make('Notes')
                     ->schema([
-                        Grid::make(2)
-                            ->schema([
-                                TextInput::make('public_token')
-                                    ->label('Public Access Token')
-                                    ->disabled()
-                                    ->dehydrated(false)
-                                    ->placeholder('Auto-generated')
-                                    ->helperText('Share this token with the customer for access without login')
-                                    ->columnSpan(2),
-                            ]),
+                        Textarea::make('internal_notes')
+                            ->label('Internal Notes')
+                            ->rows(3)
+                            ->maxLength(1000)
+                            ->helperText('Notes for internal use only (not visible to customer)')
+                            ->columnSpan('full'),
+
+                        Textarea::make('customer_notes')
+                            ->label('Customer Notes')
+                            ->rows(3)
+                            ->maxLength(1000)
+                            ->helperText('Notes visible to the customer')
+                            ->columnSpan('full'),
                     ])
                     ->collapsible(),
 
@@ -115,21 +118,18 @@ class CustomerQuoteForm
                     ])
                     ->collapsible(),
 
-                Section::make('Notes')
+                Section::make('Customer Access')
                     ->schema([
-                        Textarea::make('internal_notes')
-                            ->label('Internal Notes')
-                            ->rows(3)
-                            ->maxLength(1000)
-                            ->helperText('Notes for internal use only (not visible to customer)')
-                            ->columnSpan('full'),
-
-                        Textarea::make('customer_notes')
-                            ->label('Customer Notes')
-                            ->rows(3)
-                            ->maxLength(1000)
-                            ->helperText('Notes visible to the customer')
-                            ->columnSpan('full'),
+                        Grid::make(2)
+                            ->schema([
+                                TextInput::make('public_token')
+                                    ->label('Public Access Token')
+                                    ->disabled()
+                                    ->dehydrated(false)
+                                    ->placeholder('Auto-generated')
+                                    ->helperText('Share this token with the customer for access without login')
+                                    ->columnSpan(2),
+                            ]),
                     ])
                     ->collapsible(),
             ]);
