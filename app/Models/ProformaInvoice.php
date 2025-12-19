@@ -216,7 +216,8 @@ class ProformaInvoice extends Model
 
     public function customer(): BelongsTo
     {
-        return $this->belongsTo(Client::class, 'customer_id');
+        return $this->belongsTo(Client::class, 'customer_id')
+            ->withoutGlobalScopes();
     }
 
     public function currency(): BelongsTo
