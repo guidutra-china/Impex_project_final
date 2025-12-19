@@ -27,13 +27,18 @@ class ProformaInvoiceService
                 throw new \Exception('CustomerQuote does not have an associated Order');
             }
 
+            // Calculate revision number based on existing PIs for this CustomerQuote
+            $lastRevision = ProformaInvoice::where('customer_quote_id', $customerQuote->id)
+                ->max('revision_number') ?? 0;
+            $revisionNumber = $lastRevision + 1;
+            
             // Create Proforma Invoice
             $proformaInvoice = ProformaInvoice::create([
                 'order_id' => $order->id,
                 'customer_quote_id' => $customerQuote->id,
                 'customer_id' => $order->customer_id,
                 'public_token' => \Str::random(32),
-                'revision_number' => 1,
+                'revision_number' => $revisionNumber,
                 'status' => 'draft',
                 'issue_date' => now(),
                 'valid_until' => now()->addDays(30),
@@ -46,7 +51,7 @@ class ProformaInvoiceService
                 'rejection_reason' => '',
                 'deposit_required' => false,
                 'deposit_received' => false,
-                'notes' => 'Generated from Customer Quote: ' . $customerQuote->quote_number,
+                'notes' => 'Generated from Customer Quote: ' . $customerQuote->quote_number . ' (Revision ' . $revisionNumber . ')',
                 'terms_and_conditions' => '',
                 'customer_notes' => '',
                 'created_by' => auth()->id() ?? $order->user_id ?? null,

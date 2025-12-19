@@ -13,6 +13,7 @@ class CustomerQuoteSelection extends Component
     public CustomerQuote $customerQuote;
     public array $selectedProducts = [];
     public bool $isSubmitting = false;
+    public bool $isLocked = false;
 
     public function mount(CustomerQuote $customerQuote)
     {
@@ -23,15 +24,25 @@ class CustomerQuoteSelection extends Component
         
         $this->customerQuote = $customerQuote;
         
-        // Load already selected products
-        $this->selectedProducts = $customerQuote->productSelections()
-            ->where('is_selected_by_customer', true)
-            ->pluck('quote_item_id')
-            ->toArray();
+        // Check if quote is locked (already accepted)
+        $this->isLocked = $customerQuote->status === 'accepted';
+        
+        // Load already selected products only if locked (to show previous selection)
+        if ($this->isLocked) {
+            $this->selectedProducts = $customerQuote->productSelections()
+                ->where('is_selected_by_customer', true)
+                ->pluck('quote_item_id')
+                ->toArray();
+        }
     }
 
     public function toggleProduct($quoteItemId)
     {
+        // Prevent toggling if locked
+        if ($this->isLocked) {
+            return;
+        }
+        
         if (in_array($quoteItemId, $this->selectedProducts)) {
             $this->selectedProducts = array_diff($this->selectedProducts, [$quoteItemId]);
         } else {
@@ -39,8 +50,36 @@ class CustomerQuoteSelection extends Component
         }
     }
 
+    public function getSelectedProductCountProperty()
+    {
+        // Get visible product selections
+        $visibleSelections = $this->customerQuote->productSelections()
+            ->where('is_visible_to_customer', true)
+            ->with('quoteItem')
+            ->get();
+        
+        // Get unique product IDs from selected quote items
+        $selectedProductIds = $visibleSelections
+            ->filter(fn($selection) => in_array($selection->quote_item_id, $this->selectedProducts))
+            ->pluck('quoteItem.product_id')
+            ->unique()
+            ->count();
+        
+        return $selectedProductIds;
+    }
+    
     public function submitSelection()
     {
+        // Prevent submission if locked
+        if ($this->isLocked) {
+            Notification::make()
+                ->warning()
+                ->title('Selection already submitted')
+                ->body('This quote has already been accepted. Please contact support if you need to make changes.')
+                ->send();
+            return;
+        }
+        
         if (empty($this->selectedProducts)) {
             Notification::make()
                 ->warning()

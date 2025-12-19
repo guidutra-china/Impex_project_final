@@ -59,6 +59,27 @@ class ViewCustomerQuote extends ViewRecord
                     }
                 }),
             
+            Action::make('reopen_quote')
+                ->label('Reopen Quote')
+                ->icon('heroicon-o-arrow-path')
+                ->color('warning')
+                ->visible(fn () => $this->record->status === 'accepted')
+                ->requiresConfirmation()
+                ->modalHeading('Reopen Quote for New Selection')
+                ->modalDescription('This will allow the customer to make a new product selection. A new Proforma Invoice revision will be created when they submit.')
+                ->action(function () {
+                    $this->record->update([
+                        'status' => 'pending',
+                        'approved_at' => null,
+                    ]);
+                    
+                    \Filament\Notifications\Notification::make()
+                        ->title('Quote Reopened')
+                        ->success()
+                        ->body('Customer can now make a new selection.')
+                        ->send();
+                }),
+            
             Action::make('copy_public_link')
                 ->label('Copy Public Link')
                 ->icon('heroicon-o-link')

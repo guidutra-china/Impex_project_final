@@ -82,6 +82,13 @@
     .supplier-option-cell.selectable {
         cursor: pointer;
     }
+    .supplier-option-cell.locked {
+        cursor: not-allowed;
+        opacity: 0.6;
+    }
+    .supplier-option-cell.locked.selected {
+        opacity: 1;
+    }
     .supplier-option-cell.selected {
         background: #eff6ff;
         border-left: 3px solid #0f6fff;
@@ -185,8 +192,8 @@
                                     $isSelected = $itemData && in_array($itemData['quote_item_id'], $selectedProducts);
                                 @endphp
                                 
-                                <td class="supplier-option-cell {{ $itemData ? 'selectable' : '' }} {{ $isSelected ? 'selected' : '' }}"
-                                    @if($itemData)
+                                <td class="supplier-option-cell {{ $itemData ? 'selectable' : '' }} {{ $isSelected ? 'selected' : '' }} {{ $isLocked ? 'locked' : '' }}"
+                                    @if($itemData && !$isLocked)
                                         wire:click="toggleProduct({{ $itemData['quote_item_id'] }})"
                                     @endif
                                 >
@@ -196,7 +203,9 @@
                                                 type="checkbox" 
                                                 class="selection-checkbox"
                                                 {{ $isSelected ? 'checked' : '' }}
+                                                {{ $isLocked ? 'disabled' : '' }}
                                                 wire:click.stop="toggleProduct({{ $itemData['quote_item_id'] }})"
+                                                style="cursor: {{ $isLocked ? 'not-allowed' : 'pointer' }};"
                                             >
                                             <div class="price-display">
                                                 ${{ number_format($itemData['price'] / 100, 2) }}

@@ -55,17 +55,21 @@
         <div class="selection-summary">
             <div>
                 <div style="font-size: 14px; color: #0369a1; font-weight: 600;">
-                    {{ count($selectedProducts) }} product(s) selected
+                    {{ $this->selectedProductCount }} product(s) selected
                 </div>
                 <div style="font-size: 12px; color: #64748b; margin-top: 4px;">
-                    Select the products you want to order
+                    @if($isLocked)
+                        ✓ Selection submitted - Quote accepted
+                    @else
+                        Select the products you want to order
+                    @endif
                 </div>
             </div>
             <button 
                 wire:click="submitSelection" 
                 wire:loading.attr="disabled"
                 class="submit-selection-btn"
-                {{ count($selectedProducts) === 0 ? 'disabled' : '' }}
+                {{ ($this->selectedProductCount === 0 || $isLocked) ? 'disabled' : '' }}
             >
                 <span wire:loading.remove wire:target="submitSelection">
                     ✓ Submit Selection

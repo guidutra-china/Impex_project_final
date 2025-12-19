@@ -65,14 +65,16 @@
                 
                 <div class="unified-product-item {{ $isSelected ? 'selected' : '' }}" 
                      wire:click="toggleProduct({{ $quoteItem->id }})"
-                     style="cursor: pointer;">
+                     style="cursor: {{ $isLocked ? 'not-allowed' : 'pointer' }}; opacity: {{ $isLocked && !$isSelected ? '0.6' : '1' }};">
                     
                     <div class="product-checkbox-container">
                         <input 
                             type="checkbox" 
                             class="selection-checkbox"
                             {{ $isSelected ? 'checked' : '' }}
+                            {{ $isLocked ? 'disabled' : '' }}
                             wire:click.stop="toggleProduct({{ $quoteItem->id }})"
+                            style="cursor: {{ $isLocked ? 'not-allowed' : 'pointer' }};"
                         >
                     </div>
 
