@@ -20,11 +20,28 @@ class ProformaInvoiceService
     public function createFromCustomerQuoteSelection(CustomerQuote $customerQuote, array $selectedQuoteItemIds): ProformaInvoice
     {
         return DB::transaction(function () use ($customerQuote, $selectedQuoteItemIds) {
-            // Get the order
+            // Get the order with customer
             $order = $customerQuote->order;
             
             if (!$order) {
                 throw new \Exception('CustomerQuote does not have an associated Order');
+            }
+            
+            // Load customer if not already loaded
+            if (!$order->relationLoaded('customer')) {
+                $order->load('customer');
+            }
+            
+            // Get customer_id from order
+            $customerId = $order->customer_id ?? $order->client_id ?? null;
+            
+            if (!$customerId) {
+                \Log::error('ProformaInvoice creation failed: No customer_id', [
+                    'order_id' => $order->id,
+                    'order_customer_id' => $order->customer_id,
+                    'customer_quote_id' => $customerQuote->id,
+                ]);
+                throw new \Exception('Order #' . $order->id . ' does not have an associated Customer. Please assign a customer to the order first.');
             }
 
             // Calculate revision number based on existing PIs for this CustomerQuote
@@ -36,7 +53,7 @@ class ProformaInvoiceService
             $proformaInvoice = ProformaInvoice::create([
                 'order_id' => $order->id,
                 'customer_quote_id' => $customerQuote->id,
-                'customer_id' => $order->customer_id,
+                'customer_id' => $customerId,
                 'public_token' => \Str::random(32),
                 'revision_number' => $revisionNumber,
                 'status' => 'draft',
