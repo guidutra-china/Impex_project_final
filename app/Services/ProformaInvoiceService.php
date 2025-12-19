@@ -11,7 +11,8 @@ use Illuminate\Support\Facades\DB;
 class ProformaInvoiceService
 {
     /**
-     * Create a Proforma Invoice from Customer Quote product selections
+     * Create or update Proforma Invoice from Customer Quote product selections
+     * If PI already exists for this CustomerQuote, it will be updated with new revision
      *
      * @param CustomerQuote $customerQuote
      * @param array $selectedQuoteItemIds
@@ -44,35 +45,51 @@ class ProformaInvoiceService
                 throw new \Exception('Order #' . $order->id . ' does not have an associated Customer. Please assign a customer to the order first.');
             }
 
-            // Calculate revision number based on existing PIs for this CustomerQuote
-            $lastRevision = ProformaInvoice::where('customer_quote_id', $customerQuote->id)
-                ->max('revision_number') ?? 0;
-            $revisionNumber = $lastRevision + 1;
+            // Check if PI already exists for this CustomerQuote
+            $proformaInvoice = ProformaInvoice::where('customer_quote_id', $customerQuote->id)->first();
             
-            // Create Proforma Invoice
-            $proformaInvoice = ProformaInvoice::create([
-                'order_id' => $order->id,
-                'customer_quote_id' => $customerQuote->id,
-                'customer_id' => $customerId,
-                'public_token' => \Str::random(32),
-                'revision_number' => $revisionNumber,
-                'status' => 'draft',
-                'issue_date' => now(),
-                'valid_until' => now()->addDays(30),
-                'due_date' => now()->addDays(30),
-                'subtotal' => 0,
-                'tax' => 0,
-                'total' => 0,
-                'exchange_rate' => 1.00,
-                'currency_id' => $order->currency_id ?? 1, // Default to currency ID 1 if null
-                'rejection_reason' => '',
-                'deposit_required' => false,
-                'deposit_received' => false,
-                'notes' => 'Generated from Customer Quote: ' . $customerQuote->quote_number . ' (Revision ' . $revisionNumber . ')',
-                'terms_and_conditions' => '',
-                'customer_notes' => '',
-                'created_by' => auth()->id() ?? $order->user_id ?? null,
-            ]);
+            if ($proformaInvoice) {
+                // Update existing PI - increment revision
+                $revisionNumber = $proformaInvoice->revision_number + 1;
+                
+                $proformaInvoice->update([
+                    'revision_number' => $revisionNumber,
+                    'status' => 'draft', // Reset to draft when revised
+                    'notes' => 'Generated from Customer Quote: ' . $customerQuote->quote_number . ' (Revision ' . $revisionNumber . ')',
+                    'updated_at' => now(),
+                ]);
+                
+                // Delete old items
+                $proformaInvoice->items()->delete();
+                
+            } else {
+                // Create new PI
+                $revisionNumber = 1;
+                
+                $proformaInvoice = ProformaInvoice::create([
+                    'order_id' => $order->id,
+                    'customer_quote_id' => $customerQuote->id,
+                    'customer_id' => $customerId,
+                    'public_token' => \Str::random(32),
+                    'revision_number' => $revisionNumber,
+                    'status' => 'draft',
+                    'issue_date' => now(),
+                    'valid_until' => now()->addDays(30),
+                    'due_date' => now()->addDays(30),
+                    'subtotal' => 0,
+                    'tax' => 0,
+                    'total' => 0,
+                    'exchange_rate' => 1.00,
+                    'currency_id' => $order->currency_id ?? 1,
+                    'rejection_reason' => '',
+                    'deposit_required' => false,
+                    'deposit_received' => false,
+                    'notes' => 'Generated from Customer Quote: ' . $customerQuote->quote_number . ' (Revision ' . $revisionNumber . ')',
+                    'terms_and_conditions' => '',
+                    'customer_notes' => '',
+                    'created_by' => auth()->id() ?? $order->user_id ?? null,
+                ]);
+            }
 
             // Get selected quote items
             $quoteItems = QuoteItem::whereIn('id', $selectedQuoteItemIds)
@@ -104,10 +121,10 @@ class ProformaInvoiceService
                     'quantity_shipped' => 0,
                     'quantity_remaining' => $quoteItem->quantity,
                     'shipment_count' => 0,
-                    'unit_price' => $unitPriceDollars, // Pass in dollars, mutator will convert to cents
+                    'unit_price' => $unitPriceDollars,
                     'commission_amount' => $commissionAmountDollars,
                     'commission_percent' => $quoteItem->commission_percent ?? 0,
-                    'total' => $itemTotalDollars, // Pass in dollars, mutator will convert to cents
+                    'total' => $itemTotalDollars,
                     'delivery_days' => $quoteItem->lead_time_days,
                     'notes' => 'From Supplier: ' . ($quoteItem->supplierQuote->supplier->name ?? 'N/A'),
                 ]);
@@ -116,7 +133,7 @@ class ProformaInvoiceService
             // Update totals
             $proformaInvoice->update([
                 'subtotal' => $subtotal,
-                'total' => $subtotal, // Will be updated if tax is added
+                'total' => $subtotal,
             ]);
 
             return $proformaInvoice->fresh();
