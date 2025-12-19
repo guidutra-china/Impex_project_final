@@ -64,17 +64,17 @@
                 @if($model->customer->address)
                 <p>{{ $model->customer->address }}</p>
                 @endif
-                @if($model->customer->city || $model->customer->state || $model->customer->postal_code)
-                <p>{{ $model->customer->city }}@if($model->customer->state), {{ $model->customer->state }}@endif @if($model->customer->postal_code) {{ $model->customer->postal_code }}@endif</p>
+                @if($model->customer->city || $model->customer->state || $model->customer->zip)
+                <p>{{ $model->customer->city }}@if($model->customer->state), {{ $model->customer->state }}@endif @if($model->customer->zip) {{ $model->customer->zip }}@endif</p>
                 @endif
                 @if($model->customer->country)
-                <p>{{ $model->customer->country->name ?? $model->customer->country }}</p>
-                @endif
-                @if($model->customer->email)
-                <p>Email: {{ $model->customer->email }}</p>
+                <p>{{ $model->customer->country }}</p>
                 @endif
                 @if($model->customer->phone)
                 <p>Phone: {{ $model->customer->phone }}</p>
+                @endif
+                @if($model->customer->website)
+                <p>Website: {{ $model->customer->website }}</p>
                 @endif
                 @else
                 <p>No customer assigned</p>

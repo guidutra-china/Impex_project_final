@@ -16,7 +16,6 @@ class PublicProformaInvoiceController extends Controller
         $proformaInvoice = ProformaInvoice::where('public_token', $token)
             ->with([
                 'customer',
-                'customer.country',
                 'order',
                 'customerQuote',
                 'items.product',
@@ -52,7 +51,6 @@ class PublicProformaInvoiceController extends Controller
         $proformaInvoice = ProformaInvoice::where('public_token', $token)
             ->with([
                 'customer',
-                'customer.country',
                 'order',
                 'customerQuote',
                 'items.product',
