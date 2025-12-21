@@ -71,10 +71,9 @@ class ProformaInvoiceResource extends Resource
                                     ->label('Valid Until')
                                     ->disabled()
                                     ->columnSpan(1),
-                                TextInput::make('total')
+                                Placeholder::make('total_formatted')
                                     ->label('Total Amount')
-                                    ->prefix('$')
-                                    ->disabled()
+                                    ->content(fn ($record) => $record ? $record->currency->symbol . ' ' . number_format($record->total, 2) : '-')
                                     ->columnSpan(1),
                             ])
                             ->columns(3),
@@ -85,11 +84,11 @@ class ProformaInvoiceResource extends Resource
                         Repeater::make('items')
                             ->relationship('items')
                             ->schema([
-                                TextInput::make('product.name')
+                                TextInput::make('product_name')
                                     ->label('Product')
                                     ->disabled()
                                     ->columnSpan(2),
-                                TextInput::make('description')
+                                TextInput::make('notes')
                                     ->label('Description')
                                     ->disabled()
                                     ->columnSpan(2),
@@ -97,15 +96,22 @@ class ProformaInvoiceResource extends Resource
                                     ->label('Quantity')
                                     ->disabled()
                                     ->columnSpan(1),
-                                TextInput::make('unit_price')
+                                Placeholder::make('unit_price_formatted')
                                     ->label('Unit Price')
-                                    ->prefix('$')
-                                    ->disabled()
+                                    ->content(fn ($record, $get) => {
+                                        $pi = $record?->proformaInvoice ?? $get('../../');
+                                        $currency = $pi?->currency?->symbol ?? '$';
+                                        return $currency . ' ' . number_format($record?->unit_price ?? 0, 2);
+                                    })
                                     ->columnSpan(1),
-                                TextInput::make('total_price')
+                                Placeholder::make('total_formatted')
                                     ->label('Total')
-                                    ->prefix('$')
-                                    ->disabled()
+                                    ->content(fn ($record, $get) => {
+                                        $pi = $record?->proformaInvoice ?? $get('../../');
+                                        $currency = $pi?->currency?->symbol ?? '$';
+                                        $total = $record?->total ?? ($record?->quantity * $record?->unit_price ?? 0);
+                                        return $currency . ' ' . number_format($total, 2);
+                                    })
                                     ->columnSpan(1),
                             ])
                             ->columns(7)
@@ -114,7 +120,9 @@ class ProformaInvoiceResource extends Resource
                             ->deletable(false)
                             ->reorderable(false)
                             ->defaultItems(0),
-                    ]),
+                    ])
+                    ->collapsible()
+                    ->collapsed(false),
             ]);
     }
 
