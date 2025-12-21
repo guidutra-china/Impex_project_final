@@ -10,6 +10,8 @@ class ViewProformaInvoice extends ViewRecord
 {
     protected static string $resource = ProformaInvoiceResource::class;
 
+    protected ?string $maxContentWidth = 'full';
+
     protected function getHeaderActions(): array
     {
         return [

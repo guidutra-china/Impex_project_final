@@ -5,6 +5,8 @@ namespace App\Filament\Portal\Resources;
 use App\Filament\Portal\Resources\ProformaInvoiceResource\Pages;
 use App\Models\ProformaInvoice;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Placeholder;
+use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
@@ -75,7 +77,43 @@ class ProformaInvoiceResource extends Resource
                                     ->disabled()
                                     ->columnSpan(1),
                             ])
-                            ->columns(2),
+                            ->columns(3),
+                    ]),
+
+                Section::make('Items')
+                    ->schema([
+                        Repeater::make('items')
+                            ->relationship('items')
+                            ->schema([
+                                TextInput::make('product.name')
+                                    ->label('Product')
+                                    ->disabled()
+                                    ->columnSpan(2),
+                                TextInput::make('description')
+                                    ->label('Description')
+                                    ->disabled()
+                                    ->columnSpan(2),
+                                TextInput::make('quantity')
+                                    ->label('Quantity')
+                                    ->disabled()
+                                    ->columnSpan(1),
+                                TextInput::make('unit_price')
+                                    ->label('Unit Price')
+                                    ->prefix('$')
+                                    ->disabled()
+                                    ->columnSpan(1),
+                                TextInput::make('total_price')
+                                    ->label('Total')
+                                    ->prefix('$')
+                                    ->disabled()
+                                    ->columnSpan(1),
+                            ])
+                            ->columns(7)
+                            ->disabled()
+                            ->addable(false)
+                            ->deletable(false)
+                            ->reorderable(false)
+                            ->defaultItems(0),
                     ]),
             ]);
     }
