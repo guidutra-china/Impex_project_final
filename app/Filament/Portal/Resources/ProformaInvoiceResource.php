@@ -32,6 +32,41 @@ class ProformaInvoiceResource extends Resource
 
     // Multi-tenancy filtering is handled automatically by ClientOwnershipScope global scope
 
+    public static function form(Schema $schema): Schema
+    {
+        return $schema
+            ->schema([
+                Forms\Components\Section::make('Proforma Invoice Information')
+                    ->schema([
+                        Forms\Components\TextInput::make('proforma_number')
+                            ->label('Proforma Number')
+                            ->disabled(),
+                        Forms\Components\TextInput::make('revision_number')
+                            ->label('Revision')
+                            ->disabled(),
+                        Forms\Components\Select::make('status')
+                            ->options([
+                                'draft' => 'Draft',
+                                'pending' => 'Pending',
+                                'approved' => 'Approved',
+                                'rejected' => 'Rejected',
+                            ])
+                            ->disabled(),
+                        Forms\Components\DatePicker::make('issue_date')
+                            ->label('Issue Date')
+                            ->disabled(),
+                        Forms\Components\DatePicker::make('valid_until')
+                            ->label('Valid Until')
+                            ->disabled(),
+                        Forms\Components\TextInput::make('total')
+                            ->label('Total Amount')
+                            ->prefix('$')
+                            ->disabled(),
+                    ])
+                    ->columns(2),
+            ]);
+    }
+
     public static function table(Table $table): Table
     {
         return $table
