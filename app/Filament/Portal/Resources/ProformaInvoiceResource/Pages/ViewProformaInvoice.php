@@ -5,12 +5,13 @@ namespace App\Filament\Portal\Resources\ProformaInvoiceResource\Pages;
 use App\Filament\Portal\Resources\ProformaInvoiceResource;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Actions\Action;
+use Filament\Support\Enums\Width;
 
 class ViewProformaInvoice extends ViewRecord
 {
     protected static string $resource = ProformaInvoiceResource::class;
 
-    protected ?string $maxContentWidth = 'full';
+    protected Width|string|null $maxContentWidth = 'full';
 
     protected function getHeaderActions(): array
     {
