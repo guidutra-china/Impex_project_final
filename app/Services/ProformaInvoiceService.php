@@ -110,6 +110,12 @@ class ProformaInvoiceService
                 $itemTotalDollars = $unitPriceDollars * $quoteItem->quantity;
                 $subtotal += $itemTotalDollars;
 
+                // Conditionally include supplier name based on CustomerQuote setting
+                $notes = null;
+                if ($customerQuote->show_supplier_names && $quoteItem->supplierQuote && $quoteItem->supplierQuote->supplier) {
+                    $notes = 'From Supplier: ' . $quoteItem->supplierQuote->supplier->name;
+                }
+
                 ProformaInvoiceItem::create([
                     'proforma_invoice_id' => $proformaInvoice->id,
                     'supplier_quote_id' => $quoteItem->supplier_quote_id,
@@ -126,7 +132,7 @@ class ProformaInvoiceService
                     'commission_percent' => $quoteItem->commission_percent ?? 0,
                     'total' => $itemTotalDollars,
                     'delivery_days' => $quoteItem->lead_time_days,
-                    'notes' => 'From Supplier: ' . ($quoteItem->supplierQuote->supplier->name ?? 'N/A'),
+                    'notes' => $notes,
                 ]);
             }
 

@@ -74,13 +74,15 @@ class ProformaInvoiceResource extends Resource
                                     ->label('Valid Until')
                                     ->disabled(),
                             ]),
-                    ]),
+                    ])
+                    ->columnSpanFull(),
 
                 Section::make('Items')
                     ->schema([
                         ViewField::make('items_table')
                             ->view('filament.portal.proforma-invoice-items-table'),
-                    ]),
+                    ])
+                    ->columnSpanFull(),
             ]);
     }
 
