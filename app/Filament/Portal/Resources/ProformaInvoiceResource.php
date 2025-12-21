@@ -4,8 +4,12 @@ namespace App\Filament\Portal\Resources;
 
 use App\Filament\Portal\Resources\ProformaInvoiceResource\Pages;
 use App\Models\ProformaInvoice;
-use Filament\Forms;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -35,35 +39,44 @@ class ProformaInvoiceResource extends Resource
     public static function form(Schema $schema): Schema
     {
         return $schema
-            ->schema([
-                Forms\Components\Section::make('Proforma Invoice Information')
+            ->components([
+                Section::make('Proforma Invoice Information')
                     ->schema([
-                        Forms\Components\TextInput::make('proforma_number')
-                            ->label('Proforma Number')
-                            ->disabled(),
-                        Forms\Components\TextInput::make('revision_number')
-                            ->label('Revision')
-                            ->disabled(),
-                        Forms\Components\Select::make('status')
-                            ->options([
-                                'draft' => 'Draft',
-                                'pending' => 'Pending',
-                                'approved' => 'Approved',
-                                'rejected' => 'Rejected',
+                        Grid::make()
+                            ->schema([
+                                TextInput::make('proforma_number')
+                                    ->label('Proforma Number')
+                                    ->disabled()
+                                    ->columnSpan(1),
+                                TextInput::make('revision_number')
+                                    ->label('Revision')
+                                    ->disabled()
+                                    ->columnSpan(1),
+                                Select::make('status')
+                                    ->options([
+                                        'draft' => 'Draft',
+                                        'pending' => 'Pending',
+                                        'approved' => 'Approved',
+                                        'rejected' => 'Rejected',
+                                    ])
+                                    ->disabled()
+                                    ->columnSpan(1),
+                                DatePicker::make('issue_date')
+                                    ->label('Issue Date')
+                                    ->disabled()
+                                    ->columnSpan(1),
+                                DatePicker::make('valid_until')
+                                    ->label('Valid Until')
+                                    ->disabled()
+                                    ->columnSpan(1),
+                                TextInput::make('total')
+                                    ->label('Total Amount')
+                                    ->prefix('$')
+                                    ->disabled()
+                                    ->columnSpan(1),
                             ])
-                            ->disabled(),
-                        Forms\Components\DatePicker::make('issue_date')
-                            ->label('Issue Date')
-                            ->disabled(),
-                        Forms\Components\DatePicker::make('valid_until')
-                            ->label('Valid Until')
-                            ->disabled(),
-                        Forms\Components\TextInput::make('total')
-                            ->label('Total Amount')
-                            ->prefix('$')
-                            ->disabled(),
-                    ])
-                    ->columns(2),
+                            ->columns(2),
+                    ]),
             ]);
     }
 
