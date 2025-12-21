@@ -73,7 +73,11 @@ class ProformaInvoiceResource extends Resource
                                     ->columnSpan(1),
                                 Placeholder::make('total_formatted')
                                     ->label('Total Amount')
-                                    ->content(fn ($record) => $record ? $record->currency->symbol . ' ' . number_format($record->total, 2) : '-')
+                                    ->content(function ($record) {
+                                        if (!$record) return '-';
+                                        $currency = $record->currency->symbol ?? '$';
+                                        return $currency . ' ' . number_format($record->total, 2);
+                                    })
                                     ->columnSpan(1),
                             ])
                             ->columns(3),
@@ -98,18 +102,18 @@ class ProformaInvoiceResource extends Resource
                                     ->columnSpan(1),
                                 Placeholder::make('unit_price_formatted')
                                     ->label('Unit Price')
-                                    ->content(fn ($record, $get) => {
-                                        $pi = $record?->proformaInvoice ?? $get('../../');
-                                        $currency = $pi?->currency?->symbol ?? '$';
-                                        return $currency . ' ' . number_format($record?->unit_price ?? 0, 2);
+                                    ->content(function ($record) {
+                                        if (!$record) return '-';
+                                        $currency = $record->proformaInvoice->currency->symbol ?? '$';
+                                        return $currency . ' ' . number_format($record->unit_price ?? 0, 2);
                                     })
                                     ->columnSpan(1),
                                 Placeholder::make('total_formatted')
                                     ->label('Total')
-                                    ->content(fn ($record, $get) => {
-                                        $pi = $record?->proformaInvoice ?? $get('../../');
-                                        $currency = $pi?->currency?->symbol ?? '$';
-                                        $total = $record?->total ?? ($record?->quantity * $record?->unit_price ?? 0);
+                                    ->content(function ($record) {
+                                        if (!$record) return '-';
+                                        $currency = $record->proformaInvoice->currency->symbol ?? '$';
+                                        $total = $record->total ?? ($record->quantity * $record->unit_price);
                                         return $currency . ' ' . number_format($total, 2);
                                     })
                                     ->columnSpan(1),
