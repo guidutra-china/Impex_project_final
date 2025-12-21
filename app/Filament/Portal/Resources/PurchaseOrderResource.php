@@ -26,7 +26,8 @@ class PurchaseOrderResource extends Resource
 
     public static function canAccess(): bool
     {
-        return auth()->user()->hasRole('purchasing');
+        // Purchase Orders should never be visible to Portal users (customers)
+        return false;
     }
 
     // Multi-tenancy filtering is handled automatically by ClientOwnershipScope global scope
