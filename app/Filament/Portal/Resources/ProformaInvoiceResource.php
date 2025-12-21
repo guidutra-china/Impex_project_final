@@ -6,9 +6,9 @@ use App\Filament\Portal\Resources\ProformaInvoiceResource\Pages;
 use App\Models\ProformaInvoice;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Placeholder;
-use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\ViewField;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
@@ -44,16 +44,14 @@ class ProformaInvoiceResource extends Resource
             ->components([
                 Section::make('Proforma Invoice Information')
                     ->schema([
-                        Grid::make()
+                        Grid::make(4)
                             ->schema([
                                 TextInput::make('proforma_number')
                                     ->label('Proforma Number')
-                                    ->disabled()
-                                    ->columnSpan(1),
+                                    ->disabled(),
                                 TextInput::make('revision_number')
                                     ->label('Revision')
-                                    ->disabled()
-                                    ->columnSpan(1),
+                                    ->disabled(),
                                 Select::make('status')
                                     ->options([
                                         'draft' => 'Draft',
@@ -61,72 +59,28 @@ class ProformaInvoiceResource extends Resource
                                         'approved' => 'Approved',
                                         'rejected' => 'Rejected',
                                     ])
-                                    ->disabled()
-                                    ->columnSpan(1),
-                                DatePicker::make('issue_date')
-                                    ->label('Issue Date')
-                                    ->disabled()
-                                    ->columnSpan(1),
-                                DatePicker::make('valid_until')
-                                    ->label('Valid Until')
-                                    ->disabled()
-                                    ->columnSpan(1),
+                                    ->disabled(),
                                 Placeholder::make('total_formatted')
                                     ->label('Total Amount')
                                     ->content(function ($record) {
                                         if (!$record) return '-';
                                         $currency = $record->currency->symbol ?? '$';
                                         return $currency . ' ' . number_format($record->total, 2);
-                                    })
-                                    ->columnSpan(1),
-                            ])
-                            ->columns(3),
+                                    }),
+                                DatePicker::make('issue_date')
+                                    ->label('Issue Date')
+                                    ->disabled(),
+                                DatePicker::make('valid_until')
+                                    ->label('Valid Until')
+                                    ->disabled(),
+                            ]),
                     ]),
 
                 Section::make('Items')
                     ->schema([
-                        Repeater::make('items')
-                            ->relationship('items')
-                            ->schema([
-                                TextInput::make('product_name')
-                                    ->label('Product')
-                                    ->disabled()
-                                    ->columnSpan(2),
-                                TextInput::make('notes')
-                                    ->label('Description')
-                                    ->disabled()
-                                    ->columnSpan(2),
-                                TextInput::make('quantity')
-                                    ->label('Quantity')
-                                    ->disabled()
-                                    ->columnSpan(1),
-                                Placeholder::make('unit_price_formatted')
-                                    ->label('Unit Price')
-                                    ->content(function ($record) {
-                                        if (!$record) return '-';
-                                        $currency = $record->proformaInvoice->currency->symbol ?? '$';
-                                        return $currency . ' ' . number_format($record->unit_price ?? 0, 2);
-                                    })
-                                    ->columnSpan(1),
-                                Placeholder::make('total_formatted')
-                                    ->label('Total')
-                                    ->content(function ($record) {
-                                        if (!$record) return '-';
-                                        $currency = $record->proformaInvoice->currency->symbol ?? '$';
-                                        $total = $record->total ?? ($record->quantity * $record->unit_price);
-                                        return $currency . ' ' . number_format($total, 2);
-                                    })
-                                    ->columnSpan(1),
-                            ])
-                            ->columns(7)
-                            ->disabled()
-                            ->addable(false)
-                            ->deletable(false)
-                            ->reorderable(false)
-                            ->defaultItems(0),
-                    ])
-                    ->collapsible()
-                    ->collapsed(false),
+                        ViewField::make('items_table')
+                            ->view('filament.portal.proforma-invoice-items-table'),
+                    ]),
             ]);
     }
 
